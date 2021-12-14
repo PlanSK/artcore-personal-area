@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ru" class="h-100">
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'salary/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'salary/css/style.css' %}">
+    <title>{{ title }}</title>
+</head>
+{% load crispy_forms_tags %}
+<body class="bg-dark h-100 text-light">
+    <main class="h-100">
+      <div class="container h-100">
+        <div class="row row-cols-1 align-items-center justify-content-md-center text-center p-5 h-100">
+          <div class="col-md-3">
+            <img class="mb-4" src="{% static 'salary/img/esports_eng-logo.png' %}" alt="" height="40">
+            <form method="post">
+              {% csrf_token %}
+              {{ form|crispy }}
+              <div class="checkbox mb-3">
+                <label>
+                  <input type="checkbox" value="remember-me"> Запомнить меня
+                </label>
+              </div>
+              <button class="w-100 btn btn-lg btn-primary btn-sm mb-3" type="submit">Войти</button>
+              <a href="{% url 'registration' %}" class="link-secondary verysmall">Регистрация</a><br>
+              <a href="#" class="link-secondary verysmall">Восстановление пароля</a>
+            </form>
+          </div>
+          <div class="col-md-12 fixed-bottom">
+            <p class="mt-5 mb-3 text-muted verysmall">&copy; ESPORTS.TATAR 2021</p>
+          </div>
+        </div>
+      </div>
+    </main>   
+    <script src="{% static 'salary/js/bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>

@@ -1,0 +1,53 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'salary/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'salary/css/style.css' %}">
+    <title>{{ title }}</title>
+</head>
+<body class="bg-dark text-white font-italic">
+  <header>
+    <div class="container">
+      <div class="row justify-content-between align-items-center border-bottom pb-3 pt-3">
+        <div class="col-4 pt-1">
+          <a class="navbar-brand" href="#">
+            <img src="{% static 'salary/img/esports_eng-logo.png' %}" height="30" class="d-inline-block align-top" alt="" loading="lazy">
+          </a>
+        </div>
+        <div class="col-4 text-center">
+          {% if request.user.is_authenticated %}
+          <span class="align-middle"> Welcome, {{ user.username }}!</span>
+          {% else %}
+          <span class="align-middle"> Guest page </span>
+          {% endif%}
+        </div>
+        <div class="col-4 d-flex justify-content-end align-items-center">
+          {% if request.user.is_authenticated %}
+          <a class="btn btn-sm btn-outline-secondary" href="{% url 'logout' %}">Выйти</a>
+          {% else %}
+          <a class="btn btn-sm btn-outline-secondary visually-hidden" href="#">Выйти</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </header>
+
+{% block content %}
+{% endblock %}
+
+    <footer>
+    <div class="container position-relative bottom-0">
+      <div class="row mt-3">
+        <div class="col-md-12 border-top">
+          <p class="text-secondary text-center verysmall">© ESPORTS.TATAR 2021</p>
+        </div>
+      </div>
+    </div>
+  </footer>
+  <script src="{% static 'salary/js/bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>

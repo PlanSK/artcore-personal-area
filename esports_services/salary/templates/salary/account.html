@@ -1,0 +1,185 @@
+{% extends 'salary/base.html' %}
+{% load static %}
+
+{% block content %}
+  <main>
+    <div class="container">
+      <div class="row mb-3 mt-3 d-flex justify-content-between">
+        <!-- personal data -->
+        <div class="col-md-3 themed-grid-col bg-secondary text-white rounded border">
+          <!--avatar-->
+          <div class="d-flex justify-content-center mt-3 mb-2 row">
+            <div class="col-md-auto">
+              <svg xmlns="http://www.w3.org/2000/svg" width="110" height="110" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
+                <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
+                <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"/>
+              </svg>
+            </div>
+          </div>
+          <!--personal data text-->
+          <div class="row">
+            <div class="col-md">
+              <p class="text-center">
+              Иванов Иван<br>
+              Администратор зала
+              </p>
+            </div>
+            <div class="col-md-auto verysmall">
+              <p class="mb-0">Дата рождения: 00.00.0000</p>
+              <p class="mb-0" style="color: greenyellow;">Аттестация пройдена
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-award" viewBox="0 0 16 16">
+                  <path d="M9.669.864 8 0 6.331.864l-1.858.282-.842 1.68-1.337 1.32L2.6 6l-.306 1.854 1.337 1.32.842 1.68 1.858.282L8 12l1.669-.864 1.858-.282.842-1.68 1.337-1.32L13.4 6l.306-1.854-1.337-1.32-.842-1.68L9.669.864zm1.196 1.193.684 1.365 1.086 1.072L12.387 6l.248 1.506-1.086 1.072-.684 1.365-1.51.229L8 10.874l-1.355-.702-1.51-.229-.684-1.365-1.086-1.072L3.614 6l-.25-1.506 1.087-1.072.684-1.365 1.51-.229L8 1.126l1.356.702 1.509.229z"></path>
+                  <path d="M4 11.794V16l4-1 4 1v-4.206l-2.018.306L8 13.126 6.018 12.1 4 11.794z"></path>
+                </svg>
+              </p>
+              <p>Стаж работы: 1 месяц</p>
+            </div>
+          </div>
+        </div>
+        <!-- End personal data -->
+        <!-- Main data -->
+        <div class="col-md-8 themed-grid-col rounded border">
+        
+          <div class="row">
+            <div class="col-md">
+              <p class="text-center">Основные показатели</p>
+            </div>
+          </div>
+        
+          <div class="row text-center">
+            <!-- 1 block -->
+            <div class="col-md rounded border m-3">
+              <div class="row">
+                <div class="col-md bg-primary border-bottom">
+                  <p class="mb-0 verysmall">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-calendar2-check" viewBox="0 0 16 16">
+                      <path d="M10.854 8.146a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 0 1 .708-.708L7.5 10.793l2.646-2.647a.5.5 0 0 1 .708 0z"/>
+                      <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM2 2a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1H2z"/>
+                      <path d="M2.5 4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5H3a.5.5 0 0 1-.5-.5V4z"/>
+                    </svg><br>
+                    Количество смен
+                  </p>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md p-4"><p class="fs-4" style="font-style: normal;">10</p></div>
+              </div>
+            </div>
+            <!-- 2 block -->
+            <div class="col-md rounded border m-3">
+              <div class="row">
+                <div class="col-md bg-primary border-bottom">
+                  <p class="mb-0 verysmall">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-graph-up-arrow" viewBox="0 0 16 16">
+                      <path fill-rule="evenodd" d="M0 0h1v15h15v1H0V0Zm10 3.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0V4.9l-3.613 4.417a.5.5 0 0 1-.74.037L7.06 6.767l-3.656 5.027a.5.5 0 0 1-.808-.588l4-5.5a.5.5 0 0 1 .758-.06l2.609 2.61L13.445 4H10.5a.5.5 0 0 1-.5-.5Z"/>
+                    </svg><br>
+                    Средняя выручка
+                  </p>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md p-4"><p class="fs-4" style="font-style: normal;">20500</p></div>
+              </div>
+            </div>
+            <!-- 3 block -->
+            <div class="col-md rounded border m-3">
+              <div class="row">
+                <div class="col-md bg-primary border-bottom">
+                  <p class="mb-0 verysmall">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cash-stack" viewBox="0 0 16 16">
+                      <path d="M1 3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1H1zm7 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/>
+                      <path d="M0 5a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H1a1 1 0 0 1-1-1V5zm3 0a2 2 0 0 1-2 2v4a2 2 0 0 1 2 2h10a2 2 0 0 1 2-2V7a2 2 0 0 1-2-2H3z"/>
+                    </svg><br>
+                    Заработано
+                  </p>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md p-4"><p class="fs-4" style="font-style: normal;">12500</p></div>
+              </div>
+            </div>
+            <!-- 4 block -->
+            <div class="col-md rounded border m-3">
+              <div class="row">
+                <div class="col-md bg-primary border-bottom">
+                  <p class="mb-0 verysmall">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bar-chart" viewBox="0 0 16 16">
+                      <path d="M4 11H2v3h2v-3zm5-4H7v7h2V7zm5-5v12h-2V2h2zm-2-1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1h-2zM6 7a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7zm-5 4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1v-3z"/>
+                    </svg><br>
+                    Ваше место
+                  </p>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md p-4"><p class="fs-4" style="font-style: normal;">III</p></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- End main data -->
+      </div>
+      <!--table-->
+      <div class="row">
+        <div class="col-md-12 border">
+          <table class="table table-dark table-hover">
+            <thead class="text-warning text-center verysmall">
+              <tr>
+                <th scope="col">Дата</th>
+                <th scope="col">Бар</th>
+                <th scope="col">Game zone</th>
+                <th scope="col">VR</th>
+                <th scope="col">Общая выручка</th>
+                <th scope="col">Поддержка чистоты</th>
+                <th scope="col">Дисциплина</th>
+                <th scope="col">Заработано</th>
+              </tr>
+            </thead>
+            <tbody class="text-center verysmall">
+              <tr>
+                <th scope="row">00.00.0000</th>
+                <td>1205</td>
+                <td>2564</td>
+                <td>25</td>
+                <td>25000</td>
+                <td>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-circle text-success" viewBox="0 0 16 16">
+                  <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                  <path d="M10.97 4.97a.235.235 0 0 0-.02.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05z"/>
+                  </svg>
+                </td>
+                <td>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-circle text-success" viewBox="0 0 16 16">
+                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                    <path d="M10.97 4.97a.235.235 0 0 0-.02.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05z"/>
+                    </svg>
+                </td>
+                <td>5000</td>
+              </tr>
+              <tr>
+                <th scope="row">00.00.0000</th>
+                <td>1205</td>
+                <td>2564</td>
+                <td>25</td>
+                <td>25000</td>
+                <td>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle text-danger" viewBox="0 0 16 16">
+                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                    <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                  </svg>
+                </td>
+                <td>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-circle text-success" viewBox="0 0 16 16">
+                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                    <path d="M10.97 4.97a.235.235 0 0 0-.02.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05z"/>
+                    </svg>
+                </td>
+                <td>5000</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+{% endblock %}
