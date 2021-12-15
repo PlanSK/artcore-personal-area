@@ -15,7 +15,7 @@ class EmployeeRegistration(forms.ModelForm):
     position = forms.ModelChoiceField(queryset=Position.objects.all(), label='Должность')
 
     class Meta:
-        model = Employee
+        model = Profile
         fields = ['birth_date', 'employment_date', 'position']
         widgets = {
             'birth_date': forms.DateInput(attrs={'type': 'date'}),

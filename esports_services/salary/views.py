@@ -39,6 +39,9 @@ class LoginUser(LoginView):
         context['title'] = 'Authorization'
         return context
 
+    def get_success_url(self, **kwargs):
+        return reverse_lazy('index')
+
 
 class IndexView(LoginRequiredMixin, TemplateView):
     login_url = 'login/'
@@ -46,10 +49,10 @@ class IndexView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Account User'
+        context['title'] = 'Личный кабинет'
         print(context)
         return context
-    
+
     def get_success_url(self, **kwargs):
         return reverse_lazy('index')
 
