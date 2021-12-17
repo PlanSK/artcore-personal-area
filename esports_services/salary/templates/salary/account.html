@@ -24,10 +24,12 @@
             </div>
             <div class="col-md-auto verysmall">
               <p class="mb-0">Дата рождения: {{ user.profile.birth_date }}</p>
-              <p class="mb-0" style="color: greenyellow;">Аттестация пройдена
-                {% bs_icon 'award' %}
-              </p>
-              <p>Стаж работы: 1 месяц</p>
+              {% if user.profile.attestation %}
+              <p class="mb-0" style="color: greenyellow;">Аттестация пройдена {% bs_icon 'award' %}</p>
+              {% else %}
+              <p class="mb-0 text-warning">Аттестация не пройдена</p>
+              {% endif %}
+              <p>Стаж работы: {{ experience }}</p>
             </div>
           </div>
         </div>
