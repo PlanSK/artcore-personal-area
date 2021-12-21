@@ -6,6 +6,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="{% static 'salary/js/bootstrap.bundle.min.js' %}"></script>
     <link rel="stylesheet" href="{% static 'salary/css/bootstrap.min.css' %}">
     <link rel="stylesheet" href="{% static 'salary/css/style.css' %}">
     <title>{{ title }}</title>
@@ -15,7 +16,7 @@
     <div class="container">
       <div class="row justify-content-between align-items-center border-bottom pb-3 pt-3">
         <div class="col-4 pt-1">
-          <a class="navbar-brand" href="#">
+          <a class="navbar-brand" href="{% url 'index' %}">
             <img src="{% static 'salary/img/esports_eng-logo.png' %}" height="30" class="d-inline-block align-top" alt="" loading="lazy">
           </a>
         </div>
@@ -45,6 +46,5 @@
       </div>
     </div>
   </footer>
-  <script src="{% static 'salary/js/bootstrap.bundle.min.js' %}"></script>
 </body>
 </html>

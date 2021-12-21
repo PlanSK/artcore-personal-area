@@ -28,11 +28,11 @@ class Profile(models.Model):
 class WorkingShift(models.Model):
     hall_admin = models.ForeignKey(User, on_delete=models.PROTECT, related_name='hall_admin')
     cash_admin = models.ForeignKey(User, on_delete=models.PROTECT, related_name='cash_admin')
-    shift_date = models.DateField()
-    bar_revenue = models.FloatField()
-    game_zone_revenue = models.FloatField()
-    vr_revenue = models.FloatField()
-    hall_cleaning = models.BooleanField(default=True)
+    shift_date = models.DateField(verbose_name='Дата смены', unique=True)
+    bar_revenue = models.FloatField(verbose_name='Выручка по бару')
+    game_zone_revenue = models.FloatField(verbose_name='Выручка игровой зоны')
+    vr_revenue = models.FloatField(verbose_name='Выручка VR', default=0.0)
+    hall_cleaning = models.BooleanField(default=False)
     hall_admin_discipline = models.BooleanField(default=True)
     cach_admin_discipline = models.BooleanField(default=True)
     shortage = models.FloatField(default=0)
@@ -41,6 +41,9 @@ class WorkingShift(models.Model):
     class Meta:
         verbose_name = 'Смена'
         verbose_name_plural = 'Смены'
+
+    def __str__(self) -> str:
+        return self.shift_date.strftime('%d-%m-%Y')
 
 
 class Position(models.Model):

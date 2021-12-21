@@ -24,10 +24,14 @@
             </div>
             <div class="col-md-auto verysmall">
               <p class="mb-0">Дата рождения: {{ user.profile.birth_date }}</p>
-              {% if user.profile.attestation %}
+              {% if user.profile.position.pk == 3 %}
+              <p class="mb-0">
+                <a class="link-warning" href="/admin/">Панель администрирования</a>
+              </p>
+              {% elif user.profile.attestation %}
               <p class="mb-0" style="color: greenyellow;">Аттестация пройдена {% bs_icon 'award' %}</p>
               {% else %}
-              <p class="mb-0 text-warning">Аттестация не пройдена</p>
+              <a href="#" class="text-warning" title="Пройти аттестацию">Аттестация не пройдена</a>
               {% endif %}
               <p>Стаж работы: {{ experience }}</p>
             </div>
@@ -55,7 +59,9 @@
                 </div>
               </div>
               <div class="row">
-                <div class="col-md p-4"><p class="fs-4" style="font-style: normal;">10</p></div>
+                <div class="col-md p-4">
+                  <p class="fs-4" style="font-style: normal;">{{ total_values.quantity_shifts }}</p>
+                </div>
               </div>
             </div>
             <!-- 2 block -->
@@ -70,7 +76,9 @@
                 </div>
               </div>
               <div class="row">
-                <div class="col-md p-4"><p class="fs-4" style="font-style: normal;">20500</p></div>
+                <div class="col-md p-4">
+                  <p class="fs-4" style="font-style: normal;">{{ total_values.average_revenue }}</p>
+                </div>
               </div>
             </div>
             <!-- 3 block -->
@@ -85,7 +93,7 @@
                 </div>
               </div>
               <div class="row">
-                <div class="col-md p-4"><p class="fs-4" style="font-style: normal;">12500</p></div>
+                <div class="col-md p-4"><p class="fs-4" style="font-style: normal;">Sum KPI</p></div>
               </div>
             </div>
             <!-- 4 block -->
@@ -100,69 +108,29 @@
                 </div>
               </div>
               <div class="row">
-                <div class="col-md p-4"><p class="fs-4" style="font-style: normal;">III</p></div>
+                <div class="col-md p-4"><p class="fs-4" style="font-style: normal;">-</p></div>
               </div>
             </div>
           </div>
-          {% if user.profile.position.pk == 3 %}
           <div class="row mt-3">
             <div class="col">
-              <p class="text-center"><a class="btn btn-sm btn-outline-secondary" href="{% url 'index' %}">{% bs_icon 'calendar-plus' %}Закрыть текущую смену</a></p>
+              {% if user.profile.position.pk == 2 and not shift_exists %}
+              <p class="text-center">
+                <a class="btn btn-sm btn-outline-secondary" href="{% url 'add_workshift' %}">
+                  {% bs_icon 'calendar-plus' %}Закрыть текущую смену
+                </a>
+              </p>
+              {% else %}
+              <p class="text-secondary verysmall text-center">Текущая смена успешно закрыта.</p>
+              {% endif %}
             </div>
           </div>
-          {% endif %}
+
         </div>
         <!-- End main data -->
       </div>
       <!--table-->
-      <div class="row">
-        <div class="col-md-12 border">
-          <table class="table table-dark table-hover">
-            <thead class="text-warning text-center verysmall">
-              <tr>
-                <th scope="col">Дата</th>
-                <th scope="col">Бар</th>
-                <th scope="col">Game zone</th>
-                <th scope="col">VR</th>
-                <th scope="col">Общая выручка</th>
-                <th scope="col">Поддержка чистоты</th>
-                <th scope="col">Дисциплина</th>
-                <th scope="col">Заработано</th>
-              </tr>
-            </thead>
-            <tbody class="text-center verysmall">
-              <tr>
-                <th scope="row">00.00.0000</th>
-                <td>1205</td>
-                <td>2564</td>
-                <td>25</td>
-                <td>25000</td>
-                <td>
-                  {% bs_icon 'check-circle' color='green' %}
-                </td>
-                <td>
-                  {% bs_icon 'check-circle' color='green' %}
-                </td>
-                <td>5000</td>
-              </tr>
-              <tr>
-                <th scope="row">00.00.0000</th>
-                <td>1205</td>
-                <td>2564</td>
-                <td>25</td>
-                <td>25000</td>
-                <td>
-                  {% bs_icon 'x-circle' color='red' %}
-                </td>
-                <td>
-                  {% bs_icon 'check-circle' color='green' %}
-                </td>
-                <td>5000</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+      {% include 'salary/table_workshits.html' %}
     </div>
   </main>
 
