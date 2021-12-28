@@ -19,11 +19,11 @@
             <form method="post">
               {% csrf_token %}
               {{ form|crispy }}
-              <div class="checkbox mb-3">
+              <!-- <div class="checkbox mb-3">
                 <label>
                   <input type="checkbox" value="remember-me"> Запомнить меня
                 </label>
-              </div>
+              </div> -->
               <button class="w-100 btn btn-lg btn-primary btn-sm mb-3" type="submit">Войти</button>
               <a href="{% url 'registration' %}" class="link-secondary verysmall">Регистрация</a><br>
               <a href="#" class="link-secondary verysmall">Восстановление пароля</a>

@@ -1,0 +1,25 @@
+{% extends 'salary/base.html' %}
+{% load static %}
+
+{% block content %}
+
+{% load crispy_forms_tags %}
+
+<main>
+  <div class="container">
+      <div class="row justify-content-center">
+          <div class="col-md-5 border rounded mt-3 me-1">
+              <form class="needs-validation" method="post">
+                <p class="text-center">Редактирование данных смены</p>
+                {% csrf_token %}
+                <div class="form-error">{{ form.non_field_errors }}</div>
+                {{ form|crispy }}
+                <div class="m-6 d-flex justify-content-center">
+                  <button type="submit" class="btn btn-primary mb-4">Внести изменения</button>
+                </div>
+              </form>
+          </div>
+      </div>
+  </div>
+</main>
+{% endblock %}

@@ -73,10 +73,9 @@ class IndexView(LoginRequiredMixin, TemplateView):
             get_shift.summary_revenue = sum([
                 get_shift.bar_revenue,
                 get_shift.game_zone_revenue,
-                -get_shift.game_zone_error,
                 get_shift.vr_revenue
             ])
-            get_shift.kpi_salary = round(self.kpi_salary_calculate(get_shift) - get_shift.shortage, 2 )
+            get_shift.kpi_salary = round(self.kpi_salary_calculate(get_shift) - get_shift.shortage, 2)
 
         return workshifts
 
@@ -112,7 +111,7 @@ class IndexView(LoginRequiredMixin, TemplateView):
 
         revenue_list = [
             (workshift.bar_revenue, kpi_ratio['bar']),
-            (workshift.game_zone_revenue - workshift.game_zone_error, kpi_ratio['game_zone']),
+            (workshift.game_zone_revenue, kpi_ratio['game_zone']),
             (workshift.vr_revenue, kpi_ratio['vr'])
         ]
 
@@ -153,7 +152,6 @@ class IndexView(LoginRequiredMixin, TemplateView):
         total_salary = 0.0
         total_discipline = 0
         total_cleaning = 0
-        summary_error = 0.0
         position = self.request.user.profile.position.name
 
         for get_shift in workshifts:
@@ -161,7 +159,6 @@ class IndexView(LoginRequiredMixin, TemplateView):
             summary_game_zone_revenue += get_shift.game_zone_revenue
             summary_vr_revenue += get_shift.vr_revenue
             total_revenue += get_shift.summary_revenue
-            summary_error += get_shift.game_zone_error
             if get_shift.is_verified:
                 total_salary += get_shift.kpi_salary
             if position == 'hall_admin':
@@ -183,7 +180,6 @@ class IndexView(LoginRequiredMixin, TemplateView):
         returned_dict = {
             'bar': summary_bar_revenue,
             'game_zone': summary_game_zone_revenue,
-            'game_zone_error': summary_error,
             'vr': summary_vr_revenue,
             'sum_revenue': total_revenue,
             'quantity_shifts': quantity_shifts,
@@ -203,7 +199,6 @@ class IndexView(LoginRequiredMixin, TemplateView):
 
     def get_work_experience(self):
         employment_date = User.objects.get(username=self.request.user).profile.employment_date
-        
         experience = datetime.date.today() - employment_date
         days = experience.days
         experience_text = ''

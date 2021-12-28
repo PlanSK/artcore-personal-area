@@ -53,7 +53,6 @@ class AddWorkshiftDataForm(forms.ModelForm):
             'shift_date',
             'bar_revenue',
             'game_zone_revenue',
-            'game_zone_error',
             'vr_revenue'
         ]
         widgets = {
@@ -61,6 +60,7 @@ class AddWorkshiftDataForm(forms.ModelForm):
                 'type': 'date',
                 'value': datetime.now().strftime('%Y-%m-%d'),
                 'max': datetime.now().strftime('%Y-%m-%d'),
+                'min': datetime.now().strftime('%Y-%m-%d'),
             }),
         }
 
@@ -85,6 +85,5 @@ class EditWorkshiftDataForm(forms.ModelForm):
             'cash_admin',
             'bar_revenue',
             'game_zone_revenue',
-            'game_zone_error',
             'vr_revenue'
         ]

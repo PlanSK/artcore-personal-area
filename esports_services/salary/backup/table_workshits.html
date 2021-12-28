@@ -19,11 +19,6 @@
             <td>{% date_format table.shift_date %}</td>
             <td>{{ table.bar_revenue | intcomma }}</td>
             <td>{{ table.game_zone_revenue | intcomma }}</td>
-            {% if table.game_zone_error %}
-            <td class="text-danger">{{ table.game_zone_error | intcomma }}</td>
-            {% else %}
-            <td>-</td>
-            {% endif %}
             <td>{{ table.vr_revenue | intcomma }}</td>
             <td>{{ table.summary_revenue | intcomma }}</td>
             
@@ -44,6 +39,7 @@
             </td>
 
             {% elif  user.profile.position.name == 'cash_admin' %}
+            <td>{{ table.hall_admin.first_name }} {{ table.hall_admin.last_name }}</td>
             <td>
               {% if table.cash_admin_discipline %}
                 {% bs_icon 'check-circle' color='green' %}
@@ -76,11 +72,6 @@
               <span title='Ожидает проверки'>{% bs_icon 'stopwatch' color='yellow'%}</span>
               {% endif %}
             </td>
-            {% if  user.profile.position.name == 'cash_admin' %}
-            <td>
-              {{ table.comment }}
-            </td>
-            {% endif %}
           </tr>
           {% endfor %}
         </tbody>
@@ -89,18 +80,17 @@
             <td scope="col">Итог за месяц:</td>
             <td scope="col">{{ total_values.bar | intcomma }}</td>
             <td scope="col">{{ total_values.game_zone | intcomma }}</td>
-            <td scope="col">{{ total_values.game_zone_error | intcomma }}</td>
             <td scope="col">{{ total_values.vr | intcomma }}</td>
             <td scope="col">{{ total_values.sum_revenue | intcomma }}</td>
             {% if  user.profile.position.name == 'hall_admin' %}
             <td>{{ total_values.total_discipline }}%</td>
             <td>{{ total_values.total_cleaning }}%</td>
             {% elif  user.profile.position.name == 'cash_admin' %}
+            <td scope="col"></td>
             <td>{{ total_values.total_discipline }}%</td>
             <td></td>
             {% endif %}
             <td scope="col">{{ total_values.total_salary | intcomma }}</td>
-            <td></td>
             <td></td>
           </tr>
         </tfoot>
