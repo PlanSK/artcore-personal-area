@@ -76,11 +76,13 @@ class IndexView(LoginRequiredMixin, TemplateView):
                 -get_shift.game_zone_error,
                 get_shift.vr_revenue
             ])
-            get_shift.kpi_salary = round(self.kpi_salary_calculate(get_shift) - get_shift.shortage, 2 )
+            get_shift.kpi_salary = self.kpi_salary_calculate(get_shift)
 
         return workshifts
 
-    def kpi_salary_calculate(self, workshift):
+    def kpi_salary_calculate(self, workshift) -> float:
+        if not workshift.is_verified:
+            return 0.0
         current_user = self.request.user
         kpi_criteria = {
             'hall_admin': {
@@ -143,7 +145,10 @@ class IndexView(LoginRequiredMixin, TemplateView):
                     bonus = current_revenue * ratio
             shift_salary += bonus
 
-        return round(shift_salary, 2)
+        if workshift.shortage and workshift.shortage * 2 > shift_salary:
+            return 0.0
+        else:
+            return round(shift_salary - workshift.shortage * 2, 2)
 
     def get_total_values(self, workshifts):
         summary_bar_revenue = 0.0
@@ -162,16 +167,16 @@ class IndexView(LoginRequiredMixin, TemplateView):
             summary_vr_revenue += get_shift.vr_revenue
             total_revenue += get_shift.summary_revenue
             summary_error += get_shift.game_zone_error
-            if get_shift.is_verified:
-                total_salary += get_shift.kpi_salary
+            total_salary += get_shift.kpi_salary
+
             if position == 'hall_admin':
                 if get_shift.hall_admin_discipline:
                     total_discipline += 1
                 if get_shift.hall_cleaning:
                     total_cleaning += 1
-            elif position == 'cash_admin':
-                if get_shift.cash_admin_discipline:
+            elif position == 'cash_admin' and get_shift.cash_admin_discipline:
                     total_discipline += 1
+
         quantity_shifts = len(workshifts)
         if len(workshifts):
             total_discipline = int(round(total_discipline / len(workshifts), 2) * 100)
