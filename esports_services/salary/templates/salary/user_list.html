@@ -10,9 +10,9 @@
             <th class="col">Действия</th>
         </thead>
         {% for position, users in positions_list.items %}
-        <tr class="text-warning text-center verysmall table-active">
+        <thead class="text-center verysmall table-active">
             <th colspan="6" class="col">{{ position }}</th>
-        </tr>
+        </thead>
         {% for current_user in users %}
         <tr class="verysmall text-center">
             <td>{{current_user.first_name}} {{current_user.last_name}}</td>
