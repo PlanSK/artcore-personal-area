@@ -1,6 +1,19 @@
 {% load bootstrap_icons %}
 {% load salary_tags %}
 {% load humanize %}
+<div class="row verysmall text-center mb-2 border border-secondary">
+  <div class="col">
+    {% if previous_date %}
+    <a href="{% url 'archive_view' year=previous_date.year month=previous_date.month %}" class="link-primary"> << {{ previous_date|date:"F Y г." }}</a>
+    {% endif %}
+  </div>
+  <div class="col">{{ current_date|date:"F Y г." }}</div>
+  <div class="col">
+    {% if next_date %}
+    <a href="{% url 'archive_view' year=next_date.year month=next_date.month %}" class="link-primary">{{ next_date|date:"F Y г." }} >></a>
+    {% endif %}
+  </div>
+</div>
 <div class="row">
     <div class="col-md-12 border">
       <table class="table table-dark table-hover">
@@ -16,7 +29,7 @@
 
           {% for table in tables %}
           <tr>
-            <td>{% date_format table.shift_date %}</td>
+            <td>{{ table.shift_date|date:"d.m.Y" }}</td>
             <td>{{ table.bar_revenue | intcomma }}</td>
             <td>{{ table.game_zone_revenue | intcomma }}</td>
             {% if table.game_zone_error %}
@@ -87,19 +100,19 @@
         <tfoot class="text-center verysmall text-white">
           <tr>
             <td scope="col">Итог за месяц:</td>
-            <td scope="col">{{ total_values.bar | intcomma }}</td>
-            <td scope="col">{{ total_values.game_zone | intcomma }}</td>
-            <td scope="col">{{ total_values.game_zone_error | intcomma }}</td>
-            <td scope="col">{{ total_values.vr | intcomma }}</td>
-            <td scope="col">{{ total_values.sum_revenue | intcomma }}</td>
+            <td scope="col">{{ total_values.bar|floatformat:2 | intcomma }}</td>
+            <td scope="col">{{ total_values.game_zone|floatformat:2 | intcomma }}</td>
+            <td scope="col">{{ total_values.game_zone_error|floatformat:2 | intcomma }}</td>
+            <td scope="col">{{ total_values.vr|floatformat:2 | intcomma }}</td>
+            <td scope="col">{{ total_values.sum_revenue|floatformat:2 | intcomma }}</td>
             {% if  user.profile.position.name == 'hall_admin' %}
             <td>{{ total_values.total_discipline }}%</td>
             <td>{{ total_values.total_cleaning }}%</td>
             {% elif  user.profile.position.name == 'cash_admin' %}
             <td>{{ total_values.total_discipline }}%</td>
-            <td></td>
+            <td class="text-danger">{{ total_values.summary_shortage | intcomma }}</td>
             {% endif %}
-            <td scope="col">{{ total_values.total_salary | intcomma }}</td>
+            <td scope="col">{{ total_values.total_salary|floatformat:2 | intcomma }}</td>
             <td></td>
             <td></td>
           </tr>

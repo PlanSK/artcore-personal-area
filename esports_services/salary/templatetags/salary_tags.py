@@ -5,10 +5,6 @@ from salary.models import *
 
 register = template.Library()
 
-@register.simple_tag()
-def date_format(date):
-    return date.strftime('%d.%m.%Y')
-
 
 @register.simple_tag()
 def table_header(user):

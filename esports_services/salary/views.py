@@ -11,6 +11,7 @@ from django.db.models import Q, fields
 from .forms import *
 
 import datetime
+from dateutil.relativedelta import relativedelta
 
 
 def registration(request):
@@ -57,17 +58,33 @@ class IndexView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Личный кабинет'
+
+        current_year = self.kwargs.get('year', datetime.date.today().year)
+        current_month = self.kwargs.get('month', datetime.date.today().month)
+
+        previous_date = datetime.date(current_year, current_month, 1) - relativedelta(months=1)
+        next_date = datetime.date(current_year, current_month, 1) + relativedelta(months=1)
+        if self.get_user_workshifts(month=previous_date.month, year=previous_date.year):
+            context['previous_date'] = previous_date
+        if self.get_user_workshifts(month=next_date.month, year=next_date.year):
+            context['next_date'] = next_date
+
+        context['current_date'] = datetime.date(current_year, current_month, 1)
         context['experience'] = self.get_work_experience()
-        context['tables'] = self.get_user_workshifts()
+        context['tables'] = self.get_user_workshifts(month=current_month, year=current_year)
         context['total_values'] = self.get_total_values(context['tables'])
         context['shift_exists'] = self.check_exists_current_shift()
+
         return context
 
-    def get_user_workshifts(self):
+    def get_user_workshifts(self, month, year):
         workshifts = WorkingShift.objects.filter(
-            shift_date__year=datetime.date.today().year,
-            shift_date__month=datetime.date.today().month
+            shift_date__year=year,
+            shift_date__month=month
         ).filter(Q(cash_admin=self.request.user) | Q(hall_admin=self.request.user))
+
+        if not workshifts:
+            return []
 
         for get_shift in workshifts:
             get_shift.summary_revenue = sum([
@@ -145,10 +162,13 @@ class IndexView(LoginRequiredMixin, TemplateView):
                     bonus = current_revenue * ratio
             shift_salary += bonus
 
-        if workshift.shortage and workshift.shortage * 2 > shift_salary:
-            return 0.0
+        if current_user.profile.position.name == 'cash_admin':
+            if workshift.shortage and workshift.shortage * 2 > shift_salary:
+                return 0.0
+            else:
+                return round(shift_salary - workshift.shortage * 2, 2)
         else:
-            return round(shift_salary - workshift.shortage * 2, 2)
+            return round(shift_salary, 2)
 
     def get_total_values(self, workshifts):
         summary_bar_revenue = 0.0
@@ -159,6 +179,7 @@ class IndexView(LoginRequiredMixin, TemplateView):
         total_discipline = 0
         total_cleaning = 0
         summary_error = 0.0
+        summary_shortage = 0.0
         position = self.request.user.profile.position.name
 
         for get_shift in workshifts:
@@ -167,6 +188,7 @@ class IndexView(LoginRequiredMixin, TemplateView):
             summary_vr_revenue += get_shift.vr_revenue
             total_revenue += get_shift.summary_revenue
             summary_error += get_shift.game_zone_error
+            summary_shortage += get_shift.shortage
             total_salary += get_shift.kpi_salary
 
             if position == 'hall_admin':
@@ -193,6 +215,7 @@ class IndexView(LoginRequiredMixin, TemplateView):
             'sum_revenue': total_revenue,
             'quantity_shifts': quantity_shifts,
             'average_revenue': average_revenue,
+            'summary_shortage': summary_shortage,
             'total_salary': total_salary,
             'total_cleaning': total_cleaning,
             'total_discipline': total_discipline
