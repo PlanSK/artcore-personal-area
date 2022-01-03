@@ -2,6 +2,7 @@
 {% load static %}
 {% load bootstrap_icons %}
 {% load humanize %}
+{% load salary_tags %}
 
 {% block content %}
   <main>
@@ -39,96 +40,11 @@
           </div>
         </div>
         <!-- End personal data -->
-        <!-- Main data -->
-        <div class="col-md-8 themed-grid-col rounded border">
-          <div class="row">
-            <div class="col-md">
-              <p class="text-center">Основные показатели за {{ current_date|date:"F Y г." }}</p>
-            </div>
-          </div>
-        
-          <div class="row text-center">
-            <!-- 1 block -->
-            <div class="col-md rounded border m-3">
-              <div class="row">
-                <div class="col-md bg-primary border-bottom">
-                  <p class="mb-0 verysmall">
-                    {% bs_icon 'calendar-check' %}
-                    <br>
-                    Количество смен
-                  </p>
-                </div>
-              </div>
-              <div class="row">
-                <div class="col-md p-4">
-                  <p class="fs-4" style="font-style: normal;">{{ total_values.quantity_shifts }}</p>
-                </div>
-              </div>
-            </div>
-            <!-- 2 block -->
-            <div class="col-md rounded border m-3">
-              <div class="row">
-                <div class="col-md bg-primary border-bottom">
-                  <p class="mb-0 verysmall">
-                    {% bs_icon 'graph-up-arrow'  %}
-                    <br>
-                    Средняя выручка
-                  </p>
-                </div>
-              </div>
-              <div class="row">
-                <div class="col-md p-4">
-                  <p class="fs-4" style="font-style: normal;">{{ total_values.average_revenue | intcomma }}</p>
-                </div>
-              </div>
-            </div>
-            <!-- 3 block -->
-            <div class="col-md rounded border m-3">
-              <div class="row">
-                <div class="col-md bg-primary border-bottom">
-                  <p class="mb-0 verysmall">
-                    {% bs_icon 'cash-stack' %}
-                    <br>
-                    Заработано
-                  </p>
-                </div>
-              </div>
-              <div class="row">
-                <div class="col-md p-4"><p class="fs-4" style="font-style: normal;">{{ total_values.total_salary | intcomma }}</p></div>
-              </div>
-            </div>
-            <!-- 4 block -->
-            <div class="col-md rounded border m-3">
-              <div class="row">
-                <div class="col-md bg-primary border-bottom">
-                  <p class="mb-0 verysmall">
-                    {% bs_icon 'bar-chart' %}
-                    <br>
-                    Ваше место
-                  </p>
-                </div>
-              </div>
-              <div class="row">
-                <div class="col-md p-4"><p class="fs-4" style="font-style: normal;">-</p></div>
-              </div>
-            </div>
-          </div>
-          <div class="row mt-3">
-            <div class="col">
-              {% if user.profile.position.pk == 2 and not shift_exists %}
-              <p class="text-center">
-                <a class="btn btn-sm btn-outline-secondary" href="{% url 'add_workshift' %}">
-                  {% bs_icon 'calendar-plus' %}Закрыть текущую смену
-                </a>
-              </p>
-              {% elif user.profile.position.pk == 2 %}
-              <p class="text-secondary verysmall text-center">Текущая смена успешно закрыта.</p>
-              {% endif %}
-            </div>
-          </div>
-
-        </div>
-        <!-- End main data -->
+      {% if user.profile.position.pk <= 2 %}
+        {% include 'salary/main_indicators.html' %}
+      {% else %}
+        {% show_users %}
+      {% endif %}
       </div>
       <!--table-->
       {% if user.profile.position.pk <= 2 %}

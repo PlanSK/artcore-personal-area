@@ -31,3 +31,13 @@ def table_header(user):
         header.extend(hall_admin)
 
     return header
+
+
+@register.inclusion_tag('salary/user_list.html')
+def show_users():
+    positions_list = dict()
+    all_positions_list = Position.objects.exclude(name='staff')
+    for get_position in all_positions_list:
+        positions_list[get_position.title] = User.objects.filter(profile__position=get_position)
+
+    return {'positions_list': positions_list}
