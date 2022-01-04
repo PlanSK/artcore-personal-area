@@ -3,10 +3,9 @@
     <table class="table table-dark table-hover">
         <thead class="text-warning text-center verysmall">
             <th class="col">Сотрудник</th>
+            <th class="col">Параметры</th>
             <th class="col">Дата рождения</th>
             <th class="col">Дата трудоустройства</th>
-            <th class="col">Аттестация</th>
-            <th class="col">Активация</th>
             <th class="col">Действия</th>
         </thead>
         {% for position, users in positions_list.items %}
@@ -15,23 +14,23 @@
         </thead>
         {% for current_user in users %}
         <tr class="verysmall text-center">
-            <td>{{current_user.first_name}} {{current_user.last_name}}</td>
-            <td>{{current_user.profile.birth_date}}</td>
-            <td>{{current_user.profile.employment_date}}</td>
             <td>
-                {% if current_user.profile.attestation %}
-                    {% bs_icon 'check-circle-fill' color='green' %}
-                {% else %}
-                    {% bs_icon 'dash-circle-fill' color='yellow' %}
-                {% endif %}
+                {{current_user.first_name}} {{current_user.last_name}}
             </td>
             <td>
                 {% if current_user.is_active %}
-                    {% bs_icon 'check-circle-fill' color='green' %}
+                    <span title="Действующий сотрудник" class="me-2">{% bs_icon 'check-circle-fill' color='green' %}</span>
                 {% else %}
-                    {% bs_icon 'x-circle-fill' color='red' %}
+                    <span title="Требуется активация" class="me-2">{% bs_icon 'x-circle-fill' color='red' %}</span>
+                {% endif %}
+                {% if current_user.profile.attestation %}
+                    <span title="Аттестован">{% bs_icon 'award-fill' color='green' %}</span>
+                {% else %}
+                    <span title="Аттестация не пройдена">{% bs_icon 'bookmark-x-fill' color='yellow' %}</span>
                 {% endif %}
             </td>
+            <td>{{current_user.profile.birth_date}}</td>
+            <td>{{current_user.profile.employment_date}}</td>
             <td>
                 <a title="Внести изменения" href="#" class="btn btn-secondary verysmall">
                     {% bs_icon 'pencil-square' %}
