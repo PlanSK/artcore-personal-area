@@ -307,3 +307,9 @@ class EditWorkshiftData(LoginRequiredMixin, UpdateView):
     form_class = EditWorkshiftDataForm
     template_name = 'salary/edit_workshift.html'
     success_url = reverse_lazy('index')
+
+
+def page_not_found(request, exception):
+    response = render(request, 'salary/404.html', {'title': 'Page not found'})
+    response.status_code = 404
+    return response

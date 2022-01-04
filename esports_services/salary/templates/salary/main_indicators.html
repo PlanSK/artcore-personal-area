@@ -1,4 +1,3 @@
-{% load static %}
 {% load bootstrap_icons %}
 {% load humanize %}
 <!-- Main data -->
@@ -39,7 +38,7 @@
         </div>
         <div class="row">
             <div class="col-md p-4">
-            <p class="fs-4" style="font-style: normal;">{{ total_values.average_revenue | intcomma }}</p>
+            <p class="fs-4" style="font-style: normal;">{{ total_values.average_revenue|floatformat:"-2g" | intcomma }}</p>
             </div>
         </div>
         </div>
@@ -55,7 +54,7 @@
             </div>
         </div>
         <div class="row">
-            <div class="col-md p-4"><p class="fs-4" style="font-style: normal;">{{ total_values.total_salary | intcomma }}</p></div>
+            <div class="col-md p-4"><p class="fs-4" style="font-style: normal;">{{ total_values.total_salary|floatformat:"-2g"|intcomma }}</p></div>
         </div>
         </div>
         <!-- 4 block -->

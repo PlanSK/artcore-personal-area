@@ -33,7 +33,7 @@ def table_header(user):
     return header
 
 
-@register.inclusion_tag('salary/user_list.html')
+@register.inclusion_tag('salary/show_users.html')
 def show_users():
     positions_list = dict()
     all_positions_list = Position.objects.exclude(name='staff')

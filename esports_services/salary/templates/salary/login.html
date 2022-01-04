@@ -1,16 +1,8 @@
-<!DOCTYPE html>
-<html lang="ru" class="h-100">
+{% extends 'salary/base.html' %}
 {% load static %}
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{% static 'salary/css/bootstrap.min.css' %}">
-    <link rel="stylesheet" href="{% static 'salary/css/style.css' %}">
-    <link rel="icon" type="image/x-icon" href="{% static 'salary/img/favicon.ico' %}">
-    <title>{{ title }}</title>
-</head>
 {% load crispy_forms_tags %}
+
+{% block body %}
 <body class="bg-dark h-100 text-light">
     <main class="h-100">
       <div class="container h-100">
@@ -38,4 +30,4 @@
     </main>   
     <script src="{% static 'salary/js/bootstrap.bundle.min.js' %}"></script>
 </body>
-</html>
+{% endblock %}

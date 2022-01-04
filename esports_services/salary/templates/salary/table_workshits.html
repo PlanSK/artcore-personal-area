@@ -100,11 +100,11 @@
         <tfoot class="text-center verysmall text-white">
           <tr>
             <td scope="col">Итог за месяц:</td>
-            <td scope="col">{{ total_values.bar|floatformat:2 | intcomma }}</td>
-            <td scope="col">{{ total_values.game_zone|floatformat:2 | intcomma }}</td>
-            <td scope="col">{{ total_values.game_zone_error|floatformat:2 | intcomma }}</td>
-            <td scope="col">{{ total_values.vr|floatformat:2 | intcomma }}</td>
-            <td scope="col">{{ total_values.sum_revenue|floatformat:2 | intcomma }}</td>
+            <td scope="col">{{ total_values.bar|floatformat:"-2g" | intcomma }}</td>
+            <td scope="col">{{ total_values.game_zone|floatformat:"-2g" | intcomma }}</td>
+            <td scope="col">{{ total_values.game_zone_error|floatformat:"-2g" | intcomma }}</td>
+            <td scope="col">{{ total_values.vr|floatformat:"-2g" | intcomma }}</td>
+            <td scope="col">{{ total_values.sum_revenue|floatformat:"-2g" | intcomma }}</td>
             {% if  user.profile.position.name == 'hall_admin' %}
             <td>{{ total_values.total_discipline }}%</td>
             <td>{{ total_values.total_cleaning }}%</td>
@@ -112,7 +112,7 @@
             <td>{{ total_values.total_discipline }}%</td>
             <td class="text-danger">{{ total_values.summary_shortage | intcomma }}</td>
             {% endif %}
-            <td scope="col">{{ total_values.total_salary|floatformat:2 | intcomma }}</td>
+            <td scope="col">{{ total_values.total_salary|floatformat:"-2g" | intcomma }}</td>
             <td></td>
             <td></td>
           </tr>
