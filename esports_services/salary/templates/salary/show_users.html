@@ -23,7 +23,7 @@
                 {% else %}
                     <span title="Требуется активация" class="me-2">{% bs_icon 'x-circle-fill' color='red' %}</span>
                 {% endif %}
-                {% if current_user.profile.attestation %}
+                {% if current_user.profile.attestation_date %}
                     <span title="Аттестован">{% bs_icon 'award-fill' color='green' %}</span>
                 {% else %}
                     <span title="Аттестация не пройдена">{% bs_icon 'bookmark-x-fill' color='yellow' %}</span>

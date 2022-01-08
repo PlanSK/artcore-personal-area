@@ -152,7 +152,7 @@ class IndexView(LoginRequiredMixin, TemplateView):
             shift_salary += hall_cleaning_bonus
         
         # Attestation
-        if current_user.profile.attestation:
+        if current_user.profile.attestation_date and current_user.profile.attestation_date <= workshift.shift_date:
             shift_salary += attestation_bonus
 
         # KPI

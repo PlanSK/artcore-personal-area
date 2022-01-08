@@ -25,12 +25,12 @@
             </div>
             <div class="col-md-auto verysmall">
               <p class="mb-0">Дата рождения: {{ user.profile.birth_date }}</p>
-              {% if user.profile.position.pk == 3 %}
+              {% if user.profile.position.name == 'staff' %}
               <p class="mb-0">
                 <a class="link-warning" href="/admin/">Панель администрирования</a>
               </p>
-              {% elif user.profile.attestation %}
-              <p class="mb-0" style="color: greenyellow;">Аттестация пройдена {% bs_icon 'award' %}</p>
+              {% elif user.profile.attestation_date %}
+              <p class="mb-0" style="color: greenyellow;">Аттестация пройдена {{ user.profile.attestation_date }}</p>
               {% else %}
               <a href="#" class="text-warning" title="Пройти аттестацию">Аттестация не пройдена</a>
               {% endif %}
