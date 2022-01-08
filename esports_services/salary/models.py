@@ -10,7 +10,6 @@ class Profile(models.Model):
     birth_date = models.DateField(null=True, verbose_name='Дата рождения')
     employment_date = models.DateField(default=timezone.now, verbose_name='Дата трудоустройства')
     position = models.ForeignKey('Position', on_delete=models.PROTECT, null=True)
-    # attestation = models.BooleanField(default=False, verbose_name='Прохождение аттестации')
     attestation_date = models.DateField(blank=True, null=True, verbose_name='Дата прохождения аттестации')
 
     def __str__(self) -> str:
