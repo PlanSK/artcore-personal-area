@@ -19,7 +19,7 @@
           <div class="row">
             <div class="col-md">
               <p class="text-center">
-              {{ user.first_name }} {{ user.last_name }}<br>
+              {{ user.profile.get_name }}<br>
               {{ user.profile.position }}
               </p>
             </div>
@@ -39,14 +39,14 @@
           </div>
         </div>
         <!-- End personal data -->
-      {% if user.profile.position.pk <= 2 %}
+      {% if user.profile.position.name != 'staff' %}
         {% include 'salary/main_indicators.html' %}
       {% else %}
         {% show_users %}
       {% endif %}
       </div>
       <!--table-->
-      {% if user.profile.position.pk <= 2 %}
+      {% if user.profile.position.name != 'staff' %}
         {% include 'salary/table_workshits.html' %}
       {% endif %}
     </div>
