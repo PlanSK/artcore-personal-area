@@ -12,7 +12,8 @@
                 <div class="form-error">{{ form.non_field_errors }}</div>
                 {{ form|crispy }}
                 <div class="m-6 d-flex justify-content-center">
-                  <button type="submit" class="btn btn-primary mb-4">Внести изменения</button>
+                  <button type="submit" class="btn btn-primary mb-4 me-2">Внести изменения</button>
+                  <div><a href="{% url 'index' %}" class="btn btn-primary">Отмена</a></div>
                 </div>
               </form>
           </div>

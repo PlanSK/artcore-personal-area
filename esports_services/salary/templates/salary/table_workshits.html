@@ -38,7 +38,7 @@
             <td>-</td>
             {% endif %}
             <td>{{ table.vr_revenue | intcomma }}</td>
-            <td>{{ table.summary_revenue | intcomma }}</td>
+            <td>{{ table.get_summary_revenue | intcomma }}</td>
             
             {% if  user.profile.position.name == 'hall_admin' %}
             <td>
@@ -82,7 +82,7 @@
               {% if table.is_verified %}
                 <span title="Проверено">{% bs_icon 'check2-circle' color='green' %}</span>
               {% elif user.profile.position.name == 'cash_admin' %}
-              <a title="Внести изменения" href="{% url 'edit_workshift' table.pk %}">
+              <a title="Внести изменения" href="{% url 'edit_workshift' table.slug %}">
                 {% bs_icon 'pencil-square' color='yellow' %}
               </a>
               {% else %}

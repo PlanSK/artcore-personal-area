@@ -5,8 +5,8 @@ from django.contrib.auth.views import LoginView
 from django.urls import reverse_lazy
 from django.contrib.auth import logout
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic.edit import CreateView, UpdateView
-from django.db.models import Q, fields
+from django.views.generic.edit import CreateView, DeleteView, UpdateView
+from django.db.models import Q
 
 from .forms import *
 
@@ -73,7 +73,7 @@ class IndexView(LoginRequiredMixin, TemplateView):
         context['experience'] = self.get_work_experience()
         context['tables'] = self.get_user_workshifts(month=current_month, year=current_year)
         context['total_values'] = self.get_total_values(context['tables'])
-        context['shift_exists'] = self.check_exists_current_shift()
+        context['current_workshift'] = self.get_current_shift()
 
         return context
 
@@ -87,12 +87,6 @@ class IndexView(LoginRequiredMixin, TemplateView):
             return []
 
         for get_shift in workshifts:
-            get_shift.summary_revenue = sum([
-                get_shift.bar_revenue,
-                get_shift.game_zone_revenue,
-                -get_shift.game_zone_error,
-                get_shift.vr_revenue
-            ])
             get_shift.kpi_salary = self.kpi_salary_calculate(get_shift)
 
         return workshifts
@@ -186,7 +180,7 @@ class IndexView(LoginRequiredMixin, TemplateView):
             summary_bar_revenue += get_shift.bar_revenue
             summary_game_zone_revenue += get_shift.game_zone_revenue
             summary_vr_revenue += get_shift.vr_revenue
-            total_revenue += get_shift.summary_revenue
+            total_revenue += get_shift.get_summary_revenue()
             summary_error += get_shift.game_zone_error
             summary_shortage += get_shift.shortage
             total_salary += get_shift.kpi_salary
@@ -223,11 +217,11 @@ class IndexView(LoginRequiredMixin, TemplateView):
         return returned_dict
 
 
-    def check_exists_current_shift(self):
+    def get_current_shift(self):
         if WorkingShift.objects.filter(shift_date=datetime.date.today()):
-            return True
+            return WorkingShift.objects.get(shift_date=datetime.date.today())
 
-        return False
+        return None
 
     def get_work_experience(self):
         employment_date = User.objects.get(username=self.request.user).profile.employment_date
@@ -306,6 +300,11 @@ class EditWorkshiftData(LoginRequiredMixin, UpdateView):
     model = WorkingShift
     form_class = EditWorkshiftDataForm
     template_name = 'salary/edit_workshift.html'
+    success_url = reverse_lazy('index')
+
+
+class DeleteWorkshift(LoginRequiredMixin, DeleteView):
+    model = WorkingShift
     success_url = reverse_lazy('index')
 
 

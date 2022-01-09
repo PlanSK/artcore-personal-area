@@ -60,6 +60,15 @@ class WorkingShift(models.Model):
         super(WorkingShift, self).save()
         self.slug = self.shift_date
         super(WorkingShift, self).save()
+    
+    def get_summary_revenue(self):
+        summary_revenue = sum([
+            self.bar_revenue,
+            self.game_zone_revenue,
+            self.vr_revenue,
+            -self.game_zone_error
+        ])
+        return summary_revenue
 
 
 class Position(models.Model):
