@@ -32,10 +32,10 @@
             <td>{{ workshift.get_summary_revenue }}</td>
             <td><span title="{{ workshift.comment }}">{{ workshift.comment|truncatechars:12 }}</span></td>
             <td>
-              <a title="Внести изменения" class="btn btn-secondary verysmall" href="#">
+              <a title="Внести изменения" class="btn btn-secondary verysmall" href="{% url 'staff_edit_workshift' workshift.slug %}">
                 {% bs_icon 'pencil-square' color='yellow' %}
               </a>
-              <a title="Удалить смену" class="btn btn-secondary verysmall" href="#">
+              <a title="Удалить смену" class="btn btn-secondary verysmall" href="{% url 'delete_workshift' workshift.slug %}">
                 {% bs_icon 'x-square' color='red' %}
               </a>
             </td>

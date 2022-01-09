@@ -45,7 +45,7 @@ def show_users():
 
 @register.inclusion_tag('salary/staff_view_workshifts.html')
 def staff_workshifts_view():
-    workshifts_list = WorkingShift.objects.all()
+    workshifts_list = WorkingShift.objects.all().order_by('-shift_date')
 
     return {'workshifts_list': workshifts_list}
 

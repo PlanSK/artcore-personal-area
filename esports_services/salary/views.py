@@ -81,7 +81,7 @@ class IndexView(LoginRequiredMixin, TemplateView):
         workshifts = WorkingShift.objects.filter(
             shift_date__year=year,
             shift_date__month=month
-        ).filter(Q(cash_admin=self.request.user) | Q(hall_admin=self.request.user))
+        ).filter(Q(cash_admin=self.request.user) | Q(hall_admin=self.request.user)).order_by('-shift_date')
 
         if not workshifts:
             return []
@@ -299,6 +299,13 @@ class AddWorkshiftData(LoginRequiredMixin, CreateView):
 class EditWorkshiftData(LoginRequiredMixin, UpdateView):
     model = WorkingShift
     form_class = EditWorkshiftDataForm
+    template_name = 'salary/edit_workshift.html'
+    success_url = reverse_lazy('index')
+
+
+class StaffEditWorkshift(LoginRequiredMixin, UpdateView):
+    model = WorkingShift
+    form_class = StaffEditWorkshiftForm
     template_name = 'salary/edit_workshift.html'
     success_url = reverse_lazy('index')
 

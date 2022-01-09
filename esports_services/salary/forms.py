@@ -1,7 +1,6 @@
 from datetime import datetime
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from django.forms.models import ModelChoiceField
 
 from .models import *
 
@@ -15,7 +14,7 @@ class UserRegistration(UserCreationForm):
 
 class EmployeeRegistration(forms.ModelForm):
     position = forms.ModelChoiceField(
-        queryset=Position.objects.all().exclude(position_salary=None), 
+        queryset=Position.objects.all().exclude(name='staff'), 
         label='Должность', empty_label=None
     )
 
@@ -31,11 +30,12 @@ class EmployeeRegistration(forms.ModelForm):
         }
 
 
-class AddWorkshiftDataForm(forms.ModelForm):
-    class EmplModelChoiceField(forms.ModelChoiceField):
-        def label_from_instance(self, obj) -> str:
-            return ' '.join([obj.first_name, obj.last_name])
+class EmplModelChoiceField(forms.ModelChoiceField):
+    def label_from_instance(self, obj) -> str:
+        return ' '.join([obj.first_name, obj.last_name])
 
+
+class EditWorkshiftDataForm(forms.ModelForm):
     hall_admin = EmplModelChoiceField(
         queryset=User.objects.filter(profile__position=1),
         label='Администратор зала'
@@ -45,6 +45,21 @@ class AddWorkshiftDataForm(forms.ModelForm):
         label='Администратор кассы',
         disabled=True
     )
+
+    class Meta:
+        model = WorkingShift
+        fields = [
+            'hall_admin',
+            'cash_admin',
+            'bar_revenue',
+            'game_zone_revenue',
+            'game_zone_error',
+            'vr_revenue'
+        ]
+
+
+class AddWorkshiftDataForm(EditWorkshiftDataForm):
+
     class Meta:
         model = WorkingShift
         fields = [
@@ -64,20 +79,9 @@ class AddWorkshiftDataForm(forms.ModelForm):
             }),
         }
 
-class EditWorkshiftDataForm(forms.ModelForm):
-    class EmplModelChoiceField(forms.ModelChoiceField):
-        def label_from_instance(self, obj) -> str:
-            return ' '.join([obj.first_name, obj.last_name])
 
-    hall_admin = EmplModelChoiceField(
-        queryset=User.objects.filter(profile__position=1),
-        label='Администратор зала'
-    )
-    cash_admin = EmplModelChoiceField(
-        queryset=User.objects.filter(profile__position=2),
-        label='Администратор кассы',
-        disabled=True
-    )
+class StaffEditWorkshiftForm(EditWorkshiftDataForm):
+
     class Meta:
         model = WorkingShift
         fields = [
@@ -86,5 +90,11 @@ class EditWorkshiftDataForm(forms.ModelForm):
             'bar_revenue',
             'game_zone_revenue',
             'game_zone_error',
-            'vr_revenue'
+            'vr_revenue',
+            'hall_cleaning',
+            'cash_admin_discipline',
+            'hall_admin_discipline',
+            'shortage',
+            'comment',
+            'is_verified'
         ]
