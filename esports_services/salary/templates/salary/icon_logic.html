@@ -1,0 +1,7 @@
+{% load bootstrap_icons %}
+
+{% if logic_trigger %}
+  {% bs_icon 'check-circle' color='green' %}
+{% else %}
+  {% bs_icon 'x-circle' color='red' %}
+{% endif %}

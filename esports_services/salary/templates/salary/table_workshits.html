@@ -42,33 +42,16 @@
             
             {% if  user.profile.position.name == 'hall_admin' %}
             <td>
-              {% if table.hall_admin_discipline %}
-                {% bs_icon 'check-circle' color='green' %}
-              {% else %}
-                {% bs_icon 'x-circle' color='red' %}
-              {% endif %}
+              {% icon_logic table.hall_admin_discipline %}
             </td>
             <td>
-              {% if table.hall_cleaning %}
-                {% bs_icon 'check-circle' color='green' %}
-              {% else %}
-                {% bs_icon 'x-circle' color='red' %}
-              {% endif %}
+              {% icon_logic table.hall_cleaning %}
             </td>
-
             {% elif  user.profile.position.name == 'cash_admin' %}
             <td>
-              {% if table.cash_admin_discipline %}
-                {% bs_icon 'check-circle' color='green' %}
-              {% else %}
-                {% bs_icon 'x-circle' color='red' %}
-              {% endif %}
+              {% icon_logic table.cash_admin_discipline %}
             </td>
-              {% if table.shortage %}
-                <td class="text-danger">{{table.shortage}}</td>
-              {% else %}
-                <td>-</td>
-              {% endif %}
+            <td class="text-danger">{{table.shortage|default:"-"}}</td>
             {% endif %}
             <td>
               {% if table.is_verified %}
@@ -82,17 +65,17 @@
               {% if table.is_verified %}
                 <span title="Проверено">{% bs_icon 'check2-circle' color='green' %}</span>
               {% elif user.profile.position.name == 'cash_admin' %}
-              <a title="Внести изменения" href="{% url 'edit_workshift' table.slug %}">
-                {% bs_icon 'pencil-square' color='yellow' %}
-              </a>
+                <a title="Внести изменения" href="{% url 'edit_workshift' table.slug %}">
+                  {% bs_icon 'pencil-square' color='yellow' %}
+                </a>
               {% else %}
-              <span title='Ожидает проверки'>{% bs_icon 'stopwatch' color='yellow'%}</span>
+                <span title='Ожидает проверки'>{% bs_icon 'stopwatch' color='yellow'%}</span>
               {% endif %}
             </td>
             {% if  user.profile.position.name == 'cash_admin' %}
-            <td>
-              <span title="{{ table.comment }}">{{ table.comment|truncatechars:12 }}</span>
-            </td>
+              <td>
+                <span title="{{ table.comment }}">{{ table.comment|truncatechars:12 }}</span>
+              </td>
             {% endif %}
           </tr>
           {% endfor %}

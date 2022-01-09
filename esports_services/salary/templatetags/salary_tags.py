@@ -41,3 +41,15 @@ def show_users():
         positions_list[get_position.title] = User.objects.filter(profile__position=get_position)
 
     return {'positions_list': positions_list}
+
+
+@register.inclusion_tag('salary/staff_view_workshifts.html')
+def staff_workshifts_view():
+    workshifts_list = WorkingShift.objects.all()
+
+    return {'workshifts_list': workshifts_list}
+
+
+@register.inclusion_tag('salary/icon_logic.html')
+def icon_logic(variable=None):
+    return {'logic_trigger': variable}

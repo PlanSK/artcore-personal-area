@@ -46,7 +46,9 @@
       {% endif %}
       </div>
       <!--table-->
-      {% if user.profile.position.name != 'staff' %}
+      {% if user.profile.position.name == 'staff' %}
+        {% staff_workshifts_view %}
+      {% else %}
         {% include 'salary/table_workshits.html' %}
       {% endif %}
     </div>
