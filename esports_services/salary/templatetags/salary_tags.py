@@ -33,6 +33,11 @@ def table_header(user):
     return header
 
 
+@register.simple_tag()
+def kpi_salary(workshift, user):
+    return workshift.kpi_salary_calculate(user)
+
+
 @register.inclusion_tag('salary/show_users.html')
 def show_users():
     positions_list = dict()

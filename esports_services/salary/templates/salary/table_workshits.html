@@ -55,9 +55,10 @@
             {% endif %}
             <td>
               {% if table.is_verified %}
-                {{ table.kpi_salary | intcomma }}
+                {% kpi_salary workshift=table user=user as kpi_data %}
+                {{ kpi_data.shift_salary|floatformat:"1g" |intcomma }}
               {% else %}
-              <span title='Расчитывается после проверки'>{% bs_icon 'lock' color='gray' %}</span>
+                <span title='Расчитывается после проверки'>{% bs_icon 'lock' color='gray' %}</span>
               {% endif %}
             </td>
 

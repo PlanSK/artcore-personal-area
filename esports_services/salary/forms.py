@@ -1,6 +1,7 @@
-from datetime import datetime
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
+
+import datetime
 
 from .models import *
 
@@ -74,8 +75,8 @@ class AddWorkshiftDataForm(EditWorkshiftDataForm):
         widgets = {
             'shift_date': forms.DateInput(attrs={
                 'type': 'date',
-                'value': datetime.now().strftime('%Y-%m-%d'),
-                'max': datetime.now().strftime('%Y-%m-%d'),
+                'value': datetime.datetime.now().strftime('%Y-%m-%d'),
+                'max': datetime.datetime.now().strftime('%Y-%m-%d'),
             }),
         }
 
@@ -95,6 +96,7 @@ class StaffEditWorkshiftForm(EditWorkshiftDataForm):
             'cash_admin_discipline',
             'hall_admin_discipline',
             'shortage',
+            'shortage_paid',
             'comment',
             'is_verified'
         ]

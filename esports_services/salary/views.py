@@ -86,83 +86,7 @@ class IndexView(LoginRequiredMixin, TemplateView):
         if not workshifts:
             return []
 
-        for get_shift in workshifts:
-            get_shift.kpi_salary = self.kpi_salary_calculate(get_shift)
-
         return workshifts
-
-    def kpi_salary_calculate(self, workshift) -> float:
-        if not workshift.is_verified:
-            return 0.0
-        current_user = self.request.user
-        kpi_criteria = {
-            'hall_admin': {
-                'bar' : [(0, 0.005), (3000, 0.01), (4000, 0.02), (6000, 0.025), (8000, 0.03)],
-                'game_zone':[(0, 0.005), (20000, 0.01), (25000, 0.0125), (27500, 0.015), (30000, 0.0175)],
-                'vr': [(0, 0.1), (1000, 0.12), (2000, 0.13), (3000, 0.14), (5000, 0.15)]
-            },
-            'cash_admin': {
-                'bar' : [(0, 0.03), (3000, 0.04), (4000, 0.05), (6000, 0.06), (8000, 0.07)],
-                'game_zone':[(0, 0.005), (20000, 0.01), (25000, 0.0125), (27500, 0.015), (30000, 0.0175)],
-                'vr': [(0, 0.05), (1000, 0.06), (2000, 0.065), (3000, 0.07), (5000, 0.075)]
-            }
-        }
-        experience_bonus = 200
-        hall_cleaning_bonus = 400
-        attestation_bonus = 200
-        discipline_bonus = 1000
-
-        if current_user.profile.position.name == 'hall_admin':
-            kpi_ratio = kpi_criteria['hall_admin']
-            discipline = workshift.hall_admin_discipline
-            hall_cleaning = workshift.hall_cleaning
-        elif current_user.profile.position.name == 'cash_admin':
-            kpi_ratio = kpi_criteria['cash_admin']
-            hall_cleaning = False
-            discipline = workshift.cash_admin_discipline
-        else:
-            raise ValueError('Position settings is not defined.')
-
-        revenue_list = [
-            (workshift.bar_revenue, kpi_ratio['bar']),
-            (workshift.game_zone_revenue - workshift.game_zone_error, kpi_ratio['game_zone']),
-            (workshift.vr_revenue, kpi_ratio['vr'])
-        ]
-
-        # Position salary
-        shift_salary = current_user.profile.position.position_salary
-
-        # Expirience calc
-        experience = (datetime.date.today() - current_user.profile.employment_date).days
-        if experience > 90:
-            shift_salary += experience_bonus
-
-        # Discipline
-        if discipline:
-            shift_salary += discipline_bonus
-
-        # Hall cleaning
-        if hall_cleaning:
-            shift_salary += hall_cleaning_bonus
-        
-        # Attestation
-        if current_user.profile.attestation_date and current_user.profile.attestation_date <= workshift.shift_date:
-            shift_salary += attestation_bonus
-
-        # KPI
-        for current_revenue, ratio_list in revenue_list:
-            for revenue_value, ratio in ratio_list:
-                if current_revenue >= revenue_value:
-                    bonus = current_revenue * ratio
-            shift_salary += bonus
-
-        if current_user.profile.position.name == 'cash_admin':
-            if workshift.shortage and workshift.shortage * 2 > shift_salary:
-                return 0.0
-            else:
-                return round(shift_salary - workshift.shortage * 2, 2)
-        else:
-            return round(shift_salary, 2)
 
     def get_total_values(self, workshifts):
         summary_bar_revenue = 0.0
@@ -183,7 +107,8 @@ class IndexView(LoginRequiredMixin, TemplateView):
             total_revenue += get_shift.get_summary_revenue()
             summary_error += get_shift.game_zone_error
             summary_shortage += get_shift.shortage
-            total_salary += get_shift.kpi_salary
+            if get_shift.is_verified:
+                total_salary += get_shift.kpi_salary_calculate(self.request.user)['shift_salary']
 
             if position == 'hall_admin':
                 if get_shift.hall_admin_discipline:
