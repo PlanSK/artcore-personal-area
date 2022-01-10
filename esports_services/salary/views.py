@@ -106,7 +106,8 @@ class IndexView(LoginRequiredMixin, TemplateView):
             summary_vr_revenue += get_shift.vr_revenue
             total_revenue += get_shift.get_summary_revenue()
             summary_error += get_shift.game_zone_error
-            summary_shortage += get_shift.shortage
+            if not get_shift.shortage_paid:
+                summary_shortage += get_shift.shortage
             if get_shift.is_verified:
                 total_salary += get_shift.kpi_salary_calculate(self.request.user)['shift_salary']
 

@@ -74,7 +74,11 @@ class WorkingShift(models.Model):
         return summary_revenue
     
     def kpi_salary_calculate(self, current_user) -> float:
-        kpi_data = dict()
+        kpi_data = {
+            'experience': 0.0,
+            'discipline': 0.0,
+            'attestation': 0.0,
+        }
         kpi_criteria = {
             'hall_admin': {
                 'bar' : [(0, 0.005), (3000, 0.01), (4000, 0.02), (6000, 0.025), (8000, 0.03)],
@@ -110,22 +114,23 @@ class WorkingShift(models.Model):
 
         # Expirience calc
         experience = (self.shift_date - current_user.profile.employment_date).days
+        
         if experience > 90:
-            kpi_data['experience'] = True
+            kpi_data['experience'] = experience_bonus
             shift_salary += experience_bonus
-
 
         # Discipline
         if discipline:
+            kpi_data['discipline'] = discipline_bonus
             shift_salary += discipline_bonus
 
         # Hall cleaning
         if hall_cleaning:
             shift_salary += hall_cleaning_bonus
-        
+
         # Attestation
         if current_user.profile.attestation_date and current_user.profile.attestation_date <= self.shift_date:
-            kpi_data['attestation'] = True
+            kpi_data['attestation'] = attestation_bonus
             shift_salary += attestation_bonus
 
         # KPI

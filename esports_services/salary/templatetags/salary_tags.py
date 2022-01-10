@@ -38,6 +38,15 @@ def kpi_salary(workshift, user):
     return workshift.kpi_salary_calculate(user)
 
 
+@register.inclusion_tag('salary/cash_admin_workshifts.html')
+def cash_admin_workshifts(user, workshifts, total_values):
+    return {
+        'user': user,
+        'workshifts_list': workshifts,
+        'total_values': total_values
+    }
+
+
 @register.inclusion_tag('salary/show_users.html')
 def show_users():
     positions_list = dict()
