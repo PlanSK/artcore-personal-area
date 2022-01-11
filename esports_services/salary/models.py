@@ -78,6 +78,7 @@ class WorkingShift(models.Model):
             'experience': 0.0,
             'discipline': 0.0,
             'attestation': 0.0,
+            'cleaning': 0.0
         }
         kpi_criteria = {
             'hall_admin': {
@@ -126,6 +127,7 @@ class WorkingShift(models.Model):
 
         # Hall cleaning
         if hall_cleaning:
+            kpi_data['cleaning'] = hall_cleaning_bonus
             shift_salary += hall_cleaning_bonus
 
         # Attestation

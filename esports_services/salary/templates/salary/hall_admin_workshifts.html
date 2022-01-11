@@ -12,10 +12,8 @@
           <th>Ошибки GZ</th>
           <th>Доп. услуги и VR</th>
           <th>Общая выручка</th>
-          <th>Недостача</th>
           <th>Заработано</th>
           <th>Отметка о проверке</th>
-          <th>Примечание</th>
         </tr>
       </thead>
       <tbody class="text-center verysmall">
@@ -28,13 +26,6 @@
           <td class="text-danger">{{ workshift.game_zone_error | intcomma |default:"-" }}</td>
           <td>{{ workshift.vr_revenue | intcomma }}</td>
           <td>{{ workshift.get_summary_revenue | intcomma }}</td>
-          <td class="text-danger">
-            {% if workshift.shortage_paid and workshift.shortage %}
-            <s>{{ workshift.shortage }}</s>
-            {% else %}
-              {{workshift.shortage|default:"-"}}
-            {% endif %}
-          </td>
           <td>
             {% if workshift.is_verified %}
               {{ kpi_data.shift_salary|floatformat:"1g" |intcomma }}
@@ -44,17 +35,14 @@
           </td>
           <td>
             {% if workshift.is_verified %}
-              <span title="Проверено">{% bs_icon 'check2-circle' color='green' %}</span>
+              {% bs_icon 'check2-circle' color='green' %} Проверено
             {% else %}
-              <a title="Внести изменения" href="{% url 'edit_workshift' workshift.slug %}">
-                {% bs_icon 'pencil-square' color='yellow' %}
-              </a>
+              {% bs_icon 'stopwatch-fill' color='yellow' %} Ожидает проверки
             {% endif %}
           </td>
-          <td><span title="{{ workshift.comment }}">{{ workshift.comment|truncatechars:10 }}</span></td>
         </tr>
         <tr>
-          <td colspan="10">
+          <td colspan="8">
             <div class="collapse multi-collapse" id="workshift{{ workshift.shift_date|date:"dm" }}">
               <table class="table table-dark table-hover">
                 <thead class="text-warning text-center verysmall">
@@ -66,7 +54,7 @@
                     <th>Надб. Дисциплина</th>
                     <th>Надб. Стаж</th>
                     <th>Надб. Аттестация</th>
-                    <th>Недостача</th>
+                    <th>Надб. Клининг</th>
                     <th>Итог</th>
                   </tr>
                 </thead>
@@ -79,13 +67,7 @@
                     <td>{{ kpi_data.discipline|default:"-" }}</td>
                     <td>{{ kpi_data.experience|default:"-" }}</td>
                     <td>{{ kpi_data.attestation|default:"-" }}</td>
-                    <td>
-                      {% if workshift.shortage_paid and workshift.shortage %}
-                      <s>{{ workshift.shortage }}</s>
-                      {% elif workshift.shortage %}
-                        {% widthratio workshift.shortage 1 2 %} / x2
-                      {% endif %}
-                    </td>
+                    <td>{{ kpi_data.cleaning|default:"-" }}</td>
                     <td>
                       {% if workshift.is_verified %}
                         {{ kpi_data.shift_salary|floatformat:"1g" |intcomma }}
@@ -112,9 +94,7 @@
           <td scope="col">{{ total_values.game_zone_error|floatformat:"1g" | intcomma }}</td>
           <td scope="col">{{ total_values.vr|floatformat:"1g" | intcomma }}</td>
           <td scope="col">{{ total_values.sum_revenue|floatformat:"1g" | intcomma }}</td>
-          <td class="text-danger">{{ total_values.summary_shortage|default:"-" | intcomma }}</td>
           <td scope="col">{{ total_values.total_salary|floatformat:"1g" | intcomma }}</td>
-          <td></td>
           <td></td>
         </tr>
       </tfoot>
