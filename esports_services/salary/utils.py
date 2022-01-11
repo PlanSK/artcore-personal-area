@@ -1,5 +1,5 @@
 class TotalDataMixin:
-    def get_total_values(self, workshifts):
+    def get_total_values(self, request_user, workshifts):
         summary_bar_revenue = 0.0
         summary_game_zone_revenue = 0.0
         summary_vr_revenue = 0.0
@@ -17,7 +17,7 @@ class TotalDataMixin:
             if not get_shift.shortage_paid:
                 summary_shortage += get_shift.shortage
             if get_shift.is_verified:
-                total_salary += get_shift.kpi_salary_calculate(self.request.user)['shift_salary']
+                total_salary += get_shift.kpi_salary_calculate(request_user)['shift_salary']
 
         quantity_shifts = len(workshifts)
         if len(workshifts):

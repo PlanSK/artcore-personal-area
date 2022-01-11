@@ -16,7 +16,8 @@ def cash_admin_workshifts(user, workshifts, total_values):
     return {
         'user': user,
         'workshifts_list': workshifts,
-        'total_values': total_values
+        'total_values': total_values,
+        'current_date': workshifts[0].shift_date
     }
 
 
@@ -25,7 +26,8 @@ def hall_admin_workshifts(user, workshifts, total_values):
     return {
         'user': user,
         'workshifts_list': workshifts,
-        'total_values': total_values
+        'total_values': total_values,
+        'current_date': workshifts[0].shift_date
     }
 
 

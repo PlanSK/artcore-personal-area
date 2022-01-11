@@ -1,5 +1,5 @@
 from django.contrib.auth.forms import AuthenticationForm
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import TemplateView
 from django.contrib.auth.views import LoginView
 from django.urls import reverse_lazy
@@ -52,6 +52,25 @@ class LoginUser(LoginView):
         return reverse_lazy('index')
 
 
+class StaffUserView(LoginRequiredMixin, TotalDataMixin, TemplateView):
+    template_name = 'salary/staff_user_view.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        request_user = self.kwargs.get('request_user')
+        get_user = get_object_or_404(User, username=request_user)
+        workshifts = WorkingShift.objects.filter(
+            shift_date__year=datetime.date.today().year,
+            shift_date__month=datetime.date.today().month
+        ).filter(Q(cash_admin=get_user) | Q(hall_admin=get_user)).order_by('-shift_date')
+        context['title'] = f'Данные польователя {get_user}'
+        context['request_user'] = get_user
+        context['workshifts'] = workshifts
+        context['total_values'] = self.get_total_values(get_user, workshifts)
+
+        return context
+
+
 class IndexView(LoginRequiredMixin, TotalDataMixin, TemplateView):
     login_url = 'login/'
     template_name = 'salary/account.html'
@@ -73,7 +92,7 @@ class IndexView(LoginRequiredMixin, TotalDataMixin, TemplateView):
         context['current_date'] = datetime.date(current_year, current_month, 1)
         context['experience'] = self.get_work_experience()
         context['tables'] = self.get_user_workshifts(month=current_month, year=current_year)
-        context['total_values'] = self.get_total_values(context['tables'])
+        context['total_values'] = self.get_total_values(self.request.user, context['tables'])
         context['current_workshift'] = self.get_current_shift()
 
         return context
