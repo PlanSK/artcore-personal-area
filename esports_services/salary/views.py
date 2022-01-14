@@ -200,6 +200,11 @@ class StaffEditWorkshift(LoginRequiredMixin, UpdateView):
     template_name = 'salary/edit_workshift.html'
     success_url = reverse_lazy('index')
 
+    def get_context_data(self, **kwargs) -> dict:
+        context = super().get_context_data(**kwargs)
+        context['start_date'] = context['object'].shift_date - relativedelta(days=1)
+        return context
+
 
 class DeleteWorkshift(LoginRequiredMixin, DeleteView):
     model = WorkingShift
