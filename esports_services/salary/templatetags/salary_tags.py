@@ -11,6 +11,11 @@ def kpi_salary(workshift, user):
     return workshift.kpi_salary_calculate(user)
 
 
+@register.simple_tag()
+def get_year():
+    return datetime.date.today().year
+
+
 @register.inclusion_tag('salary/cash_admin_workshifts.html')
 def cash_admin_workshifts(user, workshifts, total_values):
     return {

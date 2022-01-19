@@ -1,6 +1,7 @@
 {% extends 'salary/base.html' %}
 {% load static %}
 {% load crispy_forms_tags %}
+{% load salary_tags %}
 
 {% block body %}
 <body class="bg-dark h-100 text-light">
@@ -23,7 +24,7 @@
             </form>
           </div>
           <div class="col-md-12 fixed-bottom">
-            <p class="mt-5 mb-3 text-muted verysmall">&copy; ESPORTS.TATAR 2021</p>
+            <p class="mt-5 mb-3 text-muted verysmall">&copy; ESPORTS.TATAR {% get_year %}</p>
           </div>
         </div>
       </div>
