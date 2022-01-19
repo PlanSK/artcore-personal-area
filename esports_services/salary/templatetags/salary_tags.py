@@ -22,7 +22,7 @@ def cash_admin_workshifts(user, workshifts, total_values):
         'user': user,
         'workshifts_list': workshifts,
         'total_values': total_values,
-        'current_date': workshifts[0].shift_date
+        'current_date': datetime.date.today()
     }
 
 
@@ -32,7 +32,7 @@ def hall_admin_workshifts(user, workshifts, total_values):
         'user': user,
         'workshifts_list': workshifts,
         'total_values': total_values,
-        'current_date': workshifts[0].shift_date
+        'current_date': datetime.date.today()
     }
 
 
