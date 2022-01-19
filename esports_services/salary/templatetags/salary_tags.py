@@ -18,21 +18,31 @@ def get_year():
 
 @register.inclusion_tag('salary/cash_admin_workshifts.html')
 def cash_admin_workshifts(user, workshifts, total_values):
+    if not workshifts:
+        current_month = datetime.date.today()
+    else:
+        current_month = workshifts[0].shift_date
+
     return {
         'user': user,
         'workshifts_list': workshifts,
         'total_values': total_values,
-        'current_date': datetime.date.today()
+        'current_date': current_month
     }
 
 
 @register.inclusion_tag('salary/hall_admin_workshifts.html')
 def hall_admin_workshifts(user, workshifts, total_values):
+    if not workshifts:
+        current_month = datetime.date.today()
+    else:
+        current_month = workshifts[0].shift_date
+
     return {
         'user': user,
         'workshifts_list': workshifts,
         'total_values': total_values,
-        'current_date': datetime.date.today()
+        'current_date': current_month
     }
 
 
