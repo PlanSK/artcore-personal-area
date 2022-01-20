@@ -91,8 +91,8 @@ class IndexView(LoginRequiredMixin, TotalDataMixin, TemplateView):
 
         context['current_date'] = datetime.date(current_year, current_month, 1)
         context['experience'] = self.get_work_experience()
-        context['tables'] = self.get_user_workshifts(month=current_month, year=current_year)
-        context['total_values'] = self.get_total_values(self.request.user, context['tables'])
+        context['workshifts'] = self.get_user_workshifts(month=current_month, year=current_year)
+        context['total_values'] = self.get_total_values(self.request.user, context['workshifts'])
         context['current_workshift'] = self.get_current_shift()
 
         return context

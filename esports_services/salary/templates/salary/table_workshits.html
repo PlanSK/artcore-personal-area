@@ -15,7 +15,7 @@
   </div>
 </div>
 {% if  user.profile.position.name == 'cash_admin' %}
-  {% cash_admin_workshifts user=user workshifts=tables total_values=total_values %}
+  {% cash_admin_workshifts user=user workshifts=workshifts total_values=total_values %}
 {% else %}
-  {% hall_admin_workshifts user=user workshifts=tables total_values=total_values %}
+  {% hall_admin_workshifts user=user workshifts=workshifts total_values=total_values %}
 {% endif %}
