@@ -5,6 +5,7 @@ from django.dispatch import receiver
 from django.utils import timezone
 
 import datetime
+from dateutil.relativedelta import relativedelta
 
 
 class Profile(models.Model):
@@ -33,6 +34,36 @@ class Profile(models.Model):
     class Meta:
         verbose_name = 'Профиль сотрудника'
         verbose_name_plural = 'Профили сотрудников'
+
+    def get_choice_plural(self, amount, variants):
+        if amount % 10 == 1 and amount % 100 != 11:
+            choice = 0
+        elif amount % 10 >= 2 and amount % 10 <= 4 and \
+                (amount % 100 < 10 or amount % 100 >= 20):
+            choice = 1
+        else:
+            choice = 2
+
+        return variants[choice]
+
+    def get_work_experience(self):
+        experience = relativedelta(datetime.date.today(), self.employment_date)
+        days, months, years = experience.days, experience.months, experience.years
+        experience_text = ''
+
+        days_variant = ('день', 'дня', 'дней')
+        month_variant = ('месяц','месяца','месяцев')
+        years_variant = ('год', 'года', 'лет')
+
+        if years:
+            experience_text = f'{years} {self.get_choice_plural(years, years_variant)} '
+
+        if months:
+            experience_text += f'{months} {self.get_choice_plural(months, month_variant)} '
+
+        experience_text += f'{days} {self.get_choice_plural(days, days_variant)}'
+
+        return experience_text
 
 
 class WorkingShift(models.Model):
