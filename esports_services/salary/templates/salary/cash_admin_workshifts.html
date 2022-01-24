@@ -76,7 +76,13 @@
                     <td>{{ kpi_data.bar.1|floatformat:"1g" }}% / {{ kpi_data.bar.0 |floatformat:"1g" }}</td>
                     <td>{{ kpi_data.game_zone.1|floatformat:"1g" }}% / {{ kpi_data.game_zone.0 |floatformat:"1g" }}</td>
                     <td>{{ kpi_data.vr.1|floatformat:"1g" }}% / {{ kpi_data.vr.0 |floatformat:"1g" }}</td>
-                    <td>{{ kpi_data.discipline|default:"-" }}</td>
+                    <td>
+                      {% if kpi_data.penalty %}
+                        {{ kpi_data.discipline }} / <span class="text-danger">-{{ kpi_data.penalty }}</span>
+                      {% else %}
+                        {{ kpi_data.discipline|default:"-" }}</td>
+                      {% endif %}
+                    </td>
                     <td>{{ kpi_data.experience|default:"-" }}</td>
                     <td>{{ kpi_data.attestation|default:"-" }}</td>
                     <td>

@@ -67,9 +67,15 @@
                       <td>{{ workshift.game_zone_revenue }}</td>
                       <td>{{ workshift.vr_revenue }}</td>
                       <td>{{ workshift.game_zone_error }}</td>
-                      <td>{% icon_logic workshift.hall_cleaning %}</td>
-                      <td>{% icon_logic workshift.cash_admin_discipline %}</td>
-                      <td>{% icon_logic workshift.hall_admin_discipline %}</td>
+                      <td>
+                        {% if workshift.hall_cleaning %}
+                          {% bs_icon 'check-circle' color='green' %}
+                        {% else %}
+                          {% bs_icon 'x-circle' color='red' %}
+                        {% endif %}
+                      </td>
+                      <td>{% icon_logic workshift.cash_admin_discipline_penalty %}</td>
+                      <td>{% icon_logic workshift.hall_admin_discipline_penalty %}</td>
                       <td>{{ workshift.shortage|default:"-" }}</td>
                     </tr>
                     {% if workshift.comment %}

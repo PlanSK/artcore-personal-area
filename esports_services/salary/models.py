@@ -76,7 +76,9 @@ class WorkingShift(models.Model):
     vr_revenue = models.FloatField(verbose_name='Выручка доп. услуги и VR', default=0.0)
     hall_cleaning = models.BooleanField(default=False, verbose_name='Наведение порядка')
     hall_admin_discipline = models.BooleanField(default=True, verbose_name='Сюблюдение дисциплины Админ зала')
+    hall_admin_discipline_penalty = models.FloatField(default=0.0, verbose_name='Дисциплинарный штраф')
     cash_admin_discipline = models.BooleanField(default=True, verbose_name='Сюблюдение дисциплины Админ кассы')
+    cash_admin_discipline_penalty = models.FloatField(default=0.0, verbose_name='Дисциплинарный штраф')
     shortage = models.FloatField(default=0, verbose_name='Недостача')
     shortage_paid = models.BooleanField(default=False, verbose_name="Отметка о погашении недостачи")
     slug = models.SlugField(max_length=60, unique=True, verbose_name='URL', null=True, blank=True)
@@ -123,10 +125,11 @@ class WorkingShift(models.Model):
                 'vr': [(0, 0.05), (1000, 0.06), (2000, 0.065), (3000, 0.07), (5000, 0.075)]
             }
         }
-        experience_bonus = 200
-        hall_cleaning_bonus = 400
-        attestation_bonus = 200
-        discipline_bonus = 1000
+        experience_bonus = 200.0
+        hall_cleaning_bonus = 400.0
+        attestation_bonus = 200.0
+        discipline_bonus = 1000.0
+        penalty = 0.0
 
         # Position salary
         shift_salary = current_user.profile.position.position_salary
@@ -134,11 +137,13 @@ class WorkingShift(models.Model):
         if current_user.profile.position.name == 'hall_admin':
             kpi_ratio = kpi_criteria['hall_admin']
             discipline = self.hall_admin_discipline
+            penalty = self.hall_admin_discipline_penalty
             hall_cleaning = self.hall_cleaning
         elif current_user.profile.position.name == 'cash_admin':
             kpi_ratio = kpi_criteria['cash_admin']
             hall_cleaning = False
             discipline = self.cash_admin_discipline
+            penalty = self.cash_admin_discipline_penalty
             if self.shortage and not self.shortage_paid:
                 shift_salary = round(shift_salary - self.shortage * 2, 2)
         else:
@@ -146,15 +151,20 @@ class WorkingShift(models.Model):
 
         # Expirience calc
         experience = (self.shift_date - current_user.profile.employment_date).days
-        
+
         if experience > 90:
             kpi_data['experience'] = experience_bonus
             shift_salary += experience_bonus
 
         # Discipline
-        if discipline:
-            kpi_data['discipline'] = discipline_bonus
-            shift_salary += discipline_bonus
+        if discipline_bonus <= penalty:
+            discipline_bonus = 0
+        else:
+            discipline_bonus -= penalty
+
+        kpi_data['discipline'] = discipline_bonus
+        kpi_data['penalty'] = penalty
+        shift_salary += discipline_bonus
 
         # Hall cleaning
         if hall_cleaning:
@@ -198,3 +208,17 @@ class Position(models.Model):
 
     def __str__(self) -> str:
         return self.title
+
+
+class DisciplinaryRegulations(models.Model):
+    article = models.CharField(max_length=10, verbose_name='Пункт')
+    title = models.CharField(max_length=255, verbose_name='Наименование')
+    base_penalty = models.FloatField(default=0.0, verbose_name='Фиксированный штраф')
+    note = models.CharField(max_length=50, verbose_name='Примечание')
+
+    class Meta:
+        verbose_name = 'Пункт регламента'
+        verbose_name_plural = 'Дисциплинарный регламент'
+
+    def __str__(self) -> str:
+        return self.article
