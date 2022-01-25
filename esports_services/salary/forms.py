@@ -82,7 +82,10 @@ class AddWorkshiftDataForm(EditWorkshiftDataForm):
 
 
 class StaffEditWorkshiftForm(EditWorkshiftDataForm):
-
+    cash_admin = EmplModelChoiceField(
+        queryset=User.objects.filter(profile__position=2),
+        label='Администратор кассы',
+    )
     class Meta:
         model = WorkingShift
         fields = [
