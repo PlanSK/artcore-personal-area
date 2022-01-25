@@ -29,6 +29,9 @@
               <p class="mb-0">
                 <a class="link-warning" href="/admin/">Панель администрирования</a>
               </p>
+              <p>
+                <a href="{% url 'monthly_report' %}" class="link-light">Авансовый отчет за {{ current_date|date:"F" }}</a>
+              </p>
               {% elif user.profile.attestation_date %}
               <p class="mb-0" style="color: greenyellow;">Аттестация пройдена {{ user.profile.attestation_date }}</p>
               {% else %}

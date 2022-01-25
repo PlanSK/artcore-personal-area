@@ -133,8 +133,9 @@ class WorkingShift(models.Model):
 
         # Position salary
         shift_salary = current_user.profile.position.position_salary
-
+        calculated_salary = shift_salary + discipline_bonus
         if current_user.profile.position.name == 'hall_admin':
+            calculated_salary += hall_cleaning_bonus
             kpi_ratio = kpi_criteria['hall_admin']
             discipline = self.hall_admin_discipline
             penalty = self.hall_admin_discipline_penalty
@@ -154,6 +155,7 @@ class WorkingShift(models.Model):
 
         if experience > 90:
             kpi_data['experience'] = experience_bonus
+            calculated_salary += experience_bonus
             shift_salary += experience_bonus
 
         # Discipline
@@ -174,6 +176,7 @@ class WorkingShift(models.Model):
         # Attestation
         if current_user.profile.attestation_date and current_user.profile.attestation_date <= self.shift_date:
             kpi_data['attestation'] = attestation_bonus
+            calculated_salary += attestation_bonus
             shift_salary += attestation_bonus
 
         # KPI
@@ -191,8 +194,9 @@ class WorkingShift(models.Model):
                 kpi_data['vr'] = (self.vr_revenue * ratio, ratio * 100)
 
         shift_salary += sum([kpi_data['bar'][0], kpi_data['game_zone'][0], kpi_data['vr'][0]])
-
+        calculated_salary += sum([kpi_data['bar'][0], kpi_data['game_zone'][0], kpi_data['vr'][0]])
         kpi_data['shift_salary'] = shift_salary
+        kpi_data['calculated_salary']= calculated_salary
 
         return kpi_data
 

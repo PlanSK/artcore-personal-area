@@ -1,6 +1,6 @@
 from django.contrib.auth.forms import AuthenticationForm
 from django.shortcuts import get_object_or_404, redirect, render
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, ListView
 from django.contrib.auth.views import LoginView
 from django.urls import reverse_lazy
 from django.contrib.auth import logout
@@ -162,6 +162,80 @@ class StaffEditWorkshift(LoginRequiredMixin, UpdateView):
 class DeleteWorkshift(LoginRequiredMixin, DeleteView):
     model = WorkingShift
     success_url = reverse_lazy('index')
+
+
+class MonthlyReportListView(LoginRequiredMixin, ListView):
+    model = WorkingShift
+    template_name = 'salary/monthlyreport_list.html'
+
+    def get_queryset(self):
+        month = datetime.date.today().month
+        workshifts = WorkingShift.objects.filter(shift_date__month=month, is_verified=True)
+        return workshifts
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        hall_admin_dict = dict()
+        cash_admin_dict = dict()
+        # TODO: здесь подсчет смен и пользователей.
+        for workshift in context['object_list']:
+            kpi_hall = workshift.kpi_salary_calculate(workshift.hall_admin)
+            kpi_cash = workshift.kpi_salary_calculate(workshift.cash_admin)
+
+            if kpi_hall['penalty'] > 1000:
+                hall_penalty = 1000
+            else:
+                hall_penalty = kpi_hall['penalty']
+
+            if kpi_cash['penalty'] > 1000:
+                cash_penalty = 1000
+            else:
+                cash_penalty = kpi_cash['penalty']
+
+            final_salary_hall = kpi_hall['calculated_salary'] - hall_penalty
+            final_salary_cash = kpi_cash['calculated_salary'] - cash_penalty
+
+            hall_values_list = [
+                kpi_hall['calculated_salary'], kpi_hall['penalty'],
+                0, final_salary_hall
+            ]
+
+            cash_values_list = [
+                kpi_cash['calculated_salary'], kpi_cash['penalty'],
+                workshift.shortage, final_salary_cash
+            ]
+
+            if not hall_admin_dict.get(workshift.hall_admin.profile.get_name()):
+                print(f'Add {workshift.hall_admin.profile.get_name()}')
+                hall_admin_dict[workshift.hall_admin.profile.get_name()] = [ hall_values_list, ]
+            else:
+                hall_admin_dict[workshift.hall_admin.profile.get_name()].append(hall_values_list)
+
+            if not cash_admin_dict.get(workshift.cash_admin.profile.get_name()):
+                print(f'Add {workshift.cash_admin.profile.get_name()}')
+                cash_admin_dict[workshift.cash_admin.profile.get_name()] = [ cash_values_list, ]
+            else:
+                cash_admin_dict[workshift.cash_admin.profile.get_name()].append(cash_values_list)
+
+        employee_list = []
+
+        for name, values in hall_admin_dict.items():
+            hall_admin_list = [name, len(values)]
+            kpi_values = [round(sum(a), 2) for a in zip(*values)]
+            hall_admin_list.extend(kpi_values)
+            employee_list.append(hall_admin_list)
+
+        for name, values in cash_admin_dict.items():
+            cash_admin_list = [name, len(values)]
+            kpi_values = [round(sum(a), 2) for a in zip(*values)]
+            cash_admin_list.extend(kpi_values)
+            employee_list.append(cash_admin_list)
+
+        context['employee_list'] = employee_list
+        context['current_date'] = datetime.date.today()
+        context['title'] = 'Monthly Report'
+
+        return context
 
 
 def page_not_found(request, exception):
