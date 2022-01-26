@@ -173,67 +173,57 @@ class MonthlyReportListView(LoginRequiredMixin, ListView):
         workshifts = WorkingShift.objects.filter(shift_date__month=month, is_verified=True)
         return workshifts
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        hall_admin_dict = dict()
-        cash_admin_dict = dict()
-        # TODO: здесь подсчет смен и пользователей.
-        for workshift in context['object_list']:
-            kpi_hall = workshift.kpi_salary_calculate(workshift.hall_admin)
-            kpi_cash = workshift.kpi_salary_calculate(workshift.cash_admin)
+    def get_values_list(self, kpi_dict: dict, shortage=0.0) -> list:
+        if kpi_dict['penalty'] > 1000:
+            penalty = 1000
+        else:
+            penalty = kpi_dict['penalty']
 
-            if kpi_hall['penalty'] > 1000:
-                hall_penalty = 1000
-            else:
-                hall_penalty = kpi_hall['penalty']
+        final_salary_hall = kpi_dict['calculated_salary'] - penalty
+        values_list = [
+            1, kpi_dict['calculated_salary'],
+            kpi_dict['penalty'], shortage, final_salary_hall
+        ]
+        return values_list
 
-            if kpi_cash['penalty'] > 1000:
-                cash_penalty = 1000
-            else:
-                cash_penalty = kpi_cash['penalty']
+    def get_employee_list(self, objects: list) -> list:
+        users_dict = dict()
 
-            final_salary_hall = kpi_hall['calculated_salary'] - hall_penalty
-            final_salary_cash = kpi_cash['calculated_salary'] - cash_penalty
+        for workshift in objects:
+            current_user_dict = {
+                workshift.hall_admin.profile.get_name(): self.get_values_list(
+                    workshift.kpi_salary_calculate(workshift.hall_admin)),
+                workshift.cash_admin.profile.get_name(): self.get_values_list(
+                    workshift.kpi_salary_calculate(workshift.cash_admin),
+                    shortage=workshift.shortage)
+            }
 
-            hall_values_list = [
-                kpi_hall['calculated_salary'], kpi_hall['penalty'],
-                0, final_salary_hall
-            ]
-
-            cash_values_list = [
-                kpi_cash['calculated_salary'], kpi_cash['penalty'],
-                workshift.shortage, final_salary_cash
-            ]
-
-            if not hall_admin_dict.get(workshift.hall_admin.profile.get_name()):
-                print(f'Add {workshift.hall_admin.profile.get_name()}')
-                hall_admin_dict[workshift.hall_admin.profile.get_name()] = [ hall_values_list, ]
-            else:
-                hall_admin_dict[workshift.hall_admin.profile.get_name()].append(hall_values_list)
-
-            if not cash_admin_dict.get(workshift.cash_admin.profile.get_name()):
-                print(f'Add {workshift.cash_admin.profile.get_name()}')
-                cash_admin_dict[workshift.cash_admin.profile.get_name()] = [ cash_values_list, ]
-            else:
-                cash_admin_dict[workshift.cash_admin.profile.get_name()].append(cash_values_list)
+            for name, values in current_user_dict.items():
+                if users_dict.get(name):
+                    users_dict[name] = [
+                        round(sum(a), 2)
+                        for a in zip(users_dict[name], values)
+                    ]
+                else:
+                    users_dict.update({name: list(map(lambda x: round(x, 2), values))})
 
         employee_list = []
 
-        for name, values in hall_admin_dict.items():
-            hall_admin_list = [name, len(values)]
-            kpi_values = [round(sum(a), 2) for a in zip(*values)]
-            hall_admin_list.extend(kpi_values)
-            employee_list.append(hall_admin_list)
+        for name, values in users_dict.items():
+            employee_list.append([name] + values)
 
-        for name, values in cash_admin_dict.items():
-            cash_admin_list = [name, len(values)]
-            kpi_values = [round(sum(a), 2) for a in zip(*values)]
-            cash_admin_list.extend(kpi_values)
-            employee_list.append(cash_admin_list)
+        employee_list.sort(key=lambda x: x[-1], reverse=1)
 
-        context['employee_list'] = employee_list
-        context['current_date'] = datetime.date.today()
-        context['title'] = 'Monthly Report'
+
+        return employee_list
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'employee_list': self.get_employee_list(context['object_list']),
+            'current_date': datetime.date.today(),
+            'title': 'Авансовый отчет'
+        })
 
         return context
 
