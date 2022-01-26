@@ -32,8 +32,8 @@
               {% endif %}
             </td>
             <td>{{ workshift.shift_date }}</td>
-            <td><a href="{% url 'staff_user_view' request_user=workshift.cash_admin %}" class="link-light">{{ workshift.cash_admin.profile.get_name }}</a></td>
-            <td><a href="{% url 'staff_user_view' request_user=workshift.hall_admin %}" class="link-light">{{ workshift.hall_admin.profile.get_name }}</a></td>
+            <td><a href="{% url 'staff_user_view' request_user=workshift.cash_admin %}" class="link-light">{{ workshift.cash_admin.get_full_name }}</a></td>
+            <td><a href="{% url 'staff_user_view' request_user=workshift.hall_admin %}" class="link-light">{{ workshift.hall_admin.get_full_name }}</a></td>
             <td>{{ workshift.get_summary_revenue }}</td>
             <td><span title="{{ workshift.comment }}">{{ workshift.comment|truncatechars:12 }}</span></td>
             <td>

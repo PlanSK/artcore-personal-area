@@ -17,9 +17,6 @@ class Profile(models.Model):
 
     def __str__(self) -> str:
         return f'{self.user.first_name} {self.user.last_name} [{self.user.username}]'
-    
-    def get_name(self) -> str:
-        return f'{self.user.first_name} {self.user.last_name}'
 
     @receiver(post_save, sender=User)
     def create_user_profile(sender, instance, created, **kwargs):
@@ -88,6 +85,7 @@ class WorkingShift(models.Model):
     class Meta:
         verbose_name = 'Смена'
         verbose_name_plural = 'Смены'
+        ordering = ['-shift_date']
 
     def __str__(self) -> str:
         return self.shift_date.strftime('%d-%m-%Y')

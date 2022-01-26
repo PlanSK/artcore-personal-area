@@ -62,7 +62,7 @@ class StaffUserView(LoginRequiredMixin, TotalDataMixin, TemplateView):
         workshifts = WorkingShift.objects.filter(
             shift_date__year=datetime.date.today().year,
             shift_date__month=datetime.date.today().month
-        ).filter(Q(cash_admin=get_user) | Q(hall_admin=get_user)).order_by('-shift_date')
+        ).filter(Q(cash_admin=get_user) | Q(hall_admin=get_user))
         context['title'] = f'Данные польователя {get_user}'
         context['request_user'] = get_user
         context['workshifts'] = workshifts
@@ -170,7 +170,7 @@ class MonthlyReportListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         month = datetime.date.today().month
-        workshifts = WorkingShift.objects.filter(shift_date__month=month, is_verified=True)
+        workshifts = WorkingShift.objects.select_related('cash_admin', 'hall_admin').filter(shift_date__month=month, is_verified=True)
         return workshifts
 
     def get_values_list(self, kpi_dict: dict, shortage=0.0) -> list:
@@ -191,9 +191,9 @@ class MonthlyReportListView(LoginRequiredMixin, ListView):
 
         for workshift in objects:
             current_user_dict = {
-                workshift.hall_admin.profile.get_name(): self.get_values_list(
+                workshift.hall_admin.get_full_name(): self.get_values_list(
                     workshift.kpi_salary_calculate(workshift.hall_admin)),
-                workshift.cash_admin.profile.get_name(): self.get_values_list(
+                workshift.cash_admin.get_full_name(): self.get_values_list(
                     workshift.kpi_salary_calculate(workshift.cash_admin),
                     shortage=workshift.shortage)
             }
