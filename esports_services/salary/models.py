@@ -8,13 +8,18 @@ import datetime
 from dateutil.relativedelta import relativedelta
 
 
+def user_directory_path(instance, filename):
+    return 'user_{0}/{1}'.format(instance.user.id, filename)
+
+
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     birth_date = models.DateField(null=True, verbose_name='Дата рождения')
     employment_date = models.DateField(default=timezone.now, verbose_name='Дата трудоустройства')
     position = models.ForeignKey('Position', on_delete=models.PROTECT, null=True)
     attestation_date = models.DateField(blank=True, null=True, verbose_name='Дата прохождения аттестации')
-    is_dismissed = models.BooleanField(default=False, verbose_name='Статус увольнения')
+    dismiss_date = models.DateField(blank=True, null=True, verbose_name="Дата увольнения")
+    photo = models.ImageField(upload_to=user_directory_path, blank=True, null=True)
 
     def __str__(self) -> str:
         return f'{self.user.first_name} {self.user.last_name} [{self.user.username}]'
@@ -45,7 +50,8 @@ class Profile(models.Model):
         return variants[choice]
 
     def get_work_experience(self):
-        experience = relativedelta(datetime.date.today(), self.employment_date)
+        end_date = self.dismiss_date if self.dismiss_date else datetime.date.today()
+        experience = relativedelta(end_date, self.employment_date)
         days, months, years = experience.days, experience.months, experience.years
         experience_text = ''
 

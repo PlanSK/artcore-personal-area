@@ -88,25 +88,15 @@ class AdminUserView(PermissionRequiredMixin, ListView):
     model = User
 
     def get_queryset(self):
-        query = User.objects.exclude(is_staff=True).select_related('profile', 'profile__position')
+        query = User.objects.exclude(is_staff=True).select_related(
+            'profile',
+            'profile__position'
+        ).order_by('-profile__position')
         return query
-
-    def show_users(self, objects) -> dict:
-        positions_list = dict()
-        all_positions_list = Position.objects.exclude(name='staff')
-        for get_position in all_positions_list:
-            positions_list[get_position.title] = [
-                user 
-                for user in objects 
-                if user.profile.position.title == get_position.title
-            ]
-
-        return positions_list
 
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
         context['title'] = 'Управление персоналом'
-        context['positions_list'] = self.show_users(context['object_list'])
 
         return context
 

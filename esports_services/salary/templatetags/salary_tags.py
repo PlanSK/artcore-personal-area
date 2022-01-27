@@ -23,8 +23,8 @@ def unverified_shift():
 
 @register.simple_tag()
 def inactive_user():
-    return User.objects.exclude(is_active=True).exclude(
-        profile__is_dismissed=True
+    return User.objects.exclude(is_active=True).filter(
+        profile__dismiss_date=None
     ).count()
 
 

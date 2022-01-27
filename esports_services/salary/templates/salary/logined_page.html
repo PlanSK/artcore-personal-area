@@ -13,7 +13,12 @@
             <img src="{% static 'salary/img/esports_eng-logo.png' %}" height="30" class="d-inline-block align-top" alt="" loading="lazy">
           </a>
           <div class="border-left border-secondary">
-            <span class="text-light verysmall m-2">{% bs_icon 'person-circle' size='30' %}{{user.get_full_name}}</span>
+            {% if user.profile.photo %}
+              <img src="{{ user.profile.photo.url }}" alt="" class="rounded-circle" style="width: 40px; height: 40px;">
+            {% else %}
+              {% bs_icon 'person-circle' size='40' %}
+            {% endif %}
+            <span class="text-light verysmall m-2">{{user.get_full_name}}</span>
             <a href="{% url 'logout' %}" class="btn btn-sm btn-outline-secondary">{% bs_icon 'door-open-fill' %}</a>
           </div>
         </div>

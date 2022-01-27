@@ -12,7 +12,11 @@
           <!--avatar-->
           <div class="d-flex justify-content-center mt-3 mb-2 row">
             <div class="col-md-auto">
-              {% bs_icon 'person-circle' size='120' %}
+              {% if user.profile.photo %}
+                <img src="{{ user.profile.photo.url }}" alt="" class="rounded-circle" style="width: 120px; height: 120px;">
+              {% else %}
+                {% bs_icon 'person-circle' size='120' %}
+              {% endif %}
             </div>
           </div>
           <!--personal data text-->

@@ -1,53 +1,52 @@
 {% extends 'salary/dashboard.html' %}
+{% load static %}
 {% load bootstrap_icons %}
 {% block data %}
-<div class="col-md-8 themed-grid-col rounded border">
-    <table class="table table-dark table-hover">
-        <thead class="text-warning text-center verysmall">
-            <th class="col">Сотрудник</th>
-            <th class="col">Параметры</th>
-            <th class="col">Дата рождения</th>
-            <th class="col">Дата трудоустройства</th>
-            <th class="col">Действия</th>
-        </thead>
-        {% for position, users in positions_list.items %}
-        <thead class="text-center verysmall table-active">
-            <th colspan="6" class="col">{{ position }}</th>
-        </thead>
-        {% for current_user in users %}
-        <tr class="verysmall text-center">
-            <td>
-                {% if current_user.profile.is_dismissed %}
-                <s>{{current_user.first_name}} {{current_user.last_name}}</s>
-                {% else %}
-                    {{current_user.first_name}} {{current_user.last_name}}
-                {% endif %}
-            </td>
-            <td>
-                {% if current_user.is_active %}
-                    <span title="Действующий сотрудник" class="me-2">{% bs_icon 'check-circle-fill' color='green' %}</span>
-                {% else %}
-                    <span title="Требуется активация" class="me-2">{% bs_icon 'x-circle-fill' color='red' %}</span>
-                {% endif %}
-                {% if current_user.profile.attestation_date %}
-                    <span title="Аттестован">{% bs_icon 'award-fill' color='green' %}</span>
-                {% else %}
-                    <span title="Аттестация не пройдена">{% bs_icon 'bookmark-x-fill' color='yellow' %}</span>
-                {% endif %}
-            </td>
-            <td>{{current_user.profile.birth_date}}</td>
-            <td>{{current_user.profile.employment_date}}</td>
-            <td>
-                <a title="Внести изменения" href="#" class="btn btn-secondary verysmall">
-                    {% bs_icon 'pencil-square' %}
-                </a>
-                <a title="Удалить" href="#" class="btn btn-secondary verysmall">
-                    {% bs_icon 'trash' %}
-                </a>
-            </td>
-        </tr>
-        {% endfor %}
-        {% endfor %}
-    </table>
+<div class="row row-cols-sm-1 row-cols-md-4 g-2">
+    {% for current_user in object_list %}
+    <div class="col">
+      <div class="card border-light bg-dark text-light h-100" style="max-width: 17rem;">
+        <div class="card-header text-center bg-black-50">
+          {% if current_user.profile.photo %}
+            <img src="{{ current_user.profile.photo.url }}" alt="" class="rounded-circle" style="width: 75px; height: 75px;">
+          {% else %}
+            {% bs_icon 'person-circle' size='75' %}
+          {% endif %}
+          <br>{{ current_user.get_full_name }}
+        </div>
+        <div class="card-body">
+          <p class="card-text fst-italic">
+              {% if current_user.profile.dismiss_date %}
+                <span class="text-danger verysmall">Уволен {{ current_user.profile.dismiss_date }}</span>
+              {% elif not current_user.is_active %}
+                <span class="text-warning verysmall">Ожидает активации</span>
+              {% else %}
+                {{ current_user.profile.position }}
+              {% endif %}
+          </p>
+          <p class="card-text verysmall">
+            Email: <a href="mailto:{{ current_user.email }}">{{ current_user.email }}</a> <br>
+            Дата рождения: {{ current_user.profile.birth_date }} <br>
+            Дата трудоустройства: {{ current_user.profile.employment_date|date:"d.m.Y" }} <br>
+            Стаж работы: {{ current_user.profile.get_work_experience }} <br>
+            Аттестация: 
+            {% if current_user.profile.attestation_date %} 
+            <span class="text-success">{{ current_user.profile.attestation_date }}</span> 
+            {% else %}
+            <span class="text-warning">Не пройдена</span> 
+            {% endif %}
+          </p>
+        </div>
+        <div class="card-footer text-center">
+          {% if not current_user.is_active %}
+          <a href="#" class="btn btn-sm btn-outline-secondary">{% bs_icon 'check-circle' %}Активировать</a>
+          {% else %}
+          <a href="#" class="btn btn-sm btn-outline-secondary">{% bs_icon 'pencil-square' %}Изменить</a>
+          <a href="#" class="btn btn-sm btn-outline-secondary">{% bs_icon 'x-circle' %}Уволить</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
 </div>
 {% endblock %}
