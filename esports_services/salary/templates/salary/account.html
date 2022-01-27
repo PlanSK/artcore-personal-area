@@ -25,14 +25,7 @@
             </div>
             <div class="col-md-auto verysmall">
               <p class="mb-0">Дата рождения: {{ user.profile.birth_date }}</p>
-              {% if user.profile.position.name == 'staff' %}
-              <p class="mb-0">
-                <a class="link-warning" href="/admin/">Панель администрирования</a>
-              </p>
-              <p>
-                <a href="{% url 'monthly_report' %}" class="link-light">Авансовый отчет за {{ current_date|date:"F" }}</a>
-              </p>
-              {% elif user.profile.attestation_date %}
+              {% if user.profile.attestation_date %}
               <p class="mb-0" style="color: greenyellow;">Аттестация пройдена {{ user.profile.attestation_date }}</p>
               {% else %}
               <a href="#" class="text-warning" title="Пройти аттестацию">Аттестация не пройдена</a>
@@ -42,18 +35,10 @@
           </div>
         </div>
         <!-- End personal data -->
-      {% if user.profile.position.name != 'staff' %}
         {% include 'salary/main_indicators.html' %}
-      {% else %}
-        {% show_users %}
-      {% endif %}
       </div>
       <!--table-->
-      {% if user.profile.position.name == 'staff' %}
-        {% staff_workshifts_view %}
-      {% else %}
         {% include 'salary/table_workshits.html' %}
-      {% endif %}
     </div>
   </main>
 

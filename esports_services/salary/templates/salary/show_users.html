@@ -1,4 +1,6 @@
+{% extends 'salary/dashboard.html' %}
 {% load bootstrap_icons %}
+{% block data %}
 <div class="col-md-8 themed-grid-col rounded border">
     <table class="table table-dark table-hover">
         <thead class="text-warning text-center verysmall">
@@ -44,3 +46,4 @@
         {% endfor %}
     </table>
 </div>
+{% endblock %}

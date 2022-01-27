@@ -1,0 +1,83 @@
+{% extends 'salary/logined_page.html' %}
+{% load bootstrap_icons %}
+{% load humanize %}
+{% load salary_tags %}
+
+{% block content %}
+  <main>
+    <div class="container">
+      <div class="row m-3">
+        <div class="col mb-3">
+          <div class="row row-cols-sm-1 row-cols-md-3 g-2">
+            <div class="col">
+              <div class="card border-light blue-snippet text-light h-100" style="max-width: 17rem;">
+                <div class="card-body">
+                  <p class="card-text fst-italic"><span class="me-2">{% bs_icon 'calendar4-week' size='30' %} </span>Смены</p>
+                  <a href="{% url 'workshifts_view' %}" class="stretched-link"></a>
+                </div>
+                {% unverified_shift as unverified_shifts %}
+                {% if unverified_shifts %}
+                <div class="card-footer">
+                  <p class="card-text text-light verysmall">Ожидает проверки: {{unverified_shifts}}</p>
+                </div>
+                {% endif %}
+              </div>
+            </div>
+            <div class="col">
+              <div class="card border-light green-snippet text-light h-100" style="max-width: 17rem;">
+                <div class="card-body">
+                  <p class="card-text fst-italic"><span class="me-2">{% bs_icon 'person-lines-fill' size='30' %} </span>Сотрудники</p>
+                  <a href="{% url 'user_view' %}" class="stretched-link"></a>
+                </div>
+                {% inactive_user as inactive_users %}
+                {% if inactive_users %}
+                <div class="card-footer">
+                  <p class="card-text text-light verysmall">Ожидает подтверждения: {{ inactive_users }}</p>
+                </div>
+                {% endif %}
+              </div>
+            </div>
+            <div class="col">
+              <div class="card border-light orange-snippet text-light h-100" style="max-width: 17rem;">
+                <div class="card-body">
+                  <p class="card-text fst-italic"><span class="me-2">{% bs_icon 'clipboard-data' size='30' %} </span>Отчеты</p>
+                  <a href="{% url 'monthly_report' %}" class="stretched-link"></a>
+                </div>
+              </div>
+            </div>
+            <div class="col">
+              <div class="card border-light blue-snippet text-light h-100" style="max-width: 17rem;">
+                <div class="card-body">
+                  <p class="card-text fst-italic"><span class="me-2">{% bs_icon 'link-45deg' size='30' %} </span>Публикации</p>
+                  <a href="#" class="stretched-link"></a>
+                </div>
+              </div>
+            </div>
+            <div class="col">
+              <div class="card border-light red-snippet text-light h-100" style="max-width: 17rem;">
+                <div class="card-body">
+                  <p class="card-text fst-italic"><span class="me-2">{% bs_icon 'mortarboard' size='30' %} </span>Дисциплина</p>
+                  <a href="#" class="stretched-link"></a>
+                </div>
+              </div>
+            </div>
+            <div class="col">
+              <div class="card border-light blue-snippet text-light h-100" style="max-width: 17rem;">
+                <div class="card-body">
+                  <p class="card-text fst-italic"><span class="me-2">{% bs_icon 'folder2-open' size='30' %} </span>Документы</p>
+                  <a href="#" class="stretched-link"></a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row justify-content-center">
+        {% block data %}
+        {% endblock %}
+      </div>
+    </div>
+
+  </main>
+
+{% endblock %}

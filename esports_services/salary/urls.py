@@ -15,5 +15,8 @@ urlpatterns = [
     path('staff_edit_workshift/<slug:slug>/', StaffEditWorkshift.as_view(), name='staff_edit_workshift'),
     path('delete_workshift/<slug:slug>', DeleteWorkshift.as_view(), name='delete_workshift'),
     path('staff_view/<str:request_user>', StaffUserView.as_view(), name='staff_user_view'),
-    path('monthly_report', MonthlyReportListView.as_view(), name='monthly_report'),
+    path('monthly_report/', MonthlyReportListView.as_view(), name='monthly_report'),
+    path('dashboard/', AdminView.as_view(), name='dashboard'),
+    path('users_view/', AdminUserView.as_view(), name='user_view'),
+    path('workshifts_view/', AdminWorkshiftsView.as_view(), name='workshifts_view'),
 ]

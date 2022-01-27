@@ -1,3 +1,31 @@
 .verysmall {
     font-size: 0.75rem;
 }
+
+.red-snippet {
+    background: linear-gradient(100deg,#c72f2f 0%,#570505 100%);
+}
+.red-snippet:hover {
+    background: #570505;
+}
+
+.green-snippet {
+    background: linear-gradient(100deg,#2fc72f 0%,#055717 100%);
+}
+.green-snippet:hover{
+    background: #055717;
+}
+
+.blue-snippet {
+    background: linear-gradient(100deg,#684ff7 0%,#3f0575 100%);
+}
+.blue-snippet:hover {
+    background: #3f0575;
+}
+
+.orange-snippet {
+    background: linear-gradient(100deg,#dac508 0%,#da6200 100%);
+}
+.orange-snippet:hover {
+    background: #da6200;
+}

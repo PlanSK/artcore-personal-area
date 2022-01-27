@@ -4,7 +4,7 @@ from django.views.generic import TemplateView, ListView
 from django.contrib.auth.views import LoginView
 from django.urls import reverse_lazy
 from django.contrib.auth import logout
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.db.models import Q
 
@@ -71,9 +71,75 @@ class StaffUserView(LoginRequiredMixin, TotalDataMixin, TemplateView):
         return context
 
 
+class AdminView(PermissionRequiredMixin, TemplateView):
+    template_name = 'salary/dashboard.html'
+    permission_required = 'is_staff'
+    login_url = 'login'
+
+    def get_context_data(self, **kwargs) -> dict:
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Панель управления'
+        return context
+
+
+class AdminUserView(PermissionRequiredMixin, ListView):
+    template_name = 'salary/show_users.html'
+    permission_required = 'is_staff'
+    model = User
+
+    def get_queryset(self):
+        query = User.objects.exclude(is_staff=True).select_related('profile', 'profile__position')
+        return query
+
+    def show_users(self, objects) -> dict:
+        positions_list = dict()
+        all_positions_list = Position.objects.exclude(name='staff')
+        for get_position in all_positions_list:
+            positions_list[get_position.title] = [
+                user 
+                for user in objects 
+                if user.profile.position.title == get_position.title
+            ]
+
+        return positions_list
+
+    def get_context_data(self, **kwargs) -> dict:
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Управление персоналом'
+        context['positions_list'] = self.show_users(context['object_list'])
+
+        return context
+
+
+class AdminWorkshiftsView(PermissionRequiredMixin, ListView):
+    template_name = 'salary/staff_view_workshifts.html'
+    permission_required = 'is_staff'
+    model = WorkingShift
+
+    def get_queryset(self):
+        worshifts = WorkingShift.objects.all().order_by(
+            '-shift_date', 'is_verified'
+        ).select_related(
+            'hall_admin__profile',
+            'cash_admin__profile',
+        )
+        return worshifts
+    
+    def get_context_data(self, **kwargs) -> dict:
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Смены'
+        return context
+
+
 class IndexView(LoginRequiredMixin, TotalDataMixin, TemplateView):
-    login_url = 'login/'
+    login_url = 'login'
     template_name = 'salary/account.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.has_perm('is_staff'):
+            return redirect('dashboard')
+
+        return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -101,7 +167,7 @@ class IndexView(LoginRequiredMixin, TotalDataMixin, TemplateView):
         workshifts = WorkingShift.objects.filter(
             shift_date__year=year,
             shift_date__month=month
-        ).filter(Q(cash_admin=self.request.user) | Q(hall_admin=self.request.user)).order_by('-shift_date')
+        ).filter(Q(cash_admin=self.request.user) | Q(hall_admin=self.request.user))
 
         if not workshifts:
             return []
@@ -170,7 +236,11 @@ class MonthlyReportListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         month = datetime.date.today().month
-        workshifts = WorkingShift.objects.select_related('cash_admin', 'hall_admin').filter(shift_date__month=month, is_verified=True)
+        workshifts = WorkingShift.objects.select_related(
+            'cash_admin__profile__position',
+            'hall_admin__profile__position',
+        ).filter(shift_date__month=month, is_verified=True)
+
         return workshifts
 
     def get_values_list(self, kpi_dict: dict, shortage=0.0) -> list:

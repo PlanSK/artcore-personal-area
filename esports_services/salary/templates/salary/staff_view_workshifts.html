@@ -1,96 +1,97 @@
+{% extends 'salary/dashboard.html' %}
 {% load bootstrap_icons %}
 {% load humanize %}
 {% load salary_tags %}
-<div class="row">
-    <div class="col-md-12 border">
-      <table class="table table-dark table-hover">
-        <thead class="text-warning text-center verysmall">
-          <tr>
-            <th></th>
-            <th scope="col">Статус</th>
-            <th scope="col">Дата</th>
-            <th scope="col">Администратор кассы</th>
-            <th scope="col">Администратор зала</th>
-            <th scope="col">Общая выручка</th>
-            <th>Комментарий</th>
-            <th scope="col">Действия</th>
-          </tr>
-        </thead>
-        <tbody class="text-center verysmall">
-          {% for workshift in workshifts_list %}
-          <tr>
-            <td>
-              <a class="btn btn-success verysmall" data-bs-toggle="collapse" href="#workshift{{ workshift.shift_date|date:"dm" }}"  role="button" aria-expanded="false" aria-controls="workshift{{ workshift.shift_date|date:"dm" }}">
-                {% bs_icon 'eye-fill' %}
-              </a>
-            </td>
-            <td>
-              {% if workshift.is_verified %}
-                {% bs_icon 'check2-circle' color='green' %} Проверено 
-              {% else %}
-                {% bs_icon 'stopwatch-fill' color='yellow' %} Ожидает проверки
-              {% endif %}
-            </td>
-            <td>{{ workshift.shift_date }}</td>
-            <td><a href="{% url 'staff_user_view' request_user=workshift.cash_admin %}" class="link-light">{{ workshift.cash_admin.get_full_name }}</a></td>
-            <td><a href="{% url 'staff_user_view' request_user=workshift.hall_admin %}" class="link-light">{{ workshift.hall_admin.get_full_name }}</a></td>
-            <td>{{ workshift.get_summary_revenue }}</td>
-            <td><span title="{{ workshift.comment }}">{{ workshift.comment|truncatechars:12 }}</span></td>
-            <td>
-              <a title="Внести изменения" class="btn btn-secondary verysmall" href="{% url 'staff_edit_workshift' workshift.slug %}">
-                {% bs_icon 'pencil-square' color='yellow' %}
-              </a>
-              <a title="Удалить смену" class="btn btn-secondary verysmall" href="{% url 'delete_workshift' workshift.slug %}">
-                {% bs_icon 'x-square' color='red' %}
-              </a>
-            </td>
-          </tr>
-          <tr>
-            <td colspan="8">
-              <div class="collapse multi-collapse" id="workshift{{ workshift.shift_date|date:"dm" }}"> 
-                <table class="table table-dark table-hover">
-                  <thead class="text-warning text-center verysmall">
-                    <tr>
-                      <th>Выручка бар</th>
-                      <th>Выручка зал</th>
-                      <th>Доп. услуги</th>
-                      <th>Ошибки</th>
-                      <th>Клининг</th>
-                      <th>Дисциплина кассир</th>
-                      <th>Дисциплина админ</th>
-                      <th>Недостача</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>{{ workshift.bar_revenue }}</td>
-                      <td>{{ workshift.game_zone_revenue }}</td>
-                      <td>{{ workshift.vr_revenue }}</td>
-                      <td>{{ workshift.game_zone_error }}</td>
-                      <td>
-                        {% if workshift.hall_cleaning %}
-                          {% bs_icon 'check-circle' color='green' %}
-                        {% else %}
-                          {% bs_icon 'x-circle' color='red' %}
-                        {% endif %}
-                      </td>
-                      <td>{% icon_logic workshift.cash_admin_discipline_penalty %}</td>
-                      <td>{% icon_logic workshift.hall_admin_discipline_penalty %}</td>
-                      <td>{{ workshift.shortage|default:"-" }}</td>
-                    </tr>
-                    {% if workshift.comment %}
-                      <tr><td colspan="8">{{ workshift.comment }}</td></tr>
+{% block data %}
+<div class="col-md-12 border">
+  <table class="table table-dark table-hover">
+    <thead class="text-warning text-center verysmall">
+      <tr>
+        <th></th>
+        <th scope="col">Статус</th>
+        <th scope="col">Дата</th>
+        <th scope="col">Администратор кассы</th>
+        <th scope="col">Администратор зала</th>
+        <th scope="col">Общая выручка</th>
+        <th>Комментарий</th>
+        <th scope="col">Действия</th>
+      </tr>
+    </thead>
+    <tbody class="text-center verysmall">
+      {% for workshift in object_list %}
+      <tr>
+        <td>
+          <a class="btn btn-success verysmall" data-bs-toggle="collapse" href="#workshift{{ workshift.shift_date|date:"dm" }}"  role="button" aria-expanded="false" aria-controls="workshift{{ workshift.shift_date|date:"dm" }}">
+            {% bs_icon 'eye-fill' %}
+          </a>
+        </td>
+        <td>
+          {% if workshift.is_verified %}
+            {% bs_icon 'check2-circle' color='green' %} Проверено 
+          {% else %}
+            {% bs_icon 'stopwatch-fill' color='yellow' %} Ожидает проверки
+          {% endif %}
+        </td>
+        <td>{{ workshift.shift_date }}</td>
+        <td><a href="{% url 'staff_user_view' request_user=workshift.cash_admin %}" class="link-light">{{ workshift.cash_admin.get_full_name }}</a></td>
+        <td><a href="{% url 'staff_user_view' request_user=workshift.hall_admin %}" class="link-light">{{ workshift.hall_admin.get_full_name }}</a></td>
+        <td>{{ workshift.get_summary_revenue }}</td>
+        <td><span title="{{ workshift.comment }}">{{ workshift.comment|truncatechars:12 }}</span></td>
+        <td>
+          <a title="Внести изменения" class="btn btn-secondary verysmall" href="{% url 'staff_edit_workshift' workshift.slug %}">
+            {% bs_icon 'pencil-square' color='yellow' %}
+          </a>
+          <a title="Удалить смену" class="btn btn-secondary verysmall" href="{% url 'delete_workshift' workshift.slug %}">
+            {% bs_icon 'x-square' color='red' %}
+          </a>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="8">
+          <div class="collapse multi-collapse" id="workshift{{ workshift.shift_date|date:"dm" }}"> 
+            <table class="table table-dark table-hover">
+              <thead class="text-warning text-center verysmall">
+                <tr>
+                  <th>Выручка бар</th>
+                  <th>Выручка зал</th>
+                  <th>Доп. услуги</th>
+                  <th>Ошибки</th>
+                  <th>Клининг</th>
+                  <th>Дисциплина кассир</th>
+                  <th>Дисциплина админ</th>
+                  <th>Недостача</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>{{ workshift.bar_revenue }}</td>
+                  <td>{{ workshift.game_zone_revenue }}</td>
+                  <td>{{ workshift.vr_revenue }}</td>
+                  <td>{{ workshift.game_zone_error }}</td>
+                  <td>
+                    {% if workshift.hall_cleaning %}
+                      {% bs_icon 'check-circle' color='green' %}
+                    {% else %}
+                      {% bs_icon 'x-circle' color='red' %}
                     {% endif %}
-                  </tbody>
-                </table>
-              </div>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-        <tfoot class="text-center verysmall text-white">
-          <tr></tr>
-        </tfoot>
-      </table>
-    </div>
-  </div>
+                  </td>
+                  <td>{% icon_logic workshift.cash_admin_discipline_penalty %}</td>
+                  <td>{% icon_logic workshift.hall_admin_discipline_penalty %}</td>
+                  <td>{{ workshift.shortage|default:"-" }}</td>
+                </tr>
+                {% if workshift.comment %}
+                  <tr><td colspan="8">{{ workshift.comment }}</td></tr>
+                {% endif %}
+              </tbody>
+            </table>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+    <tfoot class="text-center verysmall text-white">
+      <tr></tr>
+    </tfoot>
+  </table>
+</div>
+{% endblock %}

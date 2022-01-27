@@ -16,6 +16,16 @@ def get_year():
     return datetime.date.today().year
 
 
+@register.simple_tag()
+def unverified_shift():
+    return WorkingShift.objects.exclude(is_verified=True).count()
+
+
+@register.simple_tag()
+def inactive_user():
+    return User.objects.exclude(is_active=True).count()
+
+
 @register.inclusion_tag('salary/cash_admin_workshifts.html')
 def cash_admin_workshifts(user, workshifts, total_values):
     if not workshifts:
@@ -44,23 +54,6 @@ def hall_admin_workshifts(user, workshifts, total_values):
         'total_values': total_values,
         'current_date': current_month
     }
-
-
-@register.inclusion_tag('salary/show_users.html')
-def show_users():
-    positions_list = dict()
-    all_positions_list = Position.objects.exclude(name='staff')
-    for get_position in all_positions_list:
-        positions_list[get_position.title] = User.objects.filter(profile__position=get_position)
-
-    return {'positions_list': positions_list}
-
-
-@register.inclusion_tag('salary/staff_view_workshifts.html')
-def staff_workshifts_view():
-    workshifts_list = WorkingShift.objects.all().order_by('-shift_date')
-
-    return {'workshifts_list': workshifts_list}
 
 
 @register.inclusion_tag('salary/icon_logic.html')
