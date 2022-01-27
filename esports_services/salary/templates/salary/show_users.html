@@ -17,7 +17,11 @@
         {% for current_user in users %}
         <tr class="verysmall text-center">
             <td>
-                {{current_user.first_name}} {{current_user.last_name}}
+                {% if current_user.profile.is_dismissed %}
+                <s>{{current_user.first_name}} {{current_user.last_name}}</s>
+                {% else %}
+                    {{current_user.first_name}} {{current_user.last_name}}
+                {% endif %}
             </td>
             <td>
                 {% if current_user.is_active %}

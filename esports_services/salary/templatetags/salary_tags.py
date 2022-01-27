@@ -23,7 +23,9 @@ def unverified_shift():
 
 @register.simple_tag()
 def inactive_user():
-    return User.objects.exclude(is_active=True).count()
+    return User.objects.exclude(is_active=True).exclude(
+        profile__is_dismissed=True
+    ).count()
 
 
 @register.inclusion_tag('salary/cash_admin_workshifts.html')
