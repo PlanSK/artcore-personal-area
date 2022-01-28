@@ -15,11 +15,11 @@ def user_directory_path(instance, filename):
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     birth_date = models.DateField(null=True, verbose_name='Дата рождения')
-    employment_date = models.DateField(default=timezone.now, verbose_name='Дата трудоустройства')
+    employment_date = models.DateField(null=True, verbose_name='Дата трудоустройства')
     position = models.ForeignKey('Position', on_delete=models.PROTECT, null=True)
     attestation_date = models.DateField(blank=True, null=True, verbose_name='Дата прохождения аттестации')
     dismiss_date = models.DateField(blank=True, null=True, verbose_name="Дата увольнения")
-    photo = models.ImageField(upload_to=user_directory_path, blank=True, null=True)
+    photo = models.ImageField(blank=True, null=True, upload_to=user_directory_path)
 
     def __str__(self) -> str:
         return f'{self.user.first_name} {self.user.last_name} [{self.user.username}]'

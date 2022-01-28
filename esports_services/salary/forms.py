@@ -33,16 +33,16 @@ class EmployeeRegistration(forms.ModelForm):
 
 class EmplModelChoiceField(forms.ModelChoiceField):
     def label_from_instance(self, obj) -> str:
-        return ' '.join([obj.first_name, obj.last_name])
+        return obj.get_full_name()
 
 
 class EditWorkshiftDataForm(forms.ModelForm):
     hall_admin = EmplModelChoiceField(
-        queryset=User.objects.filter(profile__position=1),
+        queryset=User.objects.filter(is_active=True, profile__position=1),
         label='Администратор зала'
     )
     cash_admin = EmplModelChoiceField(
-        queryset=User.objects.filter(profile__position=2),
+        queryset=User.objects.filter(is_active=True, profile__position=2),
         label='Администратор кассы',
         disabled=True
     )
@@ -83,7 +83,7 @@ class AddWorkshiftDataForm(EditWorkshiftDataForm):
 
 class StaffEditWorkshiftForm(EditWorkshiftDataForm):
     cash_admin = EmplModelChoiceField(
-        queryset=User.objects.filter(profile__position=2),
+        queryset=User.objects.filter(is_active=True, profile__position=2),
         label='Администратор кассы',
     )
     class Meta:

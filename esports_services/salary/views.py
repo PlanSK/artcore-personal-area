@@ -28,12 +28,12 @@ def registration(request):
             profile.save()
             return redirect('login')
     else:
-        form = UserRegistration()
-        employee_form = EmployeeRegistration()
+        user_form = UserRegistration()
+        profile_form = EmployeeRegistration()
     context = {
         'title': 'Регистрация сотрудника',
-        'form': form,
-        'employee_form': employee_form
+        'form': user_form,
+        'employee_form': profile_form
     }
     return render(request, 'salary/registration.html', context=context)
 
@@ -201,18 +201,15 @@ class EditWorkshiftData(LoginRequiredMixin, UpdateView):
     form_class = EditWorkshiftDataForm
     template_name = 'salary/edit_workshift.html'
     success_url = reverse_lazy('index')
-
-
-class StaffEditWorkshift(LoginRequiredMixin, UpdateView):
-    model = WorkingShift
-    form_class = StaffEditWorkshiftForm
-    template_name = 'salary/edit_workshift.html'
-    success_url = reverse_lazy('index')
-
+    
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
         context['start_date'] = context['object'].shift_date - relativedelta(days=1)
         return context
+
+
+class StaffEditWorkshift(EditWorkshiftData):
+    form_class = StaffEditWorkshiftForm
 
 
 class DeleteWorkshift(LoginRequiredMixin, DeleteView):
