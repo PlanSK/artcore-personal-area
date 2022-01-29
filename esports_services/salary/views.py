@@ -4,7 +4,7 @@ from django.views.generic import TemplateView, ListView
 from django.contrib.auth.views import LoginView
 from django.urls import reverse_lazy
 from django.contrib.auth import logout
-from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.db.models import Q
 
@@ -20,11 +20,11 @@ def registration(request):
         user_form = UserRegistration(request.POST)
         profile_form = EmployeeRegistration(request.POST)
         if user_form.is_valid() and profile_form.is_valid():
-            user = user_form.save()
-            user.is_active = False
-            user.save()
+            user = user_form.save(commit=False) 
             profile = profile_form.save(commit=False)
+            user.is_active = False
             profile.user = user
+            user.save()
             profile.save()
             return redirect('login')
     else:
@@ -70,10 +70,8 @@ class StaffUserView(LoginRequiredMixin, TotalDataMixin, TemplateView):
 
         return context
 
-
-class AdminView(PermissionRequiredMixin, TemplateView):
+class AdminView(StaffPermissionRequiredMixin, StaffOnlyMixin, TemplateView):
     template_name = 'salary/dashboard.html'
-    permission_required = 'is_staff'
     login_url = 'login'
 
     def get_context_data(self, **kwargs) -> dict:
@@ -82,9 +80,8 @@ class AdminView(PermissionRequiredMixin, TemplateView):
         return context
 
 
-class AdminUserView(PermissionRequiredMixin, ListView):
+class AdminUserView(StaffPermissionRequiredMixin, ListView):
     template_name = 'salary/show_users.html'
-    permission_required = 'is_staff'
     model = User
 
     def get_queryset(self):
@@ -101,9 +98,8 @@ class AdminUserView(PermissionRequiredMixin, ListView):
         return context
 
 
-class AdminWorkshiftsView(PermissionRequiredMixin, ListView):
+class AdminWorkshiftsView(StaffPermissionRequiredMixin, ListView):
     template_name = 'salary/staff_view_workshifts.html'
-    permission_required = 'is_staff'
     model = WorkingShift
 
     def get_queryset(self):
@@ -126,7 +122,7 @@ class IndexView(LoginRequiredMixin, TotalDataMixin, TemplateView):
     template_name = 'salary/account.html'
 
     def dispatch(self, request, *args, **kwargs):
-        if request.user.has_perm('is_staff'):
+        if self.request.user.is_staff:
             return redirect('dashboard')
 
         return super().dispatch(request, *args, **kwargs)
@@ -179,8 +175,9 @@ def logout_user(request):
     return redirect('login')
 
 
-class AddWorkshiftData(LoginRequiredMixin, CreateView):
+class AddWorkshiftData(PermissionRequiredMixin, CreateView):
     form_class = AddWorkshiftDataForm
+    permission_required = 'salary.add_workingshift'
     template_name = 'salary/add_workshift.html'
     success_url = reverse_lazy('index')
 
@@ -196,9 +193,10 @@ class AddWorkshiftData(LoginRequiredMixin, CreateView):
         return context
 
 
-class EditWorkshiftData(LoginRequiredMixin, UpdateView):
+class EditWorkshiftData(PermissionRequiredMixin, UpdateView):
     model = WorkingShift
     form_class = EditWorkshiftDataForm
+    permission_required = 'salary.change_workingshift'
     template_name = 'salary/edit_workshift.html'
     success_url = reverse_lazy('index')
     
@@ -208,17 +206,19 @@ class EditWorkshiftData(LoginRequiredMixin, UpdateView):
         return context
 
 
-class StaffEditWorkshift(EditWorkshiftData):
+class StaffEditWorkshift(StaffOnlyMixin, EditWorkshiftData):
     form_class = StaffEditWorkshiftForm
 
 
-class DeleteWorkshift(LoginRequiredMixin, DeleteView):
+class DeleteWorkshift(PermissionRequiredMixin, DeleteView):
     model = WorkingShift
+    permission_required = 'salary.delete_workingshift'
     success_url = reverse_lazy('index')
 
 
-class MonthlyReportListView(LoginRequiredMixin, ListView):
+class MonthlyReportListView(PermissionRequiredMixin, StaffOnlyMixin, ListView):
     model = WorkingShift
+    permission_required = 'salary.view_workingshift'
     template_name = 'salary/monthlyreport_list.html'
 
     def get_queryset(self):

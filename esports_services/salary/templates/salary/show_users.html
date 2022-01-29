@@ -2,7 +2,7 @@
 {% load static %}
 {% load bootstrap_icons %}
 {% block data %}
-<div class="row row-cols-sm-1 row-cols-md-4 g-2">
+<div class="row row-cols-sm-1 row-cols-md-4 g-2 border-top">
     {% for current_user in object_list %}
     <div class="col">
       <div class="card border-light bg-dark text-light h-100" style="max-width: 17rem;">
@@ -12,7 +12,8 @@
           {% else %}
             {% bs_icon 'person-circle' size='75' %}
           {% endif %}
-          <br>{{ current_user.get_full_name }}
+          <br>{{ current_user.get_full_name }}<br>
+          <span class="text-muted verysmall" style="font-size: x-small;">Был(а) {{ current_user.profile.get_last_login|default:"давно" }}</span>
         </div>
         <div class="card-body">
           <p class="card-text fst-italic">

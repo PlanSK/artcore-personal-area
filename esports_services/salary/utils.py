@@ -1,3 +1,6 @@
+from django.contrib.auth.mixins import PermissionRequiredMixin, UserPassesTestMixin
+
+
 class TotalDataMixin:
     def get_total_values(self, request_user, workshifts):
         summary_bar_revenue = 0.0
@@ -37,3 +40,23 @@ class TotalDataMixin:
             'total_salary': total_salary,
         }
         return returned_dict
+
+
+class StaffPermissionRequiredMixin(PermissionRequiredMixin):
+    permission_required = (
+        'auth.add_user',
+        'auth.change_user',
+        'auth.view_user',
+        'salary.add_profile',
+        'salary.change_profile',
+        'salary.view_profile',
+        'salary.view_workingshift',
+        'salary.add_workingshift',
+        'salary.change_workingshift',
+        'salary.delete_workingshift',
+    )
+
+
+class StaffOnlyMixin(UserPassesTestMixin):
+    def test_func(self) -> bool:
+        return self.request.user.is_staff

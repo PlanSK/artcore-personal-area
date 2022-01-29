@@ -8,6 +8,12 @@ import datetime
 from dateutil.relativedelta import relativedelta
 
 
+HOURS_VARIANT = ('час', 'часа', 'часов')
+DAYS_VARIANT = ('день', 'дня', 'дней')
+MONTH_VARIANT = ('месяц','месяца','месяцев')
+YEARS_VARIANT = ('год', 'года', 'лет')
+
+
 def user_directory_path(instance, filename):
     return 'user_{0}/{1}'.format(instance.user.id, filename)
 
@@ -55,19 +61,35 @@ class Profile(models.Model):
         days, months, years = experience.days, experience.months, experience.years
         experience_text = ''
 
-        days_variant = ('день', 'дня', 'дней')
-        month_variant = ('месяц','месяца','месяцев')
-        years_variant = ('год', 'года', 'лет')
-
         if years:
-            experience_text = f'{years} {self.get_choice_plural(years, years_variant)} '
+            experience_text = f'{years} {self.get_choice_plural(years, YEARS_VARIANT)} '
 
         if months:
-            experience_text += f'{months} {self.get_choice_plural(months, month_variant)} '
+            experience_text += f'{months} {self.get_choice_plural(months, MONTH_VARIANT)} '
 
-        experience_text += f'{days} {self.get_choice_plural(days, days_variant)}'
+        if days or not experience_text:
+            experience_text += f'{days} {self.get_choice_plural(days, DAYS_VARIANT)}'
 
         return experience_text
+
+    def get_last_login(self) -> str:
+        if self.user.last_login:
+            date_period = relativedelta(datetime.date.today(), self.user.last_login.date())
+            hours_period = relativedelta(timezone.now(), self.user.last_login)
+            print(date_period.days, hours_period.hours)
+            if date_period.days == 0 and 1 < hours_period.hours < 12:
+                return f'{self.get_choice_plural(hours_period.hours, HOURS_VARIANT)} назад'
+            elif date_period.days == 0 and hours_period.hours > 12:
+                return f'сегодня в {self.user.last_login.strftime("%H:%M")}'
+            elif date_period.days == 1:
+                return f'вчера в {self.user.last_login.strftime("%H:%M")}'
+            elif 1 < date_period.days < 7:
+                return f'{self.get_choice_plural(date_period.days, DAYS_VARIANT)} назад'
+            elif date_period.days == 7:
+                return 'неделю назад'
+            else:
+                return self.user.last_login
+        return None
 
 
 class WorkingShift(models.Model):
