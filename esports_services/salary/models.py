@@ -84,7 +84,7 @@ class Profile(models.Model):
             elif date_period.days == 1:
                 return f'вчера в {self.user.last_login.strftime("%H:%M")}'
             elif 1 < date_period.days < 7:
-                return f'{self.get_choice_plural(date_period.days, DAYS_VARIANT)} назад'
+                return f'{date_period.days} {self.get_choice_plural(date_period.days, DAYS_VARIANT)} назад'
             elif date_period.days == 7:
                 return 'неделю назад'
             else:
