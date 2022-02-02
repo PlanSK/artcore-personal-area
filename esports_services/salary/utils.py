@@ -60,3 +60,14 @@ class StaffPermissionRequiredMixin(PermissionRequiredMixin):
 class StaffOnlyMixin(UserPassesTestMixin):
     def test_func(self) -> bool:
         return self.request.user.is_staff
+
+class TitleMixin(object):
+    title = None
+
+    def get_title(self):
+        return self.title
+
+    def get_context_data(self, **kwargs):
+        context= super(TitleMixin, self).get_context_data(**kwargs)
+        context['title'] = self.get_title()
+        return context

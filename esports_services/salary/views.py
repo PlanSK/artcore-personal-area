@@ -12,6 +12,7 @@ from .forms import *
 from .utils import *
 
 import datetime
+from typing import *
 from dateutil.relativedelta import relativedelta
 
 
@@ -38,15 +39,11 @@ def registration(request):
     return render(request, 'salary/registration.html', context=context)
 
 
-class LoginUser(LoginView):
+class LoginUser(TitleMixin, LoginView):
     template_name = 'salary/login.html'
     form_class = AuthenticationForm
     redirect_authenticated_user = True
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['title'] = 'Авторизация'
-        return context
+    title = 'Авторизация'
 
     def get_success_url(self, **kwargs):
         return reverse_lazy('index')
@@ -70,19 +67,16 @@ class StaffUserView(LoginRequiredMixin, TotalDataMixin, TemplateView):
 
         return context
 
-class AdminView(StaffPermissionRequiredMixin, StaffOnlyMixin, TemplateView):
+class AdminView(StaffPermissionRequiredMixin, StaffOnlyMixin, TitleMixin, TemplateView):
     template_name = 'salary/dashboard.html'
     login_url = 'login'
-
-    def get_context_data(self, **kwargs) -> dict:
-        context = super().get_context_data(**kwargs)
-        context['title'] = 'Панель управления'
-        return context
+    title = 'Панель управления'
 
 
-class AdminUserView(StaffPermissionRequiredMixin, ListView):
+class AdminUserView(StaffPermissionRequiredMixin, TitleMixin, ListView):
     template_name = 'salary/show_users.html'
     model = User
+    title = 'Управление персоналом'
 
     def get_queryset(self):
         query = User.objects.exclude(is_staff=True).select_related(
@@ -91,30 +85,27 @@ class AdminUserView(StaffPermissionRequiredMixin, ListView):
         ).order_by('-profile__position')
         return query
 
-    def get_context_data(self, **kwargs) -> dict:
-        context = super().get_context_data(**kwargs)
-        context['title'] = 'Управление персоналом'
 
-        return context
-
-
-class AdminWorkshiftsView(StaffPermissionRequiredMixin, ListView):
+class AdminWorkshiftsView(StaffPermissionRequiredMixin, TitleMixin, ListView):
     template_name = 'salary/staff_view_workshifts.html'
     model = WorkingShift
+    title = 'Смены'
 
     def get_queryset(self):
-        worshifts = WorkingShift.objects.all().order_by(
+        workshifts = WorkingShift.objects.all().order_by(
             '-shift_date', 'is_verified'
         ).select_related(
             'hall_admin__profile',
             'cash_admin__profile',
         )
-        return worshifts
-    
-    def get_context_data(self, **kwargs) -> dict:
-        context = super().get_context_data(**kwargs)
-        context['title'] = 'Смены'
-        return context
+
+        return workshifts
+
+
+class StaffEditUser(StaffPermissionRequiredMixin, TitleMixin, TemplateView):
+    template_name = 'salary/edit_user_profile.html'
+    fields = ('first_name','last_name', 'email', 'is_active')
+    title = 'Редактирование пользователя'
 
 
 class IndexView(LoginRequiredMixin, TotalDataMixin, TemplateView):
@@ -175,22 +166,18 @@ def logout_user(request):
     return redirect('login')
 
 
-class AddWorkshiftData(PermissionRequiredMixin, CreateView):
+class AddWorkshiftData(PermissionRequiredMixin, TitleMixin, CreateView):
     form_class = AddWorkshiftDataForm
     permission_required = 'salary.add_workingshift'
     template_name = 'salary/add_workshift.html'
     success_url = reverse_lazy('index')
+    title = 'Добавление смен'
 
     def get_initial(self):
         initional = super().get_initial()
         initional['cash_admin'] = self.request.user
         initional['shift_date'] = datetime.date.today().strftime('%Y-%m-%d')
         return initional
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['title'] = 'Add workshift'
-        return context
 
 
 class EditWorkshiftData(PermissionRequiredMixin, UpdateView):
@@ -210,10 +197,11 @@ class StaffEditWorkshift(StaffOnlyMixin, EditWorkshiftData):
     form_class = StaffEditWorkshiftForm
 
 
-class DeleteWorkshift(PermissionRequiredMixin, DeleteView):
+class DeleteWorkshift(PermissionRequiredMixin, TitleMixin, DeleteView):
     model = WorkingShift
     permission_required = 'salary.delete_workingshift'
     success_url = reverse_lazy('index')
+    title = 'Удаление смены'
 
 
 class MonthlyReportListView(PermissionRequiredMixin, StaffOnlyMixin, ListView):

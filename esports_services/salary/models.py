@@ -76,7 +76,6 @@ class Profile(models.Model):
         if self.user.last_login:
             date_period = relativedelta(datetime.date.today(), self.user.last_login.date())
             hours_period = relativedelta(timezone.now(), self.user.last_login)
-            print(date_period.days, hours_period.hours)
             if date_period.days == 0 and 1 < hours_period.hours < 12:
                 return f'{self.get_choice_plural(hours_period.hours, HOURS_VARIANT)} назад'
             elif date_period.days == 0 and hours_period.hours > 12:
