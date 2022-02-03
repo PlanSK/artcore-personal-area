@@ -90,16 +90,27 @@ class AdminWorkshiftsView(StaffPermissionRequiredMixin, TitleMixin, ListView):
     template_name = 'salary/staff_view_workshifts.html'
     model = WorkingShift
     title = 'Смены'
+    paginate_by = 5
 
     def get_queryset(self):
-        workshifts = WorkingShift.objects.all().order_by(
-            '-shift_date', 'is_verified'
-        ).select_related(
-            'hall_admin__profile',
-            'cash_admin__profile',
-        )
+        if self.kwargs.get('all'):
+            workshifts = WorkingShift.objects.all().select_related(
+                'hall_admin__profile',
+                'cash_admin__profile',
+            )
+        else:
+            workshifts = WorkingShift.objects.filter(is_verified=False).select_related(
+                'hall_admin__profile',
+                'cash_admin__profile',
+            )
 
         return workshifts
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if not self.kwargs.get('all'):
+            context['only_verified'] = True
+        return context
 
 
 class StaffEditUser(StaffPermissionRequiredMixin, TitleMixin, TemplateView):
