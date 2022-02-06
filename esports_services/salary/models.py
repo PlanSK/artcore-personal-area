@@ -212,7 +212,7 @@ class WorkingShift(models.Model):
 
         game_zone_revenue = self.game_zone_revenue - self.game_zone_error
         for revenue_value, ratio in kpi_ratio['game_zone']:
-            if game_zone_revenue >= revenue_value:
+            if self.game_zone_revenue >= revenue_value:
                 kpi_data['game_zone'] = (game_zone_revenue * ratio, ratio * 100)
 
         for revenue_value, ratio in kpi_ratio['vr']:
