@@ -1,4 +1,5 @@
 from django.contrib.auth.forms import AuthenticationForm
+from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import TemplateView, ListView
 from django.contrib.auth.views import LoginView
@@ -18,8 +19,8 @@ from dateutil.relativedelta import relativedelta
 
 def registration(request):
     if request.method == 'POST':
-        user_form = UserRegistration(request.POST)
-        profile_form = EmployeeRegistration(request.POST)
+        user_form = UserRegistrationForm(request.POST)
+        profile_form = EmployeeRegistrationForm(request.POST)
         if user_form.is_valid() and profile_form.is_valid():
             user = user_form.save(commit=False) 
             profile = profile_form.save(commit=False)
@@ -29,8 +30,8 @@ def registration(request):
             profile.save()
             return redirect('login')
     else:
-        user_form = UserRegistration()
-        profile_form = EmployeeRegistration()
+        user_form = UserRegistrationForm()
+        profile_form = EmployeeRegistrationForm()
     context = {
         'title': 'Регистрация сотрудника',
         'form': user_form,
@@ -49,7 +50,7 @@ class LoginUser(TitleMixin, LoginView):
         return reverse_lazy('index')
 
 
-class StaffUserView(LoginRequiredMixin, TotalDataMixin, TemplateView):
+class StaffUserView(StaffPermissionRequiredMixin, TotalDataMixin, TemplateView):
     template_name = 'salary/staff_user_view.html'
 
     def get_context_data(self, **kwargs):
@@ -93,19 +94,18 @@ class AdminWorkshiftsView(StaffPermissionRequiredMixin, TitleMixin, ListView):
     paginate_by = 5
 
     def get_queryset(self):
+        workshifts = WorkingShift.objects.filter(is_verified=False).select_related(
+            'hall_admin__profile',
+            'cash_admin__profile',
+        )
         if self.kwargs.get('all'):
             workshifts = WorkingShift.objects.all().select_related(
                 'hall_admin__profile',
                 'cash_admin__profile',
             )
-        else:
-            workshifts = WorkingShift.objects.filter(is_verified=False).select_related(
-                'hall_admin__profile',
-                'cash_admin__profile',
-            )
 
         return workshifts
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         if not self.kwargs.get('all'):
@@ -115,8 +115,39 @@ class AdminWorkshiftsView(StaffPermissionRequiredMixin, TitleMixin, ListView):
 
 class StaffEditUser(StaffPermissionRequiredMixin, TitleMixin, TemplateView):
     template_name = 'salary/edit_user_profile.html'
-    fields = ('first_name','last_name', 'email', 'is_active')
     title = 'Редактирование пользователя'
+
+    def dispatch(self, request, *args: Any, **kwargs: Any):
+        self.edited_user = get_object_or_404(User.objects.select_related('profile'), pk=self.kwargs['pk'])
+        return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request, *args: Any, **kwargs: Any):
+        user_form_class = StaffEditUserForm(instance=self.edited_user)
+        profile_form_class = StaffEditProfileForm(instance=self.edited_user.profile)
+        context = self.get_context_data(
+            profile_form=profile_form_class,
+            user_form=user_form_class
+        )
+        return render(request, self.template_name, context=context)
+
+    def post(self, request, **kwargs):
+        user_form_class = StaffEditUserForm(request.POST, instance=self.edited_user)
+        profile_form_class = StaffEditProfileForm(request.POST, request.FILES, instance=self.edited_user.profile)
+        if user_form_class.is_valid() and profile_form_class.is_valid():
+            user = user_form_class.save(commit=False)
+            profile = profile_form_class.save(commit=False)
+            user.save()
+            profile.user = user
+            profile.save()
+            return HttpResponseRedirect(reverse_lazy('user_view'))
+        else:
+            user_form_class = StaffEditUserForm()
+            profile_form_class = StaffEditProfileForm()
+            context = self.get_context_data(
+                profile_form=profile_form_class,
+                user_form=user_form_class
+            )
+            return render(request, self.template_name, context=context)
 
 
 class IndexView(LoginRequiredMixin, TotalDataMixin, TemplateView):

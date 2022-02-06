@@ -12,6 +12,12 @@
           <a class="navbar-brand" href="{% url 'index' %}">
             <img src="{% static 'salary/img/esports_eng-logo.png' %}" height="30" class="d-inline-block align-top" alt="" loading="lazy">
           </a>
+          {% if request.user.is_superuser %}
+          <div class="col">
+            <a href="{% url 'admin:index' %}" class="link-primary verysmall">Панель администрирования</a>
+          </div>
+          {% endif %}
+          {% if request.user.is_authenticated %}
           <div class="border-left border-secondary">
             {% if request.user.profile.photo %}
               <img src="{{ request.user.profile.photo.url }}" alt="" class="rounded-circle" style="width: 40px; height: 40px;">
@@ -19,8 +25,10 @@
               {% bs_icon 'person-circle' size='40' %}
             {% endif %}
             <span class="text-light verysmall m-2">{{request.user.get_full_name}}</span>
+            <a href="{% url 'index' %}" class="btn btn-sm btn-outline-success">{% bs_icon 'gear' %}</a>
             <a href="{% url 'logout' %}" class="btn btn-sm btn-outline-secondary">{% bs_icon 'door-open-fill' %}</a>
           </div>
+          {% endif %}
         </div>
       </nav>
     </div>

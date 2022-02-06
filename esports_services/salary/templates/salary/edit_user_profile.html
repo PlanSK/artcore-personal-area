@@ -6,9 +6,10 @@
   <div class="container">
       <div class="row justify-content-center">
           <div class="col-md-5 border rounded mt-3 me-1">
-              <form class="needs-validation" method="post">{% csrf_token %}
+              <form class="needs-validation" method="post" enctype="multipart/form-data">{% csrf_token %}
                 <p class="text-center">Редактирование пользователя<br>{{object.get_full_name}}</p>
-                {{ form|crispy }}
+                {{ user_form|crispy }}
+                {{ profile_form|crispy }}
                 <div class="m-6 d-flex justify-content-center">
                   <button type="submit" class="btn btn-primary mb-4 me-2">Внести изменения</button>
                   <div><a href="{% url 'index' %}" class="btn btn-primary">Отмена</a></div>

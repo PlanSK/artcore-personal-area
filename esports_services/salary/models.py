@@ -22,10 +22,10 @@ class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     birth_date = models.DateField(null=True, verbose_name='Дата рождения')
     employment_date = models.DateField(null=True, verbose_name='Дата трудоустройства')
-    position = models.ForeignKey('Position', on_delete=models.PROTECT, null=True)
+    position = models.ForeignKey('Position', on_delete=models.PROTECT, null=True, verbose_name='Должность')
     attestation_date = models.DateField(blank=True, null=True, verbose_name='Дата прохождения аттестации')
-    dismiss_date = models.DateField(blank=True, null=True, verbose_name="Дата увольнения")
-    photo = models.ImageField(blank=True, null=True, upload_to=user_directory_path)
+    dismiss_date = models.DateField(blank=True, null=True, verbose_name='Дата увольнения')
+    photo = models.ImageField(blank=True, null=True, upload_to=user_directory_path, verbose_name='Фото профиля')
 
     def __str__(self) -> str:
         return f'{self.user.first_name} {self.user.last_name} [{self.user.username}]'
