@@ -118,8 +118,7 @@ class WorkingShift(models.Model):
     def __str__(self) -> str:
         return self.shift_date.strftime('%d-%m-%Y')
 
-    def save(self):
-        super(WorkingShift, self).save()
+    def save(self, *args, **kwargs):
         self.slug = self.shift_date
         super(WorkingShift, self).save()
     
@@ -252,3 +251,17 @@ class DisciplinaryRegulations(models.Model):
 
     def __str__(self) -> str:
         return self.article
+
+
+class Publication(models.Model):
+    author = models.ForeignKey(User, on_delete=models.PROTECT, verbose_name='Автор публикации', related_name='author')
+    publication_date = models.DateField(verbose_name='Дата публикации')
+    link = models.TextField(verbose_name='Примечание', blank=True, null=True)
+    auditor = models.ForeignKey(User, on_delete=models.PROTECT, verbose_name='Аудитор', related_name='auditor')
+
+    class Meta:
+        verbose_name = 'Публикация'
+        verbose_name_plural = 'Публикации'
+
+    def __str__(self) -> str:
+        return f'{self.publication_date} {self.author.get_full_name()}'

@@ -21,4 +21,5 @@ urlpatterns = [
     path('workshifts_view/', AdminWorkshiftsView.as_view(), name='workshifts_view'),
     path('workshifts_view/<str:all>/', AdminWorkshiftsView.as_view(), name='workshifts_view_all'),
     path('user_edit/<int:pk>/', StaffEditUser.as_view(), name='staff_user_edit'),
+    path('edit_profile/', EditUser.as_view(), name='profile_edit'),
 ]

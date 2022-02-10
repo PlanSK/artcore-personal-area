@@ -19,13 +19,14 @@
           {% endif %}
           {% if request.user.is_authenticated %}
           <div class="border-left border-secondary">
+            <a href="{% url 'profile_edit' %}?next={{ request.path }}" class="btn">
             {% if request.user.profile.photo %}
               <img src="{{ request.user.profile.photo.url }}" alt="" class="rounded-circle" style="width: 40px; height: 40px;">
             {% else %}
               {% bs_icon 'person-circle' size='40' %}
             {% endif %}
             <span class="text-light verysmall m-2">{{request.user.get_full_name}}</span>
-            <a href="{% url 'index' %}" class="btn btn-sm btn-outline-success">{% bs_icon 'gear' %}</a>
+            </a>
             <a href="{% url 'logout' %}" class="btn btn-sm btn-outline-secondary">{% bs_icon 'door-open-fill' %}</a>
           </div>
           {% endif %}

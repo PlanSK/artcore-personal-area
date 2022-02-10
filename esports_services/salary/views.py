@@ -113,17 +113,23 @@ class AdminWorkshiftsView(StaffPermissionRequiredMixin, TitleMixin, ListView):
         return context
 
 
-class StaffEditUser(StaffPermissionRequiredMixin, TitleMixin, TemplateView):
+class EditUser(LoginRequiredMixin, TitleMixin, TemplateView):
     template_name = 'salary/edit_user_profile.html'
     title = 'Редактирование пользователя'
+    userform = EditUserForm
+    profileform = EditProfileForm
 
     def dispatch(self, request, *args: Any, **kwargs: Any):
-        self.edited_user = get_object_or_404(User.objects.select_related('profile'), pk=self.kwargs['pk'])
+        if self.kwargs.get('pk'):
+            self.edited_user = get_object_or_404(User.objects.select_related('profile'), pk=self.kwargs.get('pk', 0))
+        else:
+            self.edited_user = self.request.user
+        self.redirect_link = request.GET.get('next', reverse_lazy('index'))
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, *args: Any, **kwargs: Any):
-        user_form_class = StaffEditUserForm(instance=self.edited_user)
-        profile_form_class = StaffEditProfileForm(instance=self.edited_user.profile)
+        user_form_class = self.userform(instance=self.edited_user)
+        profile_form_class = self.profileform(instance=self.edited_user.profile)
         context = self.get_context_data(
             profile_form=profile_form_class,
             user_form=user_form_class
@@ -131,23 +137,29 @@ class StaffEditUser(StaffPermissionRequiredMixin, TitleMixin, TemplateView):
         return render(request, self.template_name, context=context)
 
     def post(self, request, **kwargs):
-        user_form_class = StaffEditUserForm(request.POST, instance=self.edited_user)
-        profile_form_class = StaffEditProfileForm(request.POST, request.FILES, instance=self.edited_user.profile)
+        user_form_class = self.userform(request.POST, instance=self.edited_user)
+        profile_form_class = self.profileform(request.POST, request.FILES, instance=self.edited_user.profile)
         if user_form_class.is_valid() and profile_form_class.is_valid():
             user = user_form_class.save(commit=False)
             profile = profile_form_class.save(commit=False)
             user.save()
             profile.user = user
             profile.save()
-            return HttpResponseRedirect(reverse_lazy('user_view'))
+            return HttpResponseRedirect(self.redirect_link)
         else:
-            user_form_class = StaffEditUserForm()
-            profile_form_class = StaffEditProfileForm()
+            user_form_class = self.userform
+            profile_form_class = self.profileform
             context = self.get_context_data(
                 profile_form=profile_form_class,
                 user_form=user_form_class
             )
             return render(request, self.template_name, context=context)
+
+
+class StaffEditUser(StaffPermissionRequiredMixin, EditUser):
+    userform = StaffEditUserForm
+    profileform = StaffEditProfileForm
+    title = 'Редактирование профиля'
 
 
 class IndexView(LoginRequiredMixin, TotalDataMixin, TemplateView):

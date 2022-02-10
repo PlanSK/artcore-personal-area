@@ -52,6 +52,27 @@ class StaffEditUserForm(UserChangeForm):
         fields = ('first_name', 'last_name', 'email', 'is_active')
 
 
+class EditUserForm(UserChangeForm):
+    password = None
+
+    class Meta:
+        model = User
+        fields = ('first_name', 'last_name', 'email')
+
+
+class EditProfileForm(forms.ModelForm):
+
+    class Meta:
+        model = Profile
+        fields = ('birth_date', 'employment_date', 'photo')
+        widgets_injection = {
+            field: forms.DateInput(attrs={'type': 'date',}, format='%Y-%m-%d')
+            for field in fields if 'date' in field
+        }
+        widgets = {}
+        widgets.update(widgets_injection)
+
+
 class EmplModelChoiceField(forms.ModelChoiceField):
     def label_from_instance(self, obj) -> str:
         return obj.get_full_name()
