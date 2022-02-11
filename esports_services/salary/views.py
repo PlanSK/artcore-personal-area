@@ -87,6 +87,16 @@ class AdminUserView(StaffPermissionRequiredMixin, TitleMixin, ListView):
         return query
 
 
+class ReportsView(StaffPermissionRequiredMixin, TitleMixin, ListView):
+    template_name = 'salary/reports_list.html'
+    model = WorkingShift
+    title = 'Отчеты'
+
+    def get_queryset(self):
+        query = WorkingShift.objects.dates('shift_date', 'month')
+        return query
+
+
 class AdminWorkshiftsView(StaffPermissionRequiredMixin, TitleMixin, ListView):
     template_name = 'salary/staff_view_workshifts.html'
     model = WorkingShift
@@ -263,12 +273,20 @@ class MonthlyReportListView(PermissionRequiredMixin, StaffOnlyMixin, ListView):
     permission_required = 'salary.view_workingshift'
     template_name = 'salary/monthlyreport_list.html'
 
+    def dispatch(self, request, *args, **kwargs):
+        self.year = self.kwargs.get('year')
+        self.month = self.kwargs.get('month')
+        return super().dispatch(request, *args, **kwargs)
+
     def get_queryset(self):
-        month = datetime.date.today().month
         workshifts = WorkingShift.objects.select_related(
             'cash_admin__profile__position',
             'hall_admin__profile__position',
-        ).filter(shift_date__month=month, is_verified=True)
+        ).filter(
+            shift_date__month=self.month,
+            shift_date__year=self.year,
+            is_verified=True
+        )
 
         return workshifts
 
