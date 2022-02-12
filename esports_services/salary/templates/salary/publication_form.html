@@ -1,0 +1,21 @@
+{% extends 'salary/logined_page.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<main>
+  <div class="container">
+      <div class="row justify-content-center">
+          <div class="col-md-5 border rounded mt-3 me-1">
+              <form class="needs-validation" method="post" enctype="multipart/form-data">{% csrf_token %}
+                <p class="text-center">{{ title }}</p>
+                {{ form|crispy }}
+                <div class="m-6 d-flex justify-content-center">
+                  <button type="submit" class="btn btn-primary mb-4 me-2">Добавить</button>
+                  <div><a href="{{ request.GET.next }}" class="btn btn-primary">Отмена</a></div>
+                </div>
+              </form>
+          </div>
+      </div>
+  </div>
+</main>
+{% endblock %}

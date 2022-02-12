@@ -8,8 +8,11 @@ class WorkshiftAdmin(admin.ModelAdmin):
     list_display_links = ('shift_date',)
     search_fields = ('shift_date',)
 
-
+class DisciplinaryRegAdmin(admin.ModelAdmin):
+    list_display = ('article', 'title', 'sanction')
 
 admin.site.register(Profile)
 admin.site.register(WorkingShift, WorkshiftAdmin)
 admin.site.register(Position)
+admin.site.register(Publication)
+admin.site.register(DisciplinaryRegulations, DisciplinaryRegAdmin)

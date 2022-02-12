@@ -17,6 +17,7 @@ from typing import *
 from dateutil.relativedelta import relativedelta
 
 
+# Registration, Login, Logout
 def registration(request):
     if request.method == 'POST':
         user_form = UserRegistrationForm(request.POST)
@@ -50,6 +51,12 @@ class LoginUser(TitleMixin, LoginView):
         return reverse_lazy('index')
 
 
+def logout_user(request):
+    logout(request)
+    return redirect('login')
+
+
+# Staff Functionality
 class StaffUserView(StaffPermissionRequiredMixin, TotalDataMixin, TemplateView):
     template_name = 'salary/staff_user_view.html'
 
@@ -121,144 +128,6 @@ class AdminWorkshiftsView(StaffPermissionRequiredMixin, TitleMixin, ListView):
         if not self.kwargs.get('all'):
             context['only_verified'] = True
         return context
-
-
-class EditUser(LoginRequiredMixin, TitleMixin, TemplateView):
-    template_name = 'salary/edit_user_profile.html'
-    title = 'Редактирование пользователя'
-    userform = EditUserForm
-    profileform = EditProfileForm
-
-    def dispatch(self, request, *args: Any, **kwargs: Any):
-        if self.kwargs.get('pk'):
-            self.edited_user = get_object_or_404(User.objects.select_related('profile'), pk=self.kwargs.get('pk', 0))
-        else:
-            self.edited_user = self.request.user
-        self.redirect_link = request.GET.get('next', reverse_lazy('index'))
-        return super().dispatch(request, *args, **kwargs)
-
-    def get(self, request, *args: Any, **kwargs: Any):
-        user_form_class = self.userform(instance=self.edited_user)
-        profile_form_class = self.profileform(instance=self.edited_user.profile)
-        context = self.get_context_data(
-            profile_form=profile_form_class,
-            user_form=user_form_class
-        )
-        return render(request, self.template_name, context=context)
-
-    def post(self, request, **kwargs):
-        user_form_class = self.userform(request.POST, instance=self.edited_user)
-        profile_form_class = self.profileform(request.POST, request.FILES, instance=self.edited_user.profile)
-        if user_form_class.is_valid() and profile_form_class.is_valid():
-            user = user_form_class.save(commit=False)
-            profile = profile_form_class.save(commit=False)
-            user.save()
-            profile.user = user
-            profile.save()
-            return HttpResponseRedirect(self.redirect_link)
-        else:
-            user_form_class = self.userform
-            profile_form_class = self.profileform
-            context = self.get_context_data(
-                profile_form=profile_form_class,
-                user_form=user_form_class
-            )
-            return render(request, self.template_name, context=context)
-
-
-class StaffEditUser(StaffPermissionRequiredMixin, EditUser):
-    userform = StaffEditUserForm
-    profileform = StaffEditProfileForm
-    title = 'Редактирование профиля'
-
-
-class IndexView(LoginRequiredMixin, TotalDataMixin, TemplateView):
-    login_url = 'login'
-    template_name = 'salary/account.html'
-
-    def dispatch(self, request, *args, **kwargs):
-        if self.request.user.is_staff:
-            return redirect('dashboard')
-
-        return super().dispatch(request, *args, **kwargs)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['title'] = 'Личный кабинет'
-
-        current_year = self.kwargs.get('year', datetime.date.today().year)
-        current_month = self.kwargs.get('month', datetime.date.today().month)
-
-        previous_date = datetime.date(current_year, current_month, 1) - relativedelta(months=1)
-        next_date = datetime.date(current_year, current_month, 1) + relativedelta(months=1)
-        if self.get_user_workshifts(month=previous_date.month, year=previous_date.year):
-            context['previous_date'] = previous_date
-        if self.get_user_workshifts(month=next_date.month, year=next_date.year):
-            context['next_date'] = next_date
-
-        context['current_date'] = datetime.date(current_year, current_month, 1)
-        context['experience'] = self.request.user.profile.get_work_experience
-        context['workshifts'] = self.get_user_workshifts(month=current_month, year=current_year)
-        context['total_values'] = self.get_total_values(self.request.user, context['workshifts'])
-        context['current_workshift'] = self.get_current_shift()
-
-        return context
-
-    def get_user_workshifts(self, month, year):
-        workshifts = WorkingShift.objects.filter(
-            shift_date__year=year,
-            shift_date__month=month
-        ).filter(Q(cash_admin=self.request.user) | Q(hall_admin=self.request.user))
-
-        if not workshifts:
-            return []
-
-        return workshifts
-
-    def get_current_shift(self):
-        if WorkingShift.objects.filter(shift_date=datetime.date.today()):
-            return WorkingShift.objects.get(shift_date=datetime.date.today())
-
-        return None
-
-    def get_success_url(self, **kwargs):
-        return reverse_lazy('index')
-
-
-def logout_user(request):
-    logout(request)
-    return redirect('login')
-
-
-class AddWorkshiftData(PermissionRequiredMixin, TitleMixin, CreateView):
-    form_class = AddWorkshiftDataForm
-    permission_required = 'salary.add_workingshift'
-    template_name = 'salary/add_workshift.html'
-    success_url = reverse_lazy('index')
-    title = 'Добавление смен'
-
-    def get_initial(self):
-        initional = super().get_initial()
-        initional['cash_admin'] = self.request.user
-        initional['shift_date'] = datetime.date.today().strftime('%Y-%m-%d')
-        return initional
-
-
-class EditWorkshiftData(PermissionRequiredMixin, UpdateView):
-    model = WorkingShift
-    form_class = EditWorkshiftDataForm
-    permission_required = 'salary.change_workingshift'
-    template_name = 'salary/edit_workshift.html'
-    success_url = reverse_lazy('index')
-    
-    def get_context_data(self, **kwargs) -> dict:
-        context = super().get_context_data(**kwargs)
-        context['start_date'] = context['object'].shift_date - relativedelta(days=1)
-        return context
-
-
-class StaffEditWorkshift(StaffOnlyMixin, EditWorkshiftData):
-    form_class = StaffEditWorkshiftForm
 
 
 class DeleteWorkshift(PermissionRequiredMixin, TitleMixin, DeleteView):
@@ -345,6 +214,181 @@ class MonthlyReportListView(PermissionRequiredMixin, StaffOnlyMixin, ListView):
         return context
 
 
+class AddPublicationView(StaffPermissionRequiredMixin, TitleMixin, CreateView):
+    title = 'Добавление публикации'
+    form_class = AddPublicationForm
+    template_name = 'salary/publication_form.html'
+    success_url = reverse_lazy('publications')
+
+    def get_initial(self):
+        initional = super().get_initial()
+        initional.update({
+            'auditor': self.request.user,
+        })
+        return initional
+
+
+class PublicationListView(StaffPermissionRequiredMixin, TitleMixin, ListView):
+    title = 'Список смен'
+    model = Publication
+    template_name = 'salary/publication_list.html'
+
+    def get_queryset(self):
+        queryset = Publication.objects.select_related('author', 'auditor').order_by('publication_date')
+
+        return queryset
+
+class EditPublicationView(StaffPermissionRequiredMixin, TitleMixin, UpdateView):
+    model = Publication
+    form_class = EditPublicationForm
+    title = 'Изменение публикации'
+    template_name = 'salary/publication_form.html'
+    success_url = reverse_lazy('publications')
+
+class DeletePublication(StaffPermissionRequiredMixin, TitleMixin, DeleteView):
+    model = Publication
+    success_url = reverse_lazy('publications')
+    title = 'Удаление смены'
+
+# Employee functionality
+class EditUser(LoginRequiredMixin, TitleMixin, TemplateView):
+    template_name = 'salary/edit_user_profile.html'
+    title = 'Редактирование пользователя'
+    userform = EditUserForm
+    profileform = EditProfileForm
+
+    def dispatch(self, request, *args: Any, **kwargs: Any):
+        if self.kwargs.get('pk'):
+            self.edited_user = get_object_or_404(User.objects.select_related('profile'), pk=self.kwargs.get('pk', 0))
+        else:
+            self.edited_user = self.request.user
+        self.redirect_link = request.GET.get('next', reverse_lazy('index'))
+        return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request, *args: Any, **kwargs: Any):
+        user_form_class = self.userform(instance=self.edited_user)
+        profile_form_class = self.profileform(instance=self.edited_user.profile)
+        context = self.get_context_data(
+            profile_form=profile_form_class,
+            user_form=user_form_class
+        )
+        return render(request, self.template_name, context=context)
+
+    def post(self, request, **kwargs):
+        user_form_class = self.userform(request.POST, instance=self.edited_user)
+        profile_form_class = self.profileform(request.POST, request.FILES, instance=self.edited_user.profile)
+        if user_form_class.is_valid() and profile_form_class.is_valid():
+            user = user_form_class.save(commit=False)
+            profile = profile_form_class.save(commit=False)
+            user.save()
+            profile.user = user
+            profile.save()
+            return HttpResponseRedirect(self.redirect_link)
+        else:
+            user_form_class = self.userform
+            profile_form_class = self.profileform
+            context = self.get_context_data(
+                profile_form=profile_form_class,
+                user_form=user_form_class
+            )
+            return render(request, self.template_name, context=context)
+
+
+class StaffEditUser(StaffPermissionRequiredMixin, EditUser):
+    userform = StaffEditUserForm
+    profileform = StaffEditProfileForm
+    title = 'Редактирование профиля'
+
+
+class IndexView(LoginRequiredMixin, TotalDataMixin, TemplateView):
+    login_url = 'login'
+    template_name = 'salary/account.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        if self.request.user.is_staff:
+            return redirect('dashboard')
+
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Личный кабинет'
+
+        current_year = self.kwargs.get('year', datetime.date.today().year)
+        current_month = self.kwargs.get('month', datetime.date.today().month)
+
+        previous_date = datetime.date(current_year, current_month, 1) - relativedelta(months=1)
+        next_date = datetime.date(current_year, current_month, 1) + relativedelta(months=1)
+        if self.get_user_workshifts(month=previous_date.month, year=previous_date.year):
+            context['previous_date'] = previous_date
+        if self.get_user_workshifts(month=next_date.month, year=next_date.year):
+            context['next_date'] = next_date
+
+        context.update({
+            'current_date': datetime.date(current_year, current_month, 1),
+            'experience': self.request.user.profile.get_work_experience,
+            'workshifts': self.get_user_workshifts(month=current_month, year=current_year),
+            'total_values': self.get_total_values(self.request.user, context['workshifts']),
+            'current_workshift': self.get_current_shift(),
+        })
+
+        return context
+
+    def get_user_workshifts(self, month, year):
+        workshifts = WorkingShift.objects.filter(
+            shift_date__year=year,
+            shift_date__month=month
+        ).filter(Q(cash_admin=self.request.user) | Q(hall_admin=self.request.user))
+
+        if not workshifts:
+            return []
+
+        return workshifts
+
+    def get_current_shift(self):
+        if WorkingShift.objects.filter(shift_date=datetime.date.today()):
+            return WorkingShift.objects.get(shift_date=datetime.date.today())
+
+        return None
+
+    def get_success_url(self, **kwargs):
+        return reverse_lazy('index')
+
+
+class AddWorkshiftData(PermissionRequiredMixin, TitleMixin, CreateView):
+    form_class = AddWorkshiftDataForm
+    permission_required = 'salary.add_workingshift'
+    template_name = 'salary/add_workshift.html'
+    success_url = reverse_lazy('index')
+    title = 'Добавление смен'
+
+    def get_initial(self):
+        initional = super().get_initial()
+        initional.update({
+            'cash_admin': self.request.user,
+            'shift_date': datetime.date.today().strftime('%Y-%m-%d'),
+        })
+        return initional
+
+
+class EditWorkshiftData(PermissionRequiredMixin, UpdateView):
+    model = WorkingShift
+    form_class = EditWorkshiftDataForm
+    permission_required = 'salary.change_workingshift'
+    template_name = 'salary/edit_workshift.html'
+    success_url = reverse_lazy('index')
+    
+    def get_context_data(self, **kwargs) -> dict:
+        context = super().get_context_data(**kwargs)
+        context['start_date'] = context['object'].shift_date - relativedelta(days=1)
+        return context
+
+
+class StaffEditWorkshift(StaffOnlyMixin, EditWorkshiftData):
+    form_class = StaffEditWorkshiftForm
+
+
+# Additional functionality
 def page_not_found(request, exception):
     response = render(request, 'salary/404.html', {'title': 'Page not found'})
     response.status_code = 404

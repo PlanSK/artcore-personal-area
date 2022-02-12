@@ -242,21 +242,21 @@ class Position(models.Model):
 class DisciplinaryRegulations(models.Model):
     article = models.CharField(max_length=10, verbose_name='Пункт')
     title = models.CharField(max_length=255, verbose_name='Наименование')
-    base_penalty = models.FloatField(default=0.0, verbose_name='Фиксированный штраф')
-    note = models.CharField(max_length=50, verbose_name='Примечание')
+    base_penalty = models.FloatField(default=0.0, verbose_name='Сумма штрафа')
+    sanction = models.CharField(max_length=255, verbose_name='Санкция', blank=True, null=True)
 
     class Meta:
         verbose_name = 'Пункт регламента'
         verbose_name_plural = 'Дисциплинарный регламент'
 
     def __str__(self) -> str:
-        return self.article
+        return f'{self.article} {self.title}'
 
 
 class Publication(models.Model):
     author = models.ForeignKey(User, on_delete=models.PROTECT, verbose_name='Автор публикации', related_name='author')
     publication_date = models.DateField(verbose_name='Дата публикации')
-    link = models.TextField(verbose_name='Примечание', blank=True, null=True)
+    link = models.TextField(verbose_name='Примечание (ссылка)', blank=True, null=True)
     auditor = models.ForeignKey(User, on_delete=models.PROTECT, verbose_name='Аудитор', related_name='auditor')
 
     class Meta:
