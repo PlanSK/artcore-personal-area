@@ -10,6 +10,10 @@ register = template.Library()
 def kpi_salary(workshift, user):
     return workshift.kpi_salary_calculate(user)
 
+@register.simple_tag()
+def return_key(dictonary: dict, name: str):
+    return dictonary[name]
+
 
 @register.simple_tag()
 def get_year():

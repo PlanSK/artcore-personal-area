@@ -21,9 +21,14 @@
       </thead>
       <tbody class="text-center verysmall">
         {% for employee in employee_list %}
+        {% return_key users employee.0 as need_user %}
         <tr>
           {% for value in employee %}
-          <td>{{ value|default:"-" }}</td>
+          <td>
+            <a href="{% url 'staff_user_view' request_user=need_user year=current_date.year month=current_date.month %}" class="link-light">
+            {{ value|default:"-" }}
+            </a>
+          </td>
           {% endfor %}
         </tr>
         {% endfor %}

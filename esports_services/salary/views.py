@@ -60,13 +60,18 @@ def logout_user(request):
 class StaffUserView(StaffPermissionRequiredMixin, TotalDataMixin, TemplateView):
     template_name = 'salary/staff_user_view.html'
 
+    def dispatch(self, request, *args: Any, **kwargs: Any):
+        self.required_year = self.kwargs.get('year')
+        self.required_month = self.kwargs.get('month')
+        return super().dispatch(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         request_user = self.kwargs.get('request_user')
         get_user = get_object_or_404(User, username=request_user)
         workshifts = WorkingShift.objects.filter(
-            shift_date__year=datetime.date.today().year,
-            shift_date__month=datetime.date.today().month
+            shift_date__year=self.required_year,
+            shift_date__month=self.required_month
         ).filter(Q(cash_admin=get_user) | Q(hall_admin=get_user))
         context['title'] = f'Данные польователя {get_user}'
         context['request_user'] = get_user
@@ -205,9 +210,17 @@ class MonthlyReportListView(PermissionRequiredMixin, StaffOnlyMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        users_list = [(obj.hall_admin, obj.cash_admin) for obj in context['object_list']]
+        users = dict()
+        for hall_admin, cash_admin in users_list:
+            users.update({
+               hall_admin.get_full_name(): hall_admin,
+               cash_admin.get_full_name(): cash_admin,
+            })
         context.update({
             'employee_list': self.get_employee_list(context['object_list']),
-            'current_date': datetime.date.today(),
+            'current_date': datetime.date(self.year, self.month, 1),
+            'users': users,
             'title': 'Авансовый отчет'
         })
 
