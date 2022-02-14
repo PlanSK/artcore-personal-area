@@ -61,9 +61,9 @@
                 <tbody class="text-center verysmall">
                   <tr>
                     <td>{{ user.profile.position.position_salary }}</td>
-                    <td>{{ kpi_data.bar.1|floatformat:"1g" }}% / {{ kpi_data.bar.0 |floatformat:"1g" }}</td>
-                    <td>{{ kpi_data.game_zone.1|floatformat:"1g" }}% / {{ kpi_data.game_zone.0 |floatformat:"1g" }}</td>
-                    <td>{{ kpi_data.vr.1|floatformat:"1g" }}% / {{ kpi_data.vr.0 |floatformat:"1g" }}</td>
+                    <td>{{ kpi_data.bar.1|floatformat:"2g" }}% / {{ kpi_data.bar.0 |floatformat:"1g" }}</td>
+                    <td>{{ kpi_data.game_zone.1|floatformat:"2g" }}% / {{ kpi_data.game_zone.0 |floatformat:"1g" }}</td>
+                    <td>{{ kpi_data.vr.1|floatformat:"2g" }}% / {{ kpi_data.vr.0 |floatformat:"1g" }}</td>
                     <td>
                       {% if kpi_data.penalty %}
                         {{ kpi_data.discipline }} / <span class="text-danger">-{{ kpi_data.penalty }}</span>
