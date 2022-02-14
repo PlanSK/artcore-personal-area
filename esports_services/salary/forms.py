@@ -161,8 +161,12 @@ class EditPublicationForm(forms.ModelForm):
         }
 
 class StaffEditWorkshiftForm(EditWorkshiftDataForm):
+    hall_admin = EmplModelChoiceField(
+        queryset=User.objects.filter(profile__position=1),
+        label='Администратор кассы',
+    )
     cash_admin = EmplModelChoiceField(
-        queryset=User.objects.filter(is_active=True, profile__position=2),
+        queryset=User.objects.filter(profile__position=2),
         label='Администратор кассы',
     )
     class Meta:
