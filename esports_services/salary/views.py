@@ -1,3 +1,4 @@
+from signal import pause
 from django.contrib.auth.forms import AuthenticationForm
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
@@ -329,6 +330,7 @@ class IndexView(LoginRequiredMixin, TotalDataMixin, TemplateView):
 
         current_year = self.kwargs.get('year', datetime.date.today().year)
         current_month = self.kwargs.get('month', datetime.date.today().month)
+        current_workshifts = self.get_user_workshifts(month=current_month, year=current_year)
 
         previous_date = datetime.date(current_year, current_month, 1) - relativedelta(months=1)
         next_date = datetime.date(current_year, current_month, 1) + relativedelta(months=1)
@@ -340,8 +342,8 @@ class IndexView(LoginRequiredMixin, TotalDataMixin, TemplateView):
         context.update({
             'current_date': datetime.date(current_year, current_month, 1),
             'experience': self.request.user.profile.get_work_experience,
-            'workshifts': self.get_user_workshifts(month=current_month, year=current_year),
-            'total_values': self.get_total_values(self.request.user, context['workshifts']),
+            'workshifts': current_workshifts,
+            'total_values': self.get_total_values(self.request.user, current_workshifts),
             'current_workshift': self.get_current_shift(),
         })
 

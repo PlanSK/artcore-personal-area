@@ -136,7 +136,10 @@ class WorkingShift(models.Model):
             'experience': 0.0,
             'discipline': 0.0,
             'attestation': 0.0,
-            'cleaning': 0.0
+            'cleaning': 0.0,
+            'game_zone': (0.0, 0.0),
+            'bar': (0.0, 0.0),
+            'vr': (0.0, 0.0),
         }
         kpi_criteria = {
             'hall_admin': {
@@ -209,7 +212,7 @@ class WorkingShift(models.Model):
             if self.bar_revenue >= revenue_value:
                 kpi_data['bar'] = (self.bar_revenue * ratio, ratio * 100)
 
-        game_zone_subtotal = self.game_zone_revenue - self.game_zone_error
+        game_zone_subtotal = self.game_zone_revenue - self.game_zone_error if self.game_zone_revenue else 0.0
         for revenue_value, ratio in kpi_ratio['game_zone']:
             if game_zone_subtotal >= revenue_value:
                 kpi_data['game_zone'] = (game_zone_subtotal * ratio, ratio * 100)
@@ -217,9 +220,13 @@ class WorkingShift(models.Model):
         for revenue_value, ratio in kpi_ratio['vr']:
             if self.vr_revenue >= revenue_value:
                 kpi_data['vr'] = (self.vr_revenue * ratio, ratio * 100)
+        try:
+            shift_salary += sum([kpi_data['bar'][0], kpi_data['game_zone'][0], kpi_data['vr'][0]])
+            calculated_salary += sum([kpi_data['bar'][0], kpi_data['game_zone'][0], kpi_data['vr'][0]])
+        except KeyError:
+            shift_salary = 0.0
+            calculated_salary = 0.0
 
-        shift_salary += sum([kpi_data['bar'][0], kpi_data['game_zone'][0], kpi_data['vr'][0]])
-        calculated_salary += sum([kpi_data['bar'][0], kpi_data['game_zone'][0], kpi_data['vr'][0]])
         kpi_data['shift_salary'] = shift_salary
         kpi_data['calculated_salary']= calculated_salary
 
