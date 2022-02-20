@@ -1,4 +1,3 @@
-from signal import pause
 from django.contrib.auth.forms import AuthenticationForm
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render

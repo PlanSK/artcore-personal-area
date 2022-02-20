@@ -105,7 +105,13 @@
                   {% endif %}
             </div>
             <div class="col">
-                      Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}.
+              {% for page_num in paginator.page_range %}
+                {% if page_num == page_obj.number %}
+                  <span class="btn btn-success verysmall" >{{ page_obj.number }}</span>
+                {% else %}
+                  <a href="?page={{ page_num }}" class="btn btn-secondary verysmall">{{ page_num }}</a>
+                {% endif %}
+              {% endfor %}
             </div>
             <div class="col">
                   {% if page_obj.has_next %}
