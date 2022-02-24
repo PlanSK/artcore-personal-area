@@ -11,6 +11,7 @@
           <th>GameZone</th>
           <th>Ошибки GZ</th>
           <th>Доп. услуги и VR</th>
+          <th>Кальяны</th>
           <th>Общая выручка</th>
           <th>Заработано</th>
           <th>Отметка о проверке</th>
@@ -25,6 +26,7 @@
           <td>{{ workshift.game_zone_revenue | intcomma }}</td>
           <td class="text-danger">{{ workshift.game_zone_error | intcomma |default:"-" }}</td>
           <td>{{ workshift.vr_revenue | intcomma }}</td>
+          <td>{{ workshift.hookah_revenue | intcomma }}</td>
           <td>{{ workshift.get_summary_revenue | intcomma }}</td>
           <td>
             {% if workshift.is_verified %}
@@ -42,7 +44,7 @@
           </td>
         </tr>
         <tr>
-          <td colspan="8">
+          <td colspan="9">
             <div class="collapse multi-collapse" id="workshift{{ workshift.shift_date|date:"dm" }}">
               <table class="table table-dark table-hover">
                 <thead class="text-warning text-center verysmall">
@@ -51,6 +53,7 @@
                     <th>KPI Бар</th>
                     <th>KPI GameZone</th>
                     <th>KPI Доп. услуги и VR</th>
+                    <th>KPI Кальян</th>
                     <th>Надб. Дисциплина</th>
                     <th>Надб. Стаж</th>
                     <th>Надб. Аттестация</th>
@@ -64,12 +67,14 @@
                     <td>{{ kpi_data.bar.1|floatformat:"2g" }}% / {{ kpi_data.bar.0 |floatformat:"1g" }}</td>
                     <td>{{ kpi_data.game_zone.1|floatformat:"2g" }}% / {{ kpi_data.game_zone.0 |floatformat:"1g" }}</td>
                     <td>{{ kpi_data.vr.1|floatformat:"2g" }}% / {{ kpi_data.vr.0 |floatformat:"1g" }}</td>
+                    <td>{{ kpi_data.hookah|floatformat:"1g" }}</td>
                     <td>
                       {% if kpi_data.penalty %}
                         {{ kpi_data.discipline }} / <span class="text-danger">-{{ kpi_data.penalty }}</span>
                       {% else %}
-                        {{ kpi_data.discipline|default:"-" }}</td>
+                        {{ kpi_data.discipline|default:"-" }}
                       {% endif %}
+                    </td>
                     <td>{{ kpi_data.experience|default:"-" }}</td>
                     <td>{{ kpi_data.attestation|default:"-" }}</td>
                     <td>{{ kpi_data.cleaning|default:"-" }}</td>
@@ -82,7 +87,7 @@
                     </td>
                   </tr>
                   {% if workshift.comment %}
-                  <tr><td colspan="9">{{ workshift.comment }}</td></tr>
+                  <tr><td colspan="10">{{ workshift.comment }}</td></tr>
                   {% endif %}
                 </tbody>
               </table>
@@ -98,6 +103,7 @@
           <td scope="col">{{ total_values.game_zone|floatformat:"1g" | intcomma }}</td>
           <td scope="col">{{ total_values.game_zone_error|floatformat:"1g" | intcomma }}</td>
           <td scope="col">{{ total_values.vr|floatformat:"1g" | intcomma }}</td>
+          <td scope="col">{{ total_values.hookah|floatformat:"1g" | intcomma }}</td>
           <td scope="col">{{ total_values.sum_revenue|floatformat:"1g" | intcomma }}</td>
           <td scope="col">{{ total_values.total_salary|floatformat:"1g" | intcomma }}</td>
           <td></td>

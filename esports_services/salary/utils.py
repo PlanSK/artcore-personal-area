@@ -10,11 +10,13 @@ class TotalDataMixin:
         total_salary = 0.0
         summary_error = 0.0
         summary_shortage = 0.0
+        summary_hookah = 0.0
 
         for get_shift in workshifts:
             summary_bar_revenue += get_shift.bar_revenue
             summary_game_zone_revenue += get_shift.game_zone_revenue
             summary_vr_revenue += get_shift.vr_revenue
+            summary_hookah += get_shift.hookah_revenue
             total_revenue += get_shift.get_summary_revenue()
             summary_error += get_shift.game_zone_error
             if not get_shift.shortage_paid:
@@ -33,6 +35,7 @@ class TotalDataMixin:
             'game_zone': summary_game_zone_revenue,
             'game_zone_error': summary_error,
             'vr': summary_vr_revenue,
+            'hookah': summary_hookah,
             'sum_revenue': total_revenue,
             'quantity_shifts': quantity_shifts,
             'average_revenue': average_revenue,

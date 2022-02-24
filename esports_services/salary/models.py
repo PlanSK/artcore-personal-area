@@ -99,6 +99,7 @@ class WorkingShift(models.Model):
     game_zone_revenue = models.FloatField(verbose_name='Выручка игровой зоны', default=0.0)
     game_zone_error = models.FloatField(verbose_name='Сумма ошибок', default=0.0)
     vr_revenue = models.FloatField(verbose_name='Выручка доп. услуги и VR', default=0.0)
+    hookah_revenue = models.FloatField(verbose_name='Выручка по кальянам', default=0.0)
     hall_cleaning = models.BooleanField(default=False, verbose_name='Наведение порядка')
     hall_admin_discipline = models.BooleanField(default=True, verbose_name='Сюблюдение дисциплины Админ зала')
     hall_admin_discipline_penalty = models.FloatField(default=0.0, verbose_name='Дисциплинарный штраф')
@@ -127,6 +128,7 @@ class WorkingShift(models.Model):
             self.bar_revenue,
             self.game_zone_revenue,
             self.vr_revenue,
+            self.hookah_revenue,
             -self.game_zone_error
         ])
         return summary_revenue
@@ -140,6 +142,7 @@ class WorkingShift(models.Model):
             'game_zone': (0.0, 0.0),
             'bar': (0.0, 0.0),
             'vr': (0.0, 0.0),
+            'hookah': 0.0,
         }
         kpi_criteria = {
             'hall_admin': {
@@ -157,6 +160,7 @@ class WorkingShift(models.Model):
         hall_cleaning_bonus = 400.0
         attestation_bonus = 200.0
         discipline_bonus = 1000.0
+        hookah_bonus = 0.2
         penalty = 0.0
 
         # Position salary
@@ -171,6 +175,7 @@ class WorkingShift(models.Model):
         elif current_user.profile.position.name == 'cash_admin':
             kpi_ratio = kpi_criteria['cash_admin']
             hall_cleaning = False
+            hookah_bonus = 0.0
             discipline = self.cash_admin_discipline
             penalty = self.cash_admin_discipline_penalty
             if self.shortage and not self.shortage_paid:
@@ -207,6 +212,9 @@ class WorkingShift(models.Model):
             calculated_salary += attestation_bonus
             shift_salary += attestation_bonus
 
+        # Hookah
+        kpi_data['hookah'] = self.hookah_revenue * hookah_bonus
+
         # KPI
         for revenue_value, ratio in kpi_ratio['bar']:
             if self.bar_revenue >= revenue_value:
@@ -221,8 +229,8 @@ class WorkingShift(models.Model):
             if self.vr_revenue >= revenue_value:
                 kpi_data['vr'] = (self.vr_revenue * ratio, ratio * 100)
         try:
-            shift_salary += sum([kpi_data['bar'][0], kpi_data['game_zone'][0], kpi_data['vr'][0]])
-            calculated_salary += sum([kpi_data['bar'][0], kpi_data['game_zone'][0], kpi_data['vr'][0]])
+            shift_salary += sum([kpi_data['bar'][0], kpi_data['game_zone'][0], kpi_data['vr'][0]], kpi_data['hookah'])
+            calculated_salary += sum([kpi_data['bar'][0], kpi_data['game_zone'][0], kpi_data['vr'][0]], kpi_data['hookah'])
         except KeyError:
             shift_salary = 0.0
             calculated_salary = 0.0
