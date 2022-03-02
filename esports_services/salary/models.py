@@ -13,6 +13,26 @@ DAYS_VARIANT = ('день', 'дня', 'дней')
 MONTH_VARIANT = ('месяц','месяца','месяцев')
 YEARS_VARIANT = ('год', 'года', 'лет')
 
+REQUIRED_EXPERIENCE = 90
+EXPERIENCE_BONUS = 200.0
+
+ATTESTATION_BONUS = 200.0
+DISCIPLINE_BONUS = 1000.0
+HALL_CLEANING_BONUS = 400.0
+HOOKAH_BONUS_RATIO = 0.2
+
+ADMIN_KPI_CRITERIA = {
+    'bar' : [(0, 0.005), (3000, 0.01), (4000, 0.02), (6000, 0.025), (8000, 0.03)],
+    'game_zone':[(0, 0.005), (20000, 0.01), (25000, 0.0125), (27500, 0.015), (30000, 0.0175)],
+    'vr': [(0, 0.1), (1000, 0.12), (2000, 0.13), (3000, 0.14), (5000, 0.15)]
+}
+
+CASHIER_KPI_CRITERIA = {
+    'bar' : [(0, 0.03), (3000, 0.04), (4000, 0.05), (6000, 0.06), (8000, 0.07)],
+    'game_zone':[(0, 0.005), (20000, 0.01), (25000, 0.0125), (27500, 0.015), (30000, 0.0175)],
+    'vr': [(0, 0.05), (1000, 0.06), (2000, 0.065), (3000, 0.07), (5000, 0.075)]
+}
+
 
 def user_directory_path(instance, filename):
     return 'user_{0}/{1}'.format(instance.user.id, filename)
@@ -44,6 +64,10 @@ class Profile(models.Model):
         verbose_name = 'Профиль сотрудника'
         verbose_name_plural = 'Профили сотрудников'
 
+    def get_experience(self):
+        end_date = self.dismiss_date if self.dismiss_date else datetime.date.today()
+        return relativedelta(end_date, self.employment_date)
+
     def get_choice_plural(self, amount, variants):
         if amount % 10 == 1 and amount % 100 != 11:
             choice = 0
@@ -56,8 +80,7 @@ class Profile(models.Model):
         return variants[choice]
 
     def get_work_experience(self):
-        end_date = self.dismiss_date if self.dismiss_date else datetime.date.today()
-        experience = relativedelta(end_date, self.employment_date)
+        experience = self.get_experience()
         days, months, years = experience.days, experience.months, experience.years
         experience_text = ''
 
@@ -123,7 +146,7 @@ class WorkingShift(models.Model):
         self.slug = self.shift_date
         super(WorkingShift, self).save()
 
-    def get_summary_revenue(self):
+    def get_summary_revenue(self) -> float:
         summary_revenue = sum([
             self.bar_revenue,
             self.game_zone_revenue,
@@ -131,7 +154,49 @@ class WorkingShift(models.Model):
             self.hookah_revenue,
             -self.game_zone_error
         ])
+
         return summary_revenue
+
+    # Earnings block
+
+    def current_experience_bonus(self, employee):
+        current_experience = (self.shift_date - employee.profile.employment_date).days
+        if self.required_experience <= current_experience:
+            return self.experience_bonus
+
+        return 0.0
+
+    def current_attestation_bonus(self, employee):
+        if (employee.profile.attestation_date and
+                employee.profile.attestation_date <= self.shift_date):
+            return ATTESTATION_BONUS
+
+        return 0.0
+
+    def employee_earnings_calc(self, employee):
+        earnings = {
+            'salary': employee.profile.position.position_salary,
+            'experience': self.current_experience_bonus(employee),
+            'penalty': 0.0,
+            'discipline': 0.0,
+            'attestation': self.current_attestation_bonus(employee),
+            'game_zone': (0.0, 0.0),
+            'bar': (0.0, 0.0),
+            'vr': (0.0, 0.0),
+        }
+        return earnings
+
+    def hall_admin_earnings_calc(self):
+        earnings = self.employee_earnings_calc(self.hall_admin)
+        earnings['penalty'] = self.hall_admin_discipline_penalty
+        earnings['cleaning'] = HALL_CLEANING_BONUS if self.hall_cleaning else 0.0
+        earnings['hookah'] = self.hookah_revenue * HOOKAH_BONUS_RATIO
+
+
+    def cashier_earnings_calc(self):
+        earnings = self.employee_earnings_calc(self.cash_admin)
+        earnings['penalty'] = self.cash_admin_discipline_penalty
+
 
     def kpi_salary_calculate(self, current_user) -> dict:
         kpi_data = {
@@ -183,7 +248,7 @@ class WorkingShift(models.Model):
         else:
             raise ValueError('Position settings is not defined.')
 
-        # Expirience calc
+        # Expirience calc +
         experience = (self.shift_date - current_user.profile.employment_date).days
 
         if experience > 90:
@@ -201,18 +266,18 @@ class WorkingShift(models.Model):
         kpi_data['penalty'] = penalty
         shift_salary += discipline_bonus
 
-        # Hall cleaning
+        # Hall cleaning +
         if hall_cleaning:
             kpi_data['cleaning'] = hall_cleaning_bonus
             shift_salary += hall_cleaning_bonus
 
-        # Attestation
+        # Attestation +
         if current_user.profile.attestation_date and current_user.profile.attestation_date <= self.shift_date:
             kpi_data['attestation'] = attestation_bonus
             calculated_salary += attestation_bonus
             shift_salary += attestation_bonus
 
-        # Hookah
+        # Hookah +
         kpi_data['hookah'] = self.hookah_revenue * hookah_bonus
 
         # KPI
