@@ -122,7 +122,7 @@ class WorkingShift(models.Model):
     def save(self, *args, **kwargs):
         self.slug = self.shift_date
         super(WorkingShift, self).save()
-    
+
     def get_summary_revenue(self):
         summary_revenue = sum([
             self.bar_revenue,
@@ -132,8 +132,8 @@ class WorkingShift(models.Model):
             -self.game_zone_error
         ])
         return summary_revenue
-    
-    def kpi_salary_calculate(self, current_user) -> float:
+
+    def kpi_salary_calculate(self, current_user) -> dict:
         kpi_data = {
             'experience': 0.0,
             'discipline': 0.0,
