@@ -119,7 +119,7 @@ class WorkingShift(models.Model):
     cash_admin = models.ForeignKey(User, on_delete=models.PROTECT, related_name='cash_admin')
     shift_date = models.DateField(verbose_name='Дата смены', unique=True)
     bar_revenue = models.FloatField(verbose_name='Выручка по бару', default=0.0)
-    game_zone_revenue = models.FloatField(verbose_name='Выручка игровой зоны', default=0.0)
+    game_zone_revenue = models.FloatField(verbose_name='Выручка игровой зоны (без доп. услуг)', default=0.0)
     game_zone_error = models.FloatField(verbose_name='Сумма ошибок', default=0.0)
     vr_revenue = models.FloatField(verbose_name='Выручка доп. услуги и VR', default=0.0)
     hookah_revenue = models.FloatField(verbose_name='Выручка по кальянам', default=0.0)
@@ -161,8 +161,8 @@ class WorkingShift(models.Model):
 
     def current_experience_bonus(self, employee) -> float:
         current_experience = (self.shift_date - employee.profile.employment_date).days
-        if self.required_experience <= current_experience:
-            return self.experience_bonus
+        if REQUIRED_EXPERIENCE <= current_experience:
+            return EXPERIENCE_BONUS
 
         return 0.0
 
@@ -240,6 +240,8 @@ class WorkingShift(models.Model):
         earnings.update(self.get_revenue_bonuses(ADMIN_BONUS_CRITERIA))
         earnings.update(self.final_salary_calculation(earnings))
 
+        return earnings
+
     def cashier_earnings_calc(self) -> dict:
         earnings = self.employee_earnings_calc(self.cash_admin)
         earnings['penalty'] = self.cash_admin_discipline_penalty
@@ -248,112 +250,7 @@ class WorkingShift(models.Model):
         if self.shortage and not self.shortage_paid:
             earnings['shift_salary'] = round(earnings['shift_salary'] - self.shortage * 2, 2)
 
-    def kpi_salary_calculate(self, current_user) -> dict:
-        kpi_data = {
-            'experience': 0.0,
-            'discipline': 0.0,
-            'attestation': 0.0,
-            'cleaning': 0.0,
-            'game_zone': (0.0, 0.0),
-            'bar': (0.0, 0.0),
-            'vr': (0.0, 0.0),
-            'hookah': 0.0,
-        }
-        kpi_criteria = {
-            'hall_admin': {
-                'bar' : [(0, 0.005), (3000, 0.01), (4000, 0.02), (6000, 0.025), (8000, 0.03)],
-                'game_zone':[(0, 0.005), (20000, 0.01), (25000, 0.0125), (27500, 0.015), (30000, 0.0175)],
-                'vr': [(0, 0.1), (1000, 0.12), (2000, 0.13), (3000, 0.14), (5000, 0.15)]
-            },
-            'cash_admin': {
-                'bar' : [(0, 0.03), (3000, 0.04), (4000, 0.05), (6000, 0.06), (8000, 0.07)],
-                'game_zone':[(0, 0.005), (20000, 0.01), (25000, 0.0125), (27500, 0.015), (30000, 0.0175)],
-                'vr': [(0, 0.05), (1000, 0.06), (2000, 0.065), (3000, 0.07), (5000, 0.075)]
-            }
-        }
-        experience_bonus = 200.0
-        hall_cleaning_bonus = 400.0
-        attestation_bonus = 200.0
-        discipline_bonus = 1000.0
-        hookah_bonus = 0.2
-        penalty = 0.0
-
-        # Position salary
-        shift_salary = current_user.profile.position.position_salary
-        calculated_salary = shift_salary + discipline_bonus
-        if current_user.profile.position.name == 'hall_admin':
-            calculated_salary += hall_cleaning_bonus
-            kpi_ratio = kpi_criteria['hall_admin']
-            discipline = self.hall_admin_discipline
-            penalty = self.hall_admin_discipline_penalty
-            hall_cleaning = self.hall_cleaning
-        elif current_user.profile.position.name == 'cash_admin':
-            kpi_ratio = kpi_criteria['cash_admin']
-            hall_cleaning = False
-            hookah_bonus = 0.0
-            discipline = self.cash_admin_discipline
-            penalty = self.cash_admin_discipline_penalty
-            if self.shortage and not self.shortage_paid:
-                shift_salary = round(shift_salary - self.shortage * 2, 2)
-        else:
-            raise ValueError('Position settings is not defined.')
-
-        # Expirience calc +
-        experience = (self.shift_date - current_user.profile.employment_date).days
-
-        if experience > 90:
-            kpi_data['experience'] = experience_bonus
-            calculated_salary += experience_bonus
-            shift_salary += experience_bonus
-
-        # Discipline
-        if discipline_bonus <= penalty:
-            discipline_bonus = 0
-        else:
-            discipline_bonus -= penalty
-
-        kpi_data['discipline'] = discipline_bonus
-        kpi_data['penalty'] = penalty
-        shift_salary += discipline_bonus
-
-        # Hall cleaning +
-        if hall_cleaning:
-            kpi_data['cleaning'] = hall_cleaning_bonus
-            shift_salary += hall_cleaning_bonus
-
-        # Attestation +
-        if current_user.profile.attestation_date and current_user.profile.attestation_date <= self.shift_date:
-            kpi_data['attestation'] = attestation_bonus
-            calculated_salary += attestation_bonus
-            shift_salary += attestation_bonus
-
-        # Hookah +
-        kpi_data['hookah'] = self.hookah_revenue * hookah_bonus
-
-        # KPI
-        for revenue_value, ratio in kpi_ratio['bar']:
-            if self.bar_revenue >= revenue_value:
-                kpi_data['bar'] = (self.bar_revenue * ratio, ratio * 100)
-
-        game_zone_subtotal = self.game_zone_revenue - self.game_zone_error if self.game_zone_revenue else 0.0
-        for revenue_value, ratio in kpi_ratio['game_zone']:
-            if game_zone_subtotal >= revenue_value:
-                kpi_data['game_zone'] = (game_zone_subtotal * ratio, ratio * 100)
-
-        for revenue_value, ratio in kpi_ratio['vr']:
-            if self.vr_revenue >= revenue_value:
-                kpi_data['vr'] = (self.vr_revenue * ratio, ratio * 100)
-        try:
-            shift_salary += sum([kpi_data['bar'][0], kpi_data['game_zone'][0], kpi_data['vr'][0]], kpi_data['hookah'])
-            calculated_salary += sum([kpi_data['bar'][0], kpi_data['game_zone'][0], kpi_data['vr'][0]], kpi_data['hookah'])
-        except KeyError:
-            shift_salary = 0.0
-            calculated_salary = 0.0
-
-        kpi_data['shift_salary'] = shift_salary
-        kpi_data['calculated_salary']= calculated_salary
-
-        return kpi_data
+        return earnings
 
 
 class Position(models.Model):

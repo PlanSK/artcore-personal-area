@@ -3,6 +3,7 @@ from django.contrib.auth.mixins import PermissionRequiredMixin, UserPassesTestMi
 
 class TotalDataMixin:
     def get_total_values(self, request_user, workshifts):
+        position = request_user.profile.position.name
         summary_bar_revenue = 0.0
         summary_game_zone_revenue = 0.0
         summary_vr_revenue = 0.0
@@ -22,7 +23,10 @@ class TotalDataMixin:
             if not get_shift.shortage_paid:
                 summary_shortage += get_shift.shortage
             if get_shift.is_verified:
-                total_salary += get_shift.kpi_salary_calculate(request_user)['shift_salary']
+                if position == 'hall_admin':
+                    total_salary += get_shift.hall_admin_earnings_calc()['shift_salary']
+                elif position == 'cash_admin':
+                    total_salary += get_shift.cashier_earnings_calc()['shift_salary']
 
         quantity_shifts = len(workshifts)
         if len(workshifts):

@@ -183,9 +183,9 @@ class MonthlyReportListView(PermissionRequiredMixin, StaffOnlyMixin, ListView):
         for workshift in objects:
             current_user_dict = {
                 workshift.hall_admin.get_full_name(): self.get_values_list(
-                    workshift.kpi_salary_calculate(workshift.hall_admin)),
+                    workshift.hall_admin_earnings_calc()),
                 workshift.cash_admin.get_full_name(): self.get_values_list(
-                    workshift.kpi_salary_calculate(workshift.cash_admin),
+                    workshift.cashier_earnings_calc(),
                     shortage=workshift.shortage)
             }
 
