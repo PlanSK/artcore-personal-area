@@ -19,7 +19,7 @@
       </thead>
       <tbody class="text-center verysmall">
         {% for workshift in workshifts_list %}
-        {% kpi_salary workshift=workshift user=user as kpi_data %}
+        {% hall_admin_earnings_tag workshift=workshift as earnings_data %}
         <tr data-bs-toggle="collapse" href="#workshift{{ workshift.shift_date|date:"dm" }}" role="button" aria-expanded="false" aria-controls="workshift{{ workshift.shift_date|date:"dm" }}">
           <td>{{ workshift.shift_date|date:"d.m.Y" }}</td>
           <td>{{ workshift.bar_revenue | intcomma }}</td>
@@ -30,7 +30,7 @@
           <td>{{ workshift.get_summary_revenue | intcomma }}</td>
           <td>
             {% if workshift.is_verified %}
-              {{ kpi_data.shift_salary|floatformat:"1g" |intcomma }}
+              {{ earnings_data.shift_salary|floatformat:"1g" |intcomma }}
             {% else %}
               <span title='Расчитывается после проверки'>{% bs_icon 'lock' color='gray' %}</span>
             {% endif %}
@@ -50,37 +50,37 @@
                 <thead class="text-warning text-center verysmall">
                   <tr>
                     <th>Оклад</th>
-                    <th>KPI Бар</th>
-                    <th>KPI GameZone</th>
-                    <th>KPI Доп. услуги и VR</th>
-                    <th>KPI Кальян</th>
-                    <th>Надб. Дисциплина</th>
-                    <th>Надб. Стаж</th>
-                    <th>Надб. Аттестация</th>
-                    <th>Надб. Клининг</th>
+                    <th>Бар</th>
+                    <th>GameZone</th>
+                    <th>Доп. услуги и VR</th>
+                    <th>Кальян</th>
+                    <th>Премия</th>
+                    <th>Стаж</th>
+                    <th>Аттестация</th>
+                    <th>Клининг</th>
                     <th>Итог</th>
                   </tr>
                 </thead>
                 <tbody class="text-center verysmall">
                   <tr>
                     <td>{{ user.profile.position.position_salary }}</td>
-                    <td>{{ kpi_data.bar.1|floatformat:"2g" }}% / {{ kpi_data.bar.0 |floatformat:"1g" }}</td>
-                    <td>{{ kpi_data.game_zone.1|floatformat:"2g" }}% / {{ kpi_data.game_zone.0 |floatformat:"1g" }}</td>
-                    <td>{{ kpi_data.vr.1|floatformat:"2g" }}% / {{ kpi_data.vr.0 |floatformat:"1g" }}</td>
-                    <td>{{ kpi_data.hookah|floatformat:"1g" }}</td>
+                    <td>{{ earnings_data.bar.1|floatformat:"2g" }}% / {{ earnings_data.bar.0 |floatformat:"1g" }}</td>
+                    <td>{{ earnings_data.game_zone.1|floatformat:"2g" }}% / {{ earnings_data.game_zone.0 |floatformat:"1g" }}</td>
+                    <td>{{ earnings_data.vr.1|floatformat:"2g" }}% / {{ earnings_data.vr.0 |floatformat:"1g" }}</td>
+                    <td>{{ earnings_data.hookah|floatformat:"1g" }}</td>
                     <td>
-                      {% if kpi_data.penalty %}
-                        {{ kpi_data.discipline }} / <span class="text-danger">-{{ kpi_data.penalty }}</span>
+                      {% if earnings_data.penalty %}
+                        {{ earnings_data.award }} / <span class="text-danger">-{{ earnings_data.penalty }}</span>
                       {% else %}
-                        {{ kpi_data.discipline|default:"-" }}
+                        {{ earnings_data.award|default:"-" }}
                       {% endif %}
                     </td>
-                    <td>{{ kpi_data.experience|default:"-" }}</td>
-                    <td>{{ kpi_data.attestation|default:"-" }}</td>
-                    <td>{{ kpi_data.cleaning|default:"-" }}</td>
+                    <td>{{ earnings_data.experience|default:"-" }}</td>
+                    <td>{{ earnings_data.attestation|default:"-" }}</td>
+                    <td>{{ earnings_data.cleaning|default:"-" }}</td>
                     <td>
                       {% if workshift.is_verified %}
-                        {{ kpi_data.shift_salary|floatformat:"1g" |intcomma }}
+                        {{ earnings_data.shift_salary|floatformat:"1g" |intcomma }}
                       {% else %}
                         {% bs_icon 'lock' color='gray' %}
                       {% endif %}

@@ -13,6 +13,26 @@ DAYS_VARIANT = ('день', 'дня', 'дней')
 MONTH_VARIANT = ('месяц','месяца','месяцев')
 YEARS_VARIANT = ('год', 'года', 'лет')
 
+REQUIRED_EXPERIENCE = 90
+EXPERIENCE_BONUS = 200.0
+
+ATTESTATION_BONUS = 200.0
+DISCIPLINE_AWARD = 1000.0
+HALL_CLEANING_BONUS = 400.0
+HOOKAH_BONUS_RATIO = 0.2
+
+ADMIN_BONUS_CRITERIA = {
+    'bar' : [(0, 0.005), (3000, 0.01), (4000, 0.02), (6000, 0.025), (8000, 0.03)],
+    'game_zone': [(0, 0.005), (20000, 0.01), (25000, 0.0125), (27500, 0.015), (30000, 0.0175)],
+    'vr': [(0, 0.1), (1000, 0.12), (2000, 0.13), (3000, 0.14), (5000, 0.15)]
+}
+
+CASHIER_BONUS_CRITERIA = {
+    'bar' : [(0, 0.03), (3000, 0.04), (4000, 0.05), (6000, 0.06), (8000, 0.07)],
+    'game_zone': [(0, 0.005), (20000, 0.01), (25000, 0.0125), (27500, 0.015), (30000, 0.0175)],
+    'vr': [(0, 0.05), (1000, 0.06), (2000, 0.065), (3000, 0.07), (5000, 0.075)]
+}
+
 
 def user_directory_path(instance, filename):
     return 'user_{0}/{1}'.format(instance.user.id, filename)
@@ -44,6 +64,10 @@ class Profile(models.Model):
         verbose_name = 'Профиль сотрудника'
         verbose_name_plural = 'Профили сотрудников'
 
+    def get_experience(self):
+        end_date = self.dismiss_date if self.dismiss_date else datetime.date.today()
+        return relativedelta(end_date, self.employment_date)
+
     def get_choice_plural(self, amount, variants):
         if amount % 10 == 1 and amount % 100 != 11:
             choice = 0
@@ -56,8 +80,7 @@ class Profile(models.Model):
         return variants[choice]
 
     def get_work_experience(self):
-        end_date = self.dismiss_date if self.dismiss_date else datetime.date.today()
-        experience = relativedelta(end_date, self.employment_date)
+        experience = self.get_experience()
         days, months, years = experience.days, experience.months, experience.years
         experience_text = ''
 
@@ -96,7 +119,7 @@ class WorkingShift(models.Model):
     cash_admin = models.ForeignKey(User, on_delete=models.PROTECT, related_name='cash_admin')
     shift_date = models.DateField(verbose_name='Дата смены', unique=True)
     bar_revenue = models.FloatField(verbose_name='Выручка по бару', default=0.0)
-    game_zone_revenue = models.FloatField(verbose_name='Выручка игровой зоны', default=0.0)
+    game_zone_revenue = models.FloatField(verbose_name='Выручка игровой зоны (без доп. услуг)', default=0.0)
     game_zone_error = models.FloatField(verbose_name='Сумма ошибок', default=0.0)
     vr_revenue = models.FloatField(verbose_name='Выручка доп. услуги и VR', default=0.0)
     hookah_revenue = models.FloatField(verbose_name='Выручка по кальянам', default=0.0)
@@ -123,7 +146,7 @@ class WorkingShift(models.Model):
         self.slug = self.shift_date
         super(WorkingShift, self).save()
 
-    def get_summary_revenue(self):
+    def get_summary_revenue(self) -> float:
         summary_revenue = sum([
             self.bar_revenue,
             self.game_zone_revenue,
@@ -131,114 +154,103 @@ class WorkingShift(models.Model):
             self.hookah_revenue,
             -self.game_zone_error
         ])
+
         return summary_revenue
 
-    def kpi_salary_calculate(self, current_user) -> dict:
-        kpi_data = {
-            'experience': 0.0,
-            'discipline': 0.0,
-            'attestation': 0.0,
-            'cleaning': 0.0,
+    # Earnings block
+
+    def current_experience_bonus(self, employee) -> float:
+        current_experience = (self.shift_date - employee.profile.employment_date).days
+        if REQUIRED_EXPERIENCE <= current_experience:
+            return EXPERIENCE_BONUS
+
+        return 0.0
+
+    def current_attestation_bonus(self, employee) -> float:
+        if (employee.profile.attestation_date and
+                employee.profile.attestation_date <= self.shift_date):
+            return ATTESTATION_BONUS
+
+        return 0.0
+
+    def get_revenue_bonuses(self, criteria: dict) -> dict:
+        if self.game_zone_revenue >= self.game_zone_error:
+            game_zone_subtotal = self.game_zone_revenue - self.game_zone_error 
+        else:
+            game_zone_subtotal = 0.0
+
+        revenue_tuple = (
+            self.bar_revenue,
+            game_zone_subtotal,
+            self.vr_revenue
+        )
+
+        result_list = []
+        for revenue, current_critera in zip(revenue_tuple, criteria.values()):
+            criteria_ratio = list(filter(lambda x: x[0] <= revenue, current_critera))[-1][1]
+            result_list.append((round(revenue * criteria_ratio, 2), criteria_ratio * 100))
+
+        return {
+            'bar': result_list[0],
+            'game_zone': result_list[1],
+            'vr': result_list[2]
+        }
+
+    def employee_earnings_calc(self, employee) -> dict:
+        base_earnings = {
+            'salary': employee.profile.position.position_salary,
+            'experience': self.current_experience_bonus(employee),
+            'penalty': 0.0,
+            'award': DISCIPLINE_AWARD,
+            'attestation': self.current_attestation_bonus(employee),
             'game_zone': (0.0, 0.0),
             'bar': (0.0, 0.0),
             'vr': (0.0, 0.0),
-            'hookah': 0.0,
         }
-        kpi_criteria = {
-            'hall_admin': {
-                'bar' : [(0, 0.005), (3000, 0.01), (4000, 0.02), (6000, 0.025), (8000, 0.03)],
-                'game_zone':[(0, 0.005), (20000, 0.01), (25000, 0.0125), (27500, 0.015), (30000, 0.0175)],
-                'vr': [(0, 0.1), (1000, 0.12), (2000, 0.13), (3000, 0.14), (5000, 0.15)]
-            },
-            'cash_admin': {
-                'bar' : [(0, 0.03), (3000, 0.04), (4000, 0.05), (6000, 0.06), (8000, 0.07)],
-                'game_zone':[(0, 0.005), (20000, 0.01), (25000, 0.0125), (27500, 0.015), (30000, 0.0175)],
-                'vr': [(0, 0.05), (1000, 0.06), (2000, 0.065), (3000, 0.07), (5000, 0.075)]
-            }
+        return base_earnings
+
+    def final_salary_calculation(self, earnings: dict) -> dict:
+        tuple_fields = ('bar', 'game_zone', 'vr')
+        exclude_fields = ('salary', 'penalty')
+        bonus_part = 0.0
+
+        for key, value in earnings.items():
+            if key not in exclude_fields:
+                if key not in tuple_fields:
+                    bonus_part += value
+                else:
+                    bonus_part += value[0]
+
+        if bonus_part > earnings['penalty']:
+            shift_bonus_part = bonus_part - earnings['penalty']
+        else: 
+            shift_bonus_part = 0.0
+
+        return {
+            'bonus_part': bonus_part,
+            'calculated_salary': bonus_part + earnings['salary'],
+            'shift_salary': shift_bonus_part + earnings['salary'],
         }
-        experience_bonus = 200.0
-        hall_cleaning_bonus = 400.0
-        attestation_bonus = 200.0
-        discipline_bonus = 1000.0
-        hookah_bonus = 0.2
-        penalty = 0.0
 
-        # Position salary
-        shift_salary = current_user.profile.position.position_salary
-        calculated_salary = shift_salary + discipline_bonus
-        if current_user.profile.position.name == 'hall_admin':
-            calculated_salary += hall_cleaning_bonus
-            kpi_ratio = kpi_criteria['hall_admin']
-            discipline = self.hall_admin_discipline
-            penalty = self.hall_admin_discipline_penalty
-            hall_cleaning = self.hall_cleaning
-        elif current_user.profile.position.name == 'cash_admin':
-            kpi_ratio = kpi_criteria['cash_admin']
-            hall_cleaning = False
-            hookah_bonus = 0.0
-            discipline = self.cash_admin_discipline
-            penalty = self.cash_admin_discipline_penalty
-            if self.shortage and not self.shortage_paid:
-                shift_salary = round(shift_salary - self.shortage * 2, 2)
-        else:
-            raise ValueError('Position settings is not defined.')
+    def hall_admin_earnings_calc(self) -> dict:
+        earnings = self.employee_earnings_calc(self.hall_admin)
+        earnings['penalty'] = self.hall_admin_discipline_penalty
+        earnings['cleaning'] = HALL_CLEANING_BONUS if self.hall_cleaning else 0.0
+        earnings['hookah'] = self.hookah_revenue * HOOKAH_BONUS_RATIO
+        earnings.update(self.get_revenue_bonuses(ADMIN_BONUS_CRITERIA))
+        earnings.update(self.final_salary_calculation(earnings))
 
-        # Expirience calc
-        experience = (self.shift_date - current_user.profile.employment_date).days
+        return earnings
 
-        if experience > 90:
-            kpi_data['experience'] = experience_bonus
-            calculated_salary += experience_bonus
-            shift_salary += experience_bonus
+    def cashier_earnings_calc(self) -> dict:
+        earnings = self.employee_earnings_calc(self.cash_admin)
+        earnings['penalty'] = self.cash_admin_discipline_penalty
+        earnings.update(self.get_revenue_bonuses(CASHIER_BONUS_CRITERIA))
+        earnings.update(self.final_salary_calculation(earnings))
+        if self.shortage and not self.shortage_paid:
+            earnings['shift_salary'] = round(earnings['shift_salary'] - self.shortage * 2, 2)
 
-        # Discipline
-        if discipline_bonus <= penalty:
-            discipline_bonus = 0
-        else:
-            discipline_bonus -= penalty
-
-        kpi_data['discipline'] = discipline_bonus
-        kpi_data['penalty'] = penalty
-        shift_salary += discipline_bonus
-
-        # Hall cleaning
-        if hall_cleaning:
-            kpi_data['cleaning'] = hall_cleaning_bonus
-            shift_salary += hall_cleaning_bonus
-
-        # Attestation
-        if current_user.profile.attestation_date and current_user.profile.attestation_date <= self.shift_date:
-            kpi_data['attestation'] = attestation_bonus
-            calculated_salary += attestation_bonus
-            shift_salary += attestation_bonus
-
-        # Hookah
-        kpi_data['hookah'] = self.hookah_revenue * hookah_bonus
-
-        # KPI
-        for revenue_value, ratio in kpi_ratio['bar']:
-            if self.bar_revenue >= revenue_value:
-                kpi_data['bar'] = (self.bar_revenue * ratio, ratio * 100)
-
-        game_zone_subtotal = self.game_zone_revenue - self.game_zone_error if self.game_zone_revenue else 0.0
-        for revenue_value, ratio in kpi_ratio['game_zone']:
-            if game_zone_subtotal >= revenue_value:
-                kpi_data['game_zone'] = (game_zone_subtotal * ratio, ratio * 100)
-
-        for revenue_value, ratio in kpi_ratio['vr']:
-            if self.vr_revenue >= revenue_value:
-                kpi_data['vr'] = (self.vr_revenue * ratio, ratio * 100)
-        try:
-            shift_salary += sum([kpi_data['bar'][0], kpi_data['game_zone'][0], kpi_data['vr'][0]], kpi_data['hookah'])
-            calculated_salary += sum([kpi_data['bar'][0], kpi_data['game_zone'][0], kpi_data['vr'][0]], kpi_data['hookah'])
-        except KeyError:
-            shift_salary = 0.0
-            calculated_salary = 0.0
-
-        kpi_data['shift_salary'] = shift_salary
-        kpi_data['calculated_salary']= calculated_salary
-
-        return kpi_data
+        return earnings
 
 
 class Position(models.Model):

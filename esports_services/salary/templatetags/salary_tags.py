@@ -7,8 +7,14 @@ register = template.Library()
 
 
 @register.simple_tag()
-def kpi_salary(workshift, user):
-    return workshift.kpi_salary_calculate(user)
+def hall_admin_earnings_tag(workshift):
+    return workshift.hall_admin_earnings_calc()
+
+
+@register.simple_tag()
+def cashier_earnings_tag(workshift):
+    return workshift.cashier_earnings_calc()
+
 
 @register.simple_tag()
 def return_key(dictonary: dict, name: str):
