@@ -96,8 +96,17 @@ class AdminUserView(StaffPermissionRequiredMixin, TitleMixin, ListView):
             'profile',
             'profile__position'
         ).order_by('-profile__position')
+
+        if not self.kwargs.get('all'):
+            return query.exclude(is_active=False)
+
         return query
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if not self.kwargs.get('all'):
+            context['only_actived'] = True
+        return context
 
 class ReportsView(StaffPermissionRequiredMixin, TitleMixin, ListView):
     template_name = 'salary/reports_list.html'
