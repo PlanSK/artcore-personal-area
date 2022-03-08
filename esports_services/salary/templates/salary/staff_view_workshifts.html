@@ -30,7 +30,7 @@
         <td><a href="{% url 'staff_user_view' request_user=workshift.hall_admin year=workshift.shift_date.year month=workshift.shift_date.month %}" class="link-light">{{ workshift.hall_admin.get_full_name }}</a></td>
         <td>{{ workshift.get_summary_revenue }}</td>
         <td>
-          <a title="Внести изменения" class="btn btn-secondary verysmall" href="{% url 'staff_edit_workshift' workshift.slug %}">
+          <a title="Внести изменения" class="btn btn-secondary verysmall" href="{% url 'staff_edit_workshift' workshift.slug %}?next={{ request.path }}">
             {% bs_icon 'pencil-square' color='yellow' %}
           </a>
           <a title="Удалить смену" class="btn btn-secondary verysmall" href="{% url 'delete_workshift' workshift.slug %}">
@@ -45,7 +45,10 @@
         <td colspan="8">
           {% if only_verified %}
           <div class="row">
-            <a href="{% url 'workshifts_view_all' all='all' %}" class="link-primary">Показать все</a>
+            <div class="col"><a href="{% url 'workshifts_view_all' all='all' %}" class="link-primary">Показать все</a></div>
+          </div>
+          <div class="row">
+              <div class="col"><hr><a class="btn btn-primary verysmall" href="{% url 'add_workshift' %}?next={{ request.path }}">{% bs_icon 'plus-circle' %}Добавить смену</a></div>
           </div>
           {% endif %}
           {% if is_paginated %}

@@ -62,18 +62,14 @@
     <div class="row mt-3">
         <div class="col">
         {% if user.profile.position.name == 'cash_admin' %}
-            {%if not current_workshift %}
+            {%if not today_workshift_exists %}
                 <p class="text-center">
-                    <a class="btn btn-sm btn-outline-secondary" href="{% url 'add_workshift' %}">
+                    <a class="btn btn-sm btn-outline-secondary" href="{% url 'add_workshift' %}?next={{ request.path }}">
                     {% bs_icon 'calendar-plus' %}Закрыть текущую смену
                     </a>
                 </p>
             {% else %}
-            <p class="text-secondary verysmall text-center">Текущая смена успешно закрыта.<br>
-                {% if current_workshift.cash_admin == user %}
-                    <a href="{% url 'edit_workshift' current_workshift.slug %}" class="link-warning verysmall">Внести изменения</a>
-                {% endif %}
-            </p>
+            <p class="text-secondary verysmall text-center">Текущая смена успешно закрыта.</p>
             {% endif %}
         {% endif %}
         </div>
