@@ -57,6 +57,39 @@ class RegistrationUser(TitleMixin, TemplateView):
             return render(request, self.template_name, context=context)
 
 
+class DismissalEmployee(StaffPermissionRequiredMixin, TitleMixin, TemplateView):
+    model = Profile
+    title = 'Увольнение сотрудника'
+    template_name = 'salary/dismissal_user.html'
+    profile_form = DismissalEmployeeForm
+
+    def dispatch(self, request, *args, **kwargs):
+        self.redirect_link = request.GET.get('next', reverse_lazy('index'))
+        self.object = get_object_or_404(User.objects.select_related('profile'), pk=self.kwargs.get('pk', 0))
+        return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        profile_form_class = self.profile_form(instance=self.object.profile)
+        context = self.get_context_data(
+            profile_form=profile_form_class,
+        )
+        return render(request, self.template_name, context=context)
+
+    def post(self, request, **kwargs):
+        profile_form_class = self.profile_form(request.POST, instance=self.object.profile)
+        if profile_form_class.is_valid():
+            self.object.is_active = False
+            self.object.save()
+            profile = profile_form_class.save(commit=False)
+            profile.save()
+            return HttpResponseRedirect(self.redirect_link)
+        else:
+            context = self.get_context_data(
+                profile_form=profile_form_class,
+            )
+            return render(request, self.template_name, context=context)
+
+
 class LoginUser(TitleMixin, LoginView):
     template_name = 'salary/login.html'
     form_class = AuthenticationForm
@@ -319,7 +352,6 @@ class EditUser(LoginRequiredMixin, TitleMixin, TemplateView):
             user = user_form_class.save(commit=False)
             profile = profile_form_class.save(commit=False)
             user.save()
-            profile.user = user
             profile.save()
             return HttpResponseRedirect(self.redirect_link)
         else:
