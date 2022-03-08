@@ -6,6 +6,7 @@ from django.contrib.auth.views import LoginView
 from django.urls import reverse_lazy
 from django.contrib.auth import logout
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
+from django.contrib.auth.models import Group
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.db.models import Q
 
@@ -18,27 +19,75 @@ from dateutil.relativedelta import relativedelta
 
 
 # Registration, Login, Logout
-def registration(request):
-    if request.method == 'POST':
-        user_form = UserRegistrationForm(request.POST)
-        profile_form = EmployeeRegistrationForm(request.POST)
-        if user_form.is_valid() and profile_form.is_valid():
-            user = user_form.save(commit=False) 
-            profile = profile_form.save(commit=False)
-            user.is_active = False
+class RegistrationUser(TitleMixin, TemplateView):
+    template_name = 'salary/registration.html'
+    title = 'Регистрация сотрудника'
+    user_form = UserRegistrationForm
+    profile_form = EmployeeRegistrationForm
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(
+            profile_form=self.profile_form,
+            user_form=self.user_form
+        )
+        return render(request, self.template_name, context=context)
+
+    def post(self, request, **kwargs):
+        user_form_class = self.user_form(request.POST)
+        profile_form_class = self.profile_form(request.POST, request.FILES)
+        if user_form_class.is_valid() and profile_form_class.is_valid():
+            user = user_form_class.save(commit=False) 
+            profile = profile_form_class.save(commit=False)
             profile.user = user
             user.save()
             profile.save()
+
+            user.is_active = False
+            user.groups.add(Group.objects.get(name='employee'))
+            if profile.position.name == 'cash_admin':
+                user.groups.add(Group.objects.get(name='cashiers'))
+            user.save()
+
             return redirect('login')
-    else:
-        user_form = UserRegistrationForm()
-        profile_form = EmployeeRegistrationForm()
-    context = {
-        'title': 'Регистрация сотрудника',
-        'form': user_form,
-        'employee_form': profile_form
-    }
-    return render(request, 'salary/registration.html', context=context)
+        else:
+            context = self.get_context_data(
+                profile_form=profile_form_class,
+                user_form=user_form_class
+            )
+            return render(request, self.template_name, context=context)
+
+
+class DismissalEmployee(StaffPermissionRequiredMixin, TitleMixin, TemplateView):
+    model = Profile
+    title = 'Увольнение сотрудника'
+    template_name = 'salary/dismissal_user.html'
+    profile_form = DismissalEmployeeForm
+
+    def dispatch(self, request, *args, **kwargs):
+        self.redirect_link = request.GET.get('next', reverse_lazy('index'))
+        self.object = get_object_or_404(User.objects.select_related('profile'), pk=self.kwargs.get('pk', 0))
+        return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        profile_form_class = self.profile_form(instance=self.object.profile)
+        context = self.get_context_data(
+            profile_form=profile_form_class,
+        )
+        return render(request, self.template_name, context=context)
+
+    def post(self, request, **kwargs):
+        profile_form_class = self.profile_form(request.POST, instance=self.object.profile)
+        if profile_form_class.is_valid():
+            self.object.is_active = False
+            self.object.save()
+            profile = profile_form_class.save(commit=False)
+            profile.save()
+            return HttpResponseRedirect(self.redirect_link)
+        else:
+            context = self.get_context_data(
+                profile_form=profile_form_class,
+            )
+            return render(request, self.template_name, context=context)
 
 
 class LoginUser(TitleMixin, LoginView):
@@ -303,7 +352,6 @@ class EditUser(LoginRequiredMixin, TitleMixin, TemplateView):
             user = user_form_class.save(commit=False)
             profile = profile_form_class.save(commit=False)
             user.save()
-            profile.user = user
             profile.save()
             return HttpResponseRedirect(self.redirect_link)
         else:

@@ -39,11 +39,9 @@
           </p>
         </div>
         <div class="card-footer text-center">
-          {% if not current_user.is_active %}
-          <a href="#" class="btn btn-sm btn-outline-secondary">{% bs_icon 'check-circle' %}Активировать</a>
-          {% else %}
           <a href="{% url 'staff_user_edit' current_user.profile.pk %}?next={{ request.path }}" class="btn btn-sm btn-outline-secondary">{% bs_icon 'pencil-square' %}Изменить</a>
-          <a href="#" class="btn btn-sm btn-outline-secondary">{% bs_icon 'x-circle' %}Уволить</a>
+          {% if current_user.is_active %}
+          <a href="{% url 'dismissal_user' current_user.profile.pk %}?next={{ request.path }}" class="btn btn-sm btn-outline-secondary">{% bs_icon 'x-circle' %}Уволить</a>
           {% endif %}
         </div>
       </div>

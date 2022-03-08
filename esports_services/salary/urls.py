@@ -5,7 +5,7 @@ from .views import *
 
 urlpatterns = [
     path('login/', LoginUser.as_view(), name='login'),
-    path('registration/', registration, name='registration'),
+    path('registration/', RegistrationUser.as_view(), name='registration'),
     path('', IndexView.as_view(), name='index'),
     path('<int:year>/<int:month>/', IndexView.as_view(), name='archive_view'),
     path('logout/', logout_user, name='logout'),
@@ -22,6 +22,7 @@ urlpatterns = [
     path('workshifts_view/', AdminWorkshiftsView.as_view(), name='workshifts_view'),
     path('workshifts_view/<str:all>/', AdminWorkshiftsView.as_view(), name='workshifts_view_all'),
     path('user_edit/<int:pk>/', StaffEditUser.as_view(), name='staff_user_edit'),
+    path('dismissal/<int:pk>/', DismissalEmployee.as_view(), name='dismissal_user'),
     path('edit_profile/', EditUser.as_view(), name='profile_edit'),
     path('add_publication/', AddPublicationView.as_view(), name='add_publication'),
     path('publications/', PublicationListView.as_view(), name='publications'),

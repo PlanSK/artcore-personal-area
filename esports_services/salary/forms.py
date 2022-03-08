@@ -1,3 +1,4 @@
+from sqlite3 import Date
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 
@@ -6,11 +7,25 @@ import datetime
 from .models import *
 
 
+class DateInput(forms.DateInput):
+    input_type = 'date'
+
+
 class UserRegistrationForm(UserCreationForm):
 
     class Meta:
         model = User
         fields = ['username', 'first_name', 'last_name', 'email', 'password1', 'password2']
+
+
+class DismissalEmployeeForm(forms.ModelForm):
+
+    class Meta:
+        model = Profile
+        fields = ('dismiss_date',)
+        widgets = {
+            'dismiss_date': DateInput(),
+        }
 
 
 class EmployeeRegistrationForm(forms.ModelForm):
@@ -122,7 +137,7 @@ class AddWorkshiftDataForm(EditWorkshiftDataForm):
                 'value': datetime.datetime.now().strftime('%Y-%m-%d'),
                 'max': datetime.datetime.now().strftime('%Y-%m-%d'),
             }),
-        }
+        }   
 
 class AddPublicationForm(forms.ModelForm):
     author = EmplModelChoiceField(
