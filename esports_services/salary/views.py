@@ -370,57 +370,46 @@ class StaffEditUser(StaffPermissionRequiredMixin, EditUser):
     title = 'Редактирование профиля'
 
 
-class IndexView(LoginRequiredMixin, TotalDataMixin, TemplateView):
+class IndexView(LoginRequiredMixin, TitleMixin, TotalDataMixin, ListView):
+    model = WorkingShift
     login_url = 'login'
     template_name = 'salary/account.html'
+    title = 'Личный кабинет'
 
     def dispatch(self, request, *args, **kwargs):
         if self.request.user.is_staff:
             return redirect('dashboard')
-
+        self.employee = get_object_or_404(User.objects.select_related('profile__position'), pk=self.request.user.pk)
         return super().dispatch(request, *args, **kwargs)
+
+    def get_queryset(self):
+        query = WorkingShift.objects.filter(Q(cash_admin=self.employee) | Q(hall_admin=self.employee))
+        return query
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Личный кабинет'
 
         current_year = self.kwargs.get('year', datetime.date.today().year)
         current_month = self.kwargs.get('month', datetime.date.today().month)
-        current_workshifts = self.get_user_workshifts(month=current_month, year=current_year)
+        current_workshifts = self.object_list.filter(shift_date__month=current_month, shift_date__year=current_year)
 
+        # Note
         previous_date = datetime.date(current_year, current_month, 1) - relativedelta(months=1)
         next_date = datetime.date(current_year, current_month, 1) + relativedelta(months=1)
-        if self.get_user_workshifts(month=previous_date.month, year=previous_date.year):
+        if self.object_list.filter(shift_date__month=previous_date.month, shift_date__year=previous_date.year).exists():
             context['previous_date'] = previous_date
-        if self.get_user_workshifts(month=next_date.month, year=next_date.year):
+        if self.object_list.filter(shift_date__month=next_date.month, shift_date__year=next_date.year).exists():
             context['next_date'] = next_date
 
         context.update({
             'current_date': datetime.date(current_year, current_month, 1),
-            'experience': self.request.user.profile.get_work_experience,
+            'experience': self.employee.profile.get_work_experience,
             'workshifts': current_workshifts,
-            'total_values': self.get_total_values(self.request.user, current_workshifts),
-            'current_workshift': self.get_current_shift(),
+            'total_values': self.get_total_values(self.employee, current_workshifts),
+            'today_workshift_exists': self.object_list.filter(shift_date=datetime.date.today()).exists(),
         })
 
         return context
-
-    def get_user_workshifts(self, month, year):
-        workshifts = WorkingShift.objects.filter(
-            shift_date__year=year,
-            shift_date__month=month
-        ).filter(Q(cash_admin=self.request.user) | Q(hall_admin=self.request.user))
-
-        if not workshifts:
-            return []
-
-        return workshifts
-
-    def get_current_shift(self):
-        if WorkingShift.objects.filter(shift_date=datetime.date.today()):
-            return WorkingShift.objects.get(shift_date=datetime.date.today())
-
-        return None
 
     def get_success_url(self, **kwargs):
         return reverse_lazy('index')
@@ -447,8 +436,11 @@ class EditWorkshiftData(PermissionRequiredMixin, UpdateView):
     form_class = EditWorkshiftDataForm
     permission_required = 'salary.change_workingshift'
     template_name = 'salary/edit_workshift.html'
-    success_url = reverse_lazy('index')
-    
+
+    def dispatch(self, request, *args, **kwargs):
+        self.success_url = request.GET.get('next', reverse_lazy('index'))
+        return super().dispatch(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
         context['start_date'] = context['object'].shift_date - relativedelta(days=1)
