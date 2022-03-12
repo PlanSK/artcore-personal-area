@@ -1,7 +1,7 @@
 from django.contrib.auth.forms import AuthenticationForm
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
-from django.views.generic import TemplateView, ListView
+from django.views.generic import TemplateView, ListView, DetailView
 from django.contrib.auth.views import LoginView
 from django.urls import reverse_lazy
 from django.contrib.auth import logout
@@ -368,6 +368,11 @@ class StaffEditUser(StaffPermissionRequiredMixin, EditUser):
     userform = StaffEditUserForm
     profileform = StaffEditProfileForm
     title = 'Редактирование профиля'
+
+
+class WorkshiftDetailView(LoginRequiredMixin, TitleMixin, DetailView):
+    model = WorkingShift
+    title = 'Просмотр смены за ...'
 
 
 class IndexView(LoginRequiredMixin, TitleMixin, TotalDataMixin, ListView):
