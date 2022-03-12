@@ -372,8 +372,13 @@ class StaffEditUser(StaffPermissionRequiredMixin, EditUser):
 
 class WorkshiftDetailView(LoginRequiredMixin, TitleMixin, DetailView):
     model = WorkingShift
-    title = 'Просмотр смены за ...'
+    title = "Детальный просмотр смены"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['yesterday'] = context['object'].shift_date - relativedelta(days=1)
+
+        return context
 
 class IndexView(LoginRequiredMixin, TitleMixin, TotalDataMixin, ListView):
     model = WorkingShift
