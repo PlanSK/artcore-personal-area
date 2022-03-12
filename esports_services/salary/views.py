@@ -379,7 +379,11 @@ class IndexView(LoginRequiredMixin, TitleMixin, TotalDataMixin, ListView):
     def dispatch(self, request, *args, **kwargs):
         if self.request.user.is_staff:
             return redirect('dashboard')
-        self.employee = get_object_or_404(User.objects.select_related('profile__position'), pk=self.request.user.pk)
+        if request.user.is_authenticated:
+            self.employee = get_object_or_404(
+                User.objects.select_related('profile__position'),
+                pk=self.request.user.pk
+            )
         return super().dispatch(request, *args, **kwargs)
 
     def get_queryset(self):
