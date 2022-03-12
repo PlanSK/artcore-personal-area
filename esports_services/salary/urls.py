@@ -8,6 +8,7 @@ urlpatterns = [
     path('registration/', RegistrationUser.as_view(), name='registration'),
     path('', IndexView.as_view(), name='index'),
     path('<int:year>/<int:month>/', IndexView.as_view(), name='archive_view'),
+    path('detail/<slug:slug>/', WorkshiftDetailView.as_view(), name='detail_workshift'),
     path('logout/', logout_user, name='logout'),
     path('add_workshift/', AddWorkshiftData.as_view(), name='add_workshift'),
     path('edit_workshift/<slug:slug>/', EditWorkshiftData.as_view(), name='edit_workshift'),

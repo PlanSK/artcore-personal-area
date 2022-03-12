@@ -1,0 +1,114 @@
+{% extends 'salary/logined_page.html' %}
+{% load bootstrap_icons %}
+{% load salary_tags %}
+{% load humanize %}
+
+{% block content %}
+<main>
+  <div class="container">
+    <div class="row mb-2 mt-3">
+      <div class="col">
+        <p class="text-center">Смена<br>
+        <b>{{ yesterday|date:"d.m.Y" }} - {{ object.shift_date|date:"d.m.Y" }}</b>
+        </p>
+      </div>
+    </div>
+    <div class="row mb-2">
+      <div class="col-4 rounded border border-light">
+        <table class="table table-dark">
+          <thead class="text-warning text-center verysmall">
+            <tr>
+              <th>Состояние</th>
+            </tr>
+          </thead>
+          <tbody class="text-center">
+            <tr>
+              <td>
+                {% if object.is_verified %}
+                  {% bs_icon 'check2-circle' color='green' %} Проверено 
+                {% else %}
+                  {% bs_icon 'stopwatch-fill' color='yellow' %} Ожидает проверки
+                {% endif %}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="col-1"></div>
+      <div class="col-7 rounded border border-light">
+        <table class="table table-dark">
+          <thead class="text-warning text-center verysmall">
+            <tr>
+              <th>Комментарий</th>
+            </tr>
+          </thead>
+          <tbody class="text-center">
+            <tr>
+              <td>{{ object.comment|default:"-" }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-4 rounded border border-light">
+        <table class="table table-dark table-hover">
+          <thead class="text-warning text-center verysmall">
+            <tr>
+              <th colspan="6">Основные показатели выручки</th>
+            </tr>
+          </thead>
+          <tbody class="text-center verysmall">
+            <tr><td class="text-warning">Бар</td><td>{{object.bar_revenue}}</td></tr>
+            <tr><td class="text-warning">Game Zone (КНА)</td><td>{{object.game_zone_revenue}}</td></tr>
+            <tr><td class="text-warning">Ошибки</td><td>{{object.game_zone_error}}</td></tr>
+            <tr><td class="text-warning">Доп. услуги</td><td>{{object.vr_revenue}}</td></tr>
+            <tr><td class="text-warning">Кальян</td><td>{{object.hookah_revenue}}</td></tr>
+            <tr><td class="text-warning">Общая выручка</td><td>{{object.get_summary_revenue}}</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="col-1"></div>
+      <div class="col-7 rounded border border-light">
+        <table class="table table-dark table-hover">
+          <thead class="text-warning text-center verysmall">
+            <tr>
+              <th></th>
+              <th>Администратор зала</th>
+              <th>Администратор кассы</th>
+            </tr>
+          </thead>
+          <tbody class="text-center verysmall">
+            <tr>
+              <td>Сотрудник</td>
+              <td>{{ object.hall_admin.last_name }} {{ object.hall_admin.first_name }}</td>
+              <td>{{ object.cash_admin.last_name }} {{ object.cash_admin.first_name }}</td>
+            </tr>
+            <tr>
+              <td>Дисциплинарный штраф</td>
+              <td>{{ object.hall_admin_discipline_penalty|default:"-" }}</td>
+              <td>{{ object.cash_admin_discipline_penalty|default:"-" }}</td>
+            </tr>
+            <tr>
+              <td>Поддержание чистоты</td>
+              <td>
+              {% if object.hall_cleaning %}
+                {% bs_icon 'check2-circle' color='green' %}
+              {% else %}
+                {% bs_icon 'x-circle' color='red' %}
+              {% endif %}
+              </td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>Недостача</td>
+              <td></td>
+              <td>{{ object.shortage|default:"-" }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</main>
+{% endblock %}

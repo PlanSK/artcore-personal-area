@@ -25,7 +25,7 @@
             {% bs_icon 'stopwatch-fill' color='yellow' %} Ожидает проверки
           {% endif %}
         </td>
-        <td>{{ workshift.shift_date }}</td>
+        <td><a href="{% url 'detail_workshift' slug=workshift.slug %}" class="link-primary">{{ workshift.shift_date }}</a></td>
         <td><a href="{% url 'staff_user_view' request_user=workshift.cash_admin year=workshift.shift_date.year month=workshift.shift_date.month %}" class="link-light">{{ workshift.cash_admin.get_full_name }}</a></td>
         <td><a href="{% url 'staff_user_view' request_user=workshift.hall_admin year=workshift.shift_date.year month=workshift.shift_date.month %}" class="link-light">{{ workshift.hall_admin.get_full_name }}</a></td>
         <td>{{ workshift.get_summary_revenue }}</td>
