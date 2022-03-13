@@ -1,7 +1,5 @@
-{% load bootstrap_icons %}
-
 {% if logic_trigger %}
   <span class="text-danger">-{{ logic_trigger }}</span>
 {% else %}
-  {% bs_icon 'check-circle' color='green' %}
+<i class="bi bi-check-circle" style="color: green;"></i>
 {% endif %}

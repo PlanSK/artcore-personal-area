@@ -38,6 +38,12 @@ def user_directory_path(instance, filename):
     return 'user_{0}/{1}'.format(instance.user.id, filename)
 
 
+def get_last_name(self):
+    return f'{self.last_name} {self.first_name}'
+
+User.add_to_class("get_full_name", get_last_name)
+
+
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     birth_date = models.DateField(null=True, verbose_name='Дата рождения')
@@ -117,7 +123,7 @@ class Profile(models.Model):
 class WorkingShift(models.Model):
     hall_admin = models.ForeignKey(User, on_delete=models.PROTECT, related_name='hall_admin')
     cash_admin = models.ForeignKey(User, on_delete=models.PROTECT, related_name='cash_admin')
-    shift_date = models.DateField(verbose_name='Дата смены', unique=True)
+    shift_date = models.DateField(verbose_name='Дата смены', unique=True, db_index=True)
     bar_revenue = models.FloatField(verbose_name='Выручка по бару', default=0.0)
     game_zone_revenue = models.FloatField(verbose_name='Выручка игровой зоны (без доп. услуг)', default=0.0)
     game_zone_error = models.FloatField(verbose_name='Сумма ошибок', default=0.0)
@@ -131,7 +137,7 @@ class WorkingShift(models.Model):
     shortage = models.FloatField(default=0, verbose_name='Недостача')
     shortage_paid = models.BooleanField(default=False, verbose_name="Отметка о погашении недостачи")
     slug = models.SlugField(max_length=60, unique=True, verbose_name='URL', null=True, blank=True)
-    is_verified = models.BooleanField(default=False, verbose_name='Проверено')
+    is_verified = models.BooleanField(default=False, verbose_name='Проверено', db_index=True)
     comment = models.TextField(verbose_name='Примечание', blank=True)
 
     class Meta:
@@ -227,9 +233,9 @@ class WorkingShift(models.Model):
             shift_bonus_part = 0.0
 
         return {
-            'bonus_part': bonus_part,
-            'calculated_salary': bonus_part + earnings['salary'],
-            'shift_salary': shift_bonus_part + earnings['salary'],
+            'bonus_part': round(bonus_part, 2),
+            'calculated_salary': round(bonus_part + earnings['salary'], 2),
+            'shift_salary': round(shift_bonus_part + earnings['salary'],2),
         }
 
     def hall_admin_earnings_calc(self) -> dict:
