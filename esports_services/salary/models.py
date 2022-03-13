@@ -123,7 +123,7 @@ class Profile(models.Model):
 class WorkingShift(models.Model):
     hall_admin = models.ForeignKey(User, on_delete=models.PROTECT, related_name='hall_admin')
     cash_admin = models.ForeignKey(User, on_delete=models.PROTECT, related_name='cash_admin')
-    shift_date = models.DateField(verbose_name='Дата смены', unique=True)
+    shift_date = models.DateField(verbose_name='Дата смены', unique=True, db_index=True)
     bar_revenue = models.FloatField(verbose_name='Выручка по бару', default=0.0)
     game_zone_revenue = models.FloatField(verbose_name='Выручка игровой зоны (без доп. услуг)', default=0.0)
     game_zone_error = models.FloatField(verbose_name='Сумма ошибок', default=0.0)
@@ -137,7 +137,7 @@ class WorkingShift(models.Model):
     shortage = models.FloatField(default=0, verbose_name='Недостача')
     shortage_paid = models.BooleanField(default=False, verbose_name="Отметка о погашении недостачи")
     slug = models.SlugField(max_length=60, unique=True, verbose_name='URL', null=True, blank=True)
-    is_verified = models.BooleanField(default=False, verbose_name='Проверено')
+    is_verified = models.BooleanField(default=False, verbose_name='Проверено', db_index=True)
     comment = models.TextField(verbose_name='Примечание', blank=True)
 
     class Meta:
