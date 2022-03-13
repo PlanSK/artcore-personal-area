@@ -233,9 +233,9 @@ class WorkingShift(models.Model):
             shift_bonus_part = 0.0
 
         return {
-            'bonus_part': bonus_part,
-            'calculated_salary': bonus_part + earnings['salary'],
-            'shift_salary': shift_bonus_part + earnings['salary'],
+            'bonus_part': round(bonus_part, 2),
+            'calculated_salary': round(bonus_part + earnings['salary'], 2),
+            'shift_salary': round(shift_bonus_part + earnings['salary'],2),
         }
 
     def hall_admin_earnings_calc(self) -> dict:

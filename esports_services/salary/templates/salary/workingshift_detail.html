@@ -14,7 +14,7 @@
       </div>
     </div>
     <div class="row mb-2">
-      <div class="col-4 rounded border border-light">
+      <div class="col-4 me-2 ms-2 rounded border border-light">
         <table class="table table-dark">
           <thead class="text-warning text-center verysmall">
             <tr>
@@ -34,8 +34,7 @@
           </tbody>
         </table>
       </div>
-      <div class="col-1"></div>
-      <div class="col-7 rounded border border-light">
+      <div class="col ms-2 me-2 rounded border border-light">
         <table class="table table-dark">
           <thead class="text-warning text-center verysmall">
             <tr>
@@ -51,8 +50,8 @@
       </div>
     </div>
     <div class="row">
-      <div class="col-4 rounded border border-light">
-        <table class="table table-dark table-hover">
+      <div class="col-md-4 col m-2 rounded border border-light">
+        <table class="table table-dark">
           <thead class="text-warning text-center verysmall">
             <tr>
               <th colspan="6">Основные показатели выручки</th>
@@ -68,8 +67,7 @@
           </tbody>
         </table>
       </div>
-      <div class="col-1"></div>
-      <div class="col-7 rounded border border-light">
+      <div class="col m-2 rounded border border-light">
         <table class="table table-dark table-hover">
           <thead class="text-warning text-center verysmall">
             <tr>
@@ -104,6 +102,142 @@
               <td>Недостача</td>
               <td></td>
               <td>{{ object.shortage|default:"-" }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="row mt-2">
+      <!-- Admin -->
+      <div class="col rounded border border-light m-2">
+        <table class="table table-dark">
+          <thead class="text-warning text-center verysmall">
+            <tr>
+              <th colspan="2">{{object.hall_admin.get_full_name}}</th>
+            </tr>
+          </thead>
+          <tbody class="verysmall">
+            <tr>
+              <td>Оклад</td>
+              <td>{{ object.hall_admin_earnings_calc.salary }}</td>
+            </tr>
+            <tr><td colspan="2" class="text-success text-center">Премиальная часть</td></tr>
+            <tr>
+              <td>Премия за стаж (более 3 мес.)</td>
+              <td>{{ object.hall_admin_earnings_calc.experience|default:"-" }}</td>
+            </tr>
+            <tr>
+              <td>Премия за дисциплину</td>
+              <td>{{ object.hall_admin_earnings_calc.award|default:"-" }}</td>
+            </tr>
+            <tr>
+              <td>Премия за аттестацию</td>
+              <td>{{ object.hall_admin_earnings_calc.attestation|default:"-" }}</td>
+            </tr>
+            <tr>
+              <td>Премия за поддержание чистоты</td>
+              <td>{{ object.hall_admin_earnings_calc.cleaning|default:"-" }}</td>
+            </tr>
+            <tr class="text-secondary">
+              <td>Премия за СММ (1 публикация)</td>
+              <td>*в разработке</td>
+            </tr>
+            <tr>
+              <td>% от выручки по бару</td>
+              <td>{{ object.hall_admin_earnings_calc.bar.0|default:"-" }}&emsp;({{ object.hall_admin_earnings_calc.bar.1}}%)</td>
+            </tr>
+            <tr>
+              <td>% от выручки от игровой зоны (КНА)</td>
+              <td>{{ object.hall_admin_earnings_calc.game_zone.0|default:"-" }}&emsp;({{ object.hall_admin_earnings_calc.game_zone.1 }}%)</td>
+            </tr>
+            <tr>
+              <td>% от выручки от доп. услуг.</td>
+              <td>{{ object.hall_admin_earnings_calc.vr.0|default:"-" }}&emsp;({{ object.hall_admin_earnings_calc.vr.1 }}%)</td>
+            </tr>
+            <tr>
+              <td>% от выручки от продажи кальяна</td>
+              <td>{{ object.hall_admin_earnings_calc.hookah|default:"-" }}&emsp;(20%)</td>
+            </tr>
+            <tr class="text-warning">
+              <td>Суммарно премиальная часть</td>
+              <td>{{ object.hall_admin_earnings_calc.bonus_part|default:"-" }}</td>
+            </tr>
+            {% if object.hall_admin_discipline_penalty %}
+            <tr>
+              <td>Суммарный заработок</td>
+              <td>{{ object.hall_admin_earnings_calc.calculated_salary|default:"-" }}</td>
+            </tr>
+            <tr class="text-danger">
+              <td>Штраф за нарушение дисциплинарного регламента</td>
+              <td>{{ object.hall_admin_discipline_penalty|default:"-" }}</td>
+            </tr>
+            {% endif %}
+            <tr class="table-active">
+              <td>К выдаче</td>
+              <td>{{ object.hall_admin_earnings_calc.shift_salary|default:"-" }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <!-- Cashier -->
+      <div class="col rounded border border-light m-2">
+        <table class="table table-dark">
+          <thead class="text-warning text-center verysmall">
+            <tr>
+              <th colspan="2">{{object.cash_admin.get_full_name}}</th>
+            </tr>
+          </thead>
+          <tbody class="verysmall">
+            <tr>
+              <td>Оклад</td>
+              <td>{{ object.cashier_earnings_calc.salary }}</td>
+            </tr>
+            <tr><td colspan="2" class="text-success text-center">Премиальная часть</td></tr>
+            <tr>
+              <td>Премия за стаж (более 3 мес.)</td>
+              <td>{{ object.cashier_earnings_calc.experience|default:"-" }}</td>
+            </tr>
+            <tr>
+              <td>Премия за дисциплину</td>
+              <td>{{ object.cashier_earnings_calc.award|default:"-" }}</td>
+            </tr>
+            <tr>
+              <td>Премия за аттестацию</td>
+              <td>{{ object.cashier_earnings_calc.attestation|default:"-" }}</td>
+            </tr>
+            <tr class="text-secondary">
+              <td>Премия за СММ (1 публикация)</td>
+              <td>*в разработке</td>
+            </tr>
+            <tr>
+              <td>% от выручки по бару</td>
+              <td>{{ object.cashier_earnings_calc.bar.0|default:"-" }}&emsp;({{ object.cashier_earnings_calc.bar.1}}%)</td>
+            </tr>
+            <tr>
+              <td>% от выручки от игровой зоны (КНА)</td>
+              <td>{{ object.cashier_earnings_calc.game_zone.0|default:"-" }}&emsp;({{ object.cashier_earnings_calc.game_zone.1 }}%)</td>
+            </tr>
+            <tr>
+              <td>% от выручки от доп. услуг.</td>
+              <td>{{ object.cashier_earnings_calc.vr.0|default:"-" }}&emsp;({{ object.cashier_earnings_calc.vr.1 }}%)</td>
+            </tr>
+            <tr class="text-warning">
+              <td>Суммарно премиальная часть</td>
+              <td>{{ object.cashier_earnings_calc.bonus_part|default:"-" }}</td>
+            </tr>
+            {% if object.cash_admin_discipline_penalty %}
+            <tr>
+              <td>Суммарный заработок</td>
+              <td>{{ object.cashier_earnings_calc.calculated_salary|default:"-" }}</td>
+            </tr>
+            <tr class="text-danger">
+              <td>Штраф за нарушение дисциплинарного регламента</td>
+              <td>{{ object.cash_admin_discipline_penalty|default:"-" }}</td>
+            </tr>
+            {% endif %}
+            <tr class="table-active">
+              <td>К выдаче</td>
+              <td>{{ object.cashier_earnings_calc.shift_salary|default:"-" }}</td>
             </tr>
           </tbody>
         </table>
