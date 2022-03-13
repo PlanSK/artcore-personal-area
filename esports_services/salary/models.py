@@ -38,6 +38,12 @@ def user_directory_path(instance, filename):
     return 'user_{0}/{1}'.format(instance.user.id, filename)
 
 
+def get_last_name(self):
+    return f'{self.last_name} {self.first_name}'
+
+User.add_to_class("get_full_name", get_last_name)
+
+
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     birth_date = models.DateField(null=True, verbose_name='Дата рождения')

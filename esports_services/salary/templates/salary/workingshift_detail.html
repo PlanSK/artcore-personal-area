@@ -81,8 +81,8 @@
           <tbody class="text-center verysmall">
             <tr>
               <td>Сотрудник</td>
-              <td>{{ object.hall_admin.last_name }} {{ object.hall_admin.first_name }}</td>
-              <td>{{ object.cash_admin.last_name }} {{ object.cash_admin.first_name }}</td>
+              <td>{{ object.hall_admin.get_full_name }}</td>
+              <td>{{ object.cash_admin.get_full_name }}</td>
             </tr>
             <tr>
               <td>Дисциплинарный штраф</td>
