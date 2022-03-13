@@ -1,5 +1,4 @@
 {% extends 'salary/logined_page.html' %}
-{% load bootstrap_icons %}
 {% load humanize %}
 {% load salary_tags %}
 
@@ -15,7 +14,7 @@
               {% if user.profile.photo %}
                 <img src="{{ user.profile.photo.url }}" alt="" class="rounded-circle" style="width: 120px; height: 120px;">
               {% else %}
-                {% bs_icon 'person-circle' size='120' %}
+              <i class="bi bi-person-circle" style="font-size: 6rem;"></i>
               {% endif %}
             </div>
           </div>

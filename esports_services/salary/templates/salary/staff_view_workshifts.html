@@ -1,5 +1,4 @@
 {% extends 'salary/dashboard.html' %}
-{% load bootstrap_icons %}
 {% load humanize %}
 {% load salary_tags %}
 {% block data %}
@@ -12,7 +11,7 @@
         <th scope="col">Администратор кассы</th>
         <th scope="col">Администратор зала</th>
         <th scope="col">Общая выручка</th>
-        <th scope="col">Действия</th>
+        <th scope="col"></th>
       </tr>
     </thead>
     <tbody class="text-center verysmall">
@@ -20,23 +19,18 @@
       <tr>
         <td>
           {% if workshift.is_verified %}
-            {% bs_icon 'check2-circle' color='green' %} Проверено 
+          <i class="bi bi-check2-circle" style="color: green;"></i>
+          Проверено 
           {% else %}
-            {% bs_icon 'stopwatch-fill' color='yellow' %} Ожидает проверки
+          <i class="bi bi-stopwatch-fill" style="color: yellow;"></i>
+          Ожидает проверки
           {% endif %}
         </td>
         <td>{{ workshift.shift_date }}</td>
         <td><a href="{% url 'staff_user_view' request_user=workshift.cash_admin year=workshift.shift_date.year month=workshift.shift_date.month %}" class="link-light">{{ workshift.cash_admin.get_full_name }}</a></td>
         <td><a href="{% url 'staff_user_view' request_user=workshift.hall_admin year=workshift.shift_date.year month=workshift.shift_date.month %}" class="link-light">{{ workshift.hall_admin.get_full_name }}</a></td>
         <td>{{ workshift.get_summary_revenue }}</td>
-        <td>
-          <a title="Внести изменения" class="btn btn-secondary verysmall" href="{% url 'staff_edit_workshift' workshift.slug %}?next={{ request.path }}">
-            {% bs_icon 'pencil-square' color='yellow' %}
-          </a>
-          <a title="Удалить смену" class="btn btn-secondary verysmall" href="{% url 'delete_workshift' workshift.slug %}">
-            {% bs_icon 'x-square' color='red' %}
-          </a>
-        </td>
+        <td><a href="{% url 'detail_workshift' slug=workshift.slug %}" class="link-primary">Подробнее...</a></td>
       </tr>
       {% endfor %}
     </tbody>
@@ -48,7 +42,7 @@
             <div class="col"><a href="{% url 'workshifts_view_all' all='all' %}" class="link-primary">Показать все</a></div>
           </div>
           <div class="row">
-              <div class="col"><hr><a class="btn btn-primary verysmall" href="{% url 'add_workshift' %}?next={{ request.path }}">{% bs_icon 'plus-circle' %}Добавить смену</a></div>
+              <div class="col"><hr><a class="btn btn-primary verysmall" href="{% url 'add_workshift' %}?next={{ request.path }}"><i class="bi bi-plus-circle"></i> Добавить смену</a></div>
           </div>
           {% endif %}
           {% if is_paginated %}
