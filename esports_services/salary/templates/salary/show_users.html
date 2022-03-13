@@ -1,6 +1,5 @@
 {% extends 'salary/dashboard.html' %}
 {% load static %}
-{% load bootstrap_icons %}
 {% block data %}
 <div class="row row-cols-sm-1 row-cols-md-4 g-2 border-top">
     {% for current_user in object_list %}
@@ -10,7 +9,7 @@
           {% if current_user.profile.photo %}
             <img src="{{ current_user.profile.photo.url }}" alt="" class="rounded-circle" style="width: 75px; height: 75px;">
           {% else %}
-            {% bs_icon 'person-circle' size='75' %}
+            <i class="bi bi-person-circle" style="font-size: 4rem;"></i>
           {% endif %}
           <br>{{ current_user.get_full_name }}<br>
           <span class="text-muted verysmall" style="font-size: x-small;">Был(а) {{ current_user.profile.get_last_login|default:"давно" }}</span>
@@ -39,9 +38,9 @@
           </p>
         </div>
         <div class="card-footer text-center">
-          <a href="{% url 'staff_user_edit' current_user.profile.pk %}?next={{ request.path }}" class="btn btn-sm btn-outline-secondary">{% bs_icon 'pencil-square' %}Изменить</a>
+          <a href="{% url 'staff_user_edit' current_user.profile.pk %}?next={{ request.path }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil-square"></i> Изменить</a>
           {% if current_user.is_active %}
-          <a href="{% url 'dismissal_user' current_user.profile.pk %}?next={{ request.path }}" class="btn btn-sm btn-outline-secondary">{% bs_icon 'x-circle' %}Уволить</a>
+          <a href="{% url 'dismissal_user' current_user.profile.pk %}?next={{ request.path }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-x-circle"></i> Уволить</a>
           {% endif %}
         </div>
       </div>

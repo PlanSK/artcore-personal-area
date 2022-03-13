@@ -1,16 +1,20 @@
 {% extends 'salary/logined_page.html' %}
-{% load bootstrap_icons %}
 {% load salary_tags %}
 {% load humanize %}
 
 {% block content %}
 <main>
   <div class="container">
-    <div class="row mb-2 mt-3">
+    <div class="row mt-1">
       <div class="col">
         <p class="text-center">Смена<br>
         <b>{{ yesterday|date:"d.m.Y" }} - {{ object.shift_date|date:"d.m.Y" }}</b>
         </p>
+      </div>
+    </div>
+    <div class="row mb-2">
+      <div class="col">
+        <a href="{% url 'workshifts_view' %}" class="btn btn-secondary verysmall">Назад к списку смен</a>
       </div>
     </div>
     <div class="row mb-2">
@@ -25,9 +29,9 @@
             <tr>
               <td>
                 {% if object.is_verified %}
-                  {% bs_icon 'check2-circle' color='green' %} Проверено 
+                <i class="bi bi-check2-circle" style="color: green;"></i> Проверено 
                 {% else %}
-                  {% bs_icon 'stopwatch-fill' color='yellow' %} Ожидает проверки
+                <i class="bi bi-stopwatch-fill" style="color: yellow;"></i> Ожидает проверки
                 {% endif %}
               </td>
             </tr>
@@ -91,9 +95,9 @@
               <td>Поддержание чистоты</td>
               <td colspan="2">
               {% if object.hall_cleaning %}
-                {% bs_icon 'check2-circle' color='green' %}
+              <i class="bi bi-check2-circle" style="color: green;"></i>
               {% else %}
-                {% bs_icon 'x-circle' color='red' %}
+              <i class="bi bi-x-circle" style="color: red;"></i>
               {% endif %}
               </td>
             </tr>
@@ -138,7 +142,7 @@
             </tr>
             <tr class="text-secondary">
               <td>Премия за СММ (1 публикация)</td>
-              <td>в разработке{% bs_icon 'emoji-smile' %}</td>
+              <td>в разработке <i class="bi bi-tools"></i></td>
             </tr>
             <tr>
               <td>% от выручки по бару</td>
@@ -214,7 +218,7 @@
             </tr>
             <tr class="text-secondary">
               <td>Премия за СММ (1 публикация)</td>
-              <td>в разработке{% bs_icon 'emoji-smile' %}</td>
+              <td>в разработке <i class="bi bi-tools"></i></td>
             </tr>
             <tr>
               <td>% от выручки по бару</td>
@@ -276,13 +280,13 @@
     <div class="row text-center">
       <div class="col">
         <a title="Внести изменения" class="btn btn-secondary verysmall" href="{% url 'staff_edit_workshift' object.slug %}?next={{ request.path }}">
-          {% bs_icon 'pencil-square' color='yellow' %}
+          <i class="bi bi-pencil-square" style="color: yellow;"></i>
           Внести изменения
         </a>
       </div>
       <div class="col">
         <a title="Удалить смену" class="btn btn-secondary verysmall" href="{% url 'delete_workshift' object.slug %}">
-          {% bs_icon 'x-square' color='red' %}
+          <i class="bi bi-x-square" style="color: red;"></i>
           Удалить смену
         </a>
       </div>

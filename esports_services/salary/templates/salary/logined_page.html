@@ -1,6 +1,5 @@
 {% extends 'salary/base.html' %}
 {% load static %}
-{% load bootstrap_icons %}
 {% load salary_tags %}
 
 {% block body %}
@@ -23,11 +22,11 @@
             {% if request.user.profile.photo %}
               <img src="{{ request.user.profile.photo.url }}" alt="" class="rounded-circle" style="width: 40px; height: 40px;">
             {% else %}
-              {% bs_icon 'person-circle' size='40' %}
+            <i class="bi bi-person-circle" style="font-size: 1.5rem; color: white;"></i>
             {% endif %}
             <span class="text-light verysmall m-2">{{request.user.get_full_name}}</span>
             </a>
-            <a href="{% url 'logout' %}" class="btn btn-sm btn-outline-secondary">{% bs_icon 'door-open-fill' %}</a>
+            <a href="{% url 'logout' %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-door-open-fill"></i></a>
           </div>
           {% endif %}
         </div>
