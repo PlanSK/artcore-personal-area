@@ -129,7 +129,7 @@ class WorkingShift(models.Model):
     game_zone_error = models.FloatField(verbose_name='Сумма ошибок', default=0.0)
     vr_revenue = models.FloatField(verbose_name='Выручка доп. услуги и VR', default=0.0)
     hookah_revenue = models.FloatField(verbose_name='Выручка по кальянам', default=0.0)
-    hall_cleaning = models.BooleanField(default=False, verbose_name='Наведение порядка')
+    hall_cleaning = models.BooleanField(default=True, verbose_name='Наведение порядка')
     hall_admin_discipline = models.BooleanField(default=True, verbose_name='Сюблюдение дисциплины Админ зала')
     hall_admin_discipline_penalty = models.FloatField(default=0.0, verbose_name='Дисциплинарный штраф')
     cash_admin_discipline = models.BooleanField(default=True, verbose_name='Сюблюдение дисциплины Админ кассы')
