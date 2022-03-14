@@ -122,7 +122,7 @@ class StaffUserView(StaffPermissionRequiredMixin, TotalDataMixin, TemplateView):
             shift_date__year=self.required_year,
             shift_date__month=self.required_month
         ).filter(Q(cash_admin=get_user) | Q(hall_admin=get_user))
-        context['title'] = f'Данные польователя {get_user}'
+        context['title'] = f'Данные пользователя {get_user}'
         context['request_user'] = get_user
         context['workshifts'] = workshifts
         context['total_values'] = self.get_total_values(get_user, workshifts)
