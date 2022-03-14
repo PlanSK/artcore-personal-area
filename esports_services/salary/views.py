@@ -448,6 +448,12 @@ class AddWorkshiftData(PermissionRequiredMixin, TitleMixin, CreateView):
         })
         return initional
 
+    def form_valid(self, form):
+        obj = form.save(commit=False)
+        obj.editor = self.request.user.get_full_name()
+        obj.slug = obj.shift_date
+        return super().form_valid(form)
+
 
 class EditWorkshiftData(PermissionRequiredMixin, UpdateView):
     model = WorkingShift
@@ -458,6 +464,10 @@ class EditWorkshiftData(PermissionRequiredMixin, UpdateView):
     def dispatch(self, request, *args, **kwargs):
         self.success_url = request.GET.get('next', reverse_lazy('index'))
         return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        self.object.editor = self.request.user.get_full_name()
+        return super().form_valid(form)
 
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)

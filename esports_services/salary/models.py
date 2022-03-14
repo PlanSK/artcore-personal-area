@@ -104,7 +104,7 @@ class Profile(models.Model):
     def get_last_login(self) -> str:
         if self.user.last_login:
             date_period = relativedelta(datetime.date.today(), self.user.last_login.date())
-            hours_period = relativedelta(timezone.now(), self.user.last_login)
+            hours_period = relativedelta(timezone.localtime(timezone.now()), self.user.last_login)
             if date_period.days == 0 and 1 < hours_period.hours < 12:
                 return f'{self.get_choice_plural(hours_period.hours, HOURS_VARIANT)} назад'
             elif date_period.days == 0 and hours_period.hours > 12:
@@ -139,6 +139,8 @@ class WorkingShift(models.Model):
     slug = models.SlugField(max_length=60, unique=True, verbose_name='URL', null=True, blank=True)
     is_verified = models.BooleanField(default=False, verbose_name='Проверено', db_index=True)
     comment = models.TextField(verbose_name='Примечание', blank=True)
+    change_date = models.DateTimeField(verbose_name='Дата изменения', blank=True, null=True)
+    editor = models.TextField(verbose_name='Редактор', blank=True, editable=False)
 
     class Meta:
         verbose_name = 'Смена'
@@ -149,7 +151,7 @@ class WorkingShift(models.Model):
         return self.shift_date.strftime('%d-%m-%Y')
 
     def save(self, *args, **kwargs):
-        self.slug = self.shift_date
+        self.change_date = timezone.localtime(timezone.now())
         super(WorkingShift, self).save()
 
     def get_summary_revenue(self) -> float:
