@@ -12,6 +12,7 @@
         <th scope="col">Администратор зала</th>
         <th scope="col">Общая выручка</th>
         <th scope="col"></th>
+        <th scope="col"></th>
       </tr>
     </thead>
     <tbody class="text-center verysmall">
@@ -31,6 +32,12 @@
         <td><a href="{% url 'staff_user_view' request_user=workshift.hall_admin year=workshift.shift_date.year month=workshift.shift_date.month %}" class="link-light">{{ workshift.hall_admin.get_full_name }}</a></td>
         <td>{{ workshift.get_summary_revenue }}</td>
         <td><a href="{% url 'detail_workshift' slug=workshift.slug %}" class="link-primary">Подробнее...</a></td>
+        <td>
+          <a title="Внести изменения" class="btn btn-secondary verysmall" href="{% url 'staff_edit_workshift' workshift.slug %}?next={{ request.path }}">
+            <i class="bi bi-pencil-square" style="color: yellow;"></i>
+            Внести изменения
+          </a>
+        </td>
       </tr>
       {% endfor %}
     </tbody>
