@@ -35,6 +35,13 @@
                 {% endif %}
               </td>
             </tr>
+            {% if object.change_date and object.editor %}
+            <tr>
+              <td class="verysmall">
+                Изменен: {{ object.change_date }} ({{ object.editor }})
+              </td>
+            </tr>
+            {% endif %}
           </tbody>
         </table>
       </div>

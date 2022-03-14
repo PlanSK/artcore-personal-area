@@ -96,12 +96,11 @@ class EmplModelChoiceField(forms.ModelChoiceField):
 class EditWorkshiftDataForm(forms.ModelForm):
     hall_admin = EmplModelChoiceField(
         queryset=User.objects.filter(is_active=True, profile__position=1),
-        label='Администратор зала'
+        label='Администратор зала',
     )
     cash_admin = EmplModelChoiceField(
         queryset=User.objects.filter(is_active=True, profile__position=2),
         label='Администратор кассы',
-        disabled=True
     )
 
     class Meta:
