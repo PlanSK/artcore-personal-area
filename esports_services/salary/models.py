@@ -226,7 +226,9 @@ class WorkingShift(models.Model):
 
     def final_salary_calculation(self, earnings: dict) -> dict:
         tuple_fields = ('bar', 'game_zone', 'vr')
-        exclude_fields = ('salary', 'penalty', 'experience', 'attestation')
+        exclude_fields = (
+            'salary', 'penalty', 'experience', 'attestation', 'basic_part',
+        )
         bonus_part = 0.0
 
         for key, value in earnings.items():

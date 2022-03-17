@@ -7,24 +7,24 @@
         </tr>
       </thead>
       <tbody class="verysmall">
-        <tr><td colspan="2" class="text-info text-center table-active">Базовая часть</td></tr>
+        <tr><td colspan="2" class="text-info text-center">Базовая часть</td></tr>
         <tr>
           <td>Оклад за смену</td>
           <td>{{ work_shift.hall_admin_earnings_calc.salary }}</td>
         </tr>
         <tr>
-          <td>Премия за стаж (более 3 мес.)</td>
+          <td>Надбавка за стаж (более 3 мес.)</td>
           <td>{{ work_shift.hall_admin_earnings_calc.experience|default:"-" }}</td>
         </tr>
         <tr>
-          <td>Премия за аттестацию</td>
+          <td>Надбавка за прохождение аттестации</td>
           <td>{{ work_shift.hall_admin_earnings_calc.attestation|default:"-" }}</td>
         </tr>
-        <tr>
+        <tr class="text-warning table-active">
           <td>Суммарный оклад</td>
           <td>{{ work_shift.hall_admin_earnings_calc.basic_part|default:"-" }}</td>
         </tr>
-        <tr><td colspan="2" class="text-info text-center table-active">Премиальная часть</td></tr>
+        <tr><td colspan="2" class="text-info text-center">Премиальная часть</td></tr>
         <tr>
           <td>Премия за дисциплину</td>
           <td>{{ work_shift.hall_admin_earnings_calc.award|default:"-" }}</td>
@@ -53,7 +53,7 @@
           <td>% от выручки от продажи кальяна</td>
           <td>{{ work_shift.hall_admin_earnings_calc.hookah|default:"-" }}&emsp;(20%)</td>
         </tr>
-        <tr class="text-warning">
+        <tr class="text-warning table-active">
           <td>Сумма премиальной части</td>
           <td>{{ work_shift.hall_admin_earnings_calc.bonus_part|default:"-" }}</td>
         </tr>
