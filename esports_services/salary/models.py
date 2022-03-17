@@ -215,38 +215,37 @@ class WorkingShift(models.Model):
             'bar': (0.0, 0.0),
             'vr': (0.0, 0.0),
         }
-        base_earnings.update({
-            'basic_part': sum([
-                base_earnings.get('salary'),
-                base_earnings.get('experience'),
-                base_earnings.get('attestation')
-                ])
-        })
+
         return base_earnings
 
-    def final_salary_calculation(self, earnings: dict) -> dict:
+    def final_earnings_calculation(self, earnings: dict) -> dict:
         tuple_fields = ('bar', 'game_zone', 'vr')
-        exclude_fields = (
-            'salary', 'penalty', 'experience', 'attestation', 'basic_part',
-        )
+        exclude_bonus_fields = ('salary', 'penalty', 'experience', 'attestation')
         bonus_part = 0.0
 
         for key, value in earnings.items():
-            if key not in exclude_fields:
+            if key not in exclude_bonus_fields:
                 if key not in tuple_fields:
                     bonus_part += value
                 else:
                     bonus_part += value[0]
 
         if bonus_part > earnings['penalty']:
-            shift_bonus_part = bonus_part - earnings['penalty']
+            remaining_bonus_part = bonus_part - earnings['penalty']
         else: 
-            shift_bonus_part = 0.0
+            remaining_bonus_part = 0.0
+
+        basic_part = sum([
+                earnings.get('salary'),
+                earnings.get('experience'),
+                earnings.get('attestation')
+        ])
 
         return {
+            'basic_part': round(basic_part, 2),
             'bonus_part': round(bonus_part, 2),
-            'estimated_earnings': round(bonus_part + earnings['salary'], 2),
-            'final_earnings': round(shift_bonus_part + earnings['salary'],2),
+            'estimated_earnings': round(bonus_part + basic_part, 2),
+            'final_earnings': round(remaining_bonus_part + basic_part,2),
         }
 
     def hall_admin_earnings_calc(self) -> dict:
@@ -255,7 +254,7 @@ class WorkingShift(models.Model):
         earnings['cleaning'] = HALL_CLEANING_BONUS if self.hall_cleaning else 0.0
         earnings['hookah'] = round(self.hookah_revenue * HOOKAH_BONUS_RATIO, 2)
         earnings.update(self.get_revenue_bonuses(ADMIN_BONUS_CRITERIA))
-        earnings.update(self.final_salary_calculation(earnings))
+        earnings.update(self.final_earnings_calculation(earnings))
 
         return earnings
 
@@ -263,7 +262,7 @@ class WorkingShift(models.Model):
         earnings = self.employee_earnings_calc(self.cash_admin)
         earnings['penalty'] = self.cash_admin_discipline_penalty
         earnings.update(self.get_revenue_bonuses(CASHIER_BONUS_CRITERIA))
-        earnings.update(self.final_salary_calculation(earnings))
+        earnings.update(self.final_earnings_calculation(earnings))
         if self.shortage and not self.shortage_paid:
             earnings['final_earnings'] = round(earnings['final_earnings'] - self.shortage * 2, 2)
 
