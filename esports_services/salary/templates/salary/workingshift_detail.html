@@ -8,13 +8,13 @@
     <div class="row mt-1">
       <div class="col">
         <p class="text-center">Смена<br>
-        <b>{{ yesterday|date:"d.m.Y" }} - {{ object.shift_date|date:"d.m.Y" }}</b>
+        <b>{{ yesterday|date:"d.m.Y" }} - {{ work_shift.shift_date|date:"d.m.Y" }}</b>
         </p>
       </div>
     </div>
     <div class="row mb-2">
       <div class="col">
-        <a href="{% url 'workshifts_view' %}" class="btn btn-secondary verysmall">Назад к списку смен</a>
+        <a href="{{ request.GET.next|default:"/" }}" class="btn btn-secondary verysmall">Назад к списку смен</a>
       </div>
     </div>
     <div class="row mb-2">
@@ -28,17 +28,17 @@
           <tbody class="text-center">
             <tr>
               <td>
-                {% if object.is_verified %}
+                {% if work_shift.is_verified %}
                 <i class="bi bi-check2-circle" style="color: green;"></i> Проверено 
                 {% else %}
                 <i class="bi bi-stopwatch-fill" style="color: yellow;"></i> Ожидает проверки
                 {% endif %}
               </td>
             </tr>
-            {% if object.change_date and object.editor %}
+            {% if work_shift.change_date and work_shift.editor %}
             <tr>
               <td class="verysmall">
-                Изменен: {{ object.change_date }} ({{ object.editor }})
+                Изменен: {{ work_shift.change_date }} ({{ work_shift.editor }})
               </td>
             </tr>
             {% endif %}
@@ -54,7 +54,7 @@
           </thead>
           <tbody class="text-center">
             <tr>
-              <td>{{ object.comment|default:"-" }}</td>
+              <td>{{ work_shift.comment|default:"-" }}</td>
             </tr>
           </tbody>
         </table>
@@ -69,12 +69,12 @@
             </tr>
           </thead>
           <tbody class="text-center verysmall">
-            <tr><td class="text-warning">Бар</td><td>{{object.bar_revenue}}</td></tr>
-            <tr><td class="text-warning">Game Zone (КНА)</td><td>{{object.game_zone_revenue}}</td></tr>
-            <tr><td class="text-warning">Ошибки</td><td>{{object.game_zone_error}}</td></tr>
-            <tr><td class="text-warning">Доп. услуги</td><td>{{object.vr_revenue}}</td></tr>
-            <tr><td class="text-warning">Кальян</td><td>{{object.hookah_revenue}}</td></tr>
-            <tr><td class="text-warning">Общая выручка</td><td>{{object.get_summary_revenue}}</td></tr>
+            <tr><td class="text-warning">Бар</td><td>{{work_shift.bar_revenue}}</td></tr>
+            <tr><td class="text-warning">Game Zone (КНА)</td><td>{{work_shift.game_zone_revenue}}</td></tr>
+            <tr><td class="text-warning">Ошибки</td><td>{{work_shift.game_zone_error}}</td></tr>
+            <tr><td class="text-warning">Доп. услуги</td><td>{{work_shift.vr_revenue}}</td></tr>
+            <tr><td class="text-warning">Кальян</td><td>{{work_shift.hookah_revenue}}</td></tr>
+            <tr><td class="text-warning">Общая выручка</td><td>{{work_shift.get_summary_revenue}}</td></tr>
           </tbody>
         </table>
       </div>
@@ -90,18 +90,18 @@
           <tbody class="text-center verysmall">
             <tr>
               <td>Сотрудник</td>
-              <td>{{ object.hall_admin.get_full_name }}</td>
-              <td>{{ object.cash_admin.get_full_name }}</td>
+              <td>{{ work_shift.hall_admin.get_full_name }}</td>
+              <td>{{ work_shift.cash_admin.get_full_name }}</td>
             </tr>
             <tr>
               <td>Нарушения регламента</td>
-              <td>{{ object.hall_admin_discipline_penalty|default:"-" }}</td>
-              <td>{{ object.cash_admin_discipline_penalty|default:"-" }}</td>
+              <td>{{ work_shift.hall_admin_discipline_penalty|default:"-" }}</td>
+              <td>{{ work_shift.cash_admin_discipline_penalty|default:"-" }}</td>
             </tr>
             <tr>
               <td>Поддержание чистоты</td>
               <td colspan="2">
-              {% if object.hall_cleaning %}
+              {% if work_shift.hall_cleaning %}
               <i class="bi bi-check2-circle" style="color: green;"></i>
               {% else %}
               <i class="bi bi-x-circle" style="color: red;"></i>
@@ -110,194 +110,36 @@
             </tr>
             <tr>
               <td>Недостача</td>
-              <td colspan="2">{{ object.shortage|default:"-" }}</td>
+              <td colspan="2">{{ work_shift.shortage|default:"-" }}</td>
             </tr>
           </tbody>
         </table>
       </div>
     </div>
     <div class="row mt-2">
-      <!-- Admin -->
-      <div class="col rounded border border-light m-2">
-        <table class="table table-dark">
-          <thead class="text-warning text-center verysmall">
-            <tr>
-              <th colspan="2">{{object.hall_admin.get_full_name}}</th>
-            </tr>
-          </thead>
-          <tbody class="verysmall">
-            <tr>
-              <td>Оклад</td>
-              <td>{{ object.hall_admin_earnings_calc.salary }}</td>
-            </tr>
-            <tr><td colspan="2" class="text-success text-center table-active">Премиальная часть</td></tr>
-            <tr>
-              <td>Премия за стаж (более 3 мес.)</td>
-              <td>{{ object.hall_admin_earnings_calc.experience|default:"-" }}</td>
-            </tr>
-            <tr>
-              <td>Премия за дисциплину</td>
-              <td>{{ object.hall_admin_earnings_calc.award|default:"-" }}</td>
-            </tr>
-            <tr>
-              <td>Премия за аттестацию</td>
-              <td>{{ object.hall_admin_earnings_calc.attestation|default:"-" }}</td>
-            </tr>
-            <tr>
-              <td>Премия за поддержание чистоты</td>
-              <td>{{ object.hall_admin_earnings_calc.cleaning|default:"-" }}</td>
-            </tr>
-            <tr class="text-secondary">
-              <td>Премия за СММ (1 публикация)</td>
-              <td>в разработке <i class="bi bi-tools"></i></td>
-            </tr>
-            <tr>
-              <td>% от выручки по бару</td>
-              <td>{{ object.hall_admin_earnings_calc.bar.0|default:"-" }}&emsp;({{ object.hall_admin_earnings_calc.bar.1}}%)</td>
-            </tr>
-            <tr>
-              <td>% от выручки от игровой зоны (КНА)</td>
-              <td>{{ object.hall_admin_earnings_calc.game_zone.0|default:"-" }}&emsp;({{ object.hall_admin_earnings_calc.game_zone.1 }}%)</td>
-            </tr>
-            <tr>
-              <td>% от выручки от доп. услуг.</td>
-              <td>{{ object.hall_admin_earnings_calc.vr.0|default:"-" }}&emsp;({{ object.hall_admin_earnings_calc.vr.1 }}%)</td>
-            </tr>
-            <tr>
-              <td>% от выручки от продажи кальяна</td>
-              <td>{{ object.hall_admin_earnings_calc.hookah|default:"-" }}&emsp;(20%)</td>
-            </tr>
-            <tr class="text-warning">
-              <td>Сумма премиальной части</td>
-              <td>{{ object.hall_admin_earnings_calc.bonus_part|default:"-" }}</td>
-            </tr>
-            </tbody>
-            <tfoot class="verysmall">
-            {% if object.hall_admin_discipline_penalty %}
-            <tr>
-              <td>Суммарный заработок</td>
-              <td>{{ object.hall_admin_earnings_calc.calculated_salary|default:"-" }}</td>
-            </tr>
-            <tr class="text-danger">
-              <td>Штраф за нарушение дисциплинарного регламента</td>
-              <td>{{ object.hall_admin_discipline_penalty|default:"-" }}</td>
-            </tr>
-            {% endif %}
-            <tr class="table-active">
-              <td>Итоговый заработок</td>
-              {% if not object.is_verified %}
-              <td class="text-secondary">{{ object.hall_admin_earnings_calc.shift_salary|default:"-" }}*</td>
-              {% else %}
-              <td>{{ object.hall_admin_earnings_calc.shift_salary|default:"-" }}</td>
-              {% endif %}
-            </tr>
-          </tfoot>
-        </table>
-        {% if not object.is_verified %}
-        <p class="text-secondary verysmall">*Смена не проверена, данные могут измениться.</p>
-        {% endif %}
-      </div>
-      <!-- Cashier -->
-      <div class="col rounded border border-light m-2">
-        <table class="table table-dark">
-          <thead class="text-warning text-center verysmall">
-            <tr>
-              <th colspan="2">{{object.cash_admin.get_full_name}}</th>
-            </tr>
-          </thead>
-          <tbody class="verysmall">
-            <tr>
-              <td>Оклад</td>
-              <td>{{ object.cashier_earnings_calc.salary }}</td>
-            </tr>
-            <tr><td colspan="2" class="text-success text-center table-active">Премиальная часть</td></tr>
-            <tr>
-              <td>Премия за стаж (более 3 мес.)</td>
-              <td>{{ object.cashier_earnings_calc.experience|default:"-" }}</td>
-            </tr>
-            <tr>
-              <td>Премия за дисциплину</td>
-              <td>{{ object.cashier_earnings_calc.award|default:"-" }}</td>
-            </tr>
-            <tr>
-              <td>Премия за аттестацию</td>
-              <td>{{ object.cashier_earnings_calc.attestation|default:"-" }}</td>
-            </tr>
-            <tr class="text-secondary">
-              <td>Премия за СММ (1 публикация)</td>
-              <td>в разработке <i class="bi bi-tools"></i></td>
-            </tr>
-            <tr>
-              <td>% от выручки по бару</td>
-              <td>{{ object.cashier_earnings_calc.bar.0|default:"-" }}&emsp;({{ object.cashier_earnings_calc.bar.1}}%)</td>
-            </tr>
-            <tr>
-              <td>% от выручки от игровой зоны (КНА)</td>
-              <td>{{ object.cashier_earnings_calc.game_zone.0|default:"-" }}&emsp;({{ object.cashier_earnings_calc.game_zone.1 }}%)</td>
-            </tr>
-            <tr>
-              <td>% от выручки от доп. услуг.</td>
-              <td>{{ object.cashier_earnings_calc.vr.0|default:"-" }}&emsp;({{ object.cashier_earnings_calc.vr.1 }}%)</td>
-            </tr>
-            <tr class="text-warning">
-              <td>Сумма премиальной части</td>
-              <td>{{ object.cashier_earnings_calc.bonus_part|default:"-" }}</td>
-            </tr>
-            </tbody>
-            <tfoot class="verysmall">
-            {% if object.cash_admin_discipline_penalty or object.shortage %}
-            <tr>
-              <td>Суммарный заработок</td>
-              <td>{{ object.cashier_earnings_calc.calculated_salary|default:"-" }}</td>
-            </tr>
-            {% if object.cash_admin_discipline_penalty %}
-            <tr class="text-danger">
-              <td>Штраф за нарушение дисциплинарного регламента</td>
-              <td>{{ object.cash_admin_discipline_penalty }}</td>
-            </tr>
-            {% endif %}
-            {% if object.shortage %}
-            <tr class="text-danger">
-              <td>Недостача</td>
-              <td>
-              {% if object.shortage_paid %}
-                <s>{{ object.shortage }}</s>
-              {% else %}
-                {{ object.shortage }} * 2
-              {% endif %}
-              </td>
-            </tr>
-            {% endif %}
-            {% endif %}
-            <tr class="table-active">
-              <td>Итоговый заработок</td>
-              {% if not object.is_verified %}
-              <td class="text-secondary">{{ object.cashier_earnings_calc.shift_salary|default:"-" }}*</td>
-              {% else %}
-              <td>{{ object.cashier_earnings_calc.shift_salary|default:"-" }}</td>
-              {% endif %}
-            </tr>
-          </tfoot>
-        </table>
-        {% if not object.is_verified %}
-        <p class="text-secondary verysmall">*Смена не проверена, данные могут измениться.</p>
-        {% endif %}
-      </div>
+      {% if request.user.profile.position.name == 'hall_admin' or request.user.is_staff %}
+        {% include 'salary/workshift_detail_admin.html' %}
+      {% endif %}
+      {% if request.user.profile.position.name == 'cash_admin' or request.user.is_staff %}
+        {% include 'salary/workshift_detail_cashier.html' %}
+      {% endif %}
     </div>
+    {% if request.user.is_staff %}
     <div class="row text-center">
       <div class="col">
-        <a title="Внести изменения" class="btn btn-secondary verysmall" href="{% url 'staff_edit_workshift' object.slug %}?next={{ request.path }}">
+        <a title="Внести изменения" class="btn btn-secondary verysmall" href="{% url 'staff_edit_workshift' work_shift.slug %}?next={{ request.path }}">
           <i class="bi bi-pencil-square" style="color: yellow;"></i>
           Внести изменения
         </a>
       </div>
       <div class="col">
-        <a title="Удалить смену" class="btn btn-secondary verysmall" href="{% url 'delete_workshift' object.slug %}">
+        <a title="Удалить смену" class="btn btn-secondary verysmall" href="{% url 'delete_workshift' work_shift.slug %}">
           <i class="bi bi-x-square" style="color: red;"></i>
           Удалить смену
         </a>
       </div>
     </div>
+    {% endif %}
   </div>
 </main>
 {% endblock %}

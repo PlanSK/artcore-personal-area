@@ -10,7 +10,7 @@
         <div class="col-md-3 bg-secondary text-white rounded border">
           <!--avatar-->
           <div class="d-flex justify-content-center mt-3 mb-2 row">
-            <div class="col-md-auto">
+            <div class="col-md-auto text-center">
               {% if user.profile.photo %}
                 <img src="{{ user.profile.photo.url }}" alt="" class="rounded-circle" style="width: 120px; height: 120px;">
               {% else %}
@@ -31,7 +31,7 @@
               {% if user.profile.attestation_date %}
               <p class="mb-0" style="color: greenyellow;">Аттестация пройдена {{ user.profile.attestation_date }}</p>
               {% else %}
-              <a href="#" class="text-warning" title="Пройти аттестацию">Аттестация не пройдена</a>
+              <p class="text-warning mb-0">Аттестация не пройдена</p>
               {% endif %}
               <p>Стаж работы: {{ experience }}</p>
             </div>
