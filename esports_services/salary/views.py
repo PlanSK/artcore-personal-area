@@ -377,6 +377,7 @@ class WorkshiftDetailView(LoginRequiredMixin, TitleMixin, DetailView):
             'cash_admin__profile__position',
             'hall_admin__profile__position',
     )
+    context_object_name = 'work_shift'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

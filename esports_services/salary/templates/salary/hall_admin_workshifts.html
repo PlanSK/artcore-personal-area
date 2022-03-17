@@ -1,96 +1,29 @@
 {% load salary_tags %}
 {% load humanize %}
 <div class="row">
-  <div class="col-md-12 border">
+  <div class="col rounded border m-2">
     <table class="table table-dark table-hover">
       <thead class="text-warning text-center verysmall">
         <tr>
           <th>Дата</th>
-          <th>Бар</th>
-          <th>GameZone</th>
-          <th>Ошибки GZ</th>
-          <th>Доп. услуги и VR</th>
-          <th>Кальяны</th>
-          <th>Общая выручка</th>
           <th>Заработано</th>
-          <th>Отметка о проверке</th>
+          <th>Примечание</th>
         </tr>
       </thead>
       <tbody class="text-center verysmall">
         {% for workshift in workshifts_list %}
         {% hall_admin_earnings_tag workshift=workshift as earnings_data %}
-        <tr data-bs-toggle="collapse" href="#workshift{{ workshift.shift_date|date:"dm" }}" role="button" aria-expanded="false" aria-controls="workshift{{ workshift.shift_date|date:"dm" }}">
+        <tr>
           <td>{{ workshift.shift_date|date:"d.m.Y" }}</td>
-          <td>{{ workshift.bar_revenue | intcomma }}</td>
-          <td>{{ workshift.game_zone_revenue | intcomma }}</td>
-          <td class="text-danger">{{ workshift.game_zone_error | intcomma |default:"-" }}</td>
-          <td>{{ workshift.vr_revenue | intcomma }}</td>
-          <td>{{ workshift.hookah_revenue | intcomma }}</td>
-          <td>{{ workshift.get_summary_revenue | intcomma }}</td>
           <td>
             {% if workshift.is_verified %}
               {{ earnings_data.final_earnings|floatformat:"1g" |intcomma }}
             {% else %}
-              <span title='Расчитывается после проверки'><i class="bi bi-lock" style="color: gray;"></i></span>
+              <i class="bi bi-stopwatch-fill" style="color:yellow;"></i> На проверке
             {% endif %}
           </td>
           <td>
-            {% if workshift.is_verified %}
-            <i class="bi bi-check2-circle" style="color:green;"></i>Проверено
-            {% else %}
-            <i class="bi bi-stopwatch-fill" style="color:yellow;"></i>Ожидает проверки
-            {% endif %}
-          </td>
-        </tr>
-        <tr>
-          <td colspan="9">
-            <div class="collapse multi-collapse" id="workshift{{ workshift.shift_date|date:"dm" }}">
-              <table class="table table-dark table-hover">
-                <thead class="text-warning text-center verysmall">
-                  <tr>
-                    <th>Оклад</th>
-                    <th>Бар</th>
-                    <th>GameZone</th>
-                    <th>Доп. услуги и VR</th>
-                    <th>Кальян</th>
-                    <th>Премия</th>
-                    <th>Стаж</th>
-                    <th>Аттестация</th>
-                    <th>Клининг</th>
-                    <th>Итог</th>
-                  </tr>
-                </thead>
-                <tbody class="text-center verysmall">
-                  <tr>
-                    <td>{{ user.profile.position.position_salary }}</td>
-                    <td>{{ earnings_data.bar.1|floatformat:"2g" }}% / {{ earnings_data.bar.0 |floatformat:"1g" }}</td>
-                    <td>{{ earnings_data.game_zone.1|floatformat:"2g" }}% / {{ earnings_data.game_zone.0 |floatformat:"1g" }}</td>
-                    <td>{{ earnings_data.vr.1|floatformat:"2g" }}% / {{ earnings_data.vr.0 |floatformat:"1g" }}</td>
-                    <td>{{ earnings_data.hookah|floatformat:"1g" }}</td>
-                    <td>
-                      {% if earnings_data.penalty %}
-                        {{ earnings_data.award }} / <span class="text-danger">-{{ earnings_data.penalty }}</span>
-                      {% else %}
-                        {{ earnings_data.award|default:"-" }}
-                      {% endif %}
-                    </td>
-                    <td>{{ earnings_data.experience|default:"-" }}</td>
-                    <td>{{ earnings_data.attestation|default:"-" }}</td>
-                    <td>{{ earnings_data.cleaning|default:"-" }}</td>
-                    <td>
-                      {% if workshift.is_verified %}
-                        {{ earnings_data.final_earnings|floatformat:"1g" |intcomma }}
-                      {% else %}
-                      <i class="bi bi-lock" style="color: gray;"></i>
-                      {% endif %}
-                    </td>
-                  </tr>
-                  {% if workshift.comment %}
-                  <tr><td colspan="10">{{ workshift.comment }}</td></tr>
-                  {% endif %}
-                </tbody>
-              </table>
-            </div>
+            <a href="{% url 'detail_workshift' slug=workshift.slug %}?next={{ request.path }}" class="link-primary">Подробнее...</a>
           </td>
         </tr>
         {% endfor %}
@@ -98,12 +31,6 @@
       <tfoot class="text-center verysmall text-white">
         <tr>
           <td scope="col">Итог за {{ current_date|date:"F" }}</td>
-          <td scope="col">{{ total_values.bar|floatformat:"1g" | intcomma }}</td>
-          <td scope="col">{{ total_values.game_zone|floatformat:"1g" | intcomma }}</td>
-          <td scope="col">{{ total_values.game_zone_error|floatformat:"1g" | intcomma }}</td>
-          <td scope="col">{{ total_values.vr|floatformat:"1g" | intcomma }}</td>
-          <td scope="col">{{ total_values.hookah|floatformat:"1g" | intcomma }}</td>
-          <td scope="col">{{ total_values.sum_revenue|floatformat:"1g" | intcomma }}</td>
           <td scope="col">{{ total_values.summary_earnings|floatformat:"1g" | intcomma }}</td>
           <td></td>
         </tr>
