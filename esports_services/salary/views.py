@@ -228,9 +228,9 @@ class MonthlyReportListView(PermissionRequiredMixin, StaffOnlyMixin, ListView):
         else:
             penalty = kpi_dict['penalty']
 
-        final_salary_hall = kpi_dict['calculated_salary'] - penalty
+        final_salary_hall = kpi_dict['esimated_earnings'] - penalty
         values_list = [
-            1, kpi_dict['calculated_salary'],
+            1, kpi_dict['esimated_earnings'],
             kpi_dict['penalty'], shortage, final_salary_hall
         ]
         return values_list

@@ -126,22 +126,27 @@
             </tr>
           </thead>
           <tbody class="verysmall">
+            <tr><td colspan="2" class="text-info text-center table-active">Базовая часть</td></tr>
             <tr>
-              <td>Оклад</td>
+              <td>Оклад за смену</td>
               <td>{{ object.hall_admin_earnings_calc.salary }}</td>
             </tr>
-            <tr><td colspan="2" class="text-success text-center table-active">Премиальная часть</td></tr>
             <tr>
               <td>Премия за стаж (более 3 мес.)</td>
               <td>{{ object.hall_admin_earnings_calc.experience|default:"-" }}</td>
             </tr>
             <tr>
-              <td>Премия за дисциплину</td>
-              <td>{{ object.hall_admin_earnings_calc.award|default:"-" }}</td>
-            </tr>
-            <tr>
               <td>Премия за аттестацию</td>
               <td>{{ object.hall_admin_earnings_calc.attestation|default:"-" }}</td>
+            </tr>
+            <tr>
+              <td>Суммарный оклад</td>
+              <td>{{ object.hall_admin_earnings_calc.basic_part|default:"-" }}</td>
+            </tr>
+            <tr><td colspan="2" class="text-info text-center table-active">Премиальная часть</td></tr>
+            <tr>
+              <td>Премия за дисциплину</td>
+              <td>{{ object.hall_admin_earnings_calc.award|default:"-" }}</td>
             </tr>
             <tr>
               <td>Премия за поддержание чистоты</td>
@@ -176,7 +181,7 @@
             {% if object.hall_admin_discipline_penalty %}
             <tr>
               <td>Суммарный заработок</td>
-              <td>{{ object.hall_admin_earnings_calc.calculated_salary|default:"-" }}</td>
+              <td>{{ object.hall_admin_earnings_calc.esimated_earnings|default:"-" }}</td>
             </tr>
             <tr class="text-danger">
               <td>Штраф за нарушение дисциплинарного регламента</td>
@@ -186,9 +191,9 @@
             <tr class="table-active">
               <td>Итоговый заработок</td>
               {% if not object.is_verified %}
-              <td class="text-secondary">{{ object.hall_admin_earnings_calc.shift_salary|default:"-" }}*</td>
+              <td class="text-secondary">{{ object.hall_admin_earnings_calc.final_earnings|default:"-" }}*</td>
               {% else %}
-              <td>{{ object.hall_admin_earnings_calc.shift_salary|default:"-" }}</td>
+              <td>{{ object.hall_admin_earnings_calc.final_earnings|default:"-" }}</td>
               {% endif %}
             </tr>
           </tfoot>
@@ -206,22 +211,27 @@
             </tr>
           </thead>
           <tbody class="verysmall">
+            <tr><td colspan="2" class="text-info text-center table-active">Базовая часть</td></tr>
             <tr>
-              <td>Оклад</td>
+              <td>Оклад за смену</td>
               <td>{{ object.cashier_earnings_calc.salary }}</td>
             </tr>
-            <tr><td colspan="2" class="text-success text-center table-active">Премиальная часть</td></tr>
             <tr>
               <td>Премия за стаж (более 3 мес.)</td>
               <td>{{ object.cashier_earnings_calc.experience|default:"-" }}</td>
             </tr>
             <tr>
-              <td>Премия за дисциплину</td>
-              <td>{{ object.cashier_earnings_calc.award|default:"-" }}</td>
-            </tr>
-            <tr>
               <td>Премия за аттестацию</td>
               <td>{{ object.cashier_earnings_calc.attestation|default:"-" }}</td>
+            </tr>
+            <tr>
+              <td>Суммарный оклад</td>
+              <td>{{ object.cashier_earnings_calc.basic_part|default:"-" }}</td>
+            </tr>
+            <tr><td colspan="2" class="text-info text-center table-active">Премиальная часть</td></tr>
+            <tr>
+              <td>Премия за дисциплину</td>
+              <td>{{ object.cashier_earnings_calc.award|default:"-" }}</td>
             </tr>
             <tr class="text-secondary">
               <td>Премия за СММ (1 публикация)</td>
@@ -248,7 +258,7 @@
             {% if object.cash_admin_discipline_penalty or object.shortage %}
             <tr>
               <td>Суммарный заработок</td>
-              <td>{{ object.cashier_earnings_calc.calculated_salary|default:"-" }}</td>
+              <td>{{ object.cashier_earnings_calc.esimated_earnings|default:"-" }}</td>
             </tr>
             {% if object.cash_admin_discipline_penalty %}
             <tr class="text-danger">
@@ -272,9 +282,9 @@
             <tr class="table-active">
               <td>Итоговый заработок</td>
               {% if not object.is_verified %}
-              <td class="text-secondary">{{ object.cashier_earnings_calc.shift_salary|default:"-" }}*</td>
+              <td class="text-secondary">{{ object.cashier_earnings_calc.final_earnings|default:"-" }}*</td>
               {% else %}
-              <td>{{ object.cashier_earnings_calc.shift_salary|default:"-" }}</td>
+              <td>{{ object.cashier_earnings_calc.final_earnings|default:"-" }}</td>
               {% endif %}
             </tr>
           </tfoot>

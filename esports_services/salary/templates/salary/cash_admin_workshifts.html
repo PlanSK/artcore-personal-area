@@ -36,7 +36,7 @@
           </td>
           <td>
             {% if workshift.is_verified %}
-              {{ earnings_data.shift_salary|floatformat:"1g" |intcomma }}
+              {{ earnings_data.final_earnings|floatformat:"1g" |intcomma }}
             {% else %}
               <span title='Расчитывается после проверки'><i class="bi bi-lock" style="color: gray;"></i></span>
             {% endif %}
@@ -95,7 +95,7 @@
                     </td>
                     <td>
                       {% if workshift.is_verified %}
-                        {{ earnings_data.shift_salary|floatformat:"1g" |intcomma }}
+                        {{ earnings_data.final_earnings|floatformat:"1g" |intcomma }}
                       {% else %}
                       <i class="bi bi-lock" style="color:gray;"></i>
                       {% endif %}
@@ -120,7 +120,7 @@
           <td scope="col">{{ total_values.vr|floatformat:"1g" | intcomma }}</td>
           <td scope="col">{{ total_values.sum_revenue|floatformat:"1g" | intcomma }}</td>
           <td class="text-danger">{{ total_values.summary_shortage|default:"-" | intcomma }}</td>
-          <td scope="col">{{ total_values.total_salary|floatformat:"1g" | intcomma }}</td>
+          <td scope="col">{{ total_values.summary_earnings|floatformat:"1g" | intcomma }}</td>
           <td></td>
           <td></td>
         </tr>
