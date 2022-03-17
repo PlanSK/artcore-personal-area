@@ -251,7 +251,7 @@ class WorkingShift(models.Model):
         earnings = self.employee_earnings_calc(self.hall_admin)
         earnings['penalty'] = self.hall_admin_discipline_penalty
         earnings['cleaning'] = HALL_CLEANING_BONUS if self.hall_cleaning else 0.0
-        earnings['hookah'] = self.hookah_revenue * HOOKAH_BONUS_RATIO
+        earnings['hookah'] = round(self.hookah_revenue * HOOKAH_BONUS_RATIO, 2)
         earnings.update(self.get_revenue_bonuses(ADMIN_BONUS_CRITERIA))
         earnings.update(self.final_salary_calculation(earnings))
 
