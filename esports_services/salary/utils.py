@@ -8,7 +8,7 @@ class TotalDataMixin:
         summary_game_zone_revenue = 0.0
         summary_vr_revenue = 0.0
         total_revenue = 0.0
-        total_salary = 0.0
+        summary_earnings = 0.0
         summary_error = 0.0
         summary_shortage = 0.0
         summary_hookah = 0.0
@@ -24,9 +24,9 @@ class TotalDataMixin:
                 summary_shortage += get_shift.shortage
             if get_shift.is_verified:
                 if position == 'hall_admin':
-                    total_salary += get_shift.hall_admin_earnings_calc()['shift_salary']
+                    summary_earnings += get_shift.hall_admin_earnings_calc()['final_earnings']
                 elif position == 'cash_admin':
-                    total_salary += get_shift.cashier_earnings_calc()['shift_salary']
+                    summary_earnings += get_shift.cashier_earnings_calc()['final_earnings']
 
         quantity_shifts = len(workshifts)
         if len(workshifts):
@@ -44,7 +44,7 @@ class TotalDataMixin:
             'quantity_shifts': quantity_shifts,
             'average_revenue': average_revenue,
             'summary_shortage': summary_shortage,
-            'total_salary': total_salary,
+            'summary_earnings': summary_earnings,
         }
         return returned_dict
 
