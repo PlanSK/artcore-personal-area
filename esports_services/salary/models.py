@@ -254,6 +254,7 @@ class WorkingShift(models.Model):
         return {
             'basic_part': round(basic_part, 2),
             'bonus_part': round(bonus_part, 2),
+            'retention': round(bonus_part - remaining_bonus_part, 2),
             'estimated_earnings': round(bonus_part + basic_part, 2),
             'final_earnings': round(remaining_bonus_part + basic_part,2),
         }

@@ -57,13 +57,17 @@
           <td>{{ work_shift.cashier_earnings_calc.estimated_earnings|default:"-" }}</td>
         </tr>
         {% if work_shift.cash_admin_discipline_penalty %}
-        <tr class="text-danger">
+        <tr>
           <td>Штраф за нарушение дисциплинарного регламента</td>
-          <td>{{ work_shift.cash_admin_discipline_penalty }}</td>
+          <td class="text-danger">{{ work_shift.cash_admin_discipline_penalty }}</td>
+        </tr>
+        <tr>
+          <td>Удержано за нарушение дисциплины</td>
+          <td class="text-danger">{{ work_shift.cashier_earnings_calc.retention|default:"-" }}</td>
         </tr>
         {% endif %}
         {% if work_shift.shortage %}
-        <tr class="text-danger">
+        <tr class="table-danger">
           <td>Недостача</td>
           <td>
           {% if work_shift.shortage_paid %}
