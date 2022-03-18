@@ -15,6 +15,7 @@ YEARS_VARIANT = ('год', 'года', 'лет')
 
 REQUIRED_EXPERIENCE = 90
 EXPERIENCE_BONUS = 200.0
+PUBLICATION_BONUS = 100.0
 
 ATTESTATION_BONUS = 200.0
 DISCIPLINE_AWARD = 1000.0
@@ -131,14 +132,16 @@ class WorkingShift(models.Model):
     hookah_revenue = models.FloatField(verbose_name='Выручка по кальянам', default=0.0)
     hall_cleaning = models.BooleanField(default=True, verbose_name='Наведение порядка')
     hall_admin_discipline = models.BooleanField(default=True, verbose_name='Сюблюдение дисциплины Админ зала')
-    hall_admin_discipline_penalty = models.FloatField(default=0.0, verbose_name='Дисциплинарный штраф')
+    hall_admin_discipline_penalty = models.FloatField(default=0.0, verbose_name='Дисциплинарный штраф (админ)')
     cash_admin_discipline = models.BooleanField(default=True, verbose_name='Сюблюдение дисциплины Админ кассы')
-    cash_admin_discipline_penalty = models.FloatField(default=0.0, verbose_name='Дисциплинарный штраф')
+    cash_admin_discipline_penalty = models.FloatField(default=0.0, verbose_name='Дисциплинарный штраф (кассир)')
     shortage = models.FloatField(default=0, verbose_name='Недостача')
     shortage_paid = models.BooleanField(default=False, verbose_name="Отметка о погашении недостачи")
     slug = models.SlugField(max_length=60, unique=True, verbose_name='URL', null=True, blank=True)
     is_verified = models.BooleanField(default=False, verbose_name='Проверено', db_index=True)
     comment = models.TextField(verbose_name='Примечание', blank=True)
+    publication_link = models.TextField(verbose_name='СММ-публикация (ссылка)', blank=True)
+    publication_is_verified = models.BooleanField(default=False, verbose_name='СММ-публикация проверена')
     change_date = models.DateTimeField(verbose_name='Дата изменения', blank=True, null=True)
     editor = models.TextField(verbose_name='Редактор', blank=True, editable=False)
 
@@ -171,6 +174,12 @@ class WorkingShift(models.Model):
         current_experience = (self.shift_date - employee.profile.employment_date).days
         if REQUIRED_EXPERIENCE <= current_experience:
             return EXPERIENCE_BONUS
+
+        return 0.0
+
+    def get_publication_bonus(self) -> float:
+        if self.publication_link and self.publication_is_verified:
+            return PUBLICATION_BONUS
 
         return 0.0
 
@@ -211,6 +220,7 @@ class WorkingShift(models.Model):
             'penalty': 0.0,
             'award': DISCIPLINE_AWARD,
             'attestation': self.get_attestation_bonus(employee),
+            'publication_bonus': self.get_publication_bonus(),
             'game_zone': (0.0, 0.0),
             'bar': (0.0, 0.0),
             'vr': (0.0, 0.0),
@@ -244,6 +254,7 @@ class WorkingShift(models.Model):
         return {
             'basic_part': round(basic_part, 2),
             'bonus_part': round(bonus_part, 2),
+            'retention': round(bonus_part - remaining_bonus_part, 2),
             'estimated_earnings': round(bonus_part + basic_part, 2),
             'final_earnings': round(remaining_bonus_part + basic_part,2),
         }
@@ -294,17 +305,3 @@ class DisciplinaryRegulations(models.Model):
 
     def __str__(self) -> str:
         return f'{self.article} {self.title}'
-
-
-class Publication(models.Model):
-    author = models.ForeignKey(User, on_delete=models.PROTECT, verbose_name='Автор публикации', related_name='author')
-    publication_date = models.DateField(verbose_name='Дата публикации')
-    link = models.TextField(verbose_name='Примечание (ссылка)', blank=True, null=True)
-    auditor = models.ForeignKey(User, on_delete=models.PROTECT, verbose_name='Аудитор', related_name='auditor')
-
-    class Meta:
-        verbose_name = 'Публикация'
-        verbose_name_plural = 'Публикации'
-
-    def __str__(self) -> str:
-        return f'{self.publication_date} {self.author.get_full_name()}'
