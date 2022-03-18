@@ -138,43 +138,6 @@ class AddWorkshiftDataForm(EditWorkshiftDataForm):
             }),
         }   
 
-class AddPublicationForm(forms.ModelForm):
-    author = EmplModelChoiceField(
-        queryset=User.objects.filter(is_active=True).exclude(profile__position__name='staff'),
-        label='Сотрудник',
-    )
-    auditor = EmplModelChoiceField(
-        queryset=User.objects.filter(is_staff=True),
-        label='Аудитор',
-    )
-    class Meta:
-        model = Publication
-        fields = ('author', 'publication_date', 'link', 'auditor')
-        widgets = {
-            'publication_date': forms.DateInput(attrs={
-                'type': 'date',
-                'value': datetime.datetime.now().strftime('%Y-%m-%d'),
-                'max': datetime.datetime.now().strftime('%Y-%m-%d'),
-            }),
-        }
-
-
-class EditPublicationForm(forms.ModelForm):
-    author = EmplModelChoiceField(
-        queryset=User.objects.filter(is_active=True).exclude(profile__position__name='staff'),
-        label='Сотрудник',
-    )
-    auditor = EmplModelChoiceField(
-        queryset=User.objects.filter(is_staff=True),
-        label='Аудитор',
-    )
-
-    class Meta:
-        model = Publication
-        fields = ('author', 'publication_date', 'link', 'auditor')
-        widgets = {
-            'publication_date': forms.DateInput(attrs={'type': 'date',}, format='%Y-%m-%d')
-        }
 
 class StaffEditWorkshiftForm(EditWorkshiftDataForm):
     hall_admin = EmplModelChoiceField(

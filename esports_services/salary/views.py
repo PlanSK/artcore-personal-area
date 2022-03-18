@@ -285,42 +285,6 @@ class MonthlyReportListView(PermissionRequiredMixin, StaffOnlyMixin, ListView):
         return context
 
 
-class AddPublicationView(StaffPermissionRequiredMixin, TitleMixin, CreateView):
-    title = 'Добавление публикации'
-    form_class = AddPublicationForm
-    template_name = 'salary/publication_form.html'
-    success_url = reverse_lazy('publications')
-
-    def get_initial(self):
-        initional = super().get_initial()
-        initional.update({
-            'auditor': self.request.user,
-        })
-        return initional
-
-
-class PublicationListView(StaffPermissionRequiredMixin, TitleMixin, ListView):
-    title = 'Список смен'
-    model = Publication
-    template_name = 'salary/publication_list.html'
-
-    def get_queryset(self):
-        queryset = Publication.objects.select_related('author', 'auditor').order_by('publication_date')
-
-        return queryset
-
-class EditPublicationView(StaffPermissionRequiredMixin, TitleMixin, UpdateView):
-    model = Publication
-    form_class = EditPublicationForm
-    title = 'Изменение публикации'
-    template_name = 'salary/publication_form.html'
-    success_url = reverse_lazy('publications')
-
-class DeletePublication(StaffPermissionRequiredMixin, TitleMixin, DeleteView):
-    model = Publication
-    success_url = reverse_lazy('publications')
-    title = 'Удаление смены'
-
 # Employee functionality
 class EditUser(LoginRequiredMixin, TitleMixin, TemplateView):
     template_name = 'salary/edit_user_profile.html'
