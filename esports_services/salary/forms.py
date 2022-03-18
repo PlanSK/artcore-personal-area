@@ -105,22 +105,23 @@ class EditWorkshiftDataForm(forms.ModelForm):
 
     class Meta:
         model = WorkingShift
-        fields = [
+        fields = (
             'hall_admin',
             'cash_admin',
             'bar_revenue',
             'game_zone_revenue',
             'game_zone_error',
             'vr_revenue',
-            'hookah_revenue'
-        ]
+            'hookah_revenue',
+            'cmm_publication_link',
+        )
 
 
 class AddWorkshiftDataForm(EditWorkshiftDataForm):
 
     class Meta:
         model = WorkingShift
-        fields = [
+        fields = (
             'hall_admin',
             'cash_admin',
             'shift_date',
@@ -128,8 +129,9 @@ class AddWorkshiftDataForm(EditWorkshiftDataForm):
             'game_zone_revenue',
             'game_zone_error',
             'vr_revenue',
-            'hookah_revenue'
-        ]
+            'hookah_revenue',
+            'cmm_publication_link',
+        )
         widgets = {
             'shift_date': forms.DateInput(attrs={
                 'type': 'date',
@@ -150,7 +152,7 @@ class StaffEditWorkshiftForm(EditWorkshiftDataForm):
     )
     class Meta:
         model = WorkingShift
-        fields = [
+        fields = (
             'hall_admin',
             'cash_admin',
             'bar_revenue',
@@ -158,6 +160,8 @@ class StaffEditWorkshiftForm(EditWorkshiftDataForm):
             'game_zone_error',
             'vr_revenue',
             'hookah_revenue',
+            'cmm_publication_is_verified',
+            'cmm_publication_link',
             'hall_cleaning',
             'cash_admin_discipline',
             'cash_admin_discipline_penalty',
@@ -166,5 +170,5 @@ class StaffEditWorkshiftForm(EditWorkshiftDataForm):
             'shortage',
             'shortage_paid',
             'comment',
-            'is_verified'
-        ]
+            'is_verified',
+        )
