@@ -113,7 +113,7 @@ class EditWorkshiftDataForm(forms.ModelForm):
             'game_zone_error',
             'vr_revenue',
             'hookah_revenue',
-            'cmm_publication_link',
+            'publication_link',
         )
 
 
@@ -130,7 +130,7 @@ class AddWorkshiftDataForm(EditWorkshiftDataForm):
             'game_zone_error',
             'vr_revenue',
             'hookah_revenue',
-            'cmm_publication_link',
+            'publication_link',
         )
         widgets = {
             'shift_date': forms.DateInput(attrs={
@@ -160,8 +160,8 @@ class StaffEditWorkshiftForm(EditWorkshiftDataForm):
             'game_zone_error',
             'vr_revenue',
             'hookah_revenue',
-            'cmm_publication_is_verified',
-            'cmm_publication_link',
+            'publication_is_verified',
+            'publication_link',
             'hall_cleaning',
             'cash_admin_discipline',
             'cash_admin_discipline_penalty',
