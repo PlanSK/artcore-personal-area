@@ -14,5 +14,4 @@ class DisciplinaryRegAdmin(admin.ModelAdmin):
 admin.site.register(Profile)
 admin.site.register(WorkingShift, WorkshiftAdmin)
 admin.site.register(Position)
-admin.site.register(Publication)
 admin.site.register(DisciplinaryRegulations, DisciplinaryRegAdmin)

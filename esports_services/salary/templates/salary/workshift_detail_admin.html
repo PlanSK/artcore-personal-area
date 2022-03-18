@@ -33,9 +33,9 @@
           <td>Премия за поддержание чистоты</td>
           <td>{{ work_shift.hall_admin_earnings_calc.cleaning|default:"-" }}</td>
         </tr>
-        <tr class="text-secondary">
+        <tr>
           <td>Премия за СММ (1 публикация)</td>
-          <td>в разработке <i class="bi bi-tools"></i></td>
+          <td>{{ work_shift.hall_admin_earnings_calc.publication_bonus|default:"-" }}</td>
         </tr>
         <tr>
           <td>% от выручки по бару</td>
@@ -61,12 +61,16 @@
         <tfoot class="verysmall">
         {% if work_shift.hall_admin_discipline_penalty %}
         <tr>
-          <td>Суммарный заработок</td>
-          <td>{{ work_shift.hall_admin_earnings_calc.esimated_earnings|default:"-" }}</td>
+          <td>Предполагаемый заработок</td>
+          <td>{{ work_shift.hall_admin_earnings_calc.estimated_earnings|default:"-" }}</td>
         </tr>
-        <tr class="text-danger">
+        <tr>
           <td>Штраф за нарушение дисциплинарного регламента</td>
-          <td>{{ work_shift.hall_admin_discipline_penalty|default:"-" }}</td>
+          <td class="text-danger">{{ work_shift.hall_admin_discipline_penalty|default:"-" }}</td>
+        </tr>
+        <tr>
+          <td>Удержано за нарушение дицциплины</td>
+          <td class="text-danger">{{ work_shift.hall_admin_earnings_calc.retention|default:"-" }}</td>
         </tr>
         {% endif %}
         <tr class="table-active">

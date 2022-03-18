@@ -105,22 +105,23 @@ class EditWorkshiftDataForm(forms.ModelForm):
 
     class Meta:
         model = WorkingShift
-        fields = [
+        fields = (
             'hall_admin',
             'cash_admin',
             'bar_revenue',
             'game_zone_revenue',
             'game_zone_error',
             'vr_revenue',
-            'hookah_revenue'
-        ]
+            'hookah_revenue',
+            'publication_link',
+        )
 
 
 class AddWorkshiftDataForm(EditWorkshiftDataForm):
 
     class Meta:
         model = WorkingShift
-        fields = [
+        fields = (
             'hall_admin',
             'cash_admin',
             'shift_date',
@@ -128,8 +129,9 @@ class AddWorkshiftDataForm(EditWorkshiftDataForm):
             'game_zone_revenue',
             'game_zone_error',
             'vr_revenue',
-            'hookah_revenue'
-        ]
+            'hookah_revenue',
+            'publication_link',
+        )
         widgets = {
             'shift_date': forms.DateInput(attrs={
                 'type': 'date',
@@ -138,43 +140,6 @@ class AddWorkshiftDataForm(EditWorkshiftDataForm):
             }),
         }   
 
-class AddPublicationForm(forms.ModelForm):
-    author = EmplModelChoiceField(
-        queryset=User.objects.filter(is_active=True).exclude(profile__position__name='staff'),
-        label='Сотрудник',
-    )
-    auditor = EmplModelChoiceField(
-        queryset=User.objects.filter(is_staff=True),
-        label='Аудитор',
-    )
-    class Meta:
-        model = Publication
-        fields = ('author', 'publication_date', 'link', 'auditor')
-        widgets = {
-            'publication_date': forms.DateInput(attrs={
-                'type': 'date',
-                'value': datetime.datetime.now().strftime('%Y-%m-%d'),
-                'max': datetime.datetime.now().strftime('%Y-%m-%d'),
-            }),
-        }
-
-
-class EditPublicationForm(forms.ModelForm):
-    author = EmplModelChoiceField(
-        queryset=User.objects.filter(is_active=True).exclude(profile__position__name='staff'),
-        label='Сотрудник',
-    )
-    auditor = EmplModelChoiceField(
-        queryset=User.objects.filter(is_staff=True),
-        label='Аудитор',
-    )
-
-    class Meta:
-        model = Publication
-        fields = ('author', 'publication_date', 'link', 'auditor')
-        widgets = {
-            'publication_date': forms.DateInput(attrs={'type': 'date',}, format='%Y-%m-%d')
-        }
 
 class StaffEditWorkshiftForm(EditWorkshiftDataForm):
     hall_admin = EmplModelChoiceField(
@@ -187,7 +152,7 @@ class StaffEditWorkshiftForm(EditWorkshiftDataForm):
     )
     class Meta:
         model = WorkingShift
-        fields = [
+        fields = (
             'hall_admin',
             'cash_admin',
             'bar_revenue',
@@ -195,6 +160,8 @@ class StaffEditWorkshiftForm(EditWorkshiftDataForm):
             'game_zone_error',
             'vr_revenue',
             'hookah_revenue',
+            'publication_is_verified',
+            'publication_link',
             'hall_cleaning',
             'cash_admin_discipline',
             'cash_admin_discipline_penalty',
@@ -203,5 +170,5 @@ class StaffEditWorkshiftForm(EditWorkshiftDataForm):
             'shortage',
             'shortage_paid',
             'comment',
-            'is_verified'
-        ]
+            'is_verified',
+        )

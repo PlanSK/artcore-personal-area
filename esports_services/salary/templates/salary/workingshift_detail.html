@@ -112,6 +112,21 @@
               <td>Недостача</td>
               <td colspan="2">{{ work_shift.shortage|default:"-" }}</td>
             </tr>
+            <tr>
+              <td>Публикация</td>
+              <td colspan="2">
+                {% if  work_shift.publication_link %}
+                  <a href="{{ work_shift.publication_link }}" class="link-info">Ссылка указана</a>
+                  {% if work_shift.publication_is_verified %}
+                    <span class="text-success">(одобрена)</span>
+                  {% else %}
+                    <span class="text-warning">(не одобрена)</span>
+                  {% endif %}
+                {% else %}
+                <span class="text-secondary">Отсутствует</span>
+                {% endif %}
+              </td>
+            </tr>
           </tbody>
         </table>
       </div>

@@ -25,8 +25,4 @@ urlpatterns = [
     path('user_edit/<int:pk>/', StaffEditUser.as_view(), name='staff_user_edit'),
     path('dismissal/<int:pk>/', DismissalEmployee.as_view(), name='dismissal_user'),
     path('edit_profile/', EditUser.as_view(), name='profile_edit'),
-    path('add_publication/', AddPublicationView.as_view(), name='add_publication'),
-    path('publications/', PublicationListView.as_view(), name='publications'),
-    path('edit_publication/<int:pk>/', EditPublicationView.as_view(), name='edit_publication'),
-    path('delete_publication/<int:pk>/', DeletePublication.as_view(), name='delete_publication'),
 ]
