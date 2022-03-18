@@ -139,6 +139,8 @@ class WorkingShift(models.Model):
     slug = models.SlugField(max_length=60, unique=True, verbose_name='URL', null=True, blank=True)
     is_verified = models.BooleanField(default=False, verbose_name='Проверено', db_index=True)
     comment = models.TextField(verbose_name='Примечание', blank=True)
+    cmm_publication_link = models.TextField(verbose_name='СММ-публикация (ссылка)', blank=True)
+    cmm_publication_is_verified = models.BooleanField(default=False, verbose_name='СММ-публикация проверена')
     change_date = models.DateTimeField(verbose_name='Дата изменения', blank=True, null=True)
     editor = models.TextField(verbose_name='Редактор', blank=True, editable=False)
 
