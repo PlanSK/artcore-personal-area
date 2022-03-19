@@ -300,6 +300,12 @@ class AddMisconductView(StaffPermissionRequiredMixin, TitleMixin, CreateView):
         obj.moderator = self.request.user
         return super().form_valid(form)
 
+
+class MisconductListView(StaffPermissionRequiredMixin, TitleMixin, ListView):
+    model = Misconduct
+    title = 'Нарушения'
+
+
 # Employee functionality
 class EditUser(LoginRequiredMixin, TitleMixin, TemplateView):
     template_name = 'salary/edit_user_profile.html'
