@@ -1,3 +1,4 @@
+from tabnanny import verbose
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
@@ -305,3 +306,20 @@ class DisciplinaryRegulations(models.Model):
 
     def __str__(self) -> str:
         return f'{self.article} {self.title}'
+
+
+class DisciplinaryMisconduct(models.Model):
+    misconduct_datetime = models.DateTimeField(verbose_name='Дата и время')
+    intruder = models.ForeignKey(User, on_delete=models.PROTECT, verbose_name='Сотрудник', related_name='intruder')
+    regulations_article = models.ForeignKey(DisciplinaryRegulations, on_delete=models.PROTECT, verbose_name='Пункт дисциплинарного регламента')
+    penalty = models.FloatField(verbose_name='Сумма штрафа', default=0.0)
+    explanation_exist = models.BooleanField(verbose_name='Наличие объяснительной', default=False)
+    moderator = models.ForeignKey(User, on_delete=models.PROTECT, verbose_name='Арбитр (кто выявил)', related_name='moderator')
+    comment = models.TextField(verbose_name='Примечание', blank=True)
+
+    class Meta:
+        verbose_name = 'Дисциплинарный проступок'
+        verbose_name_plural = 'Дисциплинарные проступки'
+
+    def __str__(self) -> str:
+        return f'{self.misconduct_datetime} {self.intruder}'
