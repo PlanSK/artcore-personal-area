@@ -285,6 +285,21 @@ class MonthlyReportListView(PermissionRequiredMixin, StaffOnlyMixin, ListView):
         return context
 
 
+class AddMisconductView(StaffPermissionRequiredMixin, TitleMixin, CreateView):
+    model = Misconduct
+    template_name = 'salary/add_misconduct.html'
+    title = 'Добавление дисциплинарного проступка'
+    form_class = AddMisconductForm
+
+    def dispatch(self, request, *args: Any, **kwargs: Any):
+        self.success_url = request.GET.get('next', reverse_lazy('index'))
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        obj = form.save(commit=False)
+        obj.moderator = self.request.user
+        return super().form_valid(form)
+
 # Employee functionality
 class EditUser(LoginRequiredMixin, TitleMixin, TemplateView):
     template_name = 'salary/edit_user_profile.html'

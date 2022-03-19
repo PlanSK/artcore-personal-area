@@ -1,3 +1,4 @@
+from dataclasses import fields
 from sqlite3 import Date
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
@@ -172,3 +173,27 @@ class StaffEditWorkshiftForm(EditWorkshiftDataForm):
             'comment',
             'is_verified',
         )
+
+
+class AddMisconductForm(forms.ModelForm):
+    intruder = EmplModelChoiceField(
+        queryset=User.objects.filter(is_active=True, is_staff=False),
+        label='Сотрудник',
+    )
+
+    class Meta:
+        model = Misconduct
+        fields = (
+            'misconduct_date',
+            'intruder',
+            'regulations_article',
+            'penalty',
+            'explanation_exist',
+            'comment',
+        )
+        widgets = {
+            'misconduct_date': forms.DateInput(attrs={
+                'type': 'date',
+                'value': datetime.datetime.now().strftime('%Y-%m-%d'),
+            }),
+        }   

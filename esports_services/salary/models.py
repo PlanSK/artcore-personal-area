@@ -308,8 +308,8 @@ class DisciplinaryRegulations(models.Model):
         return f'{self.article} {self.title}'
 
 
-class DisciplinaryMisconduct(models.Model):
-    misconduct_datetime = models.DateTimeField(verbose_name='Дата и время')
+class Misconduct(models.Model):
+    misconduct_date = models.DateField(verbose_name='Дата')
     intruder = models.ForeignKey(User, on_delete=models.PROTECT, verbose_name='Сотрудник', related_name='intruder')
     regulations_article = models.ForeignKey(DisciplinaryRegulations, on_delete=models.PROTECT, verbose_name='Пункт дисциплинарного регламента')
     penalty = models.FloatField(verbose_name='Сумма штрафа', default=0.0)
@@ -322,4 +322,4 @@ class DisciplinaryMisconduct(models.Model):
         verbose_name_plural = 'Дисциплинарные проступки'
 
     def __str__(self) -> str:
-        return f'{self.misconduct_datetime} {self.intruder}'
+        return f'{self.misconduct_date} {self.intruder.get_full_name()}'
