@@ -27,4 +27,5 @@ urlpatterns = [
     path('edit_profile/', EditUser.as_view(), name='profile_edit'),
     path('add_misconduct/', AddMisconductView.as_view(), name='add_misconduct'),
     path('misconducts/', MisconductListView.as_view(), name='misconducts_view'),
+    path('load_regulation_data/', load_regulation_data, name='load_regulation_data'),
 ]

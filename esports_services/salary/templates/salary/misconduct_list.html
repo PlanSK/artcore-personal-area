@@ -14,7 +14,7 @@
       <tr>
         <th>Дата</th>
         <th>Сотрудник</th>
-        <th>Пункт регламента</th>
+        <th>Нарушение</th>
         <th></th>
         <th></th>
       </tr>
@@ -24,7 +24,7 @@
       <tr>
         <td>{{ misconduct.misconduct_date }}</td>
         <td><a href="#" class="link-light">{{ misconduct.intruder.get_full_name }}</a></td>
-        <td>{{ misconduct.regulations_article.article }}</td>
+        <td>{{ misconduct.regulations_article.title|truncatewords:4 }}</td>
         <td><a href="#" class="link-primary">Подробнее...</a></td>
         <td>
           <a href="#?next={{ request.path }}" class="btn btn-warning verysmall">

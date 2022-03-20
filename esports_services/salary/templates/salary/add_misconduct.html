@@ -4,8 +4,8 @@
 {% block content %}
 <main>
   <div class="container">
-      <div class="row justify-content-center">
-          <div class="col-md-5 border rounded mt-3 me-1">
+      <div class="row justify-content-center mt-3">
+          <div class="col-md-6 border rounded">
               <form class="needs-validation" method="post">
                 <p class="text-center">Протокол дисциплинарного проступка</p>
                 {% csrf_token %}
@@ -19,5 +19,28 @@
           </div>
       </div>
   </div>
+{% block javascript %}
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script>
+    $(document).ready(function () {
+      $('#id_regulations_article').after('<div class="text-warning verysmall m-3">Санкция: <span id="sanction"></span></div>');
+      $('#id_regulations_article').bind('click keyup', function () {
+        $.ajax({
+          data: $(this).serialize(),
+          url: "{% url 'load_regulation_data' %}",
+          success: function(response) {
+              $('#sanction').empty().append(response.sanction);
+              $('#id_penalty').val(response.penalty)
+              $('#id_comment').val(response.title)
+          },
+          error: function (response) {
+            console.log(response.responseJSON.errors)
+          }
+        });
+        return false;
+      });
+    })
+  </script>
+{% endblock %}
 </main>
 {% endblock %}

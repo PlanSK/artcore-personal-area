@@ -1,5 +1,5 @@
 from django.contrib.auth.forms import AuthenticationForm
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import TemplateView, ListView, DetailView
 from django.contrib.auth.views import LoginView
@@ -299,6 +299,17 @@ class AddMisconductView(StaffPermissionRequiredMixin, TitleMixin, CreateView):
         obj = form.save(commit=False)
         obj.moderator = self.request.user
         return super().form_valid(form)
+
+
+def load_regulation_data(request):
+    requested_article = request.GET.get('regulations_article')
+    regulation_article = DisciplinaryRegulations.objects.get(pk=requested_article)
+    response = {
+        'title': f'п. {regulation_article.article} {regulation_article.title}',
+        'sanction': regulation_article.sanction,
+        'penalty': regulation_article.base_penalty,
+    }
+    return JsonResponse(response)
 
 
 class MisconductListView(StaffPermissionRequiredMixin, TitleMixin, ListView):
