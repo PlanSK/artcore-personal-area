@@ -320,6 +320,7 @@ class Misconduct(models.Model):
     class Meta:
         verbose_name = 'Дисциплинарный проступок'
         verbose_name_plural = 'Дисциплинарные проступки'
+        ordering = ['-misconduct_date']
 
     def __str__(self) -> str:
         return f'{self.misconduct_date} {self.intruder.get_full_name()}'

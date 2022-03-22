@@ -261,7 +261,7 @@ class MonthlyReportListView(PermissionRequiredMixin, StaffOnlyMixin, ListView):
         for name, values in users_dict.items():
             employee_list.append([name] + values)
 
-        employee_list.sort(key=lambda x: x[-1], reverse=1)
+        employee_list.sort(key=lambda x: x[-1], reverse=True)
 
 
         return employee_list
@@ -310,7 +310,37 @@ def load_regulation_data(request):
 
 class MisconductListView(StaffPermissionRequiredMixin, TitleMixin, ListView):
     model = Misconduct
+    title = 'Список нарушителей'
+    template_name = 'salary/intruders_list.html'
+
+    def get_queryset(self):
+        queryset = Misconduct.objects.all().select_related('intruder')
+        intruder_dict = dict()
+        for misconduct in queryset:
+            count = intruder_dict.get(misconduct.intruder)
+            if count:
+                count += 1
+                intruder_dict.update({
+                    misconduct.intruder: count
+                })
+            else:
+                intruder_dict.update({
+                    misconduct.intruder: 1
+                })
+
+        return dict(sorted(intruder_dict.items(), key=lambda item: item[1], reverse=True))
+
+
+class MisconductUserView(LoginRequiredMixin, TitleMixin, ListView):
+    model = Misconduct
     title = 'Нарушения'
+
+    def dispatch(self, request, *args: Any, **kwargs: Any):
+        self.username = self.kwargs.get('username')
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_queryset(self):
+        return Misconduct.objects.filter(intruder__username=self.username).select_related('intruder', 'regulations_article')
 
 
 class MisconductUpdateView(StaffPermissionRequiredMixin, TitleMixin,
