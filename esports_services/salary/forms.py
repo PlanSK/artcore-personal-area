@@ -197,3 +197,20 @@ class AddMisconductForm(forms.ModelForm):
                 'value': datetime.datetime.now().strftime('%Y-%m-%d'),
             }),
         }   
+
+class EditMisconductForm(forms.ModelForm):
+    intruder = EmplModelChoiceField(
+        queryset=User.objects.filter(is_active=True, is_staff=False),
+        label='Сотрудник',
+    )
+
+    class Meta:
+        model = Misconduct
+        fields = (
+            'misconduct_date',
+            'intruder',
+            'regulations_article',
+            'penalty',
+            'explanation_exist',
+            'comment',
+        )

@@ -27,10 +27,10 @@
         <td>{{ misconduct.regulations_article.title|truncatewords:4 }}</td>
         <td><a href="#" class="link-primary">Подробнее...</a></td>
         <td>
-          <a href="#?next={{ request.path }}" class="btn btn-warning verysmall">
+          <a href="{% url 'edit_misconduct' pk=misconduct.pk %}?next={{ request.path }}" class="btn btn-warning verysmall">
             <i class="bi bi-pen"></i>
           </a>
-          <a href="#?next={{ request.path }}" class="btn btn-danger verysmall">
+          <a href="{% url 'delete_misconduct' pk=misconduct.pk %}?next={{ request.path }}" class="btn btn-danger verysmall">
             <i class="bi bi-x"></i>
           </a>
         </td>

@@ -285,15 +285,11 @@ class MonthlyReportListView(PermissionRequiredMixin, StaffOnlyMixin, ListView):
         return context
 
 
-class AddMisconductView(StaffPermissionRequiredMixin, TitleMixin, CreateView):
+class AddMisconductView(StaffPermissionRequiredMixin, TitleMixin,
+                        SuccessUrlMixin, CreateView):
     model = Misconduct
-    template_name = 'salary/add_misconduct.html'
     title = 'Добавление дисциплинарного проступка'
     form_class = AddMisconductForm
-
-    def dispatch(self, request, *args: Any, **kwargs: Any):
-        self.success_url = request.GET.get('next', reverse_lazy('index'))
-        return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
         obj = form.save(commit=False)
@@ -315,6 +311,19 @@ def load_regulation_data(request):
 class MisconductListView(StaffPermissionRequiredMixin, TitleMixin, ListView):
     model = Misconduct
     title = 'Нарушения'
+
+
+class MisconductUpdateView(StaffPermissionRequiredMixin, TitleMixin,
+                            SuccessUrlMixin, UpdateView):
+    model = Misconduct
+    title = 'Редактирование данных нарушения'
+    form_class = EditMisconductForm
+
+
+class MisconductDeleteView(StaffPermissionRequiredMixin, TitleMixin,
+                            SuccessUrlMixin, DeleteView):
+    model = Misconduct
+    title = 'Удаление нарушения'
 
 
 # Employee functionality

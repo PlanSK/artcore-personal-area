@@ -1,5 +1,6 @@
 from django.contrib.auth.mixins import PermissionRequiredMixin, UserPassesTestMixin
-
+from django.urls import reverse_lazy
+from typing import *
 
 class TotalDataMixin:
     def get_total_values(self, request_user, workshifts):
@@ -78,3 +79,9 @@ class TitleMixin(object):
         context= super(TitleMixin, self).get_context_data(**kwargs)
         context['title'] = self.get_title()
         return context
+
+
+class SuccessUrlMixin:
+    def dispatch(self, request, *args: Any, **kwargs: Any):
+        self.success_url = request.GET.get('next', reverse_lazy('index'))
+        return super().dispatch(request, *args, **kwargs)
