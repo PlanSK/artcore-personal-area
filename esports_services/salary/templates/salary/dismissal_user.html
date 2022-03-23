@@ -11,7 +11,7 @@
                 {{ profile_form|crispy }}
                 <div class="m-6 d-flex justify-content-center">
                   <button type="submit" class="btn btn-primary mb-4 me-2">Уволить</button>
-                  <div><a href="{{ request.GET.next }}" class="btn btn-primary">Отмена</a></div>
+                  <div><a href="{{ request.GET.next|default:"/" }}" class="btn btn-primary">Отмена</a></div>
                 </div>
               </form>
           </div>

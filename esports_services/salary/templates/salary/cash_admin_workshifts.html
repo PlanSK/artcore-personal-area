@@ -38,7 +38,7 @@
             {% if workshift.is_verified %}
               <span title="Проверено"><i class="bi bi-check2-circle" style="color:green;"></i></span>
             {% else %}
-              <a title="Внести изменения" href="{% url 'edit_workshift' workshift.slug %}">
+              <a title="Внести изменения" href="{% url 'edit_workshift' workshift.slug %}?next={{ request.path }}">
                 <i class="bi bi-pencil-square" style="color:yellow;"></i>
               </a>
             {% endif %}

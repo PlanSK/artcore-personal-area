@@ -1,9 +1,8 @@
 from django.contrib.auth.forms import AuthenticationForm
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import TemplateView, ListView, DetailView
 from django.contrib.auth.views import LoginView
-from django.urls import reverse_lazy
 from django.contrib.auth import logout
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.models import Group
@@ -19,7 +18,7 @@ from dateutil.relativedelta import relativedelta
 
 
 # Registration, Login, Logout
-class RegistrationUser(TitleMixin, TemplateView):
+class RegistrationUser(TitleMixin, SuccessUrlMixin, TemplateView):
     template_name = 'salary/registration.html'
     title = 'Регистрация сотрудника'
     user_form = UserRegistrationForm
@@ -48,7 +47,7 @@ class RegistrationUser(TitleMixin, TemplateView):
                 user.groups.add(Group.objects.get(name='cashiers'))
             user.save()
 
-            return redirect('login')
+            return redirect(self.get_success_url())
         else:
             context = self.get_context_data(
                 profile_form=profile_form_class,
@@ -57,14 +56,14 @@ class RegistrationUser(TitleMixin, TemplateView):
             return render(request, self.template_name, context=context)
 
 
-class DismissalEmployee(StaffPermissionRequiredMixin, TitleMixin, TemplateView):
+class DismissalEmployee(StaffPermissionRequiredMixin, TitleMixin,
+                        SuccessUrlMixin, TemplateView):
     model = Profile
     title = 'Увольнение сотрудника'
     template_name = 'salary/dismissal_user.html'
     profile_form = DismissalEmployeeForm
 
     def dispatch(self, request, *args, **kwargs):
-        self.redirect_link = request.GET.get('next', reverse_lazy('index'))
         self.object = get_object_or_404(User.objects.select_related('profile'), pk=self.kwargs.get('pk', 0))
         return super().dispatch(request, *args, **kwargs)
 
@@ -82,7 +81,7 @@ class DismissalEmployee(StaffPermissionRequiredMixin, TitleMixin, TemplateView):
             self.object.save()
             profile = profile_form_class.save(commit=False)
             profile.save()
-            return HttpResponseRedirect(self.redirect_link)
+            return redirect(self.get_success_url())
         else:
             context = self.get_context_data(
                 profile_form=profile_form_class,
@@ -90,14 +89,11 @@ class DismissalEmployee(StaffPermissionRequiredMixin, TitleMixin, TemplateView):
             return render(request, self.template_name, context=context)
 
 
-class LoginUser(TitleMixin, LoginView):
+class LoginUser(TitleMixin, SuccessUrlMixin, LoginView):
     template_name = 'salary/login.html'
     form_class = AuthenticationForm
     redirect_authenticated_user = True
     title = 'Авторизация'
-
-    def get_success_url(self, **kwargs):
-        return reverse_lazy('index')
 
 
 def logout_user(request):
@@ -193,10 +189,9 @@ class AdminWorkshiftsView(StaffPermissionRequiredMixin, TitleMixin, ListView):
         return context
 
 
-class DeleteWorkshift(PermissionRequiredMixin, TitleMixin, DeleteView):
+class DeleteWorkshift(PermissionRequiredMixin, TitleMixin, SuccessUrlMixin, DeleteView):
     model = WorkingShift
     permission_required = 'salary.delete_workingshift'
-    success_url = reverse_lazy('index')
     title = 'Удаление смены'
 
 
@@ -357,7 +352,7 @@ class MisconductDeleteView(StaffPermissionRequiredMixin, TitleMixin,
 
 
 # Employee functionality
-class EditUser(LoginRequiredMixin, TitleMixin, TemplateView):
+class EditUser(LoginRequiredMixin, TitleMixin, SuccessUrlMixin, TemplateView):
     template_name = 'salary/edit_user_profile.html'
     title = 'Редактирование пользователя'
     userform = EditUserForm
@@ -368,7 +363,6 @@ class EditUser(LoginRequiredMixin, TitleMixin, TemplateView):
             self.edited_user = get_object_or_404(User.objects.select_related('profile'), pk=self.kwargs.get('pk', 0))
         else:
             self.edited_user = self.request.user
-        self.redirect_link = request.GET.get('next', reverse_lazy('index'))
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, *args: Any, **kwargs: Any):
@@ -388,7 +382,7 @@ class EditUser(LoginRequiredMixin, TitleMixin, TemplateView):
             profile = profile_form_class.save(commit=False)
             user.save()
             profile.save()
-            return HttpResponseRedirect(self.redirect_link)
+            return redirect(self.get_success_url())
         else:
             user_form_class = self.userform
             profile_form_class = self.profileform
@@ -420,7 +414,7 @@ class WorkshiftDetailView(LoginRequiredMixin, TitleMixin, DetailView):
 
         return context
 
-class IndexView(LoginRequiredMixin, TitleMixin, TotalDataMixin, ListView):
+class IndexView(LoginRequiredMixin, TitleMixin, TotalDataMixin, SuccessUrlMixin, ListView):
     model = WorkingShift
     login_url = 'login'
     template_name = 'salary/account.html'
@@ -465,15 +459,11 @@ class IndexView(LoginRequiredMixin, TitleMixin, TotalDataMixin, ListView):
 
         return context
 
-    def get_success_url(self, **kwargs):
-        return reverse_lazy('index')
 
-
-class AddWorkshiftData(PermissionRequiredMixin, TitleMixin, CreateView):
+class AddWorkshiftData(PermissionRequiredMixin, TitleMixin, SuccessUrlMixin, CreateView):
     form_class = AddWorkshiftDataForm
     permission_required = 'salary.add_workingshift'
     template_name = 'salary/add_workshift.html'
-    success_url = reverse_lazy('index')
     title = 'Добавление смен'
 
     def get_initial(self):
@@ -491,15 +481,11 @@ class AddWorkshiftData(PermissionRequiredMixin, TitleMixin, CreateView):
         return super().form_valid(form)
 
 
-class EditWorkshiftData(PermissionRequiredMixin, UpdateView):
+class EditWorkshiftData(PermissionRequiredMixin, SuccessUrlMixin, UpdateView):
     model = WorkingShift
     form_class = EditWorkshiftDataForm
     permission_required = 'salary.change_workingshift'
     template_name = 'salary/edit_workshift.html'
-
-    def dispatch(self, request, *args, **kwargs):
-        self.success_url = request.GET.get('next', reverse_lazy('index'))
-        return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
         self.object.editor = self.request.user.get_full_name()

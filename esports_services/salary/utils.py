@@ -82,6 +82,7 @@ class TitleMixin(object):
 
 
 class SuccessUrlMixin:
-    def dispatch(self, request, *args: Any, **kwargs: Any):
-        self.success_url = request.GET.get('next', reverse_lazy('index'))
-        return super().dispatch(request, *args, **kwargs)
+    success_url = reverse_lazy('index')
+
+    def get_success_url(self):
+        return self.request.GET.get('next', self.success_url)
