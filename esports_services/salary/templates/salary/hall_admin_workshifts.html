@@ -23,7 +23,7 @@
             {% endif %}
           </td>
           <td>
-            <a href="{% url 'detail_workshift' slug=workshift.slug %}?next={{ request.path }}" class="link-primary">Подробнее...</a>
+            <a href="{{ workshift.get_absolute_url }}?next={{ request.path }}" class="link-primary">Подробнее...</a>
           </td>
         </tr>
         {% endfor %}
