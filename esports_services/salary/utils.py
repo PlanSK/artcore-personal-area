@@ -1,6 +1,9 @@
 from django.contrib.auth.mixins import PermissionRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy
+from django.utils import timezone
+
 from typing import *
+
 
 class TotalDataMixin:
     def get_total_values(self, request_user, workshifts):
@@ -86,3 +89,10 @@ class SuccessUrlMixin:
 
     def get_success_url(self):
         return self.request.GET.get('next', self.success_url)
+
+
+class EditModelEditorFields:
+    def form_valid(self, form):
+        self.object.editor = self.request.user.get_full_name()
+        self.object.change_date = timezone.localtime(timezone.now())
+        return super().form_valid(form)

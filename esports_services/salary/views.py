@@ -64,7 +64,10 @@ class DismissalEmployee(StaffPermissionRequiredMixin, TitleMixin,
     profile_form = DismissalEmployeeForm
 
     def dispatch(self, request, *args, **kwargs):
-        self.object = get_object_or_404(User.objects.select_related('profile'), pk=self.kwargs.get('pk', 0))
+        self.object = get_object_or_404(
+            User.objects.select_related('profile'),
+            pk=self.kwargs.get('pk', 0)
+        )
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
@@ -125,7 +128,8 @@ class StaffUserView(StaffPermissionRequiredMixin, TotalDataMixin, TemplateView):
 
         return context
 
-class AdminView(StaffPermissionRequiredMixin, StaffOnlyMixin, TitleMixin, TemplateView):
+class AdminView(StaffPermissionRequiredMixin, StaffOnlyMixin, TitleMixin,
+                TemplateView):
     template_name = 'salary/dashboard.html'
     login_url = 'login'
     title = 'Панель управления'
@@ -189,7 +193,8 @@ class AdminWorkshiftsView(StaffPermissionRequiredMixin, TitleMixin, ListView):
         return context
 
 
-class DeleteWorkshift(PermissionRequiredMixin, TitleMixin, SuccessUrlMixin, DeleteView):
+class DeleteWorkshift(PermissionRequiredMixin, TitleMixin, SuccessUrlMixin,
+                        DeleteView):
     model = WorkingShift
     permission_required = 'salary.delete_workingshift'
     title = 'Удаление смены'
@@ -289,6 +294,9 @@ class AddMisconductView(StaffPermissionRequiredMixin, TitleMixin,
     def form_valid(self, form):
         obj = form.save(commit=False)
         obj.moderator = self.request.user
+        obj.editor = self.request.user.get_full_name()
+        obj.change_date = timezone.localtime(timezone.now())
+        obj.slug = obj.misconduct_date
         return super().form_valid(form)
 
 
@@ -331,15 +339,19 @@ class MisconductUserView(LoginRequiredMixin, TitleMixin, ListView):
     title = 'Нарушения'
 
     def dispatch(self, request, *args: Any, **kwargs: Any):
-        self.username = self.kwargs.get('username')
+        self.intruder = self.kwargs.get('username')
         return super().dispatch(request, *args, **kwargs)
 
     def get_queryset(self):
-        return Misconduct.objects.filter(intruder__username=self.username).select_related('intruder', 'regulations_article')
+        return Misconduct.objects.filter(intruder__username=self.intruder).select_related('intruder', 'regulations_article')
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['intruder'] = get_object_or_404(User, username=self.intruder)
+        return context
 
-class MisconductUpdateView(StaffPermissionRequiredMixin, TitleMixin,
-                            SuccessUrlMixin, UpdateView):
+class MisconductUpdateView(StaffPermissionRequiredMixin, TitleMixin, 
+                            EditModelEditorFields, SuccessUrlMixin, UpdateView):
     model = Misconduct
     title = 'Редактирование данных нарушения'
     form_class = EditMisconductForm
@@ -401,7 +413,7 @@ class StaffEditUser(StaffPermissionRequiredMixin, EditUser):
 
 class WorkshiftDetailView(LoginRequiredMixin, TitleMixin, DetailView):
     model = WorkingShift
-    title = "Детальный просмотр смены"
+    title = 'Детальный просмотр смены'
     queryset = WorkingShift.objects.select_related(
             'cash_admin__profile__position',
             'hall_admin__profile__position',
@@ -414,7 +426,15 @@ class WorkshiftDetailView(LoginRequiredMixin, TitleMixin, DetailView):
 
         return context
 
-class IndexView(LoginRequiredMixin, TitleMixin, TotalDataMixin, SuccessUrlMixin, ListView):
+class MisconductDetailView(LoginRequiredMixin, TitleMixin, DetailView):
+    model = Misconduct
+    title = 'Протокол нарушения'
+    context_object_name = 'misconduct'
+    queryset = Misconduct.objects.select_related('intruder', 'moderator', 'regulations_article')
+
+
+class IndexView(LoginRequiredMixin, TitleMixin, TotalDataMixin,
+                SuccessUrlMixin, ListView):
     model = WorkingShift
     login_url = 'login'
     template_name = 'salary/account.html'
@@ -460,7 +480,8 @@ class IndexView(LoginRequiredMixin, TitleMixin, TotalDataMixin, SuccessUrlMixin,
         return context
 
 
-class AddWorkshiftData(PermissionRequiredMixin, TitleMixin, SuccessUrlMixin, CreateView):
+class AddWorkshiftData(PermissionRequiredMixin, TitleMixin, SuccessUrlMixin,
+                        CreateView):
     form_class = AddWorkshiftDataForm
     permission_required = 'salary.add_workingshift'
     template_name = 'salary/add_workshift.html'
@@ -477,19 +498,17 @@ class AddWorkshiftData(PermissionRequiredMixin, TitleMixin, SuccessUrlMixin, Cre
     def form_valid(self, form):
         obj = form.save(commit=False)
         obj.editor = self.request.user.get_full_name()
+        obj.change_date = timezone.localtime(timezone.now())
         obj.slug = obj.shift_date
         return super().form_valid(form)
 
 
-class EditWorkshiftData(PermissionRequiredMixin, SuccessUrlMixin, UpdateView):
+class EditWorkshiftData(PermissionRequiredMixin, SuccessUrlMixin,
+                        EditModelEditorFields, UpdateView):
     model = WorkingShift
     form_class = EditWorkshiftDataForm
     permission_required = 'salary.change_workingshift'
     template_name = 'salary/edit_workshift.html'
-
-    def form_valid(self, form):
-        self.object.editor = self.request.user.get_full_name()
-        return super().form_valid(form)
 
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)

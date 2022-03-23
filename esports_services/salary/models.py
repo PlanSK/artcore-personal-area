@@ -155,10 +155,6 @@ class WorkingShift(models.Model):
     def __str__(self) -> str:
         return self.shift_date.strftime('%d-%m-%Y')
 
-    def save(self, *args, **kwargs):
-        self.change_date = timezone.localtime(timezone.now())
-        super(WorkingShift, self).save()
-
     def get_summary_revenue(self) -> float:
         summary_revenue = sum([
             self.bar_revenue,
@@ -319,6 +315,9 @@ class Misconduct(models.Model):
     explanation_exist = models.BooleanField(verbose_name='Наличие объяснительной', default=False)
     moderator = models.ForeignKey(User, on_delete=models.PROTECT, verbose_name='Арбитр (кто выявил)', related_name='moderator')
     comment = models.TextField(verbose_name='Примечание', blank=True)
+    slug = models.SlugField(max_length=60, unique=True, verbose_name='URL', null=True, blank=True)
+    change_date = models.DateTimeField(verbose_name='Дата изменения', blank=True, null=True)
+    editor = models.TextField(verbose_name='Редактор', blank=True, editable=False)
 
     class Meta:
         verbose_name = 'Дисциплинарный проступок'
@@ -327,3 +326,6 @@ class Misconduct(models.Model):
 
     def __str__(self) -> str:
         return f'{self.misconduct_date} {self.intruder.get_full_name()}'
+
+    def get_absolute_url(self):
+        return reverse_lazy('misconduct_detail', kwargs={'slug': self.slug})
