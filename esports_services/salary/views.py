@@ -37,15 +37,14 @@ class RegistrationUser(TitleMixin, SuccessUrlMixin, TemplateView):
         if user_form_class.is_valid() and profile_form_class.is_valid():
             user = user_form_class.save(commit=False) 
             profile = profile_form_class.save(commit=False)
-            profile.user = user
             user.save()
-            profile.save()
-
             user.is_active = False
             user.groups.add(Group.objects.get(name='employee'))
             if profile.position.name == 'cash_admin':
                 user.groups.add(Group.objects.get(name='cashiers'))
             user.save()
+            profile.user = user
+            profile.save()
 
             return redirect(self.get_success_url())
         else:
@@ -147,7 +146,7 @@ class AdminUserView(StaffPermissionRequiredMixin, TitleMixin, ListView):
         ).order_by('-profile__position')
 
         if not self.kwargs.get('all'):
-            return query.exclude(is_active=False)
+            return query.filter(profile__dismiss_date__isnull=True)
 
         return query
 
@@ -474,7 +473,7 @@ class IndexView(LoginRequiredMixin, TitleMixin, TotalDataMixin,
             'experience': self.employee.profile.get_work_experience,
             'workshifts': current_workshifts,
             'total_values': self.get_total_values(self.employee, current_workshifts),
-            'today_workshift_exists': self.object_list.filter(shift_date=datetime.date.today()).exists(),
+            'today_workshift_exists': WorkingShift.objects.filter(shift_date=datetime.date.today()).exists(),
         })
 
         return context
