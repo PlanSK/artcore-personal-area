@@ -432,6 +432,11 @@ class MisconductDetailView(LoginRequiredMixin, TitleMixin, DetailView):
     queryset = Misconduct.objects.select_related('intruder', 'moderator', 'regulations_article')
 
 
+class NewUserView(TitleMixin, TemplateView):
+    template_name = 'salary/userboard.html'
+    title = 'Новая панель пользователя'
+
+
 class IndexView(LoginRequiredMixin, TitleMixin, TotalDataMixin,
                 SuccessUrlMixin, ListView):
     model = WorkingShift

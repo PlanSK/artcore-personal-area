@@ -32,4 +32,5 @@ urlpatterns = [
     path('delete_misconduct/<int:pk>/', MisconductDeleteView.as_view(), name='delete_misconduct'),
     path('misconduct_detail/<slug:slug>/', MisconductDetailView.as_view(), name='misconduct_detail'),
     path('load_regulation_data/', load_regulation_data, name='load_regulation_data'),
+    path('userboard/', NewUserView.as_view(), name='userboard'),
 ]
