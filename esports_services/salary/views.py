@@ -295,7 +295,10 @@ class AddMisconductView(StaffPermissionRequiredMixin, TitleMixin,
         obj.moderator = self.request.user
         obj.editor = self.request.user.get_full_name()
         obj.change_date = timezone.localtime(timezone.now())
-        obj.slug = obj.misconduct_date
+        obj.slug = return_misconduct_slug(obj.intruder.last_name, obj.misconduct_date)
+        if WorkingShift.objects.filter(shift_date=obj.misconduct_date).exists():
+            obj.save()
+            WorkingShift.objects.get(shift_date=obj.misconduct_date).misconducts.add(obj)
         return super().form_valid(form)
 
 
@@ -349,11 +352,21 @@ class MisconductUserView(LoginRequiredMixin, TitleMixin, ListView):
         context['intruder'] = get_object_or_404(User, username=self.intruder)
         return context
 
+
 class MisconductUpdateView(StaffPermissionRequiredMixin, TitleMixin, 
                             EditModelEditorFields, SuccessUrlMixin, UpdateView):
     model = Misconduct
     title = 'Редактирование данных нарушения'
     form_class = EditMisconductForm
+
+    def form_valid(self, form):
+        self.object.workingshift_set.clear()
+        queryset = WorkingShift.objects.filter(shift_date=self.object.misconduct_date)
+        if queryset.exists():
+            self.object.slug = return_misconduct_slug(self.object.intruder.last_name, self.object.misconduct_date)
+            self.object.save()
+            queryset.get().misconducts.add(self.object)
+        return super().form_valid(form)
 
 
 class MisconductDeleteView(StaffPermissionRequiredMixin, TitleMixin,
@@ -504,6 +517,10 @@ class AddWorkshiftData(PermissionRequiredMixin, TitleMixin, SuccessUrlMixin,
         obj.editor = self.request.user.get_full_name()
         obj.change_date = timezone.localtime(timezone.now())
         obj.slug = obj.shift_date
+        if Misconduct.objects.filter(misconduct_date=obj.shift_date).exists:
+            obj.save()
+            for object in Misconduct.objects.filter(misconduct_date=obj.shift_date):
+                obj.misconducts.add(object)
         return super().form_valid(form)
 
 
