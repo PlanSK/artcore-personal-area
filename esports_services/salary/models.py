@@ -310,6 +310,7 @@ class WorkingShift(models.Model):
         earnings['penalty'] = self.cash_admin_discipline_penalty
         earnings.update(self.get_revenue_bonuses(CASHIER_BONUS_CRITERIA))
         earnings.update(self.final_earnings_calculation(earnings))
+        earnings['before_shortage'] = earnings['final_earnings']
         if self.shortage and not self.shortage_paid:
             earnings['final_earnings'] = round(earnings['final_earnings'] - self.shortage * 2, 2)
 

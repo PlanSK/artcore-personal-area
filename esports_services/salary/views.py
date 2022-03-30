@@ -7,7 +7,7 @@ from django.contrib.auth import logout
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.models import Group
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
-from django.db.models import Q
+from django.db.models import Q, QuerySet
 
 from .forms import *
 from .utils import *
@@ -199,10 +199,12 @@ class DeleteWorkshift(PermissionRequiredMixin, TitleMixin, SuccessUrlMixin,
     title = 'Удаление смены'
 
 
-class MonthlyReportListView(PermissionRequiredMixin, StaffOnlyMixin, ListView):
+class MonthlyReportListView(PermissionRequiredMixin, StaffOnlyMixin, 
+                            TitleMixin, ListView):
     model = WorkingShift
     permission_required = 'salary.view_workingshift'
     template_name = 'salary/monthlyreport_list.html'
+    title = 'Сводный отчёт'
 
     def dispatch(self, request, *args, **kwargs):
         self.year = self.kwargs.get('year')
@@ -210,7 +212,7 @@ class MonthlyReportListView(PermissionRequiredMixin, StaffOnlyMixin, ListView):
         return super().dispatch(request, *args, **kwargs)
 
     def get_queryset(self):
-        workshifts = WorkingShift.objects.select_related(
+        queryset = WorkingShift.objects.select_related(
             'cash_admin__profile__position',
             'hall_admin__profile__position',
         ).filter(
@@ -219,66 +221,81 @@ class MonthlyReportListView(PermissionRequiredMixin, StaffOnlyMixin, ListView):
             is_verified=True
         )
 
-        return workshifts
+        return queryset
 
-    def get_values_list(self, kpi_dict: dict, shortage=0.0) -> list:
-        if kpi_dict['penalty'] > 1000:
-            penalty = 1000
-        else:
-            penalty = kpi_dict['penalty']
+    def get_sum_dict_values(self, first_dict: dict, second_dict:dict) -> dict:
+        summable_fields = (
+            'summary_revenue',
+            'count',
+            'penalties',
+            'estimated_earnings',
+            'shortage',
+        )
 
-        final_salary_hall = kpi_dict['estimated_earnings'] - penalty
-        values_list = [
-            1, kpi_dict['estimated_earnings'],
-            kpi_dict['penalty'], shortage, final_salary_hall
-        ]
-        return values_list
+        total_values_dict = {
+            key: round(sum((first_dict.get(key, 0), second_dict.get(key, 0))), 2)
+            for key in summable_fields
+        }
 
-    def get_employee_list(self, objects: list) -> list:
-        users_dict = dict()
+        return total_values_dict
 
-        for workshift in objects:
-            current_user_dict = {
-                workshift.hall_admin.get_full_name(): self.get_values_list(
-                    workshift.hall_admin_earnings_calc()),
-                workshift.cash_admin.get_full_name(): self.get_values_list(
-                    workshift.cashier_earnings_calc(),
-                    shortage=workshift.shortage)
+    def get_earnings_data_dict(self, workshifts: QuerySet) -> tuple:
+        earnings_data_list = list()
+        for workshift in workshifts:
+            admin_earnings_dict = workshift.hall_admin_earnings_calc()
+            cashier_earnings_dict = workshift.cashier_earnings_calc()
+            admin_dict = dict()
+            cashier_dict = dict()
+            earnings_data_dict = dict()
+            summary_data_dict = dict()
+            general_dict = {
+                'summary_revenue': workshift.get_summary_revenue(),
+                'count': 1,
             }
 
-            for name, values in current_user_dict.items():
-                if users_dict.get(name):
-                    users_dict[name] = [
-                        round(sum(a), 2)
-                        for a in zip(users_dict[name], values)
-                    ]
-                else:
-                    users_dict.update({name: list(map(lambda x: round(x, 2), values))})
+            admin_dict.update({
+                'username': workshift.hall_admin,
+                'penalties': admin_earnings_dict['penalty'],
+                'estimated_earnings': admin_earnings_dict['estimated_earnings'],
+            })
+            admin_dict.update(general_dict)
 
-        employee_list = []
+            cashier_dict.update({
+                'username': workshift.cash_admin,
+                'shortage': workshift.shortage,
+                'penalties': cashier_earnings_dict['penalty'],
+                'estimated_earnings': cashier_earnings_dict['estimated_earnings'],
+            })
+            cashier_dict.update((general_dict))
 
-        for name, values in users_dict.items():
-            employee_list.append([name] + values)
+            earnings_data_list.extend([admin_dict, cashier_dict])
 
-        employee_list.sort(key=lambda x: x[-1], reverse=True)
-
-
-        return employee_list
+        for current_dict in earnings_data_list:
+            existing_dict = earnings_data_dict.get(current_dict['username'].get_full_name())
+            if existing_dict:
+                existing_dict.update(
+                    self.get_sum_dict_values(existing_dict, current_dict)
+                )
+            else:
+                earnings_data_dict.update({
+                    current_dict['username'].get_full_name(): current_dict
+                })
+            summary_data_dict.update(
+                self.get_sum_dict_values(summary_data_dict, current_dict)
+            )
+        earnings_data_dict = dict(
+            sorted(earnings_data_dict.items(), key=lambda item: item[1]['summary_revenue'], reverse=True)
+        )
+        return (earnings_data_dict, summary_data_dict, )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        users_list = [(obj.hall_admin, obj.cash_admin) for obj in context['object_list']]
-        users = dict()
-        for hall_admin, cash_admin in users_list:
-            users.update({
-               hall_admin.get_full_name(): hall_admin,
-               cash_admin.get_full_name(): cash_admin,
-            })
+        employee_earnings_data, summary_earnings_data = self.get_earnings_data_dict(self.object_list)
+
         context.update({
-            'employee_list': self.get_employee_list(context['object_list']),
+            'employee_earnings_data': employee_earnings_data,
+            'summary_earnings_data': summary_earnings_data,
             'current_date': datetime.date(self.year, self.month, 1),
-            'users': users,
-            'title': 'Авансовый отчет'
         })
 
         return context
