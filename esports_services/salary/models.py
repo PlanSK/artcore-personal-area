@@ -170,10 +170,6 @@ class WorkingShift(models.Model):
     vr_revenue = models.FloatField(verbose_name='Выручка доп. услуги и VR', default=0.0)
     hookah_revenue = models.FloatField(verbose_name='Выручка по кальянам', default=0.0)
     hall_cleaning = models.BooleanField(default=True, verbose_name='Наведение порядка')
-    hall_admin_discipline = models.BooleanField(default=True, verbose_name='Сюблюдение дисциплины Админ зала')
-    hall_admin_discipline_penalty = models.FloatField(default=0.0, verbose_name='Дисциплинарный штраф (админ)')
-    cash_admin_discipline = models.BooleanField(default=True, verbose_name='Сюблюдение дисциплины Админ кассы')
-    cash_admin_discipline_penalty = models.FloatField(default=0.0, verbose_name='Дисциплинарный штраф (кассир)')
     misconducts = models.ManyToManyField(Misconduct, verbose_name='Нарушения дисциплины')
     shortage = models.FloatField(default=0, verbose_name='Недостача')
     shortage_paid = models.BooleanField(default=False, verbose_name="Отметка о погашении недостачи")
@@ -203,6 +199,23 @@ class WorkingShift(models.Model):
         ])
 
         return summary_revenue
+
+    # Misconducts load data
+    def get_employee_penalty(self, employee):
+        queryset = self.misconducts.filter(
+            intruder=employee,
+            misconduct_date=self.shift_date
+        )
+        if queryset.exists():
+            return queryset.aggregate(models.Sum('penalty')).get('penalty__sum')
+
+        return 0.0
+
+    def get_hall_admin_penalties_sum(self):
+        return self.get_employee_penalty(self.hall_admin)
+
+    def get_cash_admin_penalties_sum(self):
+        return self.get_employee_penalty(self.cash_admin)
 
     # Earnings block
 
@@ -297,7 +310,7 @@ class WorkingShift(models.Model):
 
     def hall_admin_earnings_calc(self) -> dict:
         earnings = self.employee_earnings_calc(self.hall_admin)
-        earnings['penalty'] = self.hall_admin_discipline_penalty
+        earnings['penalty'] = self.get_hall_admin_penalties_sum()
         earnings['cleaning'] = HALL_CLEANING_BONUS if self.hall_cleaning else 0.0
         earnings['hookah'] = round(self.hookah_revenue * HOOKAH_BONUS_RATIO, 2)
         earnings.update(self.get_revenue_bonuses(ADMIN_BONUS_CRITERIA))
@@ -307,7 +320,7 @@ class WorkingShift(models.Model):
 
     def cashier_earnings_calc(self) -> dict:
         earnings = self.employee_earnings_calc(self.cash_admin)
-        earnings['penalty'] = self.cash_admin_discipline_penalty
+        earnings['penalty'] = self.get_cash_admin_penalties_sum()
         earnings.update(self.get_revenue_bonuses(CASHIER_BONUS_CRITERIA))
         earnings.update(self.final_earnings_calculation(earnings))
         earnings['before_shortage'] = earnings['final_earnings']
