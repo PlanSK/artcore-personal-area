@@ -286,6 +286,10 @@ class MonthlyReportListView(PermissionRequiredMixin, StaffOnlyMixin,
         earnings_data_dict = dict(
             sorted(earnings_data_dict.items(), key=lambda item: item[1]['summary_revenue'], reverse=True)
         )
+        summary_data_dict['count'] = workshifts.count()
+        summary_data_dict['summary_revenue'] = sum(
+            [workshift.get_summary_revenue() for workshift in workshifts]
+        )
         return (earnings_data_dict, summary_data_dict, )
 
     def get_context_data(self, **kwargs):
