@@ -142,6 +142,8 @@ class WorkingShift(models.Model):
     publication_is_verified = models.BooleanField(default=False, verbose_name='СММ-публикация проверена')
     change_date = models.DateTimeField(verbose_name='Дата изменения', blank=True, null=True)
     editor = models.TextField(verbose_name='Редактор', blank=True, editable=False)
+    hall_admin_penalty = models.FloatField(verbose_name='Штраф администратора зала', default=0.0)
+    cash_admin_penalty = models.FloatField(verbose_name='Штраф администратора кассы', default=0.0)
 
     class Meta:
         verbose_name = 'Смена'
@@ -161,16 +163,6 @@ class WorkingShift(models.Model):
         ])
 
         return summary_revenue
-
-    # Misconducts load data
-    def get_employee_penalty(self, employee):
-        return 0.0
-
-    def get_hall_admin_penalties_sum(self):
-        return self.get_employee_penalty(self.hall_admin)
-
-    def get_cash_admin_penalties_sum(self):
-        return self.get_employee_penalty(self.cash_admin)
 
     # Earnings block
 
@@ -265,7 +257,7 @@ class WorkingShift(models.Model):
 
     def hall_admin_earnings_calc(self) -> dict:
         earnings = self.employee_earnings_calc(self.hall_admin)
-        earnings['penalty'] = self.get_hall_admin_penalties_sum()
+        earnings['penalty'] = self.hall_admin_penalty
         earnings['cleaning'] = HALL_CLEANING_BONUS if self.hall_cleaning else 0.0
         earnings['hookah'] = round(self.hookah_revenue * HOOKAH_BONUS_RATIO, 2)
         earnings.update(self.get_revenue_bonuses(ADMIN_BONUS_CRITERIA))
@@ -275,7 +267,7 @@ class WorkingShift(models.Model):
 
     def cashier_earnings_calc(self) -> dict:
         earnings = self.employee_earnings_calc(self.cash_admin)
-        earnings['penalty'] = self.get_cash_admin_penalties_sum()
+        earnings['penalty'] = self.cash_admin_penalty
         earnings.update(self.get_revenue_bonuses(CASHIER_BONUS_CRITERIA))
         earnings.update(self.final_earnings_calculation(earnings))
         earnings['before_shortage'] = earnings['final_earnings']
@@ -313,7 +305,7 @@ class Misconduct(models.Model):
     slug = models.SlugField(max_length=60, unique=True, verbose_name='URL', null=True, blank=True)
     change_date = models.DateTimeField(verbose_name='Дата изменения', blank=True, null=True)
     editor = models.TextField(verbose_name='Редактор', blank=True, editable=False)
-    workshift = models.ForeignKey(WorkingShift, on_delete=models.CASCADE, related_name='misconducts', blank=True, null=True)
+    workshift = models.ForeignKey(WorkingShift, on_delete=models.CASCADE, blank=True, null=True)
 
     class Meta:
         verbose_name = 'Дисциплинарный проступок'

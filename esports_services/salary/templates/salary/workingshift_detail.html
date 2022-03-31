@@ -95,8 +95,8 @@
             </tr>
             <tr>
               <td>Нарушения регламента</td>
-              <td>{{ work_shift.get_hall_admin_penalties|default:"-" }}</td>
-              <td>{{ work_shift.get_cash_admin_penalties|default:"-" }}</td>
+              <td>{{ work_shift.hall_admin_penalty|default:"-" }}</td>
+              <td>{{ work_shift.cash_admin_penalty|default:"-" }}</td>
             </tr>
             <tr>
               <td>Поддержание чистоты</td>

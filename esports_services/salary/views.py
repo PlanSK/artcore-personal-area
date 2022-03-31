@@ -1,5 +1,5 @@
 from django.contrib.auth.forms import AuthenticationForm
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import TemplateView, ListView, DetailView
 from django.contrib.auth.views import LoginView
@@ -324,7 +324,13 @@ class AddMisconductView(StaffPermissionRequiredMixin, TitleMixin,
             shift_date=object.misconduct_date
         )
         if workshift_queryset.exists():
-            object.workshift = workshift_queryset.get()
+            current_workshift = workshift_queryset.get()
+            object.workshift = current_workshift
+            if object.intruder == current_workshift.hall_admin:
+                current_workshift.hall_admin_penalty += object.penalty
+            elif object.intruder == current_workshift.cash_admin:
+                current_workshift.cash_admin_penalty += object.penalty
+            current_workshift.save()
 
         return super().form_valid(form)
 
@@ -387,16 +393,14 @@ class MisconductUpdateView(StaffPermissionRequiredMixin, TitleMixin,
     form_class = EditMisconductForm
 
     def form_valid(self, form):
-        self.object.workshift = None
-        workshift_queryset = WorkingShift.objects.filter(
-            shift_date=self.object.misconduct_date
-        )
-        if workshift_queryset.exists():
-            self.object.slug = return_misconduct_slug(
-                self.object.intruder.last_name,
-                self.object.misconduct_date
-            )
-            self.object.workshift = workshift_queryset.get()
+        if self.object.workshift:
+            old_penalty = Misconduct.objects.filter(misconduct_date=self.object.workshift.shift_date, intruder=self.object.intruder).get().penalty
+            if self.object.workshift.cash_admin == self.object.intruder:
+                self.object.workshift.cash_admin_penalty += -old_penalty + self.object.penalty
+            elif self.object.workshift.hall_admin == self.object.intruder:
+                self.object.workshift.hall_admin_penalty += -old_penalty + self.object.penalty
+            self.object.workshift.save()
+
         return super().form_valid(form)
 
 
@@ -404,6 +408,23 @@ class MisconductDeleteView(StaffPermissionRequiredMixin, TitleMixin,
                             SuccessUrlMixin, DeleteView):
     model = Misconduct
     title = 'Удаление нарушения'
+
+    def post(self, request, *args, **kwargs):
+        object = self.get_object()
+        if object.workshift:
+            if object.workshift.cash_admin == object.intruder:
+                if object.penalty <= object.workshift.cash_admin_penalty:
+                    object.workshift.cash_admin_penalty -= object.penalty
+                else:
+                    object.workshift.cash_admin_penalty = 0.0
+            elif object.workshift.hall_admin == object.intruder:
+                if object.penalty <= object.workshift.hall_admin_penalty:
+                    object.workshift.hall_admin_penalty -= object.penalty
+                else:
+                    object.workshift.hall_admin_penalty = 0.0
+
+            object.workshift.save()
+        return super().post(request, *args, **kwargs)
 
 
 # Employee functionality
@@ -554,6 +575,11 @@ class AddWorkshiftData(PermissionRequiredMixin, TitleMixin, SuccessUrlMixin,
                     misconduct_date=object.shift_date):
                 misconduct.workshift = object
                 misconduct.save()
+                if object.hall_admin == misconduct.intruder:
+                    object.hall_admin_penalty += misconduct.penalty
+                elif object.cash_admin == misconduct.intruder:
+                    object.cash_admin_penalty += misconduct.penalty
+                object.save()
 
         return super().form_valid(form)
 

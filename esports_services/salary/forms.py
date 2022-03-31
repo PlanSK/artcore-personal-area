@@ -203,8 +203,7 @@ class EditMisconductForm(forms.ModelForm):
     class Meta:
         model = Misconduct
         fields = (
-            'misconduct_date',
-            'intruder',
+
             'regulations_article',
             'penalty',
             'explanation_exist',

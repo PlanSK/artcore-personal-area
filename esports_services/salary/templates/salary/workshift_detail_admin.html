@@ -59,14 +59,14 @@
         </tr>
         </tbody>
         <tfoot class="verysmall">
-        {% if work_shift.get_hall_admin_penalties_sum %}
+        {% if work_shift.hall_admin_penalty %}
         <tr>
           <td>Предполагаемый заработок</td>
           <td>{{ work_shift.hall_admin_earnings_calc.estimated_earnings|default:"-" }}</td>
         </tr>
         <tr>
           <td>Штраф за нарушение дисциплинарного регламента</td>
-          <td class="text-danger">{{ work_shift.get_hall_admin_penalties_sum|default:"-" }}</td>
+          <td class="text-danger">{{ work_shift.hall_admin_penalty|default:"-" }}</td>
         </tr>
         <tr>
           <td>Удержано за нарушение дицциплины</td>
