@@ -312,14 +312,20 @@ class AddMisconductView(StaffPermissionRequiredMixin, TitleMixin,
     form_class = AddMisconductForm
 
     def form_valid(self, form):
-        obj = form.save(commit=False)
-        obj.moderator = self.request.user
-        obj.editor = self.request.user.get_full_name()
-        obj.change_date = timezone.localtime(timezone.now())
-        obj.slug = return_misconduct_slug(obj.intruder.last_name, obj.misconduct_date)
-        if WorkingShift.objects.filter(shift_date=obj.misconduct_date).exists():
-            obj.save()
-            WorkingShift.objects.get(shift_date=obj.misconduct_date).misconducts.add(obj)
+        workshift_queryset = WorkingShift.objects.filter(
+            shift_date=object.misconduct_date
+        )
+        object = form.save(commit=False)
+        object.moderator = self.request.user
+        object.editor = self.request.user.get_full_name()
+        object.change_date = timezone.localtime(timezone.now())
+        object.slug = return_misconduct_slug(
+            object.intruder.last_name,
+            object.misconduct_date
+        )
+        if workshift_queryset.exists():
+            object.workshift = workshift_queryset.get()
+
         return super().form_valid(form)
 
 
@@ -381,12 +387,16 @@ class MisconductUpdateView(StaffPermissionRequiredMixin, TitleMixin,
     form_class = EditMisconductForm
 
     def form_valid(self, form):
-        self.object.workingshift_set.clear()
-        queryset = WorkingShift.objects.filter(shift_date=self.object.misconduct_date)
-        if queryset.exists():
-            self.object.slug = return_misconduct_slug(self.object.intruder.last_name, self.object.misconduct_date)
-            self.object.save()
-            queryset.get().misconducts.add(self.object)
+        self.object.workshift = None
+        workshift_queryset = WorkingShift.objects.filter(
+            shift_date=self.object.misconduct_date
+        )
+        if workshift_queryset.exists():
+            self.object.slug = return_misconduct_slug(
+                self.object.intruder.last_name,
+                self.object.misconduct_date
+            )
+            self.object.workshift = workshift_queryset.get()
         return super().form_valid(form)
 
 
@@ -534,14 +544,16 @@ class AddWorkshiftData(PermissionRequiredMixin, TitleMixin, SuccessUrlMixin,
         return initional
 
     def form_valid(self, form):
-        obj = form.save(commit=False)
-        obj.editor = self.request.user.get_full_name()
-        obj.change_date = timezone.localtime(timezone.now())
-        obj.slug = obj.shift_date
-        if Misconduct.objects.filter(misconduct_date=obj.shift_date).exists:
-            obj.save()
-            for object in Misconduct.objects.filter(misconduct_date=obj.shift_date):
-                obj.misconducts.add(object)
+        object = form.save(commit=False)
+        object.editor = self.request.user.get_full_name()
+        object.change_date = timezone.localtime(timezone.now())
+        object.slug = object.shift_date
+        if Misconduct.objects.filter(misconduct_date=object.shift_date).exists:
+            object.save()
+            for misconduct in Misconduct.objects.filter(
+                    misconduct_date=object.shift_date):
+                misconduct.workshift = object
+
         return super().form_valid(form)
 
 

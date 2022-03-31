@@ -1,3 +1,4 @@
+from tabnanny import verbose
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
@@ -122,44 +123,6 @@ class Profile(models.Model):
         return None
 
 
-class DisciplinaryRegulations(models.Model):
-    article = models.CharField(max_length=10, verbose_name='Пункт')
-    title = models.CharField(max_length=255, verbose_name='Наименование')
-    base_penalty = models.FloatField(default=0.0, verbose_name='Сумма штрафа')
-    sanction = models.CharField(max_length=255, verbose_name='Санкция', blank=True, null=True)
-
-    class Meta:
-        verbose_name = 'Пункт регламента'
-        verbose_name_plural = 'Дисциплинарный регламент'
-
-    def __str__(self) -> str:
-        return f'{self.article} {self.title}'
-
-
-class Misconduct(models.Model):
-    misconduct_date = models.DateField(verbose_name='Дата')
-    intruder = models.ForeignKey(User, on_delete=models.PROTECT, verbose_name='Сотрудник', related_name='intruder')
-    regulations_article = models.ForeignKey(DisciplinaryRegulations, on_delete=models.PROTECT, verbose_name='Пункт дисциплинарного регламента')
-    penalty = models.FloatField(verbose_name='Сумма штрафа', default=0.0)
-    explanation_exist = models.BooleanField(verbose_name='Наличие объяснительной', default=False)
-    moderator = models.ForeignKey(User, on_delete=models.PROTECT, verbose_name='Арбитр (кто выявил)', related_name='moderator')
-    comment = models.TextField(verbose_name='Примечание', blank=True)
-    slug = models.SlugField(max_length=60, unique=True, verbose_name='URL', null=True, blank=True)
-    change_date = models.DateTimeField(verbose_name='Дата изменения', blank=True, null=True)
-    editor = models.TextField(verbose_name='Редактор', blank=True, editable=False)
-
-    class Meta:
-        verbose_name = 'Дисциплинарный проступок'
-        verbose_name_plural = 'Дисциплинарные проступки'
-        ordering = ['-misconduct_date']
-
-    def __str__(self) -> str:
-        return f'{self.misconduct_date} {self.intruder.get_full_name()}'
-
-    def get_absolute_url(self):
-        return reverse_lazy('misconduct_detail', kwargs={'slug': self.slug})
-
-
 class WorkingShift(models.Model):
     hall_admin = models.ForeignKey(User, on_delete=models.PROTECT, related_name='hall_admin')
     cash_admin = models.ForeignKey(User, on_delete=models.PROTECT, related_name='cash_admin')
@@ -170,7 +133,6 @@ class WorkingShift(models.Model):
     vr_revenue = models.FloatField(verbose_name='Выручка доп. услуги и VR', default=0.0)
     hookah_revenue = models.FloatField(verbose_name='Выручка по кальянам', default=0.0)
     hall_cleaning = models.BooleanField(default=True, verbose_name='Наведение порядка')
-    misconducts = models.ManyToManyField(Misconduct, verbose_name='Нарушения дисциплины')
     shortage = models.FloatField(default=0, verbose_name='Недостача')
     shortage_paid = models.BooleanField(default=False, verbose_name="Отметка о погашении недостачи")
     slug = models.SlugField(max_length=60, unique=True, verbose_name='URL', null=True, blank=True)
@@ -202,13 +164,6 @@ class WorkingShift(models.Model):
 
     # Misconducts load data
     def get_employee_penalty(self, employee):
-        queryset = self.misconducts.filter(
-            intruder=employee,
-            misconduct_date=self.shift_date
-        )
-        if queryset.exists():
-            return queryset.aggregate(models.Sum('penalty')).get('penalty__sum')
-
         return 0.0
 
     def get_hall_admin_penalties_sum(self):
@@ -331,6 +286,46 @@ class WorkingShift(models.Model):
 
     def get_absolute_url(self):
         return reverse_lazy('detail_workshift', kwargs={'slug': self.slug})
+
+
+class DisciplinaryRegulations(models.Model):
+    article = models.CharField(max_length=10, verbose_name='Пункт')
+    title = models.CharField(max_length=255, verbose_name='Наименование')
+    base_penalty = models.FloatField(default=0.0, verbose_name='Сумма штрафа')
+    sanction = models.CharField(max_length=255, verbose_name='Санкция', blank=True, null=True)
+
+    class Meta:
+        verbose_name = 'Пункт регламента'
+        verbose_name_plural = 'Дисциплинарный регламент'
+
+    def __str__(self) -> str:
+        return f'{self.article} {self.title}'
+
+
+class Misconduct(models.Model):
+    misconduct_date = models.DateField(verbose_name='Дата')
+    intruder = models.ForeignKey(User, on_delete=models.PROTECT, verbose_name='Сотрудник', related_name='intruder')
+    regulations_article = models.ForeignKey(DisciplinaryRegulations, on_delete=models.PROTECT, verbose_name='Пункт дисциплинарного регламента')
+    penalty = models.FloatField(verbose_name='Сумма штрафа', default=0.0)
+    explanation_exist = models.BooleanField(verbose_name='Наличие объяснительной', default=False)
+    moderator = models.ForeignKey(User, on_delete=models.PROTECT, verbose_name='Арбитр (кто выявил)', related_name='moderator')
+    comment = models.TextField(verbose_name='Примечание', blank=True)
+    slug = models.SlugField(max_length=60, unique=True, verbose_name='URL', null=True, blank=True)
+    change_date = models.DateTimeField(verbose_name='Дата изменения', blank=True, null=True)
+    editor = models.TextField(verbose_name='Редактор', blank=True, editable=False)
+    workshift = models.ForeignKey(WorkingShift, on_delete=models.CASCADE, related_name='misconducts', blank=True, null=True)
+
+    class Meta:
+        verbose_name = 'Дисциплинарный проступок'
+        verbose_name_plural = 'Дисциплинарные проступки'
+        ordering = ['-misconduct_date']
+
+    def __str__(self) -> str:
+        return f'{self.misconduct_date} {self.intruder.get_full_name()}'
+
+    def get_absolute_url(self):
+        return reverse_lazy('misconduct_detail', kwargs={'slug': self.slug})
+
 
 class Position(models.Model):
     title = models.CharField(max_length=255)
