@@ -1,14 +1,13 @@
 from django.contrib.auth.forms import AuthenticationForm
-from django.http import HttpResponseRedirect
+from django.http import JsonResponse, HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import TemplateView, ListView, DetailView
 from django.contrib.auth.views import LoginView
-from django.urls import reverse_lazy
 from django.contrib.auth import logout
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.models import Group
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
-from django.db.models import Q
+from django.db.models import Q, QuerySet
 
 from .forms import *
 from .utils import *
@@ -19,7 +18,7 @@ from dateutil.relativedelta import relativedelta
 
 
 # Registration, Login, Logout
-class RegistrationUser(TitleMixin, TemplateView):
+class RegistrationUser(TitleMixin, SuccessUrlMixin, TemplateView):
     template_name = 'salary/registration.html'
     title = 'Регистрация сотрудника'
     user_form = UserRegistrationForm
@@ -38,17 +37,16 @@ class RegistrationUser(TitleMixin, TemplateView):
         if user_form_class.is_valid() and profile_form_class.is_valid():
             user = user_form_class.save(commit=False) 
             profile = profile_form_class.save(commit=False)
-            profile.user = user
             user.save()
-            profile.save()
-
             user.is_active = False
             user.groups.add(Group.objects.get(name='employee'))
             if profile.position.name == 'cash_admin':
                 user.groups.add(Group.objects.get(name='cashiers'))
             user.save()
+            profile.user = user
+            profile.save()
 
-            return redirect('login')
+            return redirect(self.get_success_url())
         else:
             context = self.get_context_data(
                 profile_form=profile_form_class,
@@ -57,15 +55,18 @@ class RegistrationUser(TitleMixin, TemplateView):
             return render(request, self.template_name, context=context)
 
 
-class DismissalEmployee(StaffPermissionRequiredMixin, TitleMixin, TemplateView):
+class DismissalEmployee(StaffPermissionRequiredMixin, TitleMixin,
+                        SuccessUrlMixin, TemplateView):
     model = Profile
     title = 'Увольнение сотрудника'
     template_name = 'salary/dismissal_user.html'
     profile_form = DismissalEmployeeForm
 
     def dispatch(self, request, *args, **kwargs):
-        self.redirect_link = request.GET.get('next', reverse_lazy('index'))
-        self.object = get_object_or_404(User.objects.select_related('profile'), pk=self.kwargs.get('pk', 0))
+        self.object = get_object_or_404(
+            User.objects.select_related('profile'),
+            pk=self.kwargs.get('pk', 0)
+        )
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
@@ -82,7 +83,7 @@ class DismissalEmployee(StaffPermissionRequiredMixin, TitleMixin, TemplateView):
             self.object.save()
             profile = profile_form_class.save(commit=False)
             profile.save()
-            return HttpResponseRedirect(self.redirect_link)
+            return redirect(self.get_success_url())
         else:
             context = self.get_context_data(
                 profile_form=profile_form_class,
@@ -90,14 +91,11 @@ class DismissalEmployee(StaffPermissionRequiredMixin, TitleMixin, TemplateView):
             return render(request, self.template_name, context=context)
 
 
-class LoginUser(TitleMixin, LoginView):
+class LoginUser(TitleMixin, SuccessUrlMixin, LoginView):
     template_name = 'salary/login.html'
     form_class = AuthenticationForm
     redirect_authenticated_user = True
     title = 'Авторизация'
-
-    def get_success_url(self, **kwargs):
-        return reverse_lazy('index')
 
 
 def logout_user(request):
@@ -129,7 +127,8 @@ class StaffUserView(StaffPermissionRequiredMixin, TotalDataMixin, TemplateView):
 
         return context
 
-class AdminView(StaffPermissionRequiredMixin, StaffOnlyMixin, TitleMixin, TemplateView):
+class AdminView(StaffPermissionRequiredMixin, StaffOnlyMixin, TitleMixin,
+                TemplateView):
     template_name = 'salary/dashboard.html'
     login_url = 'login'
     title = 'Панель управления'
@@ -147,7 +146,7 @@ class AdminUserView(StaffPermissionRequiredMixin, TitleMixin, ListView):
         ).order_by('-profile__position')
 
         if not self.kwargs.get('all'):
-            return query.exclude(is_active=False)
+            return query.filter(profile__dismiss_date__isnull=True)
 
         return query
 
@@ -193,17 +192,19 @@ class AdminWorkshiftsView(StaffPermissionRequiredMixin, TitleMixin, ListView):
         return context
 
 
-class DeleteWorkshift(PermissionRequiredMixin, TitleMixin, DeleteView):
+class DeleteWorkshift(PermissionRequiredMixin, TitleMixin, SuccessUrlMixin,
+                        DeleteView):
     model = WorkingShift
     permission_required = 'salary.delete_workingshift'
-    success_url = reverse_lazy('index')
     title = 'Удаление смены'
 
 
-class MonthlyReportListView(PermissionRequiredMixin, StaffOnlyMixin, ListView):
+class MonthlyReportListView(PermissionRequiredMixin, StaffOnlyMixin, 
+                            TitleMixin, ListView):
     model = WorkingShift
     permission_required = 'salary.view_workingshift'
     template_name = 'salary/monthlyreport_list.html'
+    title = 'Сводный отчёт'
 
     def dispatch(self, request, *args, **kwargs):
         self.year = self.kwargs.get('year')
@@ -211,7 +212,7 @@ class MonthlyReportListView(PermissionRequiredMixin, StaffOnlyMixin, ListView):
         return super().dispatch(request, *args, **kwargs)
 
     def get_queryset(self):
-        workshifts = WorkingShift.objects.select_related(
+        queryset = WorkingShift.objects.select_related(
             'cash_admin__profile__position',
             'hall_admin__profile__position',
         ).filter(
@@ -220,73 +221,214 @@ class MonthlyReportListView(PermissionRequiredMixin, StaffOnlyMixin, ListView):
             is_verified=True
         )
 
-        return workshifts
+        return queryset
 
-    def get_values_list(self, kpi_dict: dict, shortage=0.0) -> list:
-        if kpi_dict['penalty'] > 1000:
-            penalty = 1000
-        else:
-            penalty = kpi_dict['penalty']
+    def get_sum_dict_values(self, first_dict: dict, second_dict:dict) -> dict:
+        summable_fields = (
+            'summary_revenue',
+            'count',
+            'penalties',
+            'estimated_earnings',
+            'shortage',
+        )
 
-        final_salary_hall = kpi_dict['estimated_earnings'] - penalty
-        values_list = [
-            1, kpi_dict['estimated_earnings'],
-            kpi_dict['penalty'], shortage, final_salary_hall
-        ]
-        return values_list
+        total_values_dict = {
+            key: round(sum((first_dict.get(key, 0), second_dict.get(key, 0))), 2)
+            for key in summable_fields
+        }
 
-    def get_employee_list(self, objects: list) -> list:
-        users_dict = dict()
+        return total_values_dict
 
-        for workshift in objects:
-            current_user_dict = {
-                workshift.hall_admin.get_full_name(): self.get_values_list(
-                    workshift.hall_admin_earnings_calc()),
-                workshift.cash_admin.get_full_name(): self.get_values_list(
-                    workshift.cashier_earnings_calc(),
-                    shortage=workshift.shortage)
+    def get_earnings_data_dict(self, workshifts: QuerySet) -> tuple:
+        earnings_data_list = list()
+        for workshift in workshifts:
+            admin_earnings_dict = workshift.hall_admin_earnings_calc()
+            cashier_earnings_dict = workshift.cashier_earnings_calc()
+            admin_dict = dict()
+            cashier_dict = dict()
+            earnings_data_dict = dict()
+            summary_data_dict = dict()
+            general_dict = {
+                'summary_revenue': workshift.get_summary_revenue(),
+                'count': 1,
             }
 
-            for name, values in current_user_dict.items():
-                if users_dict.get(name):
-                    users_dict[name] = [
-                        round(sum(a), 2)
-                        for a in zip(users_dict[name], values)
-                    ]
-                else:
-                    users_dict.update({name: list(map(lambda x: round(x, 2), values))})
+            admin_dict.update({
+                'username': workshift.hall_admin,
+                'penalties': admin_earnings_dict['penalty'],
+                'estimated_earnings': admin_earnings_dict['estimated_earnings'],
+            })
+            admin_dict.update(general_dict)
 
-        employee_list = []
+            cashier_dict.update({
+                'username': workshift.cash_admin,
+                'shortage': workshift.shortage,
+                'penalties': cashier_earnings_dict['penalty'],
+                'estimated_earnings': cashier_earnings_dict['estimated_earnings'],
+            })
+            cashier_dict.update((general_dict))
 
-        for name, values in users_dict.items():
-            employee_list.append([name] + values)
+            earnings_data_list.extend([admin_dict, cashier_dict])
 
-        employee_list.sort(key=lambda x: x[-1], reverse=1)
-
-
-        return employee_list
+        for current_dict in earnings_data_list:
+            existing_dict = earnings_data_dict.get(current_dict['username'].get_full_name())
+            if existing_dict:
+                existing_dict.update(
+                    self.get_sum_dict_values(existing_dict, current_dict)
+                )
+            else:
+                earnings_data_dict.update({
+                    current_dict['username'].get_full_name(): current_dict
+                })
+            summary_data_dict.update(
+                self.get_sum_dict_values(summary_data_dict, current_dict)
+            )
+        earnings_data_dict = dict(
+            sorted(earnings_data_dict.items(), key=lambda item: item[1]['summary_revenue'], reverse=True)
+        )
+        summary_data_dict['count'] = workshifts.count()
+        summary_data_dict['summary_revenue'] = sum(
+            [workshift.get_summary_revenue() for workshift in workshifts]
+        )
+        return (earnings_data_dict, summary_data_dict, )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        users_list = [(obj.hall_admin, obj.cash_admin) for obj in context['object_list']]
-        users = dict()
-        for hall_admin, cash_admin in users_list:
-            users.update({
-               hall_admin.get_full_name(): hall_admin,
-               cash_admin.get_full_name(): cash_admin,
-            })
+        employee_earnings_data, summary_earnings_data = self.get_earnings_data_dict(self.object_list)
+
         context.update({
-            'employee_list': self.get_employee_list(context['object_list']),
+            'employee_earnings_data': employee_earnings_data,
+            'summary_earnings_data': summary_earnings_data,
             'current_date': datetime.date(self.year, self.month, 1),
-            'users': users,
-            'title': 'Авансовый отчет'
         })
 
         return context
 
 
+class AddMisconductView(StaffPermissionRequiredMixin, TitleMixin,
+                        SuccessUrlMixin, CreateView):
+    model = Misconduct
+    title = 'Добавление дисциплинарного проступка'
+    form_class = AddMisconductForm
+
+    def form_valid(self, form):
+        object = form.save(commit=False)
+        object.moderator = self.request.user
+        object.editor = self.request.user.get_full_name()
+        object.change_date = timezone.localtime(timezone.now())
+        object.slug = return_misconduct_slug(
+            object.intruder.last_name,
+            object.misconduct_date
+        )
+        workshift_queryset = WorkingShift.objects.filter(
+            shift_date=object.misconduct_date
+        )
+        if workshift_queryset.exists():
+            current_workshift = workshift_queryset.get()
+            object.workshift = current_workshift
+            if object.intruder == current_workshift.hall_admin:
+                current_workshift.hall_admin_penalty += object.penalty
+            elif object.intruder == current_workshift.cash_admin:
+                current_workshift.cash_admin_penalty += object.penalty
+            current_workshift.save()
+
+        return super().form_valid(form)
+
+
+def load_regulation_data(request):
+    requested_article = request.GET.get('regulations_article')
+    regulation_article = DisciplinaryRegulations.objects.get(pk=requested_article)
+    response = {
+        'title': f'п. {regulation_article.article} {regulation_article.title}',
+        'sanction': regulation_article.sanction,
+        'penalty': regulation_article.base_penalty,
+    }
+    return JsonResponse(response)
+
+
+class MisconductListView(StaffPermissionRequiredMixin, TitleMixin, ListView):
+    model = Misconduct
+    title = 'Список нарушителей'
+    template_name = 'salary/intruders_list.html'
+
+    def get_queryset(self):
+        queryset = Misconduct.objects.all().select_related('intruder')
+        intruder_dict = dict()
+        for misconduct in queryset:
+            count = intruder_dict.get(misconduct.intruder)
+            if count:
+                count += 1
+                intruder_dict.update({
+                    misconduct.intruder: count
+                })
+            else:
+                intruder_dict.update({
+                    misconduct.intruder: 1
+                })
+
+        return dict(sorted(intruder_dict.items(), key=lambda item: item[1], reverse=True))
+
+
+class MisconductUserView(LoginRequiredMixin, TitleMixin, ListView):
+    model = Misconduct
+    title = 'Нарушения'
+
+    def dispatch(self, request, *args: Any, **kwargs: Any):
+        self.intruder = self.kwargs.get('username')
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_queryset(self):
+        return Misconduct.objects.filter(intruder__username=self.intruder).select_related('intruder', 'regulations_article')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['intruder'] = get_object_or_404(User, username=self.intruder)
+        return context
+
+
+class MisconductUpdateView(StaffPermissionRequiredMixin, TitleMixin, 
+                            EditModelEditorFields, SuccessUrlMixin, UpdateView):
+    model = Misconduct
+    title = 'Редактирование данных нарушения'
+    form_class = EditMisconductForm
+
+    def form_valid(self, form):
+        if self.object.workshift:
+            old_penalty = Misconduct.objects.filter(misconduct_date=self.object.workshift.shift_date, intruder=self.object.intruder).get().penalty
+            if self.object.workshift.cash_admin == self.object.intruder:
+                self.object.workshift.cash_admin_penalty += -old_penalty + self.object.penalty
+            elif self.object.workshift.hall_admin == self.object.intruder:
+                self.object.workshift.hall_admin_penalty += -old_penalty + self.object.penalty
+            self.object.workshift.save()
+
+        return super().form_valid(form)
+
+
+class MisconductDeleteView(StaffPermissionRequiredMixin, TitleMixin,
+                            SuccessUrlMixin, DeleteView):
+    model = Misconduct
+    title = 'Удаление нарушения'
+
+    def post(self, request, *args, **kwargs):
+        object = self.get_object()
+        if object.workshift:
+            if object.workshift.cash_admin == object.intruder:
+                if object.penalty <= object.workshift.cash_admin_penalty:
+                    object.workshift.cash_admin_penalty -= object.penalty
+                else:
+                    object.workshift.cash_admin_penalty = 0.0
+            elif object.workshift.hall_admin == object.intruder:
+                if object.penalty <= object.workshift.hall_admin_penalty:
+                    object.workshift.hall_admin_penalty -= object.penalty
+                else:
+                    object.workshift.hall_admin_penalty = 0.0
+
+            object.workshift.save()
+        return super().post(request, *args, **kwargs)
+
+
 # Employee functionality
-class EditUser(LoginRequiredMixin, TitleMixin, TemplateView):
+class EditUser(LoginRequiredMixin, TitleMixin, SuccessUrlMixin, TemplateView):
     template_name = 'salary/edit_user_profile.html'
     title = 'Редактирование пользователя'
     userform = EditUserForm
@@ -297,7 +439,6 @@ class EditUser(LoginRequiredMixin, TitleMixin, TemplateView):
             self.edited_user = get_object_or_404(User.objects.select_related('profile'), pk=self.kwargs.get('pk', 0))
         else:
             self.edited_user = self.request.user
-        self.redirect_link = request.GET.get('next', reverse_lazy('index'))
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, *args: Any, **kwargs: Any):
@@ -317,7 +458,7 @@ class EditUser(LoginRequiredMixin, TitleMixin, TemplateView):
             profile = profile_form_class.save(commit=False)
             user.save()
             profile.save()
-            return HttpResponseRedirect(self.redirect_link)
+            return redirect(self.get_success_url())
         else:
             user_form_class = self.userform
             profile_form_class = self.profileform
@@ -336,7 +477,7 @@ class StaffEditUser(StaffPermissionRequiredMixin, EditUser):
 
 class WorkshiftDetailView(LoginRequiredMixin, TitleMixin, DetailView):
     model = WorkingShift
-    title = "Детальный просмотр смены"
+    title = 'Детальный просмотр смены'
     queryset = WorkingShift.objects.select_related(
             'cash_admin__profile__position',
             'hall_admin__profile__position',
@@ -349,7 +490,20 @@ class WorkshiftDetailView(LoginRequiredMixin, TitleMixin, DetailView):
 
         return context
 
-class IndexView(LoginRequiredMixin, TitleMixin, TotalDataMixin, ListView):
+class MisconductDetailView(LoginRequiredMixin, TitleMixin, DetailView):
+    model = Misconduct
+    title = 'Протокол нарушения'
+    context_object_name = 'misconduct'
+    queryset = Misconduct.objects.select_related('intruder', 'moderator', 'regulations_article')
+
+
+class NewUserView(TitleMixin, TemplateView):
+    template_name = 'salary/userboard.html'
+    title = 'Новая панель пользователя'
+
+
+class IndexView(LoginRequiredMixin, TitleMixin, TotalDataMixin,
+                SuccessUrlMixin, ListView):
     model = WorkingShift
     login_url = 'login'
     template_name = 'salary/account.html'
@@ -389,20 +543,17 @@ class IndexView(LoginRequiredMixin, TitleMixin, TotalDataMixin, ListView):
             'experience': self.employee.profile.get_work_experience,
             'workshifts': current_workshifts,
             'total_values': self.get_total_values(self.employee, current_workshifts),
-            'today_workshift_exists': self.object_list.filter(shift_date=datetime.date.today()).exists(),
+            'today_workshift_exists': WorkingShift.objects.filter(shift_date=datetime.date.today()).exists(),
         })
 
         return context
 
-    def get_success_url(self, **kwargs):
-        return reverse_lazy('index')
 
-
-class AddWorkshiftData(PermissionRequiredMixin, TitleMixin, CreateView):
+class AddWorkshiftData(PermissionRequiredMixin, TitleMixin, SuccessUrlMixin,
+                        CreateView):
     form_class = AddWorkshiftDataForm
     permission_required = 'salary.add_workingshift'
     template_name = 'salary/add_workshift.html'
-    success_url = reverse_lazy('index')
     title = 'Добавление смен'
 
     def get_initial(self):
@@ -414,25 +565,31 @@ class AddWorkshiftData(PermissionRequiredMixin, TitleMixin, CreateView):
         return initional
 
     def form_valid(self, form):
-        obj = form.save(commit=False)
-        obj.editor = self.request.user.get_full_name()
-        obj.slug = obj.shift_date
+        object = form.save(commit=False)
+        object.editor = self.request.user.get_full_name()
+        object.change_date = timezone.localtime(timezone.now())
+        object.slug = object.shift_date
+        if Misconduct.objects.filter(misconduct_date=object.shift_date).exists():
+            object.save()
+            for misconduct in Misconduct.objects.filter(
+                    misconduct_date=object.shift_date):
+                misconduct.workshift = object
+                misconduct.save()
+                if object.hall_admin == misconduct.intruder:
+                    object.hall_admin_penalty += misconduct.penalty
+                elif object.cash_admin == misconduct.intruder:
+                    object.cash_admin_penalty += misconduct.penalty
+                object.save()
+
         return super().form_valid(form)
 
 
-class EditWorkshiftData(PermissionRequiredMixin, UpdateView):
+class EditWorkshiftData(PermissionRequiredMixin, SuccessUrlMixin,
+                        EditModelEditorFields, UpdateView):
     model = WorkingShift
     form_class = EditWorkshiftDataForm
     permission_required = 'salary.change_workingshift'
     template_name = 'salary/edit_workshift.html'
-
-    def dispatch(self, request, *args, **kwargs):
-        self.success_url = request.GET.get('next', reverse_lazy('index'))
-        return super().dispatch(request, *args, **kwargs)
-
-    def form_valid(self, form):
-        self.object.editor = self.request.user.get_full_name()
-        return super().form_valid(form)
 
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)

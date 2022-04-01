@@ -32,13 +32,13 @@
             {% endif %}
           </td>
           <td>
-            <a href="{% url 'detail_workshift' slug=workshift.slug %}?next={{ request.path }}" class="link-primary">Подробнее...</a>
+            <a href="{{ workshift.get_absolute_url }}?next={{ request.path }}" class="link-primary">Подробнее...</a>
           </td>
           <td>
             {% if workshift.is_verified %}
               <span title="Проверено"><i class="bi bi-check2-circle" style="color:green;"></i></span>
             {% else %}
-              <a title="Внести изменения" href="{% url 'edit_workshift' workshift.slug %}">
+              <a title="Внести изменения" href="{% url 'edit_workshift' workshift.slug %}?next={{ request.path }}">
                 <i class="bi bi-pencil-square" style="color:yellow;"></i>
               </a>
             {% endif %}

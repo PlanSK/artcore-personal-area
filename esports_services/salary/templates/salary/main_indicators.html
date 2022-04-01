@@ -75,6 +75,7 @@
     </div>
     <div class="row border-top border-light">
         <div class="col text-center">
+            <a href="{% url 'misconducts_user_view' username=request.user %}?next={{ request.GET.next|default:"/" }}" class="btn btn-secondary verysmall">Мои нарушения</a><br>
             <a href="https://drive.google.com/file/d/1uuleLHx0kNMqbNjlmcF-9a9CoNM56P99/view?ths=true" class="link-secondary verysmall">Дисцциплинарный регламент</a><br>
             <a href="https://docs.google.com/spreadsheets/d/1PSd8xztUzjojQMUpQVBfyCa-LlVAcCXrvbzNdWb9qH4/" class="link-secondary verysmall">Графики</a>
         </div>
