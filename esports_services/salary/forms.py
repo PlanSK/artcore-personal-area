@@ -198,12 +198,13 @@ class EditMisconductForm(forms.ModelForm):
     intruder = EmplModelChoiceField(
         queryset=User.objects.filter(is_active=True, is_staff=False),
         label='Сотрудник',
+        disabled = True,
     )
 
     class Meta:
         model = Misconduct
         fields = (
-
+            'intruder',
             'regulations_article',
             'penalty',
             'explanation_exist',
