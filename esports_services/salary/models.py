@@ -1,7 +1,9 @@
+from tabnanny import verbose
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.urls import reverse_lazy
 from django.utils import timezone
 
 import datetime
@@ -131,10 +133,6 @@ class WorkingShift(models.Model):
     vr_revenue = models.FloatField(verbose_name='Выручка доп. услуги и VR', default=0.0)
     hookah_revenue = models.FloatField(verbose_name='Выручка по кальянам', default=0.0)
     hall_cleaning = models.BooleanField(default=True, verbose_name='Наведение порядка')
-    hall_admin_discipline = models.BooleanField(default=True, verbose_name='Сюблюдение дисциплины Админ зала')
-    hall_admin_discipline_penalty = models.FloatField(default=0.0, verbose_name='Дисциплинарный штраф (админ)')
-    cash_admin_discipline = models.BooleanField(default=True, verbose_name='Сюблюдение дисциплины Админ кассы')
-    cash_admin_discipline_penalty = models.FloatField(default=0.0, verbose_name='Дисциплинарный штраф (кассир)')
     shortage = models.FloatField(default=0, verbose_name='Недостача')
     shortage_paid = models.BooleanField(default=False, verbose_name="Отметка о погашении недостачи")
     slug = models.SlugField(max_length=60, unique=True, verbose_name='URL', null=True, blank=True)
@@ -144,6 +142,8 @@ class WorkingShift(models.Model):
     publication_is_verified = models.BooleanField(default=False, verbose_name='СММ-публикация проверена')
     change_date = models.DateTimeField(verbose_name='Дата изменения', blank=True, null=True)
     editor = models.TextField(verbose_name='Редактор', blank=True, editable=False)
+    hall_admin_penalty = models.FloatField(verbose_name='Штраф администратора зала', default=0.0)
+    cash_admin_penalty = models.FloatField(verbose_name='Штраф администратора кассы', default=0.0)
 
     class Meta:
         verbose_name = 'Смена'
@@ -152,10 +152,6 @@ class WorkingShift(models.Model):
 
     def __str__(self) -> str:
         return self.shift_date.strftime('%d-%m-%Y')
-
-    def save(self, *args, **kwargs):
-        self.change_date = timezone.localtime(timezone.now())
-        super(WorkingShift, self).save()
 
     def get_summary_revenue(self) -> float:
         summary_revenue = sum([
@@ -261,7 +257,7 @@ class WorkingShift(models.Model):
 
     def hall_admin_earnings_calc(self) -> dict:
         earnings = self.employee_earnings_calc(self.hall_admin)
-        earnings['penalty'] = self.hall_admin_discipline_penalty
+        earnings['penalty'] = self.hall_admin_penalty
         earnings['cleaning'] = HALL_CLEANING_BONUS if self.hall_cleaning else 0.0
         earnings['hookah'] = round(self.hookah_revenue * HOOKAH_BONUS_RATIO, 2)
         earnings.update(self.get_revenue_bonuses(ADMIN_BONUS_CRITERIA))
@@ -271,26 +267,17 @@ class WorkingShift(models.Model):
 
     def cashier_earnings_calc(self) -> dict:
         earnings = self.employee_earnings_calc(self.cash_admin)
-        earnings['penalty'] = self.cash_admin_discipline_penalty
+        earnings['penalty'] = self.cash_admin_penalty
         earnings.update(self.get_revenue_bonuses(CASHIER_BONUS_CRITERIA))
         earnings.update(self.final_earnings_calculation(earnings))
+        earnings['before_shortage'] = earnings['final_earnings']
         if self.shortage and not self.shortage_paid:
             earnings['final_earnings'] = round(earnings['final_earnings'] - self.shortage * 2, 2)
 
         return earnings
 
-
-class Position(models.Model):
-    title = models.CharField(max_length=255)
-    name = models.CharField(max_length=60)
-    position_salary = models.FloatField(blank=True, null=True)
-
-    class Meta:
-        verbose_name = 'Должность'
-        verbose_name_plural = 'Должности'
-
-    def __str__(self) -> str:
-        return self.title
+    def get_absolute_url(self):
+        return reverse_lazy('detail_workshift', kwargs={'slug': self.slug})
 
 
 class DisciplinaryRegulations(models.Model):
@@ -305,3 +292,41 @@ class DisciplinaryRegulations(models.Model):
 
     def __str__(self) -> str:
         return f'{self.article} {self.title}'
+
+
+class Misconduct(models.Model):
+    misconduct_date = models.DateField(verbose_name='Дата')
+    intruder = models.ForeignKey(User, on_delete=models.PROTECT, verbose_name='Сотрудник', related_name='intruder')
+    regulations_article = models.ForeignKey(DisciplinaryRegulations, on_delete=models.PROTECT, verbose_name='Пункт дисциплинарного регламента')
+    penalty = models.FloatField(verbose_name='Сумма штрафа', default=0.0)
+    explanation_exist = models.BooleanField(verbose_name='Наличие объяснительной', default=False)
+    moderator = models.ForeignKey(User, on_delete=models.PROTECT, verbose_name='Арбитр (кто выявил)', related_name='moderator')
+    comment = models.TextField(verbose_name='Примечание', blank=True)
+    slug = models.SlugField(max_length=60, unique=True, verbose_name='URL', null=True, blank=True)
+    change_date = models.DateTimeField(verbose_name='Дата изменения', blank=True, null=True)
+    editor = models.TextField(verbose_name='Редактор', blank=True, editable=False)
+    workshift = models.ForeignKey(WorkingShift, on_delete=models.CASCADE, blank=True, null=True)
+
+    class Meta:
+        verbose_name = 'Дисциплинарный проступок'
+        verbose_name_plural = 'Дисциплинарные проступки'
+        ordering = ['-misconduct_date']
+
+    def __str__(self) -> str:
+        return f'{self.misconduct_date} {self.intruder.get_full_name()}'
+
+    def get_absolute_url(self):
+        return reverse_lazy('misconduct_detail', kwargs={'slug': self.slug})
+
+
+class Position(models.Model):
+    title = models.CharField(max_length=255)
+    name = models.CharField(max_length=60)
+    position_salary = models.FloatField(blank=True, null=True)
+
+    class Meta:
+        verbose_name = 'Должность'
+        verbose_name_plural = 'Должности'
+
+    def __str__(self) -> str:
+        return self.title

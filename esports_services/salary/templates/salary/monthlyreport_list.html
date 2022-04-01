@@ -7,38 +7,47 @@
   <div class="container">
     <div class="row row-cols-1">
       <div class="col table-responsive border rounded m-2">
-        <p class="text-center">Авансовый отчет за {{ current_date|date:"F" }}</p>
+        <p class="text-center">{{ title }} за {{ current_date|date:"F" }}</p>
         <table class="table table-dark table-hover">
           <thead class="text-warning text-center verysmall">
             <tr>
               <th>Сотрудник</th>
               <th>Количество смен</th>
+              <th>Выручка</th>
               <th>Сумма начислений</th>
-              <th>Дисц. штрафы</th>
-              <th>Недостачи*</th>
-              <th>К выдаче</th>
+              <th>Штрафы</th>
+              <th>Недостачи</th>
               <th></th>
             </tr>
           </thead>
           <tbody class="text-center verysmall">
-            {% for employee in employee_list %}
-            {% return_key users employee.0 as need_user %}
+            {% for employee in employee_earnings_data.values %}
             <tr>
-              {% for value in employee %}
-                <td>
-                  {{ value|default:"-" }}
-                </td>
-              {% endfor %}
-              <td><a href="{% url 'staff_user_view' request_user=need_user year=current_date.year month=current_date.month %}" class="link-primary verysmall">Подробнее...</a></td>
+              <td>{{ employee.username.get_full_name }}</td>
+              <td>{{ employee.count|default:"-"  }}</td>
+              <td>{{ employee.summary_revenue|default:"-" | intcomma }}</td>
+              <td>{{ employee.estimated_earnings|default:"-" | intcomma }}</td>
+              <td>{{ employee.penalties|default:"-" | intcomma }}</td>
+              <td>{{ employee.shortage|default:"-" | intcomma }}</td>
+              <td><a href="{% url 'staff_user_view' request_user=employee.username year=current_date.year month=current_date.month %}" class="link-primary verysmall">Подробнее...</a></td>
             </tr>
             {% endfor %}
           </tbody>
+          <tfoot class="text-center verysmall text-white">
+            <tr>
+              <td></td>
+              <td>{{ summary_earnings_data.count|default:"-"  }}</td>
+              <td>{{ summary_earnings_data.summary_revenue|default:"-" | intcomma }}</td>
+              <td>{{ summary_earnings_data.estimated_earnings|default:"-" | intcomma }}</td>
+              <td>{{ summary_earnings_data.penalties|default:"-" | intcomma }}</td>
+              <td>{{ summary_earnings_data.shortage|default:"-" | intcomma }}</td>
+              <td></td>
+            </tr>
+          </tfoot>
         </table>
       </div>
       <div class="col">
-        <p class="text-warning verysmall">Примечания:<br>
-          - Отображаются только проверенные смены.<br>
-          - Недостача не вычитается. </p>
+        <p class="text-secondary fs-italic verysmall">Примечание - отображаются только проверенные смены.</p>
         <p class="text-center"><a href="{% url 'reports_list' %}" class="btn btn-secondary verysmall">Вернуться к списку отчетов</a></p>
       </div>
     </div>

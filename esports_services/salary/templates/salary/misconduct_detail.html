@@ -1,0 +1,103 @@
+{% extends 'salary/logined_page.html' %}
+{% load salary_tags %}
+{% load humanize %}
+
+{% block content %}
+<main>
+  <div class="container">
+    <div class="row mt-1">
+      <div class="col">
+        <p class="text-center">Протокол нарушения</p>
+      </div>
+    </div>
+    <div class="row mb-2">
+      <div class="col">
+        <a href="{{ request.GET.next|default:"/" }}" class="btn btn-secondary verysmall">Назад</a>
+      </div>
+    </div>
+    <div class="row mb-2">
+      <div class="col-4 me-2 ms-2 rounded border border-light">
+        <table class="table table-dark">
+          <thead class="text-warning text-center verysmall">
+            <tr>
+              <th colspan="2">Основные данные</th>
+            </tr>
+          </thead>
+          <tbody class="text-center verysmall">
+            <tr>
+              <td class="text-warning">Дата нарушения</td>
+              <td>{{ misconduct.misconduct_date }}</td>
+            </tr>
+            <tr>
+              <td class="text-warning">Сотрудник</td>
+              <td>{{ misconduct.intruder.get_full_name }}</td>
+            </tr>
+            <tr>
+              <td class="text-warning">Кем наложено</td>
+              <td>{{ misconduct.moderator.get_full_name }}</td>
+            </tr>
+            <tr>
+              <td class="text-warning">Наличие объяснения</td>
+              <td>
+                {% if misconduct.explanation_exist %}
+                <i class="bi bi-check2-circle" style="color: green;"></i>
+                {% else %}
+                <i class="bi bi-x-circle" style="color: red;"></i>
+                {% endif %}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="col ms-2 me-2 rounded border border-light">
+        <table class="table table-dark">
+          <thead class="text-warning text-center verysmall">
+            <tr>
+              <th colspan="2">Данные нарушения</th>
+            </tr>
+          </thead>
+          <tbody class="text-center verysmall">
+            <tr>
+              <td class="text-warning">Пункт регламента</td>
+              <td>{{ misconduct.regulations_article.article }}</td>
+            </tr>
+            <tr>
+              <td class="text-warning">Описание нарушения</td>
+              <td>{{ misconduct.regulations_article.title }}</td>
+            </tr>
+            <tr>
+              <td class="text-warning">Санкция</td>
+              <td>{{ misconduct.regulations_article.sanction }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col m-2 rounded border border-light">
+        <table class="table table-dark">
+          <thead class="text-warning text-center verysmall">
+            <tr>
+              <th colspan="2">Принятое решение</th>
+            </tr>
+          </thead>
+          <tbody class="text-center verysmall">
+            <tr>
+              <td class="text-warning">Штраф</td>
+              <td>{{ misconduct.penalty|default:"Предупреждение" }}</td>
+            </tr>
+            <tr>
+              <td class="text-warning">Комментарий</td>
+              <td>{{ misconduct.comment|default:"-" }}</td>
+            </tr>
+            <tr>
+              <td class="text-warning">Протокол составлен:</td>
+              <td>{{ misconduct.change_date }} ({{ misconduct.editor }})</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</main>
+{% endblock %}

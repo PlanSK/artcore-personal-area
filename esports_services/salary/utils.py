@@ -1,4 +1,12 @@
 from django.contrib.auth.mixins import PermissionRequiredMixin, UserPassesTestMixin
+from django.urls import reverse_lazy
+from django.utils import timezone
+from django.utils.text import slugify
+
+from unidecode import unidecode
+from typing import *
+
+from salary.models import Misconduct
 
 
 class TotalDataMixin:
@@ -78,3 +86,26 @@ class TitleMixin(object):
         context= super(TitleMixin, self).get_context_data(**kwargs)
         context['title'] = self.get_title()
         return context
+
+
+class SuccessUrlMixin:
+    success_url = reverse_lazy('index')
+
+    def get_success_url(self):
+        return self.request.GET.get('next', self.success_url)
+
+
+class EditModelEditorFields:
+    def form_valid(self, form):
+        self.object.editor = self.request.user.get_full_name()
+        self.object.change_date = timezone.localtime(timezone.now())
+        return super().form_valid(form)
+
+
+def return_misconduct_slug(last_name, date):
+    slug_name = slugify(f'{unidecode(last_name)} {date.strftime("%d %m %Y")}')
+    count = Misconduct.objects.filter(slug__startswith=slug_name).count()
+    if not count:
+        return slug_name
+    else:
+        return f'{slug_name}-{count}'
