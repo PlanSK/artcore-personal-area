@@ -162,7 +162,9 @@ class ReportsView(StaffPermissionRequiredMixin, TitleMixin, ListView):
     title = 'Отчеты'
 
     def get_queryset(self):
-        query = WorkingShift.objects.dates('shift_date', 'month')
+        query = WorkingShift.objects.filter(
+            is_verified=True
+        ).dates('shift_date','month')
         return query
 
 
