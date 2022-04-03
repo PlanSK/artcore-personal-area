@@ -1,5 +1,5 @@
 from django.contrib.auth.forms import AuthenticationForm
-from django.http import JsonResponse, HttpRequest, HttpResponse
+from django.http import JsonResponse, HttpResponseNotFound
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import TemplateView, ListView, DetailView
 from django.contrib.auth.views import LoginView
@@ -156,6 +156,7 @@ class AdminUserView(StaffPermissionRequiredMixin, TitleMixin, ListView):
             context['only_actived'] = True
         return context
 
+
 class ReportsView(StaffPermissionRequiredMixin, TitleMixin, ListView):
     template_name = 'salary/reports_list.html'
     model = WorkingShift
@@ -168,29 +169,42 @@ class ReportsView(StaffPermissionRequiredMixin, TitleMixin, ListView):
         return query
 
 
-class AdminWorkshiftsView(StaffPermissionRequiredMixin, TitleMixin, ListView):
-    template_name = 'salary/staff_view_workshifts.html'
+class StaffWorkshiftsView(StaffPermissionRequiredMixin, TitleMixin, ListView):
+    template_name = 'salary/staff_unverified_workshifts_view.html'
     model = WorkingShift
     title = 'Смены'
     paginate_by = 10
 
     def get_queryset(self):
-        workshifts = WorkingShift.objects.filter(is_verified=False).select_related(
-            'hall_admin__profile',
-            'cash_admin__profile',
-        )
-        if self.kwargs.get('all'):
-            workshifts = WorkingShift.objects.all().select_related(
-                'hall_admin__profile',
-                'cash_admin__profile',
-            )
+        workshifts = WorkingShift.objects.filter(
+            is_verified=False
+        ).select_related('hall_admin', 'cash_admin')
 
         return workshifts
 
+
+class StaffArchiveWorkshiftsView(StaffPermissionRequiredMixin, TitleMixin, ListView):
+    template_name = 'salary/staff_archive_workshifts_view.html'
+    model = WorkingShift
+    title = 'Смены'
+
+    def get_queryset(self):
+        if self.kwargs.get('year') and self.kwargs.get('month'):
+            queryset = WorkingShift.objects.filter(
+                shift_date__month = self.kwargs.get('month'),
+                shift_date__year = self.kwargs.get('year')
+            ).select_related('cash_admin', 'hall_admin').order_by('shift_date')
+        else:
+            HttpResponseNotFound('No all data found.')
+        return queryset
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        if not self.kwargs.get('all'):
-            context['only_verified'] = True
+        context['summary_revenue'] = sum([
+            workshift.get_summary_revenue()
+            for workshift in self.object_list 
+        ])
+
         return context
 
 
@@ -484,7 +498,7 @@ class IndexView(LoginRequiredMixin, TitleMixin, TotalDataMixin,
 
     def dispatch(self, request, *args, **kwargs):
         if self.request.user.is_staff:
-            return redirect('dashboard')
+            return redirect('workshifts_view')
         if request.user.is_authenticated:
             self.employee = get_object_or_404(
                 User.objects.select_related('profile__position'),
