@@ -20,11 +20,9 @@
       <tr>
         <td>
           {% if workshift.is_verified %}
-          <i class="bi bi-check2-circle" style="color: green;"></i>
-          Проверено 
+          <i class="fa-solid fa-calendar-check" style="color: green;"></i>
           {% else %}
-          <i class="bi bi-stopwatch-fill" style="color: yellow;"></i>
-          Ожидает проверки
+          <i class="fa-solid fa-hourglass-end fa-beat" style="color: yellow;"></i>
           {% endif %}
         </td>
         <td>{{ workshift.shift_date }}</td>

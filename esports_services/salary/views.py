@@ -172,7 +172,7 @@ class AdminWorkshiftsView(StaffPermissionRequiredMixin, TitleMixin, ListView):
     template_name = 'salary/staff_view_workshifts.html'
     model = WorkingShift
     title = 'Смены'
-    paginate_by = 5
+    paginate_by = 10
 
     def get_queryset(self):
         workshifts = WorkingShift.objects.filter(is_verified=False).select_related(
@@ -192,6 +192,17 @@ class AdminWorkshiftsView(StaffPermissionRequiredMixin, TitleMixin, ListView):
         if not self.kwargs.get('all'):
             context['only_verified'] = True
         return context
+
+
+class StaffWorkshiftsMonthlyList(StaffPermissionRequiredMixin, TitleMixin, 
+                                    ListView):
+    template_name = 'salary/staff_monthly_workshifts_list.html'
+    model = WorkingShift
+    title = 'Смены'
+
+    def get_queryset(self):
+        workshifts_months = WorkingShift.objects.dates('shift_date', 'month')
+        return workshifts_months
 
 
 class DeleteWorkshift(PermissionRequiredMixin, TitleMixin, SuccessUrlMixin,
