@@ -1,0 +1,19 @@
+{% extends 'salary/dashboard.html' %}
+{% load humanize %}
+{% load salary_tags %}
+{% block data %}
+<div class="col table-responsive m-3 text-center border">
+  <div class="row border-bottom"><div class="col"><p class="verysmall text-warning">Архив смен</p></div></div>
+  <div class="row justify-content-center m-1">
+    <div class="col-md-3 col-sm-12">
+      <div class="list-group">
+    {% for period in object_list %}
+    <a href="{% url 'workshift_archive_view' year=period.year month=period.month %}" class="list-group-item list-group-item-action list-group-item-primary mb-1">
+      {{ period|date:"F Y г." }}
+    </a>
+    {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
