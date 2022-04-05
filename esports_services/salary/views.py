@@ -7,7 +7,7 @@ from django.contrib.auth import logout
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.models import Group
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
-from django.db.models import Q, QuerySet
+from django.db.models import Q, QuerySet, Sum
 
 from .forms import *
 from .utils import *
@@ -484,9 +484,55 @@ class MisconductDetailView(LoginRequiredMixin, TitleMixin, DetailView):
     queryset = Misconduct.objects.select_related('intruder', 'moderator', 'regulations_article')
 
 
-class NewUserView(TitleMixin, TemplateView):
+class IndexEmployeeView(LoginRequiredMixin, TitleMixin, ListView):
+    model = WorkingShift
     template_name = 'salary/userboard.html'
-    title = 'Новая панель пользователя'
+    title = 'Панель пользователя'
+
+    def dispatch(self, request, *args: Any, **kwargs: Any):
+        self.employee = self.kwargs.get('pk')
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_queryset(self) -> QuerySet:
+        queryset = WorkingShift.objects.select_related(
+            'hall_admin__profile__position',
+            'cash_admin__profile__position'
+        ).filter(
+            # shift_date__month=datetime.date.today().month,
+            # shift_date__year=datetime.date.today().year,
+        ).filter(Q(cash_admin=self.employee) | Q(hall_admin=self.employee))
+
+        return queryset
+
+    def get_summary_earnings(self):
+        summary_earnings = sum([
+            workshift.hall_admin_earnings_calc().get('final_earnings')
+            if workshift.hall_admin == self.employee
+            else workshift.cashier_earnings_calc().get('final_earnings')
+            for workshift in self.object_list
+        ])
+
+        return round(summary_earnings, 2)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['summary_earnings'] = self.get_summary_earnings()
+        context['misconducts'] = Misconduct.objects.filter(
+            intruder=self.employee
+        ).aggregate(Sum('penalty'))
+        context['employee'] = self.employee
+
+        return context
+
+
+class EmployeeWorkshiftsView(IndexEmployeeView):
+    template_name = 'salary/employee_workshifts_view.html'
+    title = 'Смены'
+
+    def get_queryset(self) -> QuerySet:
+        queryset = super().get_queryset()
+        return queryset.order_by('shift_date')
+
 
 
 class IndexView(LoginRequiredMixin, TitleMixin, TotalDataMixin,

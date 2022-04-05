@@ -27,7 +27,7 @@
                     <div class="text-center">
                       <p class="card-text fst-italic">Мои смены</p>
                       <hr class="m-1">
-                      <span class="fw-bold">10</span>
+                      <span class="fw-bold">{{ object_list.count|default:"-" }}</span>
                       <a href="#" class="stretched-link"></a>
                     </div>
                   </div>
@@ -46,7 +46,7 @@
                     <div class="text-center">
                       <p class="card-text fst-italic">Мой заработок</p>
                       <hr class="m-1">
-                      <span class="fw-bold">10234.09</span>
+                      <span class="fw-bold">{{ summary_earnings|default:"-" | intcomma }}</span>
                       <a href="#" class="stretched-link"></a>
                     </div>
                   </div>
@@ -63,7 +63,7 @@
                     <div class="text-center">
                       <p class="card-text fst-italic">Штрафы</p>
                       <hr class="m-1">
-                      <span class="fw-bold">-</span>
+                      <span class="fw-bold">{{ misconducts.penalty__sum|default:"-" }}</span>
                       <a href="#" class="stretched-link"></a>
                     </div>
                   </div>
@@ -72,19 +72,8 @@
             </div>
             <hr class="w-100 mt-2">
           </div>
-          <div class="row row-cols-md-3 row-cols-sm-1 justify-content-center">
-            <div class="col-sm-12 col-md-3 mb-1">
-              <div class="card red-snippet text-light h-100">
-                <div class="card-body">
-                  <p class="card-text fst-italic">
-                    <span class="me-2"><i class="bi bi-mortarboard" style="font-size: 1.5rem;"></i></span>
-                    Нарушения <span class="badge bg-secondary ms-3">1</span>
-                  </p>
-                  <a href="{% url 'misconducts_view' %}" class="stretched-link"></a>
-                </div>
-              </div>
-            </div>
-            <div class="col-sm-12 col-md-3 mb-1">
+          <div class="row row-cols-md-2 row-cols-sm-1 justify-content-center">
+            <div class="col-sm-12 col-md-4 mb-1">
               <div class="card orange-snippet text-light h-100">
                 <div class="card-body">
                   <p class="card-text fst-italic">
@@ -95,12 +84,12 @@
                 </div>
               </div>
             </div>
-            <div class="col-sm-12 col-md-3 mb-1">
+            <div class="col-sm-12 col-md-4 mb-1">
               <div class="card green-snippet text-light h-100">
                 <div class="card-body">
                   <p class="card-text fst-italic">
                     <span class="me-2"><i class="bi bi-graph-up-arrow" style="font-size: 1.5rem;"></i></span>
-                    Графики
+                    График
                   </p>
                   <a href="#" class="stretched-link"></a>
                 </div>

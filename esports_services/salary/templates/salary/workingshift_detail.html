@@ -69,12 +69,12 @@
             </tr>
           </thead>
           <tbody class="text-center verysmall">
-            <tr><td class="text-warning">Бар</td><td>{{work_shift.bar_revenue}}</td></tr>
-            <tr><td class="text-warning">Game Zone (КНА)</td><td>{{work_shift.game_zone_revenue}}</td></tr>
+            <tr><td class="text-warning">Бар</td><td>{{work_shift.bar_revenue | intcomma}}</td></tr>
+            <tr><td class="text-warning">Game Zone (КНА)</td><td>{{work_shift.game_zone_revenue | intcomma }}</td></tr>
             <tr><td class="text-warning">Ошибки</td><td>{{work_shift.game_zone_error}}</td></tr>
-            <tr><td class="text-warning">Доп. услуги</td><td>{{work_shift.vr_revenue}}</td></tr>
-            <tr><td class="text-warning">Кальян</td><td>{{work_shift.hookah_revenue}}</td></tr>
-            <tr><td class="text-warning">Общая выручка</td><td>{{work_shift.get_summary_revenue}}</td></tr>
+            <tr><td class="text-warning">Доп. услуги</td><td>{{work_shift.vr_revenue | intcomma}}</td></tr>
+            <tr><td class="text-warning">Кальян</td><td>{{work_shift.hookah_revenue | intcomma}}</td></tr>
+            <tr><td class="text-warning">Общая выручка</td><td>{{work_shift.get_summary_revenue | intcomma}}</td></tr>
           </tbody>
         </table>
       </div>
@@ -132,10 +132,10 @@
       </div>
     </div>
     <div class="row mt-2">
-      {% if request.user.profile.position.name == 'hall_admin' or request.user.is_staff %}
+      {% if request.user == work_shift.hall_admin or request.user.is_staff %}
         {% include 'salary/workshift_detail_admin.html' %}
       {% endif %}
-      {% if request.user.profile.position.name == 'cash_admin' or request.user.is_staff %}
+      {% if request.user == work_shift.cash_admin or request.user.is_staff %}
         {% include 'salary/workshift_detail_cashier.html' %}
       {% endif %}
     </div>
