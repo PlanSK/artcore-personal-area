@@ -486,11 +486,13 @@ class MisconductDetailView(LoginRequiredMixin, TitleMixin, DetailView):
 
 class IndexEmployeeView(LoginRequiredMixin, TitleMixin, ListView):
     model = WorkingShift
-    template_name = 'salary/userboard.html'
+    template_name = 'salary/employee_board.html'
     title = 'Панель пользователя'
 
-    def dispatch(self, request, *args: Any, **kwargs: Any):
-        self.employee = self.kwargs.get('pk')
+    def dispatch(self, request, *args, **kwargs):
+        if self.request.user.is_staff:
+            return redirect('workshifts_view')
+
         return super().dispatch(request, *args, **kwargs)
 
     def get_queryset(self) -> QuerySet:
@@ -498,16 +500,18 @@ class IndexEmployeeView(LoginRequiredMixin, TitleMixin, ListView):
             'hall_admin__profile__position',
             'cash_admin__profile__position'
         ).filter(
-            # shift_date__month=datetime.date.today().month,
-            # shift_date__year=datetime.date.today().year,
-        ).filter(Q(cash_admin=self.employee) | Q(hall_admin=self.employee))
+            shift_date__month=datetime.date.today().month,
+            shift_date__year=datetime.date.today().year,
+        ).filter(
+            Q(cash_admin=self.request.user) | Q(hall_admin=self.request.user)
+        )
 
         return queryset
 
     def get_summary_earnings(self):
         summary_earnings = sum([
             workshift.hall_admin_earnings_calc().get('final_earnings')
-            if workshift.hall_admin == self.employee
+            if workshift.hall_admin == self.request.user
             else workshift.cashier_earnings_calc().get('final_earnings')
             for workshift in self.object_list
         ])
@@ -518,9 +522,8 @@ class IndexEmployeeView(LoginRequiredMixin, TitleMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['summary_earnings'] = self.get_summary_earnings()
         context['misconducts'] = Misconduct.objects.filter(
-            intruder=self.employee
+            intruder=self.request.user
         ).aggregate(Sum('penalty'))
-        context['employee'] = self.employee
 
         return context
 
@@ -532,7 +535,45 @@ class EmployeeWorkshiftsView(IndexEmployeeView):
     def get_queryset(self) -> QuerySet:
         queryset = super().get_queryset()
         return queryset.order_by('shift_date')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['summary_shortage'] = self.object_list.aggregate(Sum('shortage'))
 
+        return context
+
+
+class EmployeeMonthlyListView(LoginRequiredMixin, TitleMixin, ListView):
+    template_name = 'salary/employee_monthly_list.html'
+    title = 'Архив смен'
+
+    def get_queryset(self) -> QuerySet:
+        queryset = WorkingShift.objects.select_related(
+            'hall_admin__profile__position',
+            'cash_admin__profile__position'
+        ).filter(
+            Q(cash_admin=self.request.user) | Q(hall_admin=self.request.user)
+        ).dates('shift_date', 'month')
+
+        return queryset
+
+
+class EmployeeArchiveView(IndexEmployeeView):
+    template_name = 'salary/employee_workshifts_view.html'
+    title = 'Просмотр смен'
+
+    def get_queryset(self) -> QuerySet:
+        queryset = WorkingShift.objects.select_related(
+            'hall_admin__profile__position',
+            'cash_admin__profile__position'
+        ).filter(
+            shift_date__month=self.kwargs.get('month'),
+            shift_date__year=self.kwargs.get('year'),
+        ).filter(
+            Q(cash_admin=self.request.user) | Q(hall_admin=self.request.user)
+        ).order_by('shift_date')
+
+        return queryset
 
 
 class IndexView(LoginRequiredMixin, TitleMixin, TotalDataMixin,
