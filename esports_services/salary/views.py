@@ -554,6 +554,60 @@ class EmployeeArchiveView(IndexEmployeeView):
         return queryset
 
 
+class StaffEmployeeMonthView(StaffOnlyMixin, TitleMixin, ListView):
+    template_name = 'salary/staff_employee_month_view.html'
+    title = 'Просмотр смен'
+
+    def dispatch(self, request, *args: Any, **kwargs: Any):
+        self.employee = get_object_or_404(User, username=self.kwargs.get('employee'))
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_queryset(self) -> QuerySet:
+        queryset = WorkingShift.objects.select_related(
+            'hall_admin__profile__position',
+            'cash_admin__profile__position'
+        ).filter(
+            shift_date__month=self.kwargs.get('month'),
+            shift_date__year=self.kwargs.get('year'),
+        ).filter(
+            Q(cash_admin=self.employee) | Q(hall_admin=self.employee)
+        ).order_by('shift_date')
+
+        return queryset
+
+    def get_summary_earnings(self):
+        summary_earnings = sum([
+            workshift.hall_admin_earnings_calc().get('final_earnings')
+            if workshift.hall_admin == self.employee
+            else workshift.cashier_earnings_calc().get('final_earnings')
+            for workshift in self.object_list
+        ])
+
+        return round(summary_earnings, 2)
+
+    def get_summary_penalties(self):
+        summary_penalties = sum([
+            workshift.hall_admin_penalty
+            if workshift.hall_admin == self.employee
+            else workshift.cash_admin_penalty
+            for workshift in self.object_list
+        ])
+
+        return round(summary_penalties, 2)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'employee': self.employee,
+            'summary_earnings': self.get_summary_earnings(),
+            'summary_penalties': self.get_summary_penalties(),
+            'summary_shortages': self.object_list.aggregate(
+                Sum('shortage')
+            ).get('shortage__sum')
+        })
+        return context
+
+
 class EmployeeDocumentsList(LoginRequiredMixin, TitleMixin, TemplateView):
     template_name = 'salary/employee_documents_list.html'
     title = 'Список документов'
