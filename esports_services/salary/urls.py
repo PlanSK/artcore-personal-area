@@ -33,4 +33,5 @@ urlpatterns = [
     path('my_workshifts/', EmployeeWorkshiftsView.as_view(), name='employee_workshifts'),
     path('monthly_list/', EmployeeMonthlyListView.as_view(), name='employee_monthly_list'),
     path('workshifts_view/<int:year>/<int:month>/', EmployeeArchiveView.as_view(), name='employee_archive_view'),
+    path('documents/', EmployeeDocumentsList.as_view(), name='employee_documents'),
 ]

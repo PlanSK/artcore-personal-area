@@ -465,6 +465,7 @@ class IndexEmployeeView(LoginRequiredMixin, TitleMixin, ListView):
     model = WorkingShift
     template_name = 'salary/employee_board.html'
     title = 'Панель пользователя'
+    login_url = reverse_lazy('login')
 
     def dispatch(self, request, *args, **kwargs):
         if self.request.user.is_staff:
@@ -551,6 +552,11 @@ class EmployeeArchiveView(IndexEmployeeView):
         ).order_by('shift_date')
 
         return queryset
+
+
+class EmployeeDocumentsList(LoginRequiredMixin, TitleMixin, TemplateView):
+    template_name = 'salary/employee_documents_list.html'
+    title = 'Список документов'
 
 
 class AddWorkshiftData(PermissionRequiredMixin, TitleMixin, SuccessUrlMixin,
