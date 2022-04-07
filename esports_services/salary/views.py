@@ -491,7 +491,7 @@ class IndexEmployeeView(LoginRequiredMixin, TitleMixin, ListView):
             workshift.hall_admin_earnings_calc().get('final_earnings')
             if workshift.hall_admin == self.request.user
             else workshift.cashier_earnings_calc().get('final_earnings')
-            for workshift in self.object_list
+            for workshift in self.object_list.filter(is_verified=True)
         ])
 
         return round(summary_earnings, 2)

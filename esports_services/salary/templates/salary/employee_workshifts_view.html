@@ -24,17 +24,28 @@
             <tr>
               <td>
                 {% if workshift.is_verified %}
-                    <i class="fa-solid fa-calendar-check" style="color: green;"></i>
+                  <i class="fa-solid fa-calendar-check" style="color: green;"></i>
                 {% else %}
-                    <i class="fa-solid fa-hourglass-end fa-beat" style="color:yellow;"></i>
+                  {% if perms.salary.change_workingshift %}
+                    <a href="{% url 'edit_workshift' slug=workshift.slug %}?next={{ request.path }}"><i class="fa-regular fa-pen-to-square" style="color:yellow;"></i></a>
+                    {% if workshift.comment %}
+                      <i class="fa-solid fa-envelope fa-beat"></i>
+                    {% endif %}
+                  {% else %}
+                    <i class="fa-solid fa-hourglass-end" style="color:yellow;"></i>
+                  {% endif %}
                 {% endif %}
               </td>
               <td>{{ workshift.shift_date|date:"d.m.Y" }}</td>
+              {% if workshift.is_verified %}
                 {% if request.user == workshift.hall_admin %}
               <td>{{ workshift.hall_admin_earnings_calc.final_earnings | intcomma }}</td>
                 {% elif request.user == workshift.cash_admin %}
               <td>{{ workshift.cashier_earnings_calc.final_earnings | intcomma }}</td>
                 {% endif %}
+              {% else %}
+              <td><i class="fa-solid fa-calculator fa-fade"></i></td>
+              {% endif %}
               <td><a href="{{ workshift.get_absolute_url }}?next={{ request.path }}" class="link-primary">Подробнее...</a></td>
             </tr>
             {% endfor %}
@@ -42,7 +53,7 @@
           <tfoot class="text-center verysmall">
             <tr>
               <td colspan="2">Суммарно за месяц:</td>
-              <td>{{ summary_earnings | intcomma }}</td>
+              <td>{{ summary_earnings|default:"-" | intcomma }}</td>
               <td></td>
             </tr>
           </tfoot>
