@@ -498,10 +498,17 @@ class IndexEmployeeView(LoginRequiredMixin, TitleMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['summary_earnings'] = self.get_summary_earnings()
-        context['misconducts'] = Misconduct.objects.filter(
-            intruder=self.request.user
-        ).aggregate(Sum('penalty'))
+        context.update({
+            'summary_earnings': self.get_summary_earnings(),
+            'misconducts': Misconduct.objects.filter(
+                intruder=self.request.user
+            ).aggregate(Sum('penalty')).get('penalty__sum'),
+            'shortages': self.object_list.filter(
+                cash_admin=self.request.user
+            ).aggregate(Sum('shortage')).get('shortage__sum'),
+            'today_workshift_is_exists': self.object_list.filter(
+                shift_date=datetime.date.today()).exists(),
+        })
 
         return context
 
