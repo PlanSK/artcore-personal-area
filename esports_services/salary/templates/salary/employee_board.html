@@ -5,18 +5,25 @@
 {% block content %}
   <main>
     <div class="container">
+      {% if perms.salary.add_workingshift %}
       <div class="row mt-2">
-        <div class="col text-center">
-          <a href="#" class="btn btn-secondary verysmall">
+        <div class="col text-center verysmall text-secondary">
+          {% if today_workshift_is_exists %}
+          Текущая смена закрыта.<br>
+          Вы можете добавить смену за другую дату <a href="{% url 'add_workshift' %}?next={{ request.path }}" class="link-secondary verysmall">здесь.</a>
+          {% else %}
+          <a href="{% url 'add_workshift' %}?next={{ request.path }}" class="btn btn-secondary verysmall">
             <i class="fa-solid fa-calendar-plus fa-beat me-2"></i>
-            Закрыть текущую смену
+            Закрыть смену
           </a>
+          {% endif %}
           <hr>
         </div>
       </div>
+      {% endif %}
       <div class="row m-3">
         <div class="col">
-          <div class="row row-cols-md-3 row-cols-sm-1 justify-content-center">
+          <div class="row row-cols-md-4 row-cols-sm-1 justify-content-center">
             <div class="col-sm-12 col-md-3 mb-1">
               <div class="card text-light blue-snippet h-100">
                 <div class="row g-0">
@@ -27,8 +34,8 @@
                     <div class="text-center">
                       <p class="card-text fst-italic">Мои смены</p>
                       <hr class="m-1">
-                      <span class="fw-bold">10</span>
-                      <a href="#" class="stretched-link"></a>
+                      <span class="fw-bold">{{ object_list.count|default:"-" }}</span>
+                      <a href="{% url 'employee_workshifts' %}" class="stretched-link"></a>
                     </div>
                   </div>
                 </div>
@@ -46,7 +53,7 @@
                     <div class="text-center">
                       <p class="card-text fst-italic">Мой заработок</p>
                       <hr class="m-1">
-                      <span class="fw-bold">10234.09</span>
+                      <span class="fw-bold">{{ summary_earnings|default:"-" | intcomma }}</span>
                       <a href="#" class="stretched-link"></a>
                     </div>
                   </div>
@@ -54,48 +61,62 @@
               </div>
             </div>
             <div class="col-sm-12 col-md-3 mb-1">
+                {% if misconducts %}
+              <div class="card text-light red-snippet h-100">
+                <div class="row g-0">
+                  <div class="col-md-2 red-snippet d-flex align-items-center justify-content-center rounded">
+                {% else %}
               <div class="card text-light blue-snippet h-100">
                 <div class="row g-0">
                   <div class="col-md-2 blue-snippet d-flex align-items-center justify-content-center rounded">
+                {% endif %}
                     <span class="m-2"><i class="fa-solid fa-sack-xmark fa-xl"></i></span>
                   </div>
                   <div class="col m-1">
                     <div class="text-center">
                       <p class="card-text fst-italic">Штрафы</p>
                       <hr class="m-1">
-                      <span class="fw-bold">-</span>
-                      <a href="#" class="stretched-link"></a>
+                      <span class="fw-bold">{{ misconducts|default:"-" | intcomma }}</span>
+                      <a href="{% url 'misconducts_user_view' username=request.user %}?next={{ request.path }}" class="stretched-link"></a>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-            <hr class="w-100 mt-2">
-          </div>
-          <div class="row row-cols-md-3 row-cols-sm-1 justify-content-center">
+              {% if shortages %}
             <div class="col-sm-12 col-md-3 mb-1">
-              <div class="card red-snippet text-light h-100">
-                <div class="card-body">
-                  <p class="card-text fst-italic">
-                    <span class="me-2"><i class="bi bi-mortarboard" style="font-size: 1.5rem;"></i></span>
-                    Нарушения <span class="badge bg-secondary ms-3">1</span>
-                  </p>
-                  <a href="{% url 'misconducts_view' %}" class="stretched-link"></a>
+              <div class="card text-light red-snippet h-100">
+                <div class="row g-0">
+                  <div class="col-md-2 red-snippet d-flex align-items-center justify-content-center rounded">
+                    <span class="m-2"><i class="fa-solid fa-coins fa-xl"></i></i></span>
+                  </div>
+                  <div class="col m-1">
+                    <div class="text-center">
+                      <p class="card-text fst-italic">Недостачи</p>
+                      <hr class="m-1">
+                      <span class="fw-bold">{{ shortages|default:"-" | intcomma }}</span>
+                      <a href="{% url 'misconducts_user_view' username=request.user %}?next={{ request.path }}" class="stretched-link"></a>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-            <div class="col-sm-12 col-md-3 mb-1">
+              {% endif %}
+            <hr class="w-100 mt-2">
+          </div>
+          <div class="row row-cols-md-2 row-cols-sm-1 justify-content-center">
+            <div class="col-sm-12 col-md-4 mb-1">
               <div class="card orange-snippet text-light h-100">
                 <div class="card-body">
                   <p class="card-text fst-italic">
                     <span class="me-2"><i class="bi bi-folder" style="font-size: 1.5rem;"></i></span>
                     Документы
                   </p>
-                  <a href="#" class="stretched-link"></a>
+                  <a href="{% url 'employee_documents' %}" class="stretched-link"></a>
                 </div>
               </div>
             </div>
-            <div class="col-sm-12 col-md-3 mb-1">
+            <div class="col-sm-12 col-md-4 mb-1">
               <div class="card green-snippet text-light h-100">
                 <div class="card-body">
                   <p class="card-text fst-italic">

@@ -84,7 +84,7 @@
           <tbody class="text-center verysmall">
             <tr>
               <td class="text-warning">Штраф</td>
-              <td>{{ misconduct.penalty|default:"Предупреждение" }}</td>
+              <td>{{ misconduct.penalty|default:"Предупреждение" | intcomma }}</td>
             </tr>
             <tr>
               <td class="text-warning">Комментарий</td>
