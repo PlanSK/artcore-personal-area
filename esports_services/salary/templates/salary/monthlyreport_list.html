@@ -29,7 +29,11 @@
               <td>{{ employee.estimated_earnings|default:"-" | intcomma }}</td>
               <td>{{ employee.penalties|default:"-" | intcomma }}</td>
               <td>{{ employee.shortage|default:"-" | intcomma }}</td>
-              <td><a href="{% url 'staff_user_view' request_user=employee.username year=current_date.year month=current_date.month %}" class="link-primary verysmall">Подробнее...</a></td>
+              <td>
+                <a href="{% url 'staff_employee_month_view' year=current_date.year month=current_date.month employee=employee.username %}" class="link-primary verysmall">
+                  Подробнее...
+                </a>
+              </td>
             </tr>
             {% endfor %}
           </tbody>

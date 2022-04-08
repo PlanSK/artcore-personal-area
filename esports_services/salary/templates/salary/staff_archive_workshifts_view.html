@@ -29,13 +29,13 @@
         </td>
         <td>{{ workshift.shift_date }}</td>
       {% if workshift.is_verified %}
-        <td><a href="{% url 'staff_user_view' request_user=workshift.cash_admin year=workshift.shift_date.year month=workshift.shift_date.month %}" class="link-light">{{ workshift.cash_admin.get_full_name }}</a></td>
-        <td><a href="{% url 'staff_user_view' request_user=workshift.hall_admin year=workshift.shift_date.year month=workshift.shift_date.month %}" class="link-light">{{ workshift.hall_admin.get_full_name }}</a></td>
+        <td>{{ workshift.cash_admin.get_full_name }}</td>
+        <td>{{ workshift.hall_admin.get_full_name }}</td>
       {% else %}
       <td>{{ workshift.cash_admin.get_full_name }}</td>
       <td>{{ workshift.hall_admin.get_full_name }}</td>
       {% endif %}
-        <td>{{ workshift.get_summary_revenue }}</td>
+        <td>{{ workshift.get_summary_revenue | intcomma }}</td>
         <td><a href="{{ workshift.get_absolute_url }}?next={{ request.path }}" class="link-primary">Подробнее...</a></td>
         <td>
           <a title="Внести изменения" class="btn btn-secondary verysmall" href="{% url 'staff_edit_workshift' workshift.slug %}?next={{ request.path }}">
@@ -52,7 +52,7 @@
         <td>{{ object_list.count }}</td>
         <td colspan="2"></td>
         <td>
-          {{ summary_revenue }}
+          {{ summary_revenue | intcomma }}
         </td>
         <td colspan="2"></td>
       </tr>
