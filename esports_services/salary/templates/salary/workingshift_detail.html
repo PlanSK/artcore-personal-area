@@ -95,8 +95,8 @@
             </tr>
             <tr>
               <td>Нарушения регламента</td>
-              <td>{{ work_shift.hall_admin_penalty|default:"-" }}</td>
-              <td>{{ work_shift.cash_admin_penalty|default:"-" }}</td>
+              <td>{{ work_shift.hall_admin_penalty|default:"-" | intcomma }}</td>
+              <td>{{ work_shift.cash_admin_penalty|default:"-" | intcomma }}</td>
             </tr>
             <tr>
               <td>Поддержание чистоты</td>
@@ -110,7 +110,7 @@
             </tr>
             <tr>
               <td>Недостача</td>
-              <td colspan="2">{{ work_shift.shortage|default:"-" }}</td>
+              <td colspan="2">{{ work_shift.shortage|default:"-" | intcomma }}</td>
             </tr>
             <tr>
               <td>Публикация</td>
