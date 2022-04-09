@@ -17,7 +17,7 @@
                     {{ form }}
                     <div class="m-6 d-flex justify-content-center">
                         <button type="submit" class="btn btn-primary mb-4 me-2">Удалить</button>
-                        <div><a href="{{ request.GET.next|default:"/" }}" class="btn btn-primary">Отмена</a></div>
+                        <button class="btn btn-outline-secondary verysmall" onclick="history.back()">Отмена</button>
                     </div>
                 </form>
             </div>

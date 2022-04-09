@@ -12,7 +12,7 @@
           Текущая смена закрыта.<br>
           Вы можете добавить смену за другую дату <a href="{% url 'add_workshift' %}?next={{ request.path }}" class="link-secondary verysmall">здесь.</a>
           {% else %}
-          <a href="{% url 'add_workshift' %}?next={{ request.path }}" class="btn btn-secondary verysmall">
+          <a href="{% url 'add_workshift' %}?next={{ request.path }}" class="btn btn-outline-secondary verysmall">
             <i class="fa-solid fa-calendar-plus fa-beat me-2"></i>
             Закрыть смену
           </a>
@@ -95,7 +95,6 @@
                       <p class="card-text fst-italic">Недостачи</p>
                       <hr class="m-1">
                       <span class="fw-bold">{{ shortages|default:"-" | intcomma }}</span>
-                      <a href="{% url 'misconducts_user_view' username=request.user %}?next={{ request.path }}" class="stretched-link"></a>
                     </div>
                   </div>
                 </div>
@@ -109,7 +108,7 @@
               <div class="card orange-snippet text-light h-100">
                 <div class="card-body">
                   <p class="card-text fst-italic">
-                    <span class="me-2"><i class="bi bi-folder" style="font-size: 1.5rem;"></i></span>
+                    <span class="me-2"><i class="fa-solid fa-book fa-xl"></i></span>
                     Документы
                   </p>
                   <a href="{% url 'employee_documents' %}" class="stretched-link"></a>
@@ -120,7 +119,7 @@
               <div class="card green-snippet text-light h-100">
                 <div class="card-body">
                   <p class="card-text fst-italic">
-                    <span class="me-2"><i class="bi bi-graph-up-arrow" style="font-size: 1.5rem;"></i></span>
+                    <span class="me-2"><i class="fa-solid fa-chart-line fa-2xl"></i></span>
                     Графики
                   </p>
                   <a href="#" class="stretched-link"></a>
