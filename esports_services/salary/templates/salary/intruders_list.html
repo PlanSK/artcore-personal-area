@@ -4,7 +4,7 @@
 <div class="row border-top">
   <div class="col text-center">
     <a href="{% url 'add_misconduct' %}?next={{ request.path }}" class="btn btn-primary verysmall mt-3">
-      <i class="bi bi-plus-circle"></i>Добавить проступок
+      <i class="bi bi-plus-circle"></i>&nbsp;Добавить проступок
     </a>
   </div>
 </div>
@@ -19,7 +19,7 @@
     <tbody class="text-center verysmall">
       {% for intruder, count in object_list.items %}
       <tr>
-        <td><a href="{% url 'misconducts_user_view' username=intruder.username %}?next={{ request.path }}" class="link-light">{{ intruder.get_full_name }}</a></td>
+        <td><a href="{% url 'misconducts_user_view' username=intruder.username %}" class="link-light">{{ intruder.get_full_name }}</a></td>
         <td>{{ count }}</td>
       </tr>
       {% endfor %}

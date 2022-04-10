@@ -6,27 +6,36 @@
 <body class="bg-dark text-white font-italic">
   <header>
     <div class="container">
-      <nav class="navbar navbar-light bg-dark border-bottom">
+      <nav class="navbar navbar-expand navbar-dark bg-dark border-bottom p-0">
         <div class="container-fluid">
           <a class="navbar-brand" href="{% url 'index' %}">
             <img src="{% static 'salary/img/logo.png' %}" height="30" class="d-inline-block align-top" alt="" loading="lazy">
           </a>
-          {% if request.user.is_superuser %}
-          <div class="col">
-            <a href="{% url 'admin:index' %}" class="link-primary verysmall">Панель администрирования</a>
-          </div>
-          {% endif %}
           {% if request.user.is_authenticated %}
-          <div class="border-left border-secondary">
-            <a href="{% url 'profile_edit' %}?next={{ request.path }}" class="btn">
-            {% if request.user.profile.photo %}
-              <img src="{{ request.user.profile.photo.url }}" alt="" class="rounded-circle" style="width: 40px; height: 40px;">
-            {% else %}
-            <i class="bi bi-person-circle" style="font-size: 1.5rem; color: white;"></i>
-            {% endif %}
-            <span class="text-light verysmall m-2">{{request.user.get_full_name}}</span>
-            </a>
-            <a href="{% url 'logout' %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-door-open-fill"></i></a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDarkDropdown" aria-controls="navbarNavDarkDropdown" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse d-flex" id="navbarNavDarkDropdown">
+            <ul class="navbar-nav">
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDarkDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                {% if request.user.profile.photo %}
+                  <img src="{{ request.user.profile.photo.url }}" alt="" class="rounded-circle" style="width: 40px; height: 40px;">
+                {% else %}
+                  <i class="bi bi-person-circle" style="font-size: 1.5rem; color: white;"></i>
+                {% endif %}
+                  <span class="text-light verysmall m-2">{{request.user.get_full_name}}</span>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end" aria-labelledby="navbarDarkDropdownMenuLink">
+                  {% if request.user.is_superuser %}
+                  <li><a class="dropdown-item verysmall" href="{% url 'admin:index' %}"><i class="fa-solid fa-screwdriver-wrench"></i>&nbsp;Панель администрирования</a></li>
+                  {% endif %}
+                  <li><a class="dropdown-item verysmall" href="{% url 'profile_edit' %}?next={{ request.path }}"><i class="fa-solid fa-user"></i>&nbsp;Редактировать профиль</a></li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li><a class="dropdown-item verysmall" href="{% url 'logout' %}"><i class="fa-solid fa-arrow-right-from-bracket"></i>&nbsp;Выйти</i></a></li>
+                </ul>
+              </li>
+            </ul>
           </div>
           {% endif %}
         </div>
@@ -41,7 +50,9 @@
     <div class="container position-relative bottom-0">
       <div class="row mt-3">
         <div class="col-md-12 border-top">
-          <p class="text-secondary text-center verysmall">© ARTCORE {% get_year %}</p>
+          <p class="text-secondary text-center verysmall">© ARTCORE
+            <script>document.write(new Date().getFullYear())</script>
+          </p>
         </div>
       </div>
     </div>

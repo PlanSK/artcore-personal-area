@@ -12,7 +12,7 @@
     </div>
     <div class="row mb-2">
       <div class="col">
-        <a href="{{ request.GET.next|default:"/" }}" class="btn btn-secondary verysmall">Назад</a>
+        <button class="btn btn-outline-secondary verysmall" onclick="history.back()">Назад</button>
       </div>
     </div>
     <div class="row mb-2">
@@ -84,7 +84,7 @@
           <tbody class="text-center verysmall">
             <tr>
               <td class="text-warning">Штраф</td>
-              <td>{{ misconduct.penalty|default:"Предупреждение" }}</td>
+              <td>{{ misconduct.penalty|default:"Предупреждение" | intcomma }}</td>
             </tr>
             <tr>
               <td class="text-warning">Комментарий</td>

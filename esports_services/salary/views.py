@@ -1,5 +1,5 @@
 from django.contrib.auth.forms import AuthenticationForm
-from django.http import JsonResponse, HttpRequest, HttpResponse
+from django.http import JsonResponse, HttpResponseNotFound
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import TemplateView, ListView, DetailView
 from django.contrib.auth.views import LoginView
@@ -7,7 +7,7 @@ from django.contrib.auth import logout
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.models import Group
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
-from django.db.models import Q, QuerySet
+from django.db.models import Q, QuerySet, Sum
 
 from .forms import *
 from .utils import *
@@ -104,29 +104,6 @@ def logout_user(request):
 
 
 # Staff Functionality
-class StaffUserView(StaffPermissionRequiredMixin, TotalDataMixin, TemplateView):
-    template_name = 'salary/staff_user_view.html'
-
-    def dispatch(self, request, *args: Any, **kwargs: Any):
-        self.required_year = self.kwargs.get('year')
-        self.required_month = self.kwargs.get('month')
-        return super().dispatch(request, *args, **kwargs)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        request_user = self.kwargs.get('request_user')
-        get_user = get_object_or_404(User, username=request_user)
-        workshifts = WorkingShift.objects.filter(
-            shift_date__year=self.required_year,
-            shift_date__month=self.required_month
-        ).filter(Q(cash_admin=get_user) | Q(hall_admin=get_user))
-        context['title'] = f'Данные пользователя {get_user}'
-        context['request_user'] = get_user
-        context['workshifts'] = workshifts
-        context['total_values'] = self.get_total_values(get_user, workshifts)
-
-        return context
-
 class AdminView(StaffPermissionRequiredMixin, StaffOnlyMixin, TitleMixin,
                 TemplateView):
     template_name = 'salary/dashboard.html'
@@ -156,6 +133,7 @@ class AdminUserView(StaffPermissionRequiredMixin, TitleMixin, ListView):
             context['only_actived'] = True
         return context
 
+
 class ReportsView(StaffPermissionRequiredMixin, TitleMixin, ListView):
     template_name = 'salary/reports_list.html'
     model = WorkingShift
@@ -168,30 +146,54 @@ class ReportsView(StaffPermissionRequiredMixin, TitleMixin, ListView):
         return query
 
 
-class AdminWorkshiftsView(StaffPermissionRequiredMixin, TitleMixin, ListView):
-    template_name = 'salary/staff_view_workshifts.html'
+class StaffWorkshiftsView(StaffPermissionRequiredMixin, TitleMixin, ListView):
+    template_name = 'salary/staff_unverified_workshifts_view.html'
     model = WorkingShift
     title = 'Смены'
-    paginate_by = 5
+    paginate_by = 10
 
     def get_queryset(self):
-        workshifts = WorkingShift.objects.filter(is_verified=False).select_related(
-            'hall_admin__profile',
-            'cash_admin__profile',
-        )
-        if self.kwargs.get('all'):
-            workshifts = WorkingShift.objects.all().select_related(
-                'hall_admin__profile',
-                'cash_admin__profile',
-            )
+        workshifts = WorkingShift.objects.filter(
+            is_verified=False
+        ).select_related('hall_admin', 'cash_admin')
 
         return workshifts
 
+
+class StaffArchiveWorkshiftsView(StaffPermissionRequiredMixin, TitleMixin, ListView):
+    template_name = 'salary/staff_archive_workshifts_view.html'
+    model = WorkingShift
+    title = 'Смены'
+
+    def get_queryset(self):
+        if self.kwargs.get('year') and self.kwargs.get('month'):
+            queryset = WorkingShift.objects.filter(
+                shift_date__month = self.kwargs.get('month'),
+                shift_date__year = self.kwargs.get('year')
+            ).select_related('cash_admin', 'hall_admin').order_by('shift_date')
+        else:
+            HttpResponseNotFound('No all data found.')
+        return queryset
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        if not self.kwargs.get('all'):
-            context['only_verified'] = True
+        context['summary_revenue'] = sum([
+            workshift.get_summary_revenue()
+            for workshift in self.object_list 
+        ])
+
         return context
+
+
+class StaffWorkshiftsMonthlyList(StaffPermissionRequiredMixin, TitleMixin, 
+                                    ListView):
+    template_name = 'salary/staff_monthly_workshifts_list.html'
+    model = WorkingShift
+    title = 'Смены'
+
+    def get_queryset(self):
+        workshifts_months = WorkingShift.objects.dates('shift_date', 'month')
+        return workshifts_months
 
 
 class DeleteWorkshift(PermissionRequiredMixin, TitleMixin, SuccessUrlMixin,
@@ -459,56 +461,163 @@ class MisconductDetailView(LoginRequiredMixin, TitleMixin, DetailView):
     queryset = Misconduct.objects.select_related('intruder', 'moderator', 'regulations_article')
 
 
-class NewUserView(TitleMixin, TemplateView):
-    template_name = 'salary/userboard.html'
-    title = 'Новая панель пользователя'
-
-
-class IndexView(LoginRequiredMixin, TitleMixin, TotalDataMixin,
-                SuccessUrlMixin, ListView):
+class IndexEmployeeView(LoginRequiredMixin, TitleMixin, ListView):
     model = WorkingShift
-    login_url = 'login'
-    template_name = 'salary/account.html'
-    title = 'Личный кабинет'
+    template_name = 'salary/employee_board.html'
+    title = 'Панель пользователя'
+    login_url = reverse_lazy('login')
 
     def dispatch(self, request, *args, **kwargs):
         if self.request.user.is_staff:
-            return redirect('dashboard')
-        if request.user.is_authenticated:
-            self.employee = get_object_or_404(
-                User.objects.select_related('profile__position'),
-                pk=self.request.user.pk
-            )
+            return redirect('workshifts_view')
+
         return super().dispatch(request, *args, **kwargs)
 
-    def get_queryset(self):
-        query = WorkingShift.objects.filter(Q(cash_admin=self.employee) | Q(hall_admin=self.employee))
-        return query
+    def get_queryset(self) -> QuerySet:
+        queryset = WorkingShift.objects.select_related(
+            'hall_admin__profile__position',
+            'cash_admin__profile__position'
+        ).filter(
+            shift_date__month=datetime.date.today().month,
+            shift_date__year=datetime.date.today().year,
+        ).filter(
+            Q(cash_admin=self.request.user) | Q(hall_admin=self.request.user)
+        )
+
+        return queryset
+
+    def get_summary_earnings(self):
+        summary_earnings = sum([
+            workshift.hall_admin_earnings_calc().get('final_earnings')
+            if workshift.hall_admin == self.request.user
+            else workshift.cashier_earnings_calc().get('final_earnings')
+            for workshift in self.object_list.filter(is_verified=True)
+        ])
+
+        return round(summary_earnings, 2)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
-        current_year = self.kwargs.get('year', datetime.date.today().year)
-        current_month = self.kwargs.get('month', datetime.date.today().month)
-        current_workshifts = self.object_list.filter(shift_date__month=current_month, shift_date__year=current_year)
-
-        # Note
-        previous_date = datetime.date(current_year, current_month, 1) - relativedelta(months=1)
-        next_date = datetime.date(current_year, current_month, 1) + relativedelta(months=1)
-        if self.object_list.filter(shift_date__month=previous_date.month, shift_date__year=previous_date.year).exists():
-            context['previous_date'] = previous_date
-        if self.object_list.filter(shift_date__month=next_date.month, shift_date__year=next_date.year).exists():
-            context['next_date'] = next_date
-
         context.update({
-            'current_date': datetime.date(current_year, current_month, 1),
-            'experience': self.employee.profile.get_work_experience,
-            'workshifts': current_workshifts,
-            'total_values': self.get_total_values(self.employee, current_workshifts),
-            'today_workshift_exists': WorkingShift.objects.filter(shift_date=datetime.date.today()).exists(),
+            'summary_earnings': self.get_summary_earnings(),
+            'misconducts': Misconduct.objects.filter(
+                intruder=self.request.user
+            ).aggregate(Sum('penalty')).get('penalty__sum'),
+            'shortages': self.object_list.filter(
+                cash_admin=self.request.user
+            ).aggregate(Sum('shortage')).get('shortage__sum'),
+            'today_workshift_is_exists': self.object_list.filter(
+                shift_date=datetime.date.today()).exists(),
         })
 
         return context
+
+
+class EmployeeWorkshiftsView(IndexEmployeeView):
+    template_name = 'salary/employee_workshifts_view.html'
+    title = 'Смены'
+
+    def get_queryset(self) -> QuerySet:
+        queryset = super().get_queryset()
+        return queryset.order_by('shift_date')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['summary_shortage'] = self.object_list.aggregate(Sum('shortage'))
+
+        return context
+
+
+class EmployeeMonthlyListView(LoginRequiredMixin, TitleMixin, ListView):
+    template_name = 'salary/employee_monthly_list.html'
+    title = 'Архив смен'
+
+    def get_queryset(self) -> QuerySet:
+        queryset = WorkingShift.objects.select_related(
+            'hall_admin__profile__position',
+            'cash_admin__profile__position'
+        ).filter(
+            Q(cash_admin=self.request.user) | Q(hall_admin=self.request.user)
+        ).dates('shift_date', 'month')
+
+        return queryset
+
+
+class EmployeeArchiveView(IndexEmployeeView):
+    template_name = 'salary/employee_workshifts_view.html'
+    title = 'Просмотр смен'
+
+    def get_queryset(self) -> QuerySet:
+        queryset = WorkingShift.objects.select_related(
+            'hall_admin__profile__position',
+            'cash_admin__profile__position'
+        ).filter(
+            shift_date__month=self.kwargs.get('month'),
+            shift_date__year=self.kwargs.get('year'),
+        ).filter(
+            Q(cash_admin=self.request.user) | Q(hall_admin=self.request.user)
+        ).order_by('shift_date')
+
+        return queryset
+
+
+class StaffEmployeeMonthView(StaffOnlyMixin, TitleMixin, ListView):
+    template_name = 'salary/staff_employee_month_view.html'
+    title = 'Просмотр смен'
+
+    def dispatch(self, request, *args: Any, **kwargs: Any):
+        self.employee = get_object_or_404(User, username=self.kwargs.get('employee'))
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_queryset(self) -> QuerySet:
+        queryset = WorkingShift.objects.select_related(
+            'hall_admin__profile__position',
+            'cash_admin__profile__position'
+        ).filter(
+            shift_date__month=self.kwargs.get('month'),
+            shift_date__year=self.kwargs.get('year'),
+        ).filter(
+            Q(cash_admin=self.employee) | Q(hall_admin=self.employee)
+        ).order_by('shift_date')
+
+        return queryset
+
+    def get_summary_earnings(self):
+        summary_earnings = sum([
+            workshift.hall_admin_earnings_calc().get('final_earnings')
+            if workshift.hall_admin == self.employee
+            else workshift.cashier_earnings_calc().get('final_earnings')
+            for workshift in self.object_list
+        ])
+
+        return round(summary_earnings, 2)
+
+    def get_summary_penalties(self):
+        summary_penalties = sum([
+            workshift.hall_admin_penalty
+            if workshift.hall_admin == self.employee
+            else workshift.cash_admin_penalty
+            for workshift in self.object_list
+        ])
+
+        return round(summary_penalties, 2)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'employee': self.employee,
+            'summary_earnings': self.get_summary_earnings(),
+            'summary_penalties': self.get_summary_penalties(),
+            'summary_shortages': self.object_list.aggregate(
+                Sum('shortage')
+            ).get('shortage__sum')
+        })
+        return context
+
+
+class EmployeeDocumentsList(LoginRequiredMixin, TitleMixin, TemplateView):
+    template_name = 'salary/employee_documents_list.html'
+    title = 'Список документов'
 
 
 class AddWorkshiftData(PermissionRequiredMixin, TitleMixin, SuccessUrlMixin,

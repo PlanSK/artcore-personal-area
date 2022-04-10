@@ -239,7 +239,7 @@ class WorkingShift(models.Model):
         result_list = []
         for revenue, current_critera in zip(revenue_tuple, criteria.values()):
             criteria_ratio = list(filter(lambda x: x[0] <= revenue, current_critera))[-1][1]
-            result_list.append((round(revenue * criteria_ratio, 2), criteria_ratio * 100))
+            result_list.append((round(revenue * criteria_ratio, 2), round(criteria_ratio * 100, 1)))
 
         return {
             'bar': result_list[0],

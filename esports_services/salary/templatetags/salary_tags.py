@@ -7,26 +7,6 @@ register = template.Library()
 
 
 @register.simple_tag()
-def hall_admin_earnings_tag(workshift):
-    return workshift.hall_admin_earnings_calc()
-
-
-@register.simple_tag()
-def cashier_earnings_tag(workshift):
-    return workshift.cashier_earnings_calc()
-
-
-@register.simple_tag()
-def return_key(dictonary: dict, name: str):
-    return dictonary[name]
-
-
-@register.simple_tag()
-def get_year():
-    return datetime.date.today().year
-
-
-@register.simple_tag()
 def unverified_shift():
     return WorkingShift.objects.exclude(is_verified=True).count()
 
@@ -36,36 +16,6 @@ def inactive_user():
     return User.objects.exclude(is_active=True).filter(
         profile__dismiss_date=None
     ).count()
-
-
-@register.inclusion_tag('salary/cash_admin_workshifts.html')
-def cash_admin_workshifts(user, workshifts, total_values):
-    if not workshifts:
-        current_month = datetime.date.today()
-    else:
-        current_month = workshifts[0].shift_date
-
-    return {
-        'user': user,
-        'workshifts_list': workshifts,
-        'total_values': total_values,
-        'current_date': current_month
-    }
-
-
-@register.inclusion_tag('salary/hall_admin_workshifts.html')
-def hall_admin_workshifts(user, workshifts, total_values):
-    if not workshifts:
-        current_month = datetime.date.today()
-    else:
-        current_month = workshifts[0].shift_date
-
-    return {
-        'user': user,
-        'workshifts_list': workshifts,
-        'total_values': total_values,
-        'current_date': current_month
-    }
 
 
 @register.inclusion_tag('salary/icon_logic.html')

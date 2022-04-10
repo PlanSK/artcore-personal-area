@@ -1,3 +1,4 @@
+  {% load humanize %}
   <!-- Admin -->
   <div class="col rounded border border-light m-2">
     <table class="table table-dark">
@@ -10,24 +11,24 @@
         <tr><td colspan="2" class="text-info text-center">Базовая часть</td></tr>
         <tr>
           <td>Оклад за смену</td>
-          <td>{{ work_shift.hall_admin_earnings_calc.salary }}</td>
+          <td>{{ work_shift.hall_admin_earnings_calc.salary | intcomma }}</td>
         </tr>
         <tr>
           <td>Надбавка за стаж (более 3 мес.)</td>
-          <td>{{ work_shift.hall_admin_earnings_calc.experience|default:"-" }}</td>
+          <td>{{ work_shift.hall_admin_earnings_calc.experience|default:"-" | intcomma }}</td>
         </tr>
         <tr>
           <td>Надбавка за прохождение аттестации</td>
-          <td>{{ work_shift.hall_admin_earnings_calc.attestation|default:"-" }}</td>
+          <td>{{ work_shift.hall_admin_earnings_calc.attestation|default:"-" | intcomma }}</td>
         </tr>
         <tr class="text-warning table-active">
           <td>Суммарный оклад</td>
-          <td>{{ work_shift.hall_admin_earnings_calc.basic_part|default:"-" }}</td>
+          <td>{{ work_shift.hall_admin_earnings_calc.basic_part|default:"-" | intcomma }}</td>
         </tr>
         <tr><td colspan="2" class="text-info text-center">Премиальная часть</td></tr>
         <tr>
           <td>Премия за дисциплину</td>
-          <td>{{ work_shift.hall_admin_earnings_calc.award|default:"-" }}</td>
+          <td>{{ work_shift.hall_admin_earnings_calc.award|default:"-" | intcomma }}</td>
         </tr>
         <tr>
           <td>Премия за поддержание чистоты</td>
@@ -35,19 +36,19 @@
         </tr>
         <tr>
           <td>Премия за СММ (1 публикация)</td>
-          <td>{{ work_shift.hall_admin_earnings_calc.publication_bonus|default:"-" }}</td>
+          <td>{{ work_shift.hall_admin_earnings_calc.publication_bonus|default:"-" | intcomma }}</td>
         </tr>
         <tr>
           <td>% от выручки по бару</td>
-          <td>{{ work_shift.hall_admin_earnings_calc.bar.0|default:"-" }}&emsp;({{ work_shift.hall_admin_earnings_calc.bar.1}}%)</td>
+          <td>{{ work_shift.hall_admin_earnings_calc.bar.0|default:"-" | intcomma }}&emsp;({{ work_shift.hall_admin_earnings_calc.bar.1}}%)</td>
         </tr>
         <tr>
           <td>% от выручки от игровой зоны (КНА)</td>
-          <td>{{ work_shift.hall_admin_earnings_calc.game_zone.0|default:"-" }}&emsp;({{ work_shift.hall_admin_earnings_calc.game_zone.1 }}%)</td>
+          <td>{{ work_shift.hall_admin_earnings_calc.game_zone.0|default:"-" | intcomma }}&emsp;({{ work_shift.hall_admin_earnings_calc.game_zone.1 }}%)</td>
         </tr>
         <tr>
           <td>% от выручки от доп. услуг.</td>
-          <td>{{ work_shift.hall_admin_earnings_calc.vr.0|default:"-" }}&emsp;({{ work_shift.hall_admin_earnings_calc.vr.1 }}%)</td>
+          <td>{{ work_shift.hall_admin_earnings_calc.vr.0|default:"-" | intcomma }}&emsp;({{ work_shift.hall_admin_earnings_calc.vr.1 }}%)</td>
         </tr>
         <tr>
           <td>% от выручки от продажи кальяна</td>
@@ -55,30 +56,30 @@
         </tr>
         <tr class="text-warning table-active">
           <td>Сумма премиальной части</td>
-          <td>{{ work_shift.hall_admin_earnings_calc.bonus_part|default:"-" }}</td>
+          <td>{{ work_shift.hall_admin_earnings_calc.bonus_part|default:"-" | intcomma }}</td>
         </tr>
         </tbody>
         <tfoot class="verysmall">
         {% if work_shift.hall_admin_penalty %}
         <tr>
           <td>Предполагаемый заработок</td>
-          <td>{{ work_shift.hall_admin_earnings_calc.estimated_earnings|default:"-" }}</td>
+          <td>{{ work_shift.hall_admin_earnings_calc.estimated_earnings|default:"-" | intcomma }}</td>
         </tr>
         <tr>
           <td>Штраф за нарушение дисциплинарного регламента</td>
-          <td class="text-danger">{{ work_shift.hall_admin_penalty|default:"-" }}</td>
+          <td class="text-danger">{{ work_shift.hall_admin_penalty|default:"-" | intcomma }}</td>
         </tr>
         <tr>
           <td>Удержано за нарушение дицциплины</td>
-          <td class="text-danger">{{ work_shift.hall_admin_earnings_calc.retention|default:"-" }}</td>
+          <td class="text-danger">{{ work_shift.hall_admin_earnings_calc.retention|default:"-" | intcomma }}</td>
         </tr>
         {% endif %}
         <tr class="table-active">
           <td>Итоговый заработок</td>
           {% if not work_shift.is_verified %}
-          <td class="text-secondary">{{ work_shift.hall_admin_earnings_calc.final_earnings|default:"-" }}*</td>
+          <td class="text-secondary">{{ work_shift.hall_admin_earnings_calc.final_earnings|default:"-" | intcomma }}*</td>
           {% else %}
-          <td>{{ work_shift.hall_admin_earnings_calc.final_earnings|default:"-" }}</td>
+          <td>{{ work_shift.hall_admin_earnings_calc.final_earnings|default:"-" | intcomma }}</td>
           {% endif %}
         </tr>
       </tfoot>
