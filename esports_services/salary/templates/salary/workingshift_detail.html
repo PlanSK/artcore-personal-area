@@ -140,7 +140,7 @@
       {% endif %}
     </div>
     <div class="row text-center">
-      {% if perms.salary.change_workingshift and perms.salary.delete_workingshift %}
+      {% if perms.salary.advanced_change_workshift and perms.salary.delete_workingshift %}
       <div class="col">
         <a title="Внести изменения" class="btn btn-secondary verysmall" href="{% url 'staff_edit_workshift' work_shift.slug %}?next={{ request.path }}">
           <i class="bi bi-pencil-square" style="color: yellow;"></i>

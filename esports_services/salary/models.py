@@ -187,6 +187,10 @@ class WorkingShift(models.Model):
         verbose_name = 'Смена'
         verbose_name_plural = 'Смены'
         ordering = ['-shift_date']
+        permissions = [
+            ("view_workshift_report", "Can view monthly reports"),
+            ("advanced_change_workshift", "Can edit the entire contents of the workingshift"),
+        ]
 
     def __str__(self) -> str:
         return self.shift_date.strftime('%d-%m-%Y')
