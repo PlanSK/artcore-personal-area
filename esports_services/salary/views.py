@@ -1,8 +1,8 @@
-from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.forms import AuthenticationForm, AdminPasswordChangeForm
 from django.http import JsonResponse, HttpResponseNotFound
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import TemplateView, ListView, DetailView
-from django.contrib.auth.views import LoginView
+from django.contrib.auth.views import LoginView, PasswordChangeView
 from django.contrib.auth import logout
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.models import Group
@@ -17,7 +17,6 @@ from typing import *
 from dateutil.relativedelta import relativedelta
 
 
-# Registration, Login, Logout
 class RegistrationUser(TitleMixin, SuccessUrlMixin, TemplateView):
     template_name = 'salary/registration.html'
     title = 'Регистрация сотрудника'
@@ -55,7 +54,7 @@ class RegistrationUser(TitleMixin, SuccessUrlMixin, TemplateView):
             return render(request, self.template_name, context=context)
 
 
-class DismissalEmployee(StaffPermissionRequiredMixin, TitleMixin,
+class DismissalEmployee(EmployeePermissionsMixin, TitleMixin,
                         SuccessUrlMixin, TemplateView):
     model = Profile
     title = 'Увольнение сотрудника'
@@ -98,20 +97,24 @@ class LoginUser(TitleMixin, SuccessUrlMixin, LoginView):
     title = 'Авторизация'
 
 
+class EmployeePasswordChangeView(TitleMixin, SuccessUrlMixin, PasswordChangeView):
+    title = 'Смена пароля'
+    template_name = 'salary/password_change.html'
+
+
+class StaffPasswordChangeView(EmployeePermissionsMixin, TitleMixin, 
+                                SuccessUrlMixin, PasswordChangeView):
+    title = 'Задать пароль'
+    template_name = 'salary/password_change.html'
+    form_class = AdminPasswordChangeForm
+
+
 def logout_user(request):
     logout(request)
     return redirect('login')
 
 
-# Staff Functionality
-class AdminView(StaffPermissionRequiredMixin, StaffOnlyMixin, TitleMixin,
-                TemplateView):
-    template_name = 'salary/dashboard.html'
-    login_url = 'login'
-    title = 'Панель управления'
-
-
-class AdminUserView(StaffPermissionRequiredMixin, TitleMixin, ListView):
+class AdminUserView(EmployeePermissionsMixin, TitleMixin, ListView):
     template_name = 'salary/show_users.html'
     model = User
     title = 'Управление персоналом'
@@ -134,7 +137,7 @@ class AdminUserView(StaffPermissionRequiredMixin, TitleMixin, ListView):
         return context
 
 
-class ReportsView(StaffPermissionRequiredMixin, TitleMixin, ListView):
+class ReportsView(WorkingshiftPermissonsMixin, TitleMixin, ListView):
     template_name = 'salary/reports_list.html'
     model = WorkingShift
     title = 'Отчеты'
@@ -146,7 +149,7 @@ class ReportsView(StaffPermissionRequiredMixin, TitleMixin, ListView):
         return query
 
 
-class StaffWorkshiftsView(StaffPermissionRequiredMixin, TitleMixin, ListView):
+class StaffWorkshiftsView(WorkingshiftPermissonsMixin, TitleMixin, ListView):
     template_name = 'salary/staff_unverified_workshifts_view.html'
     model = WorkingShift
     title = 'Смены'
@@ -160,7 +163,7 @@ class StaffWorkshiftsView(StaffPermissionRequiredMixin, TitleMixin, ListView):
         return workshifts
 
 
-class StaffArchiveWorkshiftsView(StaffPermissionRequiredMixin, TitleMixin, ListView):
+class StaffArchiveWorkshiftsView(WorkingshiftPermissonsMixin, TitleMixin, ListView):
     template_name = 'salary/staff_archive_workshifts_view.html'
     model = WorkingShift
     title = 'Смены'
@@ -185,7 +188,7 @@ class StaffArchiveWorkshiftsView(StaffPermissionRequiredMixin, TitleMixin, ListV
         return context
 
 
-class StaffWorkshiftsMonthlyList(StaffPermissionRequiredMixin, TitleMixin, 
+class StaffWorkshiftsMonthlyList(WorkingshiftPermissonsMixin, TitleMixin, 
                                     ListView):
     template_name = 'salary/staff_monthly_workshifts_list.html'
     model = WorkingShift
@@ -196,17 +199,14 @@ class StaffWorkshiftsMonthlyList(StaffPermissionRequiredMixin, TitleMixin,
         return workshifts_months
 
 
-class DeleteWorkshift(PermissionRequiredMixin, TitleMixin, SuccessUrlMixin,
+class DeleteWorkshift(WorkingshiftPermissonsMixin, TitleMixin, SuccessUrlMixin,
                         DeleteView):
     model = WorkingShift
-    permission_required = 'salary.delete_workingshift'
     title = 'Удаление смены'
 
 
-class MonthlyReportListView(PermissionRequiredMixin, StaffOnlyMixin, 
-                            TitleMixin, ListView):
+class MonthlyReportListView(WorkingshiftPermissonsMixin, TitleMixin, ListView):
     model = WorkingShift
-    permission_required = 'salary.view_workingshift'
     template_name = 'salary/monthlyreport_list.html'
     title = 'Сводный отчёт'
 
@@ -309,8 +309,8 @@ class MonthlyReportListView(PermissionRequiredMixin, StaffOnlyMixin,
         return context
 
 
-class AddMisconductView(StaffPermissionRequiredMixin, TitleMixin,
-                        SuccessUrlMixin, CreateView):
+class AddMisconductView(MisconductPermissionsMixin, TitleMixin, SuccessUrlMixin,
+                        CreateView):
     model = Misconduct
     title = 'Добавление дисциплинарного проступка'
     form_class = AddMisconductForm
@@ -338,7 +338,7 @@ def load_regulation_data(request):
     return JsonResponse(response)
 
 
-class MisconductListView(StaffPermissionRequiredMixin, TitleMixin, ListView):
+class MisconductListView(MisconductPermissionsMixin, TitleMixin, ListView):
     model = Misconduct
     title = 'Список нарушителей'
     template_name = 'salary/intruders_list.html'
@@ -361,9 +361,11 @@ class MisconductListView(StaffPermissionRequiredMixin, TitleMixin, ListView):
         return dict(sorted(intruder_dict.items(), key=lambda item: item[1], reverse=True))
 
 
-class MisconductUserView(LoginRequiredMixin, TitleMixin, ListView):
+class MisconductUserView(LoginRequiredMixin, PermissionRequiredMixin,
+                            TitleMixin, ListView):
     model = Misconduct
     title = 'Нарушения'
+    permission_required = 'salary.view_misconduct'
 
     def dispatch(self, request, *args: Any, **kwargs: Any):
         self.intruder = self.kwargs.get('username')
@@ -378,20 +380,19 @@ class MisconductUserView(LoginRequiredMixin, TitleMixin, ListView):
         return context
 
 
-class MisconductUpdateView(StaffPermissionRequiredMixin, TitleMixin, 
+class MisconductUpdateView(MisconductPermissionsMixin, TitleMixin, 
                             EditModelEditorFields, SuccessUrlMixin, UpdateView):
     model = Misconduct
     title = 'Редактирование данных нарушения'
     form_class = EditMisconductForm
 
 
-class MisconductDeleteView(StaffPermissionRequiredMixin, TitleMixin,
+class MisconductDeleteView(MisconductPermissionsMixin, TitleMixin,
                             SuccessUrlMixin, DeleteView):
     model = Misconduct
     title = 'Удаление нарушения'
 
 
-# Employee functionality
 class EditUser(LoginRequiredMixin, TitleMixin, SuccessUrlMixin, TemplateView):
     template_name = 'salary/edit_user_profile.html'
     title = 'Редактирование пользователя'
@@ -433,15 +434,17 @@ class EditUser(LoginRequiredMixin, TitleMixin, SuccessUrlMixin, TemplateView):
             return render(request, self.template_name, context=context)
 
 
-class StaffEditUser(StaffPermissionRequiredMixin, EditUser):
+class StaffEditUser(EmployeePermissionsMixin, EditUser):
     userform = StaffEditUserForm
     profileform = StaffEditProfileForm
     title = 'Редактирование профиля'
 
 
-class WorkshiftDetailView(LoginRequiredMixin, TitleMixin, DetailView):
+class WorkshiftDetailView(LoginRequiredMixin, PermissionRequiredMixin,
+                            TitleMixin, DetailView):
     model = WorkingShift
     title = 'Детальный просмотр смены'
+    permission_required = 'salary.view_workingshift'
     queryset = WorkingShift.objects.select_related(
             'cash_admin__profile__position',
             'hall_admin__profile__position',
@@ -454,9 +457,11 @@ class WorkshiftDetailView(LoginRequiredMixin, TitleMixin, DetailView):
 
         return context
 
-class MisconductDetailView(LoginRequiredMixin, TitleMixin, DetailView):
+class MisconductDetailView(LoginRequiredMixin, PermissionRequiredMixin,
+                            TitleMixin, DetailView):
     model = Misconduct
     title = 'Протокол нарушения'
+    permission_required = 'salary.view_misconduct'
     context_object_name = 'misconduct'
     queryset = Misconduct.objects.select_related('intruder', 'moderator', 'regulations_article')
 
@@ -513,9 +518,10 @@ class IndexEmployeeView(LoginRequiredMixin, TitleMixin, ListView):
         return context
 
 
-class EmployeeWorkshiftsView(IndexEmployeeView):
+class EmployeeWorkshiftsView(PermissionRequiredMixin, IndexEmployeeView):
     template_name = 'salary/employee_workshifts_view.html'
     title = 'Смены'
+    permission_required = 'salary.view_workingshift'
 
     def get_queryset(self) -> QuerySet:
         queryset = super().get_queryset()
@@ -528,9 +534,11 @@ class EmployeeWorkshiftsView(IndexEmployeeView):
         return context
 
 
-class EmployeeMonthlyListView(LoginRequiredMixin, TitleMixin, ListView):
+class EmployeeMonthlyListView(LoginRequiredMixin, PermissionRequiredMixin,
+                                TitleMixin, ListView):
     template_name = 'salary/employee_monthly_list.html'
     title = 'Архив смен'
+    permission_required = 'salary.view_workingshift'
 
     def get_queryset(self) -> QuerySet:
         queryset = WorkingShift.objects.select_related(
@@ -543,9 +551,10 @@ class EmployeeMonthlyListView(LoginRequiredMixin, TitleMixin, ListView):
         return queryset
 
 
-class EmployeeArchiveView(IndexEmployeeView):
+class EmployeeArchiveView(PermissionRequiredMixin, IndexEmployeeView):
     template_name = 'salary/employee_workshifts_view.html'
     title = 'Просмотр смен'
+    permission_required = 'salary.view_workingshift'
 
     def get_queryset(self) -> QuerySet:
         queryset = WorkingShift.objects.select_related(
@@ -561,7 +570,7 @@ class EmployeeArchiveView(IndexEmployeeView):
         return queryset
 
 
-class StaffEmployeeMonthView(StaffOnlyMixin, TitleMixin, ListView):
+class StaffEmployeeMonthView(WorkingshiftPermissonsMixin, TitleMixin, ListView):
     template_name = 'salary/staff_employee_month_view.html'
     title = 'Просмотр смен'
 
@@ -657,11 +666,10 @@ class EditWorkshiftData(PermissionRequiredMixin, SuccessUrlMixin,
         return context
 
 
-class StaffEditWorkshift(StaffOnlyMixin, EditWorkshiftData):
+class StaffEditWorkshift(EditWorkshiftData, WorkingshiftPermissonsMixin):
     form_class = StaffEditWorkshiftForm
 
 
-# Additional functionality
 def page_not_found(request, exception):
     response = render(request, 'salary/404.html', {'title': 'Page not found'})
     response.status_code = 404
