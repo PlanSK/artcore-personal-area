@@ -27,10 +27,11 @@
                   <span class="text-light verysmall m-2">{{request.user.get_full_name}}</span>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end" aria-labelledby="navbarDarkDropdownMenuLink">
-                  {% if request.user.is_superuser %}
+                  {% if request.user.is_staff %}
                   <li><a class="dropdown-item verysmall" href="{% url 'admin:index' %}"><i class="fa-solid fa-screwdriver-wrench"></i>&nbsp;Панель администрирования</a></li>
                   {% endif %}
                   <li><a class="dropdown-item verysmall" href="{% url 'profile_edit' %}?next={{ request.path }}"><i class="fa-solid fa-user"></i>&nbsp;Редактировать профиль</a></li>
+                  <li><a class="dropdown-item verysmall" href="{% url 'passowrd_change' %}?next={{ request.path }}"><i class="fa-solid fa-key"></i>&nbsp;Смена пароля</a></li>
                   <li><hr class="dropdown-divider"></li>
                   <li><a class="dropdown-item verysmall" href="{% url 'logout' %}"><i class="fa-solid fa-arrow-right-from-bracket"></i>&nbsp;Выйти</i></a></li>
                 </ul>

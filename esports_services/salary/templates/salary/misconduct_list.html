@@ -23,7 +23,7 @@
           <td>{{ misconduct.regulations_article.title|truncatewords:4 }}</td>
           <td>{{ misconduct.penalty | intcomma }}</td>
           <td><a href="{{ misconduct.get_absolute_url }}" class="link-primary">Смотреть</a></td>
-          {% if perms.salary.change_misconduct %}
+          {% if perms.salary.change_misconduct and perms.salary.delete_misconduct %}
           <td>
             <a href="{% url 'edit_misconduct' pk=misconduct.pk %}?next={{ request.path }}" class="btn btn-warning verysmall">
               <i class="bi bi-pen"></i>
