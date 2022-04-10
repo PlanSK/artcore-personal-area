@@ -102,7 +102,7 @@ class EmployeePasswordChangeView(TitleMixin, SuccessUrlMixin, PasswordChangeView
     template_name = 'salary/password_change.html'
 
 
-class StaffPasswordChangeView(StaffPermissionRequiredMixin, TitleMixin, 
+class StaffPasswordChangeView(EmployeePermissionsMixin, TitleMixin, 
                                 SuccessUrlMixin, PasswordChangeView):
     title = 'Задать пароль'
     template_name = 'salary/password_change.html'
