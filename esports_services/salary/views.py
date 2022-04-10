@@ -1,4 +1,4 @@
-from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.forms import AuthenticationForm, AdminPasswordChangeForm
 from django.http import JsonResponse, HttpResponseNotFound
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import TemplateView, ListView, DetailView
@@ -98,9 +98,16 @@ class LoginUser(TitleMixin, SuccessUrlMixin, LoginView):
     title = 'Авторизация'
 
 
-class ChangePasswordView(TitleMixin, SuccessUrlMixin, PasswordChangeView):
+class EmployeePasswordChangeView(TitleMixin, SuccessUrlMixin, PasswordChangeView):
     title = 'Смена пароля'
     template_name = 'salary/password_change.html'
+
+
+class StaffPasswordChangeView(StaffPermissionRequiredMixin, TitleMixin, 
+                                SuccessUrlMixin, PasswordChangeView):
+    title = 'Задать пароль'
+    template_name = 'salary/password_change.html'
+    form_class = AdminPasswordChangeForm
 
 
 def logout_user(request):

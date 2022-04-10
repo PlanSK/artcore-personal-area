@@ -38,10 +38,19 @@
           </p>
         </div>
         <div class="card-footer text-center">
-          <a href="{% url 'staff_user_edit' current_user.profile.pk %}?next={{ request.path }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil-square"></i> Изменить</a>
-          {% if current_user.is_active %}
-          <a href="{% url 'dismissal_user' current_user.profile.pk %}?next={{ request.path }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-x-circle"></i> Уволить</a>
-          {% endif %}
+          <div class="dropdown">
+            <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuActions" data-bs-toggle="dropdown" aria-expanded="false">
+              Редактирование профиля
+            </button>
+            <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdownMenuActions">
+              <li><a href="{% url 'staff_passowrd_change' user=current_user %}?next={{ request.path }}" class="dropdown-item verysmall"><i class="fa-solid fa-key"></i> Изменить пароль</a></li>
+              <li><a href="{% url 'staff_user_edit' current_user.profile.pk %}?next={{ request.path }}" class="dropdown-item verysmall"><i class="fa-solid fa-user-pen"></i> Измениние профиля</a></li>
+              {% if current_user.is_active %}
+              <li><hr class="dropdown-divider"></li>
+              <li><a href="{% url 'dismissal_user' current_user.profile.pk %}?next={{ request.path }}" class="dropdown-item verysmall"><i class="fa-solid fa-user-xmark"></i> Уволить</a></li>
+              {% endif %}
+            </ul>
+          </div>
         </div>
       </div>
     </div>

@@ -35,5 +35,6 @@ urlpatterns = [
     path('workshifts_view/<int:year>/<int:month>/', EmployeeArchiveView.as_view(), name='employee_archive_view'),
     path('documents/', EmployeeDocumentsList.as_view(), name='employee_documents'),
     path('workshifts_view/<int:year>/<int:month>/<str:employee>/', StaffEmployeeMonthView.as_view(), name='staff_employee_month_view'),
-    path('password_change/', ChangePasswordView.as_view(), name='passowrd_change'),
+    path('password_change/', EmployeePasswordChangeView.as_view(), name='passowrd_change'),
+    path('password_change/<str:user>/', StaffPasswordChangeView.as_view(), name='staff_passowrd_change'),
 ]
