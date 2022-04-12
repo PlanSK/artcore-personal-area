@@ -36,7 +36,13 @@
               {% if employee == workshift.cash_admin %}
               <td>{{ workshift.cashier_earnings_calc.final_earnings | intcomma }}</td>
               <td>{{ workshift.cash_admin_penalty|default:"-" | intcomma }}</td>
-              <td>{{ workshift.shortage|default:"-" | intcomma }}</td>
+              <td>
+                {% if workshift.shortage_paid %}
+                  <s class="text-secondary">{{ workshift.shortage|default:"-" | intcomma }}</s>
+                {% else %}
+                  {{ workshift.shortage|default:"-" | intcomma }}
+                {% endif %}
+              </td>
               {% else %}
               <td>{{ workshift.hall_admin_earnings_calc.final_earnings | intcomma }}</td>
               <td>{{ workshift.hall_admin_penalty|default:"-" | intcomma }}</td>
@@ -52,12 +58,7 @@
               <td>{{ object_list.count }}</td>
               <td>{{ summary_earnings|default:"-" | intcomma }}</td>
               <td>{{ summary_penalties|default:"-" | intcomma }}</td>
-              <td>
-                {% if employee == workshift.cash_admin %}
-                {{ summary_shortages|default:"-" | intcomma }}</td>
-                {% else %}
-                -
-                {% endif %}
+              <td>{{ summary_shortages|default:"-" | intcomma }}</td>
               <td></td>
             </tr>
           </tfoot>
