@@ -266,7 +266,7 @@ class MonthlyReportListView(WorkingshiftPermissonsMixin, TitleMixin, ListView):
 
             cashier_dict.update({
                 'username': workshift.cash_admin,
-                'shortage': workshift.shortage,
+                'shortage': workshift.shortage if not workshift.shortage_paid else 0.0,
                 'penalties': cashier_earnings_dict['penalty'],
                 'estimated_earnings': cashier_earnings_dict['estimated_earnings'],
             })
@@ -487,7 +487,7 @@ class IndexEmployeeView(LoginRequiredMixin, TitleMixin, ListView):
             shift_date__year=datetime.date.today().year,
         ).filter(
             Q(cash_admin=self.request.user) | Q(hall_admin=self.request.user)
-        )
+        ).order_by('shift_date')
 
         return queryset
 
@@ -505,11 +505,12 @@ class IndexEmployeeView(LoginRequiredMixin, TitleMixin, ListView):
         context = super().get_context_data(**kwargs)
         context.update({
             'summary_earnings': self.get_summary_earnings(),
-            'misconducts': Misconduct.objects.filter(
+            'penalty_sum': Misconduct.objects.filter(
                 intruder=self.request.user
             ).aggregate(Sum('penalty')).get('penalty__sum'),
-            'shortages': self.object_list.filter(
-                cash_admin=self.request.user
+            'shortage_sum': self.object_list.filter(
+                cash_admin=self.request.user,
+                shortage_paid=False
             ).aggregate(Sum('shortage')).get('shortage__sum'),
             'today_workshift_is_exists': self.object_list.filter(
                 shift_date=datetime.date.today()).exists(),
@@ -522,16 +523,6 @@ class EmployeeWorkshiftsView(PermissionRequiredMixin, IndexEmployeeView):
     template_name = 'salary/employee_workshifts_view.html'
     title = 'Смены'
     permission_required = 'salary.view_workingshift'
-
-    def get_queryset(self) -> QuerySet:
-        queryset = super().get_queryset()
-        return queryset.order_by('shift_date')
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['summary_shortage'] = self.object_list.aggregate(Sum('shortage'))
-
-        return context
 
 
 class EmployeeMonthlyListView(LoginRequiredMixin, PermissionRequiredMixin,
@@ -617,9 +608,10 @@ class StaffEmployeeMonthView(WorkingshiftPermissonsMixin, TitleMixin, ListView):
             'employee': self.employee,
             'summary_earnings': self.get_summary_earnings(),
             'summary_penalties': self.get_summary_penalties(),
-            'summary_shortages': self.object_list.aggregate(
-                Sum('shortage')
-            ).get('shortage__sum')
+            'summary_shortages': self.object_list.filter(
+                cash_admin=self.employee,
+                shortage_paid=False,
+            ).aggregate(Sum('shortage')).get('shortage__sum')
         })
         return context
 

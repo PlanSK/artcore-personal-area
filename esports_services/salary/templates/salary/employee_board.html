@@ -61,7 +61,7 @@
               </div>
             </div>
             <div class="col-sm-12 col-md-3 mb-1">
-                {% if misconducts %}
+                {% if penalty_sum %}
               <div class="card text-light red-snippet h-100">
                 <div class="row g-0">
                   <div class="col-md-2 red-snippet d-flex align-items-center justify-content-center rounded">
@@ -76,14 +76,14 @@
                     <div class="text-center">
                       <p class="card-text fst-italic">Штрафы</p>
                       <hr class="m-1">
-                      <span class="fw-bold">{{ misconducts|default:"-" | intcomma }}</span>
+                      <span class="fw-bold">{{ penalty_sum|default:"-" | intcomma }}</span>
                       <a href="{% url 'misconducts_user_view' username=request.user %}?next={{ request.path }}" class="stretched-link"></a>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-              {% if shortages %}
+              {% if shortage_sum %}
             <div class="col-sm-12 col-md-3 mb-1">
               <div class="card text-light red-snippet h-100">
                 <div class="row g-0">
@@ -94,7 +94,7 @@
                     <div class="text-center">
                       <p class="card-text fst-italic">Недостачи</p>
                       <hr class="m-1">
-                      <span class="fw-bold">{{ shortages|default:"-" | intcomma }}</span>
+                      <span class="fw-bold">{{ shortage_sum|default:"-" | intcomma }}</span>
                     </div>
                   </div>
                 </div>
