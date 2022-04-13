@@ -13,7 +13,6 @@
         <table class="table table-dark table-hover">
           <thead class="text-warning text-center verysmall">
             <tr>
-              <th></th>
               <th>Статус</th>
               <th>Дата</th>
               <th>Заработок</th>
@@ -24,16 +23,14 @@
             {% for workshift in object_list %}
             <tr>
               <td>
-                {% if workshift.comment and not workshift.is_verified %}
-                <span  data-bs-toggle="tooltip" data-bs-placement="right" title="Добавлен комментарий">
-                  <i class="fa-regular fa-envelope fa-shake"></i>
-                </span>
-                {% endif %}
-              </td>
-              <td>
                 {% if workshift.is_verified %}
                   <i class="fa-solid fa-calendar-check" style="color: green;"></i>
                 {% else %}
+                  {% if workshift.comment_for_cash_admin and request.user == workshift.cash_admin or workshift.comment_for_hall_admin and request.user == workshift.hall_admin %}
+                  <span  data-bs-toggle="tooltip" data-bs-placement="right" title="Добавлен комментарий">
+                    <i class="fa-regular fa-envelope fa-shake"></i>&nbsp;
+                  </span>
+                  {% endif %}
                   {% if perms.salary.change_workingshift %}
                     <a href="{% url 'edit_workshift' slug=workshift.slug %}?next={{ request.path }}"><i class="fa-regular fa-pen-to-square" style="color:yellow;"></i></a>
                   {% else %}

@@ -46,18 +46,34 @@
         </table>
       </div>
       <div class="col-md-7 col-sm-auto m-2 table-responsive rounded border border-light">
+        {% if request.user == work_shift.cash_admin or request.user.is_staff %}
         <table class="table table-dark">
           <thead class="text-warning text-center verysmall">
             <tr>
-              <th>Комментарий</th>
+              <th>Комментарий для кассира</th>
             </tr>
           </thead>
-          <tbody class="text-center">
+          <tbody class="text-center verysmall">
             <tr>
-              <td>{{ work_shift.comment|default:"-" }}</td>
+              <td>{{ work_shift.comment_for_cash_admin|default:"-" }}</td>
             </tr>
           </tbody>
         </table>
+        {% endif %}
+        {% if request.user == work_shift.hall_admin or request.user.is_staff %}
+        <table class="table table-dark">
+          <thead class="text-warning text-center verysmall">
+            <tr>
+              <th>Комментарий для админа</th>
+            </tr>
+          </thead>
+          <tbody class="text-center verysmall">
+            <tr>
+              <td>{{ work_shift.comment_for_hall_admin|default:"-" }}</td>
+            </tr>
+          </tbody>
+        </table>
+        {% endif %}
       </div>
     </div>
     <div class="row row-cols-md-2 row-cols-sm-1 justify-content-center m-1">
