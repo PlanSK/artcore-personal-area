@@ -376,7 +376,15 @@ class MisconductUserView(LoginRequiredMixin, PermissionRequiredMixin,
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['intruder'] = get_object_or_404(User, username=self.intruder)
+
+        context.update({
+            'intruder': get_object_or_404(User, username=self.intruder),
+
+            'penalty_sum': self.object_list.filter(
+                status=Misconduct.MisconductStatus.CLOSED,
+            ).aggregate(Sum('penalty')).get('penalty__sum'),
+        })
+
         return context
 
 
@@ -509,16 +517,22 @@ class IndexEmployeeView(LoginRequiredMixin, TitleMixin, ListView):
         context.update({
             'summary_earnings': self.get_summary_earnings(),
             'penalty_count': misconducts.count(),
+
             'wait_explanation': misconducts.filter(
                 status=Misconduct.MisconductStatus.ADDED
             ).exists(),
+
             'penalty_sum': misconducts.filter(
-                status=Misconduct.MisconductStatus.CLOSED
+                status=Misconduct.MisconductStatus.CLOSED,
+                workshift_date__month=datetime.date.today().month,
+                workshift_date__year=datetime.date.today().year,
             ).aggregate(Sum('penalty')).get('penalty__sum'),
+
             'shortage_sum': self.object_list.filter(
                 cash_admin=self.request.user,
                 shortage_paid=False
             ).aggregate(Sum('shortage')).get('shortage__sum'),
+
             'today_workshift_is_exists': self.object_list.filter(
                 shift_date=datetime.date.today()).exists(),
         })
