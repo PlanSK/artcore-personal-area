@@ -152,7 +152,7 @@ class Misconduct(models.Model):
     explanation_exist = models.BooleanField(verbose_name='Наличие объяснительной', default=False)
     moderator = models.ForeignKey(User, on_delete=models.PROTECT, verbose_name='Арбитр (кто выявил)', related_name='moderator')
     comment = models.TextField(verbose_name='Примечание', blank=True)
-    status = models.CharField(max_length=60, choices=MisconductStatus.choices, default=MisconductStatus.ADDED)
+    status = models.CharField(max_length=60, choices=MisconductStatus.choices, default=MisconductStatus.ADDED, verbose_name='Статус рассмотрения')
     slug = models.SlugField(max_length=60, unique=True, verbose_name='URL', null=True, blank=True)
     change_date = models.DateTimeField(verbose_name='Дата изменения', blank=True, null=True)
     editor = models.TextField(verbose_name='Редактор', blank=True, editable=False)
