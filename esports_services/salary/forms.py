@@ -180,6 +180,7 @@ class AddMisconductForm(forms.ModelForm):
         model = Misconduct
         fields = (
             'misconduct_date',
+            'workshift_date',
             'intruder',
             'regulations_article',
             'penalty',
@@ -188,6 +189,10 @@ class AddMisconductForm(forms.ModelForm):
         )
         widgets = {
             'misconduct_date': forms.DateInput(attrs={
+                'type': 'date',
+                'value': datetime.datetime.now().strftime('%Y-%m-%d'),
+            }),
+            'workshift_date': forms.DateInput(attrs={
                 'type': 'date',
                 'value': datetime.datetime.now().strftime('%Y-%m-%d'),
             }),
