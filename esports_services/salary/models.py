@@ -139,13 +139,20 @@ class DisciplinaryRegulations(models.Model):
 
 
 class Misconduct(models.Model):
-    misconduct_date = models.DateField(verbose_name='Дата')
+    class MisconductStatus(models.TextChoices):
+        ADDED = 'AD', 'Ожидает объяснение'
+        WAIT = 'WT', 'Ожидает решение'
+        CLOSED = 'CL', 'Решение принято'
+
+    misconduct_date = models.DateField(verbose_name='Дата нарушения')
+    workshift_date = models.DateField(verbose_name='Дата смены')
     intruder = models.ForeignKey(User, on_delete=models.PROTECT, verbose_name='Сотрудник', related_name='intruder')
     regulations_article = models.ForeignKey(DisciplinaryRegulations, on_delete=models.PROTECT, verbose_name='Пункт дисциплинарного регламента')
     penalty = models.FloatField(verbose_name='Сумма штрафа', default=0.0)
     explanation_exist = models.BooleanField(verbose_name='Наличие объяснительной', default=False)
     moderator = models.ForeignKey(User, on_delete=models.PROTECT, verbose_name='Арбитр (кто выявил)', related_name='moderator')
     comment = models.TextField(verbose_name='Примечание', blank=True)
+    status = models.CharField(max_length=60, choices=MisconductStatus.choices, default=MisconductStatus.ADDED, verbose_name='Статус рассмотрения')
     slug = models.SlugField(max_length=60, unique=True, verbose_name='URL', null=True, blank=True)
     change_date = models.DateTimeField(verbose_name='Дата изменения', blank=True, null=True)
     editor = models.TextField(verbose_name='Редактор', blank=True, editable=False)
@@ -158,8 +165,14 @@ class Misconduct(models.Model):
     def __str__(self) -> str:
         return f'{self.misconduct_date} {self.intruder.get_full_name()}'
 
+    def save(self, *args, **kwargs):
+        if self.explanation_exist and self.status == self.MisconductStatus.ADDED:
+            self.status = self.MisconductStatus.WAIT
+        super().save(*args, **kwargs)
+
     def get_absolute_url(self):
         return reverse_lazy('misconduct_detail', kwargs={'slug': self.slug})
+
 
 class WorkingShift(models.Model):
     hall_admin = models.ForeignKey(User, on_delete=models.PROTECT, related_name='hall_admin')
@@ -323,7 +336,10 @@ class WorkingShift(models.Model):
         return reverse_lazy('detail_workshift', kwargs={'slug': self.slug})
 
     def save(self, *args, **kwargs):
-        misconduct_queryset = Misconduct.objects.filter(misconduct_date=self.shift_date)
+        misconduct_queryset = Misconduct.objects.filter(
+            workshift_date=self.shift_date,
+            status=Misconduct.MisconductStatus.CLOSED,
+        )
         self.cash_admin_penalty = 0.0
         self.hall_admin_penalty = 0.0
         for misconduct in misconduct_queryset:
@@ -338,7 +354,7 @@ class WorkingShift(models.Model):
 @receiver(post_delete, sender=Misconduct)
 def run_calculating_penalties(sender, instance, created=None, **kwargs):
     workshift_queryset = WorkingShift.objects.filter(
-            shift_date=instance.misconduct_date
+            shift_date=instance.workshift_date
     ).first()
     if workshift_queryset:
         workshift_queryset.save()

@@ -39,9 +39,21 @@
               <td class="text-warning">Наличие объяснения</td>
               <td>
                 {% if misconduct.explanation_exist %}
-                <i class="bi bi-check2-circle" style="color: green;"></i>
+                <i class="fa-solid fa-check" style="color: green;"></i>
                 {% else %}
-                <i class="bi bi-x-circle" style="color: red;"></i>
+                <i class="fa-solid fa-x" style="color: red;"></i>
+                {% endif %}
+              </td>
+            </tr>
+            <tr>
+              <td class="text-warning">Статус</td>
+              <td>
+                {% if misconduct.status == 'AD' %}
+                <i class="fa-solid fa-file-circle-question fa-fade" style="color: coral;"></i> Ожидает объяснение
+                {% elif misconduct.status == 'WT' %}
+                <i class="fa-regular fa-clock fa-fade" style="color: yellow;"></i> На рассмотрении
+                {% elif misconduct.status == 'CL' %}
+                <i class="fa-solid fa-clipboard-check" style="color: yellowgreen;"></i> Решение принято
                 {% endif %}
               </td>
             </tr>
