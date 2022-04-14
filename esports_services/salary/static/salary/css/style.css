@@ -37,3 +37,7 @@
 .clear-after-toggle::after {
     content: none;
 }
+
+.text-justify {
+    text-align: justify;
+}

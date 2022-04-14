@@ -21,23 +21,26 @@
         <table class="table table-dark">
           <thead class="text-warning text-center verysmall">
             <tr>
-              <th>Состояние</th>
+              <th colspan="2">Состояние</th>
             </tr>
           </thead>
-          <tbody class="text-center">
+          <tbody class="text-center verysmall">
             <tr>
+              <td>Состояние</td>
               <td>
                 {% if work_shift.is_verified %}
-                <i class="bi bi-check2-circle" style="color: green;"></i> Проверено 
+                <i class="fa-solid fa-calendar-check" style="color: green;"></i> Проверено 
                 {% else %}
-                <i class="bi bi-stopwatch-fill" style="color: yellow;"></i> Ожидает проверки
+                <i class="fa-solid fa-clock fa-fade" style="color: yellow;"></i> Ожидает проверки
                 {% endif %}
               </td>
             </tr>
             {% if work_shift.change_date and work_shift.editor %}
             <tr>
-              <td class="verysmall">
-                Изменен: {{ work_shift.change_date }} ({{ work_shift.editor }})
+              <td>Изменен:</td>
+              <td>
+                {{ work_shift.change_date }}<br>
+                ({{ work_shift.editor }})
               </td>
             </tr>
             {% endif %}
@@ -52,9 +55,15 @@
               <th>Комментарий для кассира</th>
             </tr>
           </thead>
-          <tbody class="text-center verysmall">
+          <tbody class="verysmall">
             <tr>
-              <td>{{ work_shift.comment_for_cash_admin|default:"-" }}</td>
+              {% if work_shift.comment_for_cash_admin %}
+              <td class="text-justify">
+                {{ work_shift.comment_for_cash_admin|linebreaks }}
+              {% else %}
+              <td class="text-center">-
+              {% endif %}
+              </td>
             </tr>
           </tbody>
         </table>
@@ -66,9 +75,15 @@
               <th>Комментарий для админа</th>
             </tr>
           </thead>
-          <tbody class="text-center verysmall">
+          <tbody class="verysmall">
             <tr>
-              <td>{{ work_shift.comment_for_hall_admin|default:"-" }}</td>
+              {% if work_shift.comment_for_hall_admin %}
+              <td class="text-justify">
+                {{ work_shift.comment_for_hall_admin|linebreaks }}
+              {% else %}
+              <td class="text-center">-
+              {% endif %}
+              </td>
             </tr>
           </tbody>
         </table>
