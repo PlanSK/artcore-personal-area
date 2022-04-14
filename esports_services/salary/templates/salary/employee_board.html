@@ -27,7 +27,7 @@
               <div class="card text-light blue-snippet h-100">
                 <div class="row g-0">
                   <div class="col-md-2 blue-snippet d-flex align-items-center justify-content-center rounded">
-                    <span class="m-2"><i class="fa-solid fa-calendar-check fa-xl"></i></i></span>
+                    <span class="m-2"><i class="fa-solid fa-calendar-check fa-xl"></i></span>
                   </div>
                   <div class="col m-1">
                     <div class="text-center">
@@ -102,9 +102,26 @@
               {% endif %}
             <hr class="w-100 mt-2">
           </div>
-          <div class="row row-cols-md-2 row-cols-sm-1 justify-content-center">
+          <div class="row row-cols-md-3 row-cols-sm-1 justify-content-center">
             <div class="col-sm-12 col-md-4 mb-1">
-              <div class="card orange-snippet text-light h-100">
+              <div class="card red-snippet text-light h-100">
+                <div class="card-body">
+                  <p class="card-text fst-italic">
+                    <span class="me-2"><i class="fa-solid fa-graduation-cap fa-xl"></i></span>
+                    Нарушения 
+                    {% if penalty_count %}
+                    <span class="badge bg-danger rounded-circle">{{ penalty_count }}</span>
+                    {% endif %}
+                    {% if wait_explanation %}
+                    <i class="fa-solid fa-file-circle-question fa-fade fa-xl"></i>
+                    {% endif %}
+                  </p>
+                  <a href="{% url 'misconducts_user_view' username=request.user %}?next={{ request.path }}" class="stretched-link"></a>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-12 col-md-4 mb-1">
+              <div class="card blue-snippet text-light h-100">
                 <div class="card-body">
                   <p class="card-text fst-italic">
                     <span class="me-2"><i class="fa-solid fa-book fa-xl"></i></span>

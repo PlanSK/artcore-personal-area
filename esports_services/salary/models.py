@@ -165,6 +165,11 @@ class Misconduct(models.Model):
     def __str__(self) -> str:
         return f'{self.misconduct_date} {self.intruder.get_full_name()}'
 
+    def save(self, *args, **kwargs):
+        if self.explanation_exist and self.status == self.MisconductStatus.ADDED:
+            self.status = self.MisconductStatus.WAIT
+        super().save(*args, **kwargs)
+
     def get_absolute_url(self):
         return reverse_lazy('misconduct_detail', kwargs={'slug': self.slug})
 
@@ -331,7 +336,10 @@ class WorkingShift(models.Model):
         return reverse_lazy('detail_workshift', kwargs={'slug': self.slug})
 
     def save(self, *args, **kwargs):
-        misconduct_queryset = Misconduct.objects.filter(workshift_date=self.shift_date)
+        misconduct_queryset = Misconduct.objects.filter(
+            workshift_date=self.shift_date,
+            status=Misconduct.MisconductStatus.CLOSED,
+        )
         self.cash_admin_penalty = 0.0
         self.hall_admin_penalty = 0.0
         for misconduct in misconduct_queryset:
