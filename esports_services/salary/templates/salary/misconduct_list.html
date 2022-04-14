@@ -48,6 +48,15 @@
         </tr>
         {% endfor %}
       </tbody>
+      <tfoot class="verysmall">
+        <tr>
+          <td></td>
+          <td>{{ object_list.count }}</td>
+          <td></td>
+          <td>{{ penalty_sum }}</td>
+          <td colspan="2"></td>
+        </tr>
+      </tfoot>
       {% else %}
       <tr>
         <td colspan="4" class="verysmall text-warning">Нарушений нет</td>
