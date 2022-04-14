@@ -16,8 +16,3 @@ def inactive_user():
     return User.objects.exclude(is_active=True).filter(
         profile__dismiss_date=None
     ).count()
-
-
-@register.inclusion_tag('salary/icon_logic.html')
-def icon_logic(variable=None):
-    return {'logic_trigger': variable}
