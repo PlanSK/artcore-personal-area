@@ -11,7 +11,8 @@
         <tr>
           <th>Дата</th>
           <th>Нарушение</th>
-          <th>Штраф</th>
+          <th>Статус</th>
+          <th>Санкция</th>
           <th></th>
           <th></th>
         </tr>
@@ -19,9 +20,18 @@
       <tbody class="text-center verysmall">
         {% for misconduct in object_list %} 
         <tr>
-          <td>{{ misconduct.misconduct_date }}</td>
-          <td>{{ misconduct.regulations_article.title|truncatewords:4 }}</td>
-          <td>{{ misconduct.penalty | intcomma }}</td>
+          <td>{{ misconduct.misconduct_date|date:"d.m.Y" }}</td>
+          <td>{{ misconduct.regulations_article.title|truncatewords:2 }}</td>
+          <td>
+            {% if misconduct.status == 'AD' %}
+            <i class="fa-solid fa-file-circle-question fa-fade fa-xl" style="color: coral;"></i><br>Ожидает объяснение
+            {% elif misconduct.status == 'WT' %}
+            <i class="fa-regular fa-clock fa-fade fa-xl" style="color: yellow;"></i><br>На рассмотрении
+            {% elif misconduct.status == 'CL' %}
+            <i class="fa-solid fa-clipboard-check fa-xl" style="color: yellowgreen;"></i><br>Решение принято
+            {% endif %}
+          </td>
+          <td>{{ misconduct.penalty|default:"Предупреждение" | intcomma }}</td>
           <td><a href="{{ misconduct.get_absolute_url }}" class="link-primary">Смотреть</a></td>
           {% if perms.salary.change_misconduct and perms.salary.delete_misconduct %}
           <td>
