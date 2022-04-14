@@ -33,3 +33,7 @@
 .orange-snippet:hover {
     background: #da6200;
 }
+
+.clear-after-toggle::after {
+    content: none;
+}
