@@ -186,6 +186,7 @@ class AddMisconductForm(forms.ModelForm):
             'penalty',
             'explanation_exist',
             'comment',
+            'status',
         )
         widgets = {
             'misconduct_date': forms.DateInput(attrs={
@@ -208,9 +209,12 @@ class EditMisconductForm(forms.ModelForm):
     class Meta:
         model = Misconduct
         fields = (
+            'misconduct_date',
+            'workshift_date',
             'intruder',
             'regulations_article',
             'penalty',
             'explanation_exist',
             'comment',
+            'status',
         )
