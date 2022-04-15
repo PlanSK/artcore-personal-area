@@ -9,12 +9,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
     <script src="https://kit.fontawesome.com/31a3581c8d.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" id="css-url" href="">
-    <script src="{% static 'salary/js/code.js' %}"></script>
     <script>
-        let css_url = "{% static 'salary/css/style.css' %}";
-        let mod_date = new Date(fetchHeader(css_url,'Last-Modified')).getTime();
-        let link_css = document.getElementById("css-url");
-        link_css.setAttribute('href', css_url + "?v=" + Math.floor(mod_date / 1000));
+        document.getElementById("css-url").setAttribute('href', "{% static 'salary/css/style.css' %}?v=" + Math.floor((new Date().getTime()) / 1000));
     </script>
     <link rel="icon" type="image/x-icon" href="{% static 'salary/img/favicon.ico' %}">
     <title>{{ title }}</title>
