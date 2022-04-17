@@ -40,4 +40,5 @@ urlpatterns = [
     path('password_reset/', ResetPasswordView.as_view(), name='password_reset'),
     path('password_reset_done/', ResetPasswordMailed.as_view(), name='password_reset_done'),
     path('password_reset/<uidb64>/<token>/', ResetPasswordConfirmView.as_view(), name='password_reset_confirm'),
+    path('graph/', SalaryGraphView.as_view(), name='graph'),
 ]

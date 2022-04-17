@@ -474,6 +474,35 @@ class MisconductDetailView(LoginRequiredMixin, PermissionRequiredMixin,
     queryset = Misconduct.objects.select_related('intruder', 'moderator', 'regulations_article')
 
 
+class SalaryGraphView(LoginRequiredMixin, TitleMixin, ListView):
+    model = WorkingShift
+    title = 'График'
+    template_name = 'salary/graph.html'
+
+    def get_queryset(self) -> QuerySet:
+        workshifts = WorkingShift.objects.filter(shift_date__month=3)
+        return workshifts
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        import matplotlib.pyplot as plt
+        import io
+        import urllib, base64
+
+        revenues = [workshift.get_summary_revenue() for workshift in self.object_list]
+        days = [workshift.shift_date.day for workshift in self.object_list]
+        plt.bar(days, revenues)
+        fig = plt.gcf()
+
+        buf = io.BytesIO()
+        fig.savefig(buf, format='png')
+        buf.seek(0)
+        string = base64.b64encode(buf.read())
+
+        context['image'] = 'data:image/png;base64,' + urllib.parse.quote(string)
+        return context
+
+
 class IndexEmployeeView(LoginRequiredMixin, TitleMixin, ListView):
     model = WorkingShift
     template_name = 'salary/employee_board.html'

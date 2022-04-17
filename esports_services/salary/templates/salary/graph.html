@@ -1,0 +1,15 @@
+{% extends 'salary/logined_page.html' %}
+{% load humanize %}
+
+{% block content %}
+<main>
+  <div class="container">
+    <div class="row">
+      <div class="col text-center ">
+        <p class="text-warning">График выручки за март</p>
+        <img src="{{ image }}">
+      </div>
+    </div>
+  </div>
+</main>
+{% endblock %}
