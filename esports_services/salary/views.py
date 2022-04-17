@@ -2,9 +2,9 @@ from django.contrib.auth.forms import AuthenticationForm, AdminPasswordChangeFor
 from django.http import JsonResponse, HttpResponseNotFound
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import TemplateView, ListView, DetailView
-from django.contrib.auth.views import LoginView, PasswordChangeView
+from django.contrib.auth.views import LoginView, PasswordChangeView, PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView
 from django.contrib.auth import logout
-from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.contrib.auth.models import Group
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.db.models import Q, QuerySet, Sum
@@ -99,13 +99,13 @@ class LoginUser(TitleMixin, SuccessUrlMixin, LoginView):
 
 class EmployeePasswordChangeView(TitleMixin, SuccessUrlMixin, PasswordChangeView):
     title = 'Смена пароля'
-    template_name = 'salary/password_change.html'
+    template_name = 'salary/auth/password_change.html'
 
 
 class StaffPasswordChangeView(EmployeePermissionsMixin, TitleMixin, 
                                 SuccessUrlMixin, PasswordChangeView):
     title = 'Задать пароль'
-    template_name = 'salary/password_change.html'
+    template_name = 'salary/auth/password_change.html'
     form_class = AdminPasswordChangeForm
 
 
@@ -681,6 +681,24 @@ class EditWorkshiftData(PermissionRequiredMixin, SuccessUrlMixin,
 
 class StaffEditWorkshift(EditWorkshiftData, WorkingshiftPermissonsMixin):
     form_class = StaffEditWorkshiftForm
+
+
+class ResetPasswordView(TitleMixin, PasswordResetView):
+    title = 'Сброс пароля'
+    template_name = 'salary/auth/password_reset_form.html'
+    email_template_name = 'salary/auth/password_reset_email.html'
+    success_url = reverse_lazy('password_reset_done')
+
+
+class ResetPasswordMailed(TitleMixin, PasswordResetDoneView):
+    template_name = 'salary/auth/password_reset_done.html'
+    title = 'Пароль успешно сброшен'
+
+
+class ResetPasswordConfirmView(TitleMixin, PasswordResetConfirmView):
+    template_name = 'salary/auth/password_reset_confirm.html'
+    title = 'Форма сброса пароля'
+    success_url = reverse_lazy('login')
 
 
 def page_not_found(request, exception):

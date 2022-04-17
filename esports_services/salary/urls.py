@@ -37,4 +37,7 @@ urlpatterns = [
     path('workshifts_view/<int:year>/<int:month>/<str:employee>/', StaffEmployeeMonthView.as_view(), name='staff_employee_month_view'),
     path('password_change/', EmployeePasswordChangeView.as_view(), name='passowrd_change'),
     path('password_change/<str:user>/', StaffPasswordChangeView.as_view(), name='staff_passowrd_change'),
+    path('password_reset/', ResetPasswordView.as_view(), name='password_reset'),
+    path('password_reset_done/', ResetPasswordMailed.as_view(), name='password_reset_done'),
+    path('password_reset/<uidb64>/<token>/', ResetPasswordConfirmView.as_view(), name='password_reset_confirm'),
 ]
