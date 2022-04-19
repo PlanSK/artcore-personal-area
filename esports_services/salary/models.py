@@ -209,16 +209,16 @@ class WorkingShift(models.Model):
     def __str__(self) -> str:
         return self.shift_date.strftime('%d-%m-%Y')
 
-    def get_summary_revenue(self) -> float:
-        summary_revenue = sum([
+    @property
+    def summary_revenue(self) -> float:
+        total_revenue = sum((
             self.bar_revenue,
             self.game_zone_revenue,
             self.vr_revenue,
             self.hookah_revenue,
-            -self.game_zone_error
-        ])
-
-        return summary_revenue
+            -self.game_zone_error,
+        ))
+        return round(total_revenue, 2) if total_revenue > 0.0 else 0.0
 
     # Earnings block
 

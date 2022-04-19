@@ -181,7 +181,7 @@ class StaffArchiveWorkshiftsView(WorkingshiftPermissonsMixin, TitleMixin, ListVi
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['summary_revenue'] = sum([
-            workshift.get_summary_revenue()
+            workshift.summary_revenue
             for workshift in self.object_list 
         ])
 
@@ -253,7 +253,7 @@ class MonthlyReportListView(WorkingshiftPermissonsMixin, TitleMixin, ListView):
             earnings_data_dict = dict()
             summary_data_dict = dict()
             general_dict = {
-                'summary_revenue': workshift.get_summary_revenue(),
+                'summary_revenue': workshift.summary_revenue,
                 'count': 1,
             }
 
@@ -292,7 +292,7 @@ class MonthlyReportListView(WorkingshiftPermissonsMixin, TitleMixin, ListView):
         )
         summary_data_dict['count'] = workshifts.count()
         summary_data_dict['summary_revenue'] = sum(
-            [workshift.get_summary_revenue() for workshift in workshifts]
+            [workshift.summary_revenue for workshift in workshifts]
         )
         return (earnings_data_dict, summary_data_dict, )
 

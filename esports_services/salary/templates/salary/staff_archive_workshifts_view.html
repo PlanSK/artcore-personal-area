@@ -35,7 +35,7 @@
       <td>{{ workshift.cash_admin.get_full_name }}</td>
       <td>{{ workshift.hall_admin.get_full_name }}</td>
       {% endif %}
-        <td>{{ workshift.get_summary_revenue | intcomma }}</td>
+        <td>{{ workshift.summary_revenue | intcomma }}</td>
         <td><a href="{{ workshift.get_absolute_url }}?next={{ request.path }}" class="link-primary verysmall">Смотреть</a></td>
         <td>
           <a class="link-warning" href="{% url 'staff_edit_workshift' workshift.slug %}?next={{ request.path }}" data-bs-toggle="tooltip" data-bs-placement="top" title="Внести изменения">
