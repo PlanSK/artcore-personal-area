@@ -62,11 +62,8 @@ class Profile(models.Model):
         verbose_name = 'Профиль сотрудника'
         verbose_name_plural = 'Профили сотрудников'
 
-    def get_experience(self):
-        end_date = self.dismiss_date if self.dismiss_date else datetime.date.today()
-        return relativedelta(end_date, self.employment_date)
-
-    def get_choice_plural(self, amount, variants):
+    @classmethod
+    def get_choice_plural(cls, amount, variants):
         if amount % 10 == 1 and amount % 100 != 11:
             choice = 0
         elif amount % 10 >= 2 and amount % 10 <= 4 and \
@@ -77,8 +74,9 @@ class Profile(models.Model):
 
         return variants[choice]
 
-    def get_work_experience(self):
-        experience = self.get_experience()
+    def get_experience_text(self):
+        end_date = self.dismiss_date if self.dismiss_date else datetime.date.today()
+        experience = relativedelta(end_date, self.employment_date)
         days, months, years = experience.days, experience.months, experience.years
         experience_text = ''
 
@@ -92,24 +90,6 @@ class Profile(models.Model):
             experience_text += f'{days} {self.get_choice_plural(days, DAYS_VARIANT)}'
 
         return experience_text
-
-    def get_last_login(self) -> str:
-        if self.user.last_login:
-            date_period = relativedelta(datetime.date.today(), self.user.last_login.date())
-            hours_period = relativedelta(timezone.localtime(timezone.now()), self.user.last_login)
-            if date_period.days == 0 and 1 < hours_period.hours < 12:
-                return f'{self.get_choice_plural(hours_period.hours, HOURS_VARIANT)} назад'
-            elif date_period.days == 0 and hours_period.hours > 12:
-                return f'сегодня в {self.user.last_login.strftime("%H:%M")}'
-            elif date_period.days == 1:
-                return f'вчера в {self.user.last_login.strftime("%H:%M")}'
-            elif 1 < date_period.days < 7:
-                return f'{date_period.days} {self.get_choice_plural(date_period.days, DAYS_VARIANT)} назад'
-            elif date_period.days == 7:
-                return 'неделю назад'
-            else:
-                return self.user.last_login
-        return None
 
 
 @receiver(post_save, sender=User)
