@@ -1,3 +1,4 @@
+from turtle import color
 from django.contrib.auth.forms import AuthenticationForm, AdminPasswordChangeForm
 from django.http import JsonResponse, HttpResponseNotFound
 from django.shortcuts import get_object_or_404, redirect, render
@@ -8,6 +9,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMix
 from django.contrib.auth.models import Group
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.db.models import Q, QuerySet, Sum
+from matplotlib.pyplot import colorbar
 
 from .forms import *
 from .utils import *
@@ -491,11 +493,25 @@ class SalaryGraphView(LoginRequiredMixin, TitleMixin, ListView):
 
         revenues = [workshift.get_summary_revenue() for workshift in self.object_list]
         days = [workshift.shift_date.day for workshift in self.object_list]
-        plt.bar(days, revenues)
-        fig = plt.gcf()
+        color = 'red'
+
+        plt.style.use('dark_background')
+
+        fig, ax = plt.subplots()
+
+        # hbars = ax.barh(days, revenues, color=color, height=0.5, align='center')
+        # ax.bar_label(hbars, fmt='%.2f', fontsize=8)
+
+        ax.plot(days, revenues, color=color)
+        for coords in zip(days, revenues):
+            ax.annotate(coords[1], xy=coords, textcoords='data')
+
+        plt.ylabel('Выручка')
+        plt.title(f'Динамика выручки на {self.object_list.first().shift_date}')
 
         buf = io.BytesIO()
-        fig.savefig(buf, format='png')
+
+        fig.savefig(buf, format='png', transparent=True)
         buf.seek(0)
         string = base64.b64encode(buf.read())
 
