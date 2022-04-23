@@ -1,4 +1,3 @@
-from turtle import color
 from django.contrib.auth.forms import AuthenticationForm, AdminPasswordChangeForm
 from django.http import JsonResponse, HttpResponseNotFound
 from django.shortcuts import get_object_or_404, redirect, render
@@ -8,8 +7,7 @@ from django.contrib.auth import logout
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.contrib.auth.models import Group
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
-from django.db.models import Q, QuerySet, Sum
-from matplotlib.pyplot import colorbar
+from django.db.models import Q, QuerySet, Sum, Avg, Min, Max
 
 from .forms import *
 from .utils import *
@@ -476,13 +474,29 @@ class MisconductDetailView(LoginRequiredMixin, PermissionRequiredMixin,
     queryset = Misconduct.objects.select_related('intruder', 'moderator', 'regulations_article')
 
 
+class MonthlyAnalyticalReport(LoginRequiredMixin, TitleMixin, ListView):
+    model = WorkingShift
+    title = 'Аналитический отчёт'
+    template_name = 'salary/monthly_analytical_report.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['avg'] = WorkingShift.objects.aggregate(Avg('bar_revenue'), Avg('game_zone_revenue'))
+        context['sum_rev'] = sum([workshift.summary_revenue for workshift in WorkingShift.objects.all()]) 
+        # Сумма за год, сумма за месяц, средняя за месяц, средняя за смену, через словарь значений.
+        return context
+
+
 class SalaryGraphView(LoginRequiredMixin, TitleMixin, ListView):
     model = WorkingShift
     title = 'График'
     template_name = 'salary/graph.html'
 
     def get_queryset(self) -> QuerySet:
-        workshifts = WorkingShift.objects.filter(shift_date__month=3)
+        workshifts = WorkingShift.objects.filter(
+            shift_date__month=2
+        ).order_by('shift_date')
+
         return workshifts
 
     def get_context_data(self, **kwargs):
@@ -491,7 +505,7 @@ class SalaryGraphView(LoginRequiredMixin, TitleMixin, ListView):
         import io
         import urllib, base64
 
-        revenues = [workshift.get_summary_revenue() for workshift in self.object_list]
+        revenues = [workshift.summary_revenue for workshift in self.object_list]
         days = [workshift.shift_date.day for workshift in self.object_list]
         color = 'red'
 
@@ -503,11 +517,11 @@ class SalaryGraphView(LoginRequiredMixin, TitleMixin, ListView):
         # ax.bar_label(hbars, fmt='%.2f', fontsize=8)
 
         ax.plot(days, revenues, color=color)
-        for coords in zip(days, revenues):
-            ax.annotate(coords[1], xy=coords, textcoords='data')
+        # for coords in zip(days, revenues):
+        #     ax.annotate(coords[0], xy=coords)
 
         plt.ylabel('Выручка')
-        plt.title(f'Динамика выручки на {self.object_list.first().shift_date}')
+        plt.title(f'Динамика выручки')
 
         buf = io.BytesIO()
 
