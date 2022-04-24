@@ -7,7 +7,7 @@ from django.contrib.auth import logout
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.contrib.auth.models import Group
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
-from django.db.models import Q, QuerySet, Sum, Avg, Min, Max
+from django.db.models import Q, QuerySet, Sum, Avg, Min, Max, StdDev
 
 from .forms import *
 from .utils import *
@@ -484,45 +484,18 @@ class MonthlyAnalyticalReport(LoginRequiredMixin, TitleMixin, ListView):
             shift_date__year=self.kwargs.get('year'))
         return queryset
 
-    def summary_revenue_analyze(self, object_list: QuerySet) -> dict:
+    def data_analyzing(self, object_list: QuerySet) -> None:
         current_month_objects = object_list.filter(
                 shift_date__month=self.kwargs.get('month'))
         previous_month_objects = object_list.filter(
             shift_date__month=(datetime.date(
                 self.kwargs.get('year'), self.kwargs.get('month'), 1
                 ) - relativedelta(months=1)).month)
-
-        year_revenue_analyze = get_workshift_revenue_analyze(object_list)
-        current_month_analyze = get_workshift_revenue_analyze(
-            current_month_objects)
-        if previous_month_objects:
-            previous_month_analyze = get_workshift_revenue_analyze(
-                previous_month_objects)
-
-        current_month_revenue_status = round((
-            current_month_analyze[0] - previous_month_analyze[0]
-        ) * 100 / current_month_analyze[0], 2)
-
-        month_dates = object_list.dates('shift_date', 'month')
-        month_sums_revenue = 0
-        for month_date in month_dates:
-            month_sums_revenue += get_workshift_revenue_analyze(
-                object_list.filter(shift_date__month=month_date.month))[0]
-
-        
-        revenue_dict = {
-            'current_month_revenue_sum': current_month_analyze[0],
-            'current_revenue_status': current_month_revenue_status,
-            'current_average_day_revenue': current_month_analyze[1],
-            'average_day_revenue': year_revenue_analyze[1],
-            'average_month_revenue': month_sums_revenue / len(month_dates),
-            'min_revenue_workshift': object_list.get(
-                summary_revenue=current_month_analyze[2]),
-            'max_revenue_workshift': object_list.get(
-                summary_revenue=current_month_analyze[3]),
-        }
-
-        return revenue_dict
+        aggregate_data = current_month_objects.aggregate(
+            Sum('summary_revenue'),
+            Avg('summary_revenue'),
+        )
+        return aggregate_data
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -536,9 +509,15 @@ class MonthlyAnalyticalReport(LoginRequiredMixin, TitleMixin, ListView):
             shift_date__month=self.kwargs.get('month')).select_related(
                 'cash_admin__profile__position',
                 'hall_admin__profile__position')
-
-        context['avg'] = WorkingShift.objects.aggregate(Avg('bar_revenue'), Avg('game_zone_revenue'))
-        context['revenues'] = self.summary_revenue_analyze(self.object_list)
+        current_month_data = current_month_workshifts.aggregate(
+            Sum('summary_revenue'),
+            Avg('summary_revenue'),
+            StdDev('summary_revenue'),
+            Min('summary_revenue'),
+            Max('summary_revenue'),
+        )
+        context['current_month_stat'] = current_month_data
+        context['revenues'] = self.data_analyzing(self.object_list)
         # Сумма за год, сумма за месяц, средняя за месяц, средняя за смену, через словарь значений.
         return context
 

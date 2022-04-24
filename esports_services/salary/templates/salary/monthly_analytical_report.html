@@ -15,7 +15,7 @@
       </div>
     </div>
     <div class="row mb-2 row-cols-md-2 row-cols-sm-1 m-1 justify-content-center">
-      <div class="col-md-6 col-sm-auto m-2 table-responsive rounded border border-light">
+      <div class="col-md-7 col-sm-auto m-2 table-responsive rounded border border-light">
         <p class="text-orange text-center fw-bold">Аналитика по выручке</p>
         <table class="table table-dark">
           <thead class="text-warning text-center verysmall">
@@ -24,37 +24,42 @@
               <th>Значение</th>
               <th>Сравнение (месяц)</th>
               <th>Сравнение (год)</th>
+              <th>Ст. отклонение</th>
             </tr>
           </thead>
           <tbody class="verysmall text-center">
             <tr>
               <td>Общая выручка</td>
-              <td>%Цифра%</td>
+              <td>{{ current_month_stat.summary_revenue__sum }}</td>
               <td><i class="fa-solid fa-arrow-trend-up"></i> рост на 3%</td>
+              <td></td>
               <td></td>
             </tr>
             <tr>
               <td>Средняя выручка</td>
-              <td>%Цифра%</td>
+              <td>{{ current_month_stat.summary_revenue__avg | floatformat:"2g"}}</td>
               <td><i class="fa-solid fa-arrow-trend-down"></i> %в сравнении с годовой</td>
               <td></td>
+              <td>{{ current_month_stat.summary_revenue__stddev | floatformat:"2g" }}</td>
             </tr>
             <tr>
               <td>Максимальная выручка <span class="badge bg-secondary"><i class="fa-solid fa-person-circle-question"></i></span></td>
-              <td>%Цифра%</td>
+              <td>{{ current_month_stat.summary_revenue__max }}</td>
               <td>%дата%</td>
-              <td></td>
+              <td>Число год</td>
+              <td>-</td>
             </tr>
             <tr>
               <td>Минимальная выручка  <span class="badge bg-secondary"><i class="fa-solid fa-person-circle-question"></i></span></td>
-              <td>%Цифра%</td>
+              <td>{{ current_month_stat.summary_revenue__min }}</td>
               <td>%дата%</td>
-              <td></td>
+              <td>Число год</td>
+              <td>-</td>
             </tr>
           </tbody>
         </table>
       </div>
-      <div class="col-md-5 col-sm-auto m-2 table-responsive rounded border border-light">
+      <div class="col-md-4 col-sm-auto m-2 table-responsive rounded border border-light">
         <table class="table table-dark">
           <thead class="text-warning text-center verysmall">
             <tr><th>Динамика выручки</th></tr>
@@ -79,18 +84,18 @@
               <th>Максимальное значение</th>
               <th>Сравнение (месяц)</th>
               <th>Сравнение (год)</th>
+              <th>Ст. отклонение</th>
             </tr>
           </thead>
           <tbody class="text-center verysmall">
-            <tr><td class="text-warning">Бар</td><td>%цифра%</td><td></td><td></td><td></td><td></td></tr>
-            <tr><td class="text-warning">Game Zone (КНА)</td><td>%цифра%</td><td></td><td></td><td></td><td></td></tr>
-            <tr><td class="text-warning">Ошибки</td><td>%цифра%</td><td></td><td></td><td></td><td></td></tr>
-            <tr><td class="text-warning">Доп. услуги</td><td>%цифра%</td><td></td><td></td><td></td><td></td></tr>
-            <tr><td class="text-warning">Кальян</td><td>%цифра%</td><td></td><td></td><td></td><td></td></tr>
-            <tr><td class="text-warning">Общая выручка</td><td>%цифра%</td><td></td><td></td><td></td><td></td></tr>
+            <tr><td class="text-warning">Бар</td><td>%цифра%</td><td></td><td></td><td></td><td></td><td></td></tr>
+            <tr><td class="text-warning">Game Zone (КНА)</td><td>%цифра%</td><td></td><td></td><td></td><td></td><td></td></tr>
+            <tr><td class="text-warning">Ошибки</td><td>%цифра%</td><td></td><td></td><td></td><td></td><td></td></tr>
+            <tr><td class="text-warning">Доп. услуги</td><td>%цифра%</td><td></td><td></td><td></td><td></td><td></td></tr>
+            <tr><td class="text-warning">Кальян</td><td>%цифра%</td><td></td><td></td><td></td><td></td><td></td></tr>
           </tbody>
           <tfoot class="text-center verysmall">
-            <tr><td class="text-danger">Недостачи</td><td>%цифра%</td><td></td><td></td><td></td><td></td></tr>
+            <tr><td class="text-danger">Недостачи</td><td>%цифра%</td><td></td><td></td><td></td><td></td><td>-</td></tr>
           </tfoot>
         </table>
       </div>
