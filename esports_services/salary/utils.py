@@ -2,11 +2,12 @@ from django.contrib.auth.mixins import PermissionRequiredMixin, UserPassesTestMi
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.utils.text import slugify
+from django.db.models import QuerySet
 
 from unidecode import unidecode
 from typing import *
 
-from salary.models import Misconduct
+from salary.models import Misconduct, WorkingShift
 
 
 class EmployeePermissionsMixin(PermissionRequiredMixin):
@@ -78,3 +79,21 @@ def return_misconduct_slug(last_name, date):
         return slug_name
     else:
         return f'{slug_name}-{count}'
+
+
+def get_workshift_revenue_analyze(workshifts: QuerySet) -> tuple:
+    """Return sum of 'summary_revenue' properties
+
+    Args:
+        workshifts (QuerySet): WorkingShift.objects queryset
+
+    Returns:
+        tuple: (summary_revenue, average_revenue, min_revenue, max_revenue)
+    """
+    revenues_list = [workshift.summary_revenue for workshift in workshifts]
+    summary_revenue = sum(revenues_list)
+    average_revenue = round(summary_revenue / len(revenues_list), 2)
+    min_revenue = min(revenues_list)
+    max_revenue = max(revenues_list)
+
+    return (summary_revenue, average_revenue, min_revenue, max_revenue)
