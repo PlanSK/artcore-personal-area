@@ -166,6 +166,7 @@ class WorkingShift(models.Model):
     hall_cleaning = models.BooleanField(default=True, verbose_name='Наведение порядка')
     shortage = models.FloatField(default=0, verbose_name='Недостача')
     shortage_paid = models.BooleanField(default=False, verbose_name="Отметка о погашении недостачи")
+    summary_revenue = models.FloatField(default=0, verbose_name='Суммарная выручка')
     slug = models.SlugField(max_length=60, unique=True, verbose_name='URL', null=True, blank=True)
     is_verified = models.BooleanField(default=False, verbose_name='Проверено', db_index=True)
     comment_for_cash_admin = models.TextField(verbose_name='Примечание для кассира', blank=True)
@@ -189,18 +190,7 @@ class WorkingShift(models.Model):
     def __str__(self) -> str:
         return self.shift_date.strftime('%d-%m-%Y')
 
-    @property
-    def summary_revenue(self) -> float:
-        total_revenue = sum((
-            self.bar_revenue,
-            self.game_zone_revenue,
-            self.vr_revenue,
-            self.hookah_revenue,
-            -self.game_zone_error,
-        ))
-        return round(total_revenue, 2) if total_revenue > 0.0 else 0.0
-
-    # Earnings block
+     # Earnings block
 
     def get_experience_bonus(self, employee) -> float:
         current_experience = (self.shift_date - employee.profile.employment_date).days
@@ -316,6 +306,16 @@ class WorkingShift(models.Model):
         return reverse_lazy('detail_workshift', kwargs={'slug': self.slug})
 
     def save(self, *args, **kwargs):
+        total_revenue = sum((
+            self.bar_revenue,
+            self.game_zone_revenue,
+            self.vr_revenue,
+            self.hookah_revenue,
+            -self.game_zone_error,
+        ))
+        self.summary_revenue=round(
+            total_revenue, 2) if total_revenue > 0.0 else 0.0
+
         misconduct_queryset = Misconduct.objects.filter(
             workshift_date=self.shift_date,
             status=Misconduct.MisconductStatus.CLOSED,
