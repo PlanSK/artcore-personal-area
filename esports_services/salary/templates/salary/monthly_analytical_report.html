@@ -1,5 +1,6 @@
 {% extends 'salary/logined_page.html' %}
 {% load humanize %}
+{% load salary_tags %}
 
 {% block content %}
 <main>
@@ -31,14 +32,26 @@
             <tr>
               <td>Общая выручка</td>
               <td>{{ current_month_stat.summary_revenue__sum }}</td>
-              <td><i class="fa-solid fa-arrow-trend-up"></i> рост на 3%</td>
+              <td>
+                {% if total_sum_revenue_difference > 0 %}
+                <span class="text-acid"><i class="fa-solid fa-arrow-trend-up"></i> рост на {{ total_sum_revenue_difference }}%</span>
+                {% else %}
+                <span class="text-danger"><i class="fa-solid fa-arrow-trend-down"></i> снижение на {% absolute_value total_sum_revenue_difference %}%</span>
+                {% endif %}
+              </td>
               <td></td>
               <td></td>
             </tr>
             <tr>
               <td>Средняя выручка</td>
               <td>{{ current_month_stat.summary_revenue__avg | floatformat:"2g"}}</td>
-              <td><i class="fa-solid fa-arrow-trend-down"></i> %в сравнении с годовой</td>
+              <td>
+                {% if avg_revenue_difference > 0 %}
+                <span class="text-acid"><i class="fa-solid fa-arrow-trend-up"></i> рост на {{ avg_revenue_difference }}%</span>
+                {% else %}
+                <span class="text-danger"><i class="fa-solid fa-arrow-trend-down"></i> снижение на {% absolute_value avg_revenue_difference %}%</span>
+                {% endif %}
+              </td>
               <td></td>
               <td>{{ current_month_stat.summary_revenue__stddev | floatformat:"2g" }}</td>
             </tr>

@@ -484,19 +484,6 @@ class MonthlyAnalyticalReport(LoginRequiredMixin, TitleMixin, ListView):
             shift_date__year=self.kwargs.get('year'))
         return queryset
 
-    def data_analyzing(self, object_list: QuerySet) -> None:
-        current_month_objects = object_list.filter(
-                shift_date__month=self.kwargs.get('month'))
-        previous_month_objects = object_list.filter(
-            shift_date__month=(datetime.date(
-                self.kwargs.get('year'), self.kwargs.get('month'), 1
-                ) - relativedelta(months=1)).month)
-        aggregate_data = current_month_objects.aggregate(
-            Sum('summary_revenue'),
-            Avg('summary_revenue'),
-        )
-        return aggregate_data
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         previous_month = (datetime.date(
@@ -516,8 +503,26 @@ class MonthlyAnalyticalReport(LoginRequiredMixin, TitleMixin, ListView):
             Min('summary_revenue'),
             Max('summary_revenue'),
         )
+        previous_month_data = previous_month_workshifts.aggregate(
+            Sum('summary_revenue'),
+            Avg('summary_revenue'),
+        )
+        total_sum_revenue_difference = round(
+            (current_month_data.get(
+                'summary_revenue__sum'
+            ) - previous_month_data.get(
+                'summary_revenue__sum', 0
+            )) * 100 / current_month_data.get('summary_revenue__sum'), 2)
+        avg_revenue_difference = round(
+            (current_month_data.get(
+                'summary_revenue__avg'
+            ) - previous_month_data.get(
+                'summary_revenue__avg', 0
+            )) * 100 / current_month_data.get('summary_revenue__avg'), 2)
         context['current_month_stat'] = current_month_data
-        context['revenues'] = self.data_analyzing(self.object_list)
+        context['total_sum_revenue_difference'] = total_sum_revenue_difference
+        context['avg_revenue_difference'] = -avg_revenue_difference
+
         # Сумма за год, сумма за месяц, средняя за месяц, средняя за смену, через словарь значений.
         return context
 
