@@ -479,51 +479,63 @@ class MonthlyAnalyticalReport(LoginRequiredMixin, TitleMixin, ListView):
     title = 'Аналитический отчёт'
     template_name = 'salary/monthly_analytical_report.html'
 
-    def get_queryset(self) -> QuerySet:
-        queryset = WorkingShift.objects.filter(
-            shift_date__year=self.kwargs.get('year'))
-        return queryset
+    def calc_field_values(self):
+        fields = (
+            'summary_revenue', 'bar_revenue', 'game_zone_revenue',
+            'game_zone_error', 'vr_revenue', 'hookah_revenue', 'shortage',
+            'summary_revenue__avg',
+        )
+        current_month_queryset = self.object_list.filter(
+            shift_date__month=self.kwargs.get('month'),
+            shift_date__year=self.kwargs.get('year'),
+        )
+        self.current_date = datetime.date(
+            self.kwargs.get('year'),
+            self.kwargs.get('month'), 1)
+
+        self.previous_month_date = self.current_date - relativedelta(months=1)
+        previous_month_queryset = self.object_list.filter(
+            shift_date__month=self.previous_month_date.month,
+            shift_date__year=self.previous_month_date.year,
+        )
+        values_dict = dict()
+
+        for field in fields:
+            # много запросов есть смысл перебирать workshifts values или values_list
+            if '__avg' in field:
+                current_month_value = round(current_month_queryset.aggregate(
+                    avg=Avg('summary_revenue')).get('avg', 0), 2)
+                previous_month_value = round(previous_month_queryset.aggregate(
+                    avg=Avg('summary_revenue')).get('avg', 0), 2)
+            else:
+                current_month_value = current_month_queryset.aggregate(
+                    sum=Sum(field)).get('sum', 0)
+                previous_month_value = previous_month_queryset.aggregate(
+                    sum=Sum(field)).get('sum', 0)
+
+            if current_month_value == 0.0:
+                ratio = 100.0
+            elif current_month_value > previous_month_value:
+                ratio = round((current_month_value - previous_month_value) /
+                            current_month_value * 100, 2)
+            elif current_month_value < previous_month_value:
+                ratio = round((previous_month_value - current_month_value) /
+                            previous_month_value * 100, 2)
+            
+            values_dict[field] = (
+                        current_month_value,
+                        previous_month_value,
+                        ratio,
+                    )
+
+        return values_dict
+
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        previous_month = (datetime.date(
-            self.kwargs.get('year'),
-            self.kwargs.get('month'), 1) - relativedelta(months=1)).month
-
-        previous_month_workshifts=self.object_list.filter(
-            shift_date__month=previous_month)
-        current_month_workshifts=self.object_list.filter(
-            shift_date__month=self.kwargs.get('month')).select_related(
-                'cash_admin__profile__position',
-                'hall_admin__profile__position')
-        current_month_data = current_month_workshifts.aggregate(
-            Sum('summary_revenue'),
-            Avg('summary_revenue'),
-            StdDev('summary_revenue'),
-            Min('summary_revenue'),
-            Max('summary_revenue'),
-        )
-        previous_month_data = previous_month_workshifts.aggregate(
-            Sum('summary_revenue'),
-            Avg('summary_revenue'),
-        )
-        total_sum_revenue_difference = round(
-            (current_month_data.get(
-                'summary_revenue__sum'
-            ) - previous_month_data.get(
-                'summary_revenue__sum', 0
-            )) * 100 / current_month_data.get('summary_revenue__sum'), 2)
-        avg_revenue_difference = round(
-            (current_month_data.get(
-                'summary_revenue__avg'
-            ) - previous_month_data.get(
-                'summary_revenue__avg', 0
-            )) * 100 / current_month_data.get('summary_revenue__avg'), 2)
-        context['current_month_stat'] = current_month_data
-        context['total_sum_revenue_difference'] = total_sum_revenue_difference
-        context['avg_revenue_difference'] = -avg_revenue_difference
-
-        # Сумма за год, сумма за месяц, средняя за месяц, средняя за смену, через словарь значений.
+        context['analytic'] = self.calc_field_values()
+        context['current_month_date'] = self.current_date
+        context['previous_month_date'] = self.previous_month_date
         return context
 
 
