@@ -479,13 +479,20 @@ class MonthlyAnalyticalReport(LoginRequiredMixin, TitleMixin, ListView):
     title = 'Аналитический отчёт'
     template_name = 'salary/monthly_analytical_report.html'
 
-    def calc_field_values(self):
+    def get_queryset(self) -> QuerySet:
+        queryset = WorkingShift.objects.all().select_related(
+            'hall_admin',
+            'cash_admin',
+        )
+        return queryset
+
+    def get_fields_dict(self) -> dict:
         fields = (
             'summary_revenue', 'bar_revenue', 'game_zone_revenue',
             'game_zone_error', 'vr_revenue', 'hookah_revenue', 'shortage',
             'summary_revenue__avg',
         )
-        current_month_queryset = self.object_list.filter(
+        self.current_month_queryset = self.object_list.filter(
             shift_date__month=self.kwargs.get('month'),
             shift_date__year=self.kwargs.get('year'),
         )
@@ -498,20 +505,20 @@ class MonthlyAnalyticalReport(LoginRequiredMixin, TitleMixin, ListView):
             shift_date__month=self.previous_month_date.month,
             shift_date__year=self.previous_month_date.year,
         )
-        values_dict = dict()
 
-        for field in fields:
-            # много запросов есть смысл перебирать workshifts values или values_list
-            if '__avg' in field:
-                current_month_value = round(current_month_queryset.aggregate(
-                    avg=Avg('summary_revenue')).get('avg', 0), 2)
-                previous_month_value = round(previous_month_queryset.aggregate(
-                    avg=Avg('summary_revenue')).get('avg', 0), 2)
-            else:
-                current_month_value = current_month_queryset.aggregate(
-                    sum=Sum(field)).get('sum', 0)
-                previous_month_value = previous_month_queryset.aggregate(
-                    sum=Sum(field)).get('sum', 0)
+        values_dict = dict()
+        operations_list = [
+            Sum(field) if '__avg' not in field
+            else Avg(field.split('__')[0])
+            for field in fields
+        ]
+
+        current_month_values = self.current_month_queryset.aggregate(*operations_list)
+        previous_month_values = previous_month_queryset.aggregate(*operations_list)
+
+        for field in current_month_values.keys():
+            current_month_value = round(current_month_values.get(field, 0), 2)
+            previous_month_value = round(previous_month_values.get(field, 0), 2)
 
             if current_month_value == 0.0:
                 ratio = 100.0
@@ -521,21 +528,32 @@ class MonthlyAnalyticalReport(LoginRequiredMixin, TitleMixin, ListView):
             elif current_month_value < previous_month_value:
                 ratio = round((previous_month_value - current_month_value) /
                             previous_month_value * 100, 2)
-            
+
             values_dict[field] = (
-                        current_month_value,
                         previous_month_value,
+                        current_month_value,
                         ratio,
                     )
 
         return values_dict
 
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['analytic'] = self.calc_field_values()
-        context['current_month_date'] = self.current_date
-        context['previous_month_date'] = self.previous_month_date
+        context.update({
+            'analytic': self.get_fields_dict(),
+            'min_revenue_workshift': self.current_month_queryset.order_by(
+                'summary_revenue').first(),
+            'max_revenue_workshift': self.current_month_queryset.order_by(
+                'summary_revenue').last(),
+            'current_month_date': self.current_date,
+            'previous_month_date': self.previous_month_date,
+            'linechart_data': list(
+                map(list,
+                    self.current_month_queryset.values_list('shift_date__day',
+                                                            'summary_revenue'))
+            ),
+        })
+
         return context
 
 
