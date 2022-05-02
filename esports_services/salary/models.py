@@ -161,18 +161,19 @@ class WorkingShift(models.Model):
     bar_revenue = models.FloatField(verbose_name='Выручка по бару', default=0.0)
     game_zone_revenue = models.FloatField(verbose_name='Выручка игровой зоны (без доп. услуг)', default=0.0)
     game_zone_error = models.FloatField(verbose_name='Сумма ошибок', default=0.0)
+    game_zone_subtotal = models.FloatField(verbose_name='Подытог по игоровой зоне', default=0.0)
     vr_revenue = models.FloatField(verbose_name='Выручка доп. услуги и VR', default=0.0)
     hookah_revenue = models.FloatField(verbose_name='Выручка по кальянам', default=0.0)
-    hall_cleaning = models.BooleanField(default=True, verbose_name='Наведение порядка')
-    shortage = models.FloatField(default=0, verbose_name='Недостача')
-    shortage_paid = models.BooleanField(default=False, verbose_name="Отметка о погашении недостачи")
-    summary_revenue = models.FloatField(default=0, verbose_name='Суммарная выручка')
+    hall_cleaning = models.BooleanField(verbose_name='Наведение порядка', default=True)
+    shortage = models.FloatField(verbose_name='Недостача', default=0.0)
+    shortage_paid = models.BooleanField(verbose_name='Отметка о погашении недостачи', default=False)
+    summary_revenue = models.FloatField(verbose_name='Суммарная выручка', default=0.0)
     slug = models.SlugField(max_length=60, unique=True, verbose_name='URL', null=True, blank=True)
-    is_verified = models.BooleanField(default=False, verbose_name='Проверено', db_index=True)
+    is_verified = models.BooleanField(verbose_name='Проверено', default=False, db_index=True)
     comment_for_cash_admin = models.TextField(verbose_name='Примечание для кассира', blank=True)
     comment_for_hall_admin = models.TextField(verbose_name='Примечание для админа', blank=True)
     publication_link = models.TextField(verbose_name='СММ-публикация (ссылка)', blank=True)
-    publication_is_verified = models.BooleanField(default=False, verbose_name='СММ-публикация проверена')
+    publication_is_verified = models.BooleanField(verbose_name='СММ-публикация проверена', default=False)
     change_date = models.DateTimeField(verbose_name='Дата изменения', blank=True, null=True)
     editor = models.TextField(verbose_name='Редактор', blank=True, editable=False)
     hall_admin_penalty = models.FloatField(verbose_name='Штраф администратора зала', default=0.0)
@@ -213,14 +214,9 @@ class WorkingShift(models.Model):
         return 0.0
 
     def get_revenue_bonuses(self, criteria: dict) -> dict:
-        if self.game_zone_revenue >= self.game_zone_error:
-            game_zone_subtotal = self.game_zone_revenue - self.game_zone_error 
-        else:
-            game_zone_subtotal = 0.0
-
         revenue_tuple = (
             self.bar_revenue,
-            game_zone_subtotal,
+            self.game_zone_subtotal,
             self.vr_revenue
         )
 
@@ -306,14 +302,17 @@ class WorkingShift(models.Model):
         return reverse_lazy('detail_workshift', kwargs={'slug': self.slug})
 
     def save(self, *args, **kwargs):
+        self.game_zone_subtotal = round(
+            self.game_zone_revenue - self.game_zone_error, 2
+        ) if self.game_zone_revenue >= self.game_zone_error  else 0.0
+
         total_revenue = sum((
             self.bar_revenue,
-            self.game_zone_revenue,
+            self.game_zone_subtotal,
             self.vr_revenue,
             self.hookah_revenue,
-            -self.game_zone_error,
         ))
-        self.summary_revenue=round(
+        self.summary_revenue = round(
             total_revenue, 2) if total_revenue > 0.0 else 0.0
 
         misconduct_queryset = Misconduct.objects.filter(
