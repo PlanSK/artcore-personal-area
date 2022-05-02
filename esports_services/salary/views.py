@@ -575,52 +575,6 @@ class MonthlyAnalyticalReport(LoginRequiredMixin, TitleMixin, ListView):
         return context
 
 
-class SalaryGraphView(LoginRequiredMixin, TitleMixin, ListView):
-    model = WorkingShift
-    title = 'График'
-    template_name = 'salary/graph.html'
-
-    def get_queryset(self) -> QuerySet:
-        workshifts = WorkingShift.objects.filter(
-            shift_date__month=2
-        ).order_by('shift_date')
-
-        return workshifts
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        import matplotlib.pyplot as plt
-        import io
-        import urllib, base64
-
-        revenues = [workshift.summary_revenue for workshift in self.object_list]
-        days = [workshift.shift_date.day for workshift in self.object_list]
-        color = 'red'
-
-        plt.style.use('dark_background')
-
-        fig, ax = plt.subplots()
-
-        # hbars = ax.barh(days, revenues, color=color, height=0.5, align='center')
-        # ax.bar_label(hbars, fmt='%.2f', fontsize=8)
-
-        ax.plot(days, revenues, color=color)
-        # for coords in zip(days, revenues):
-        #     ax.annotate(coords[0], xy=coords)
-
-        plt.ylabel('Выручка')
-        plt.title(f'Динамика выручки')
-
-        buf = io.BytesIO()
-
-        fig.savefig(buf, format='png', transparent=True)
-        buf.seek(0)
-        string = base64.b64encode(buf.read())
-
-        context['image'] = 'data:image/png;base64,' + urllib.parse.quote(string)
-        return context
-
-
 class IndexEmployeeView(LoginRequiredMixin, TitleMixin, ListView):
     model = WorkingShift
     template_name = 'salary/employee_board.html'
