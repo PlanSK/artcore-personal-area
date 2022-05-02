@@ -483,7 +483,7 @@ class MonthlyAnalyticalReport(LoginRequiredMixin, TitleMixin, ListView):
         queryset = WorkingShift.objects.all().select_related(
             'hall_admin',
             'cash_admin',
-        )
+        ).order_by('shift_date')
         return queryset
 
     def get_fields_dict(self) -> dict:
@@ -501,7 +501,7 @@ class MonthlyAnalyticalReport(LoginRequiredMixin, TitleMixin, ListView):
             self.kwargs.get('month'), 1)
 
         self.previous_month_date = self.current_date - relativedelta(months=1)
-        previous_month_queryset = self.object_list.filter(
+        self.previous_month_queryset = self.object_list.filter(
             shift_date__month=self.previous_month_date.month,
             shift_date__year=self.previous_month_date.year,
         )
@@ -514,7 +514,7 @@ class MonthlyAnalyticalReport(LoginRequiredMixin, TitleMixin, ListView):
         ]
 
         current_month_values = self.current_month_queryset.aggregate(*operations_list)
-        previous_month_values = previous_month_queryset.aggregate(*operations_list)
+        previous_month_values = self.previous_month_queryset.aggregate(*operations_list)
 
         for field in current_month_values.keys():
             current_month_value = round(current_month_values.get(field, 0), 2)
@@ -537,6 +537,28 @@ class MonthlyAnalyticalReport(LoginRequiredMixin, TitleMixin, ListView):
 
         return values_dict
 
+    def get_linechart_data(self) -> list:
+        """Return list of lists with revenue data for Google LineChart
+
+        Returns:
+            list: list of lists [day_of_month, previous_month_revenue, current_month_revenue]
+        """
+        current_month_list =  self.current_month_queryset.values_list(
+            'shift_date__day',
+            'summary_revenue')
+        previous_month_list = self.previous_month_queryset.values_list(
+            'shift_date__day',
+            'summary_revenue')
+        linechart_data_list = list()
+        for first_element in previous_month_list:
+            for second_element in current_month_list:
+                if first_element[0] == second_element[0]:
+                    data_row = list(first_element)
+                    data_row.append(second_element[1])
+                    linechart_data_list.append(data_row)
+
+        return linechart_data_list
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context.update({
@@ -547,11 +569,7 @@ class MonthlyAnalyticalReport(LoginRequiredMixin, TitleMixin, ListView):
                 'summary_revenue').last(),
             'current_month_date': self.current_date,
             'previous_month_date': self.previous_month_date,
-            'linechart_data': list(
-                map(list,
-                    self.current_month_queryset.values_list('shift_date__day',
-                                                            'summary_revenue'))
-            ),
+            'linechart_data': self.get_linechart_data(),
         })
 
         return context
