@@ -167,13 +167,13 @@
             </tr>
             <tr>
               <td class="text-warning">Game Zone (КНА)</td>
-              <td>{{ analytic.game_zone_revenue__sum.0 | intcomma }}</td>
-              <td>{{ analytic.game_zone_revenue__sum.1 | intcomma }}</td>
+              <td>{{ analytic.game_zone_subtotal__sum.0 | intcomma }}</td>
+              <td>{{ analytic.game_zone_subtotal__sum.1 | intcomma }}</td>
               <td>
-                {% if analytic.game_zone_revenue__sum.0 < analytic.game_zone_revenue__sum.1 %}
-                <span class="text-acid"><i class="fa-solid fa-arrow-trend-up"></i> рост на {{ analytic.game_zone_revenue__sum.2 }}%</span>
-                {% elif analytic.game_zone_revenue__sum.0 > analytic.game_zone_revenue__sum.1 %}
-                <span class="text-danger"><i class="fa-solid fa-arrow-trend-down"></i> снижение на {{ analytic.game_zone_revenue__sum.2 }}%</span>
+                {% if analytic.game_zone_subtotal__sum.0 < analytic.game_zone_subtotal__sum.1 %}
+                <span class="text-acid"><i class="fa-solid fa-arrow-trend-up"></i> рост на {{ analytic.game_zone_subtotal__sum.2 }}%</span>
+                {% elif analytic.game_zone_subtotal__sum.0 > analytic.game_zone_subtotal__sum.1 %}
+                <span class="text-danger"><i class="fa-solid fa-arrow-trend-down"></i> снижение на {{ analytic.game_zone_subtotal__sum.2 }}%</span>
                 {% else %}
                 -
                 {% endif %}

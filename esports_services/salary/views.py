@@ -1,5 +1,5 @@
 from django.contrib.auth.forms import AuthenticationForm, AdminPasswordChangeForm
-from django.http import JsonResponse, HttpResponseNotFound
+from django.http import Http404, JsonResponse, HttpResponseNotFound
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import TemplateView, ListView, DetailView
 from django.contrib.auth.views import LoginView, PasswordChangeView, PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView
@@ -488,7 +488,7 @@ class MonthlyAnalyticalReport(LoginRequiredMixin, TitleMixin, ListView):
 
     def get_fields_dict(self) -> dict:
         fields = (
-            'summary_revenue', 'bar_revenue', 'game_zone_revenue',
+            'summary_revenue', 'bar_revenue', 'game_zone_subtotal',
             'game_zone_error', 'vr_revenue', 'hookah_revenue', 'shortage',
             'summary_revenue__avg',
         )
@@ -512,6 +512,9 @@ class MonthlyAnalyticalReport(LoginRequiredMixin, TitleMixin, ListView):
             else Avg(field.split('__')[0])
             for field in fields
         ]
+
+        if not self.current_month_queryset or not self.previous_month_queryset:
+            raise Http404
 
         current_month_values = self.current_month_queryset.aggregate(*operations_list)
         previous_month_values = self.previous_month_queryset.aggregate(*operations_list)
@@ -559,10 +562,29 @@ class MonthlyAnalyticalReport(LoginRequiredMixin, TitleMixin, ListView):
 
         return linechart_data_list
 
+    def get_piechart_data(self, analytic_data: dict) -> list:
+        categories = {
+            'bar_revenue': 'Бар',
+            'game_zone_subtotal': 'Game zone',
+            'vr_revenue': 'Доп. услуги и VR',
+            'hookah_revenue': 'Кальян',
+        }
+
+        piechart_data = list()
+
+        for category in categories.keys():
+            piechart_data.append(
+                [categories.get(category), analytic_data.get(f'{category}__sum')[1]]
+            )
+
+        return piechart_data
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        analytic_data = self.get_fields_dict()
         context.update({
-            'analytic': self.get_fields_dict(),
+            'analytic': analytic_data,
+            'piechart_data': self.get_piechart_data(analytic_data),
             'min_revenue_workshift': self.current_month_queryset.order_by(
                 'summary_revenue').first(),
             'max_revenue_workshift': self.current_month_queryset.order_by(
