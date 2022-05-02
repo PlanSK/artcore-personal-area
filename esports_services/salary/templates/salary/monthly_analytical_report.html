@@ -8,12 +8,14 @@
   <script type="text/javascript">
     // Loading variables from django
     var linechart_data = JSON.parse("{{ linechart_data }}");
+    var piechart_data = {{ piechart_data|safe }};
     var current_month_title = '{{ current_month_date|date:"F Y г." }}'
     var previous_month_title = '{{ previous_month_date|date:"F Y г." }}'
 
     google.charts.load('current', {'packages':['corechart']});
     // Init Callback's
     google.charts.setOnLoadCallback(revenuesLineChart);
+    google.charts.setOnLoadCallback(currentMonthPieChart);
     // Draw functions
     function revenuesLineChart() {
       var data = new google.visualization.DataTable();
@@ -58,6 +60,42 @@
       var chart = new google.visualization.LineChart(document.getElementById('revenues_linechart_div'));
       chart.draw(data, options);
     }
+
+    var width = window.innerWidth;
+    var chart_width
+    if(width > 1280) {
+      chart_width = 720
+    }
+    else if(width < 720) {
+      chart_width = width
+    }
+
+    function currentMonthPieChart() {
+      var data = new google.visualization.DataTable();
+      data.addColumn('string', 'Category');
+      data.addColumn('number', 'Values');
+      data.addRows(piechart_data);
+
+      var options = {
+        title:'Распределение выручки по категориям',
+        width: chart_width,
+        height:300,
+        titleTextStyle: {
+          color: '#fff'
+        },
+        backgroundColor: '#3e4444',
+        is3D: 'true',
+        legend: { 
+          textStyle: {
+            position: 'bottom',
+            color: '#fff'
+          }
+        },
+      };
+
+      var chart = new google.visualization.PieChart(document.getElementById('currentmonth_piechart_div'));
+      chart.draw(data, options);
+    }
   </script>
   <div class="container">
     <div class="row mt-1">
@@ -71,7 +109,7 @@
       </div>
     </div>
     <div class="row mb-2 row-cols-md-2 row-cols-sm-1 m-1 justify-content-center">
-      <div class="col-md-5 col-sm-auto m-2 table-responsive rounded border border-light">
+      <div class="col-md-5 col-sm-12 m-2 table-responsive rounded border border-light">
         <p class="text-orange text-center fw-bold">Аналитика по выручке</p>
         <table class="table table-dark">
           <thead class="text-warning text-center verysmall">
@@ -139,7 +177,7 @@
           </tbody>
         </table>
       </div>
-      <div class="col-md-5 col-sm-12 m-2 table-responsive rounded border border-light">
+      <div class="col-md col-sm-12 m-2 table-responsive rounded border border-light">
         <p class="text-orange text-center fw-bold">Основные показатели выручки</p>
         <table class="table table-dark">
           <thead class="text-warning text-center verysmall">
@@ -228,19 +266,22 @@
       </div>
     </div>
     <div class="row row-cols-md-2 row-cols-sm-1 justify-content-center m-2">
-      <div class="col-md-10 col-sm-auto m-2 rounded border border-light text-center">
+      <div class="col-md-12 col-sm-12 rounded border border-light text-center">
         <div id="carouselChartControls" class="carousel slide carousel-fade" data-bs-ride="carousel">
           <div class="carousel-inner">
-            <div class="carousel-item active text-center">
+            <div class="carousel-item active">
               <div id="revenues_linechart_div" class="chart_div"></div>
             </div>
-            <!-- <div class="carousel-item">
-              <img src="..." class="d-block w-100" alt="...">
-            </div>
             <div class="carousel-item">
-              <img src="..." class="d-block w-100" alt="...">
-            </div> -->
+              <div id="currentmonth_piechart_div" class="chart_div"></div>
+            </div>
           </div>
+          <script>
+            var styled_linechart = document.getElementById('revenues_linechart_div');
+            var styled_piechart = document.getElementById('currentmonth_piechart_div');
+            styled_linechart.setAttribute('style', 'width: ' + chart_width + 'px;');
+            styled_piechart.setAttribute('style', 'width: ' + chart_width + 'px;');
+          </script>
           <button class="carousel-control-prev" type="button" data-bs-target="#carouselChartControls" data-bs-slide="prev">
             <span class="carousel-control-prev-icon" aria-hidden="true"></span>
             <span class="visually-hidden">Previous</span>
