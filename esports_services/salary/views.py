@@ -149,6 +149,10 @@ class ReportsView(WorkingshiftPermissonsMixin, TitleMixin, ListView):
         return query
 
 
+class AnalyticalView(ReportsView):
+    template_name = 'salary/analytical_reports_list.html'
+
+
 class StaffWorkshiftsView(WorkingshiftPermissonsMixin, TitleMixin, ListView):
     template_name = 'salary/staff_unverified_workshifts_view.html'
     model = WorkingShift
@@ -496,6 +500,10 @@ class MonthlyAnalyticalReport(LoginRequiredMixin, TitleMixin, ListView):
             shift_date__month=self.kwargs.get('month'),
             shift_date__year=self.kwargs.get('year'),
         )
+
+        if not self.current_month_queryset:
+            raise Http404
+
         self.current_date = datetime.date(
             self.kwargs.get('year'),
             self.kwargs.get('month'), 1)
@@ -513,15 +521,14 @@ class MonthlyAnalyticalReport(LoginRequiredMixin, TitleMixin, ListView):
             for field in fields
         ]
 
-        if not self.current_month_queryset or not self.previous_month_queryset:
-            raise Http404
-
         current_month_values = self.current_month_queryset.aggregate(*operations_list)
         previous_month_values = self.previous_month_queryset.aggregate(*operations_list)
 
         for field in current_month_values.keys():
             current_month_value = round(current_month_values.get(field, 0), 2)
-            previous_month_value = round(previous_month_values.get(field, 0), 2)
+            previous_month_value = round(
+                previous_month_values.get(field, 0), 2
+            ) if previous_month_values.get(field, 0) else 0
 
             if current_month_value == 0.0:
                 ratio = 100.0
