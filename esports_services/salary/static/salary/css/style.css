@@ -41,3 +41,17 @@
 .text-justify {
     text-align: justify;
 }
+
+.text-orange {
+    color: #fd7e14;
+}
+
+.text-acid {
+    color: #04ff00;
+}
+
+.chart_div {
+    margin-left: auto;
+    margin-right: auto;
+    height: 300px;
+}

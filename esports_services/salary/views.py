@@ -1,5 +1,5 @@
 from django.contrib.auth.forms import AuthenticationForm, AdminPasswordChangeForm
-from django.http import JsonResponse, HttpResponseNotFound
+from django.http import Http404, JsonResponse, HttpResponseNotFound
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import TemplateView, ListView, DetailView
 from django.contrib.auth.views import LoginView, PasswordChangeView, PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView
@@ -7,7 +7,7 @@ from django.contrib.auth import logout
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.contrib.auth.models import Group
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
-from django.db.models import Q, QuerySet, Sum
+from django.db.models import Q, QuerySet, Sum, Avg, Min, Max, StdDev
 
 from .forms import *
 from .utils import *
@@ -147,6 +147,10 @@ class ReportsView(WorkingshiftPermissonsMixin, TitleMixin, ListView):
             is_verified=True
         ).dates('shift_date','month')
         return query
+
+
+class AnalyticalView(ReportsView):
+    template_name = 'salary/analytical_reports_list.html'
 
 
 class StaffWorkshiftsView(WorkingshiftPermissonsMixin, TitleMixin, ListView):
@@ -472,6 +476,132 @@ class MisconductDetailView(LoginRequiredMixin, PermissionRequiredMixin,
     permission_required = 'salary.view_misconduct'
     context_object_name = 'misconduct'
     queryset = Misconduct.objects.select_related('intruder', 'moderator', 'regulations_article')
+
+
+class MonthlyAnalyticalReport(LoginRequiredMixin, TitleMixin, ListView):
+    model = WorkingShift
+    title = 'Аналитический отчёт'
+    template_name = 'salary/monthly_analytical_report.html'
+
+    def get_queryset(self) -> QuerySet:
+        queryset = WorkingShift.objects.all().select_related(
+            'hall_admin',
+            'cash_admin',
+        ).order_by('shift_date')
+        return queryset
+
+    def get_fields_dict(self) -> dict:
+        fields = (
+            'summary_revenue', 'bar_revenue', 'game_zone_subtotal',
+            'game_zone_error', 'vr_revenue', 'hookah_revenue', 'shortage',
+            'summary_revenue__avg',
+        )
+        self.current_month_queryset = self.object_list.filter(
+            shift_date__month=self.kwargs.get('month'),
+            shift_date__year=self.kwargs.get('year'),
+        )
+
+        if not self.current_month_queryset:
+            raise Http404
+
+        self.current_date = datetime.date(
+            self.kwargs.get('year'),
+            self.kwargs.get('month'), 1)
+
+        self.previous_month_date = self.current_date - relativedelta(months=1)
+        self.previous_month_queryset = self.object_list.filter(
+            shift_date__month=self.previous_month_date.month,
+            shift_date__year=self.previous_month_date.year,
+        )
+
+        values_dict = dict()
+        operations_list = [
+            Sum(field) if '__avg' not in field
+            else Avg(field.split('__')[0])
+            for field in fields
+        ]
+
+        current_month_values = self.current_month_queryset.aggregate(*operations_list)
+        previous_month_values = self.previous_month_queryset.aggregate(*operations_list)
+
+        for field in current_month_values.keys():
+            current_month_value = round(current_month_values.get(field, 0), 2)
+            previous_month_value = round(
+                previous_month_values.get(field, 0), 2
+            ) if previous_month_values.get(field, 0) else 0
+
+            if current_month_value == 0.0:
+                ratio = 100.0
+            elif current_month_value > previous_month_value:
+                ratio = round((current_month_value - previous_month_value) /
+                            current_month_value * 100, 2)
+            elif current_month_value < previous_month_value:
+                ratio = round((previous_month_value - current_month_value) /
+                            previous_month_value * 100, 2)
+
+            values_dict[field] = (
+                        previous_month_value,
+                        current_month_value,
+                        ratio,
+                    )
+
+        return values_dict
+
+    def get_linechart_data(self) -> list:
+        """Return list of lists with revenue data for Google LineChart
+
+        Returns:
+            list: list of lists [day_of_month, previous_month_revenue, current_month_revenue]
+        """
+        current_month_list =  self.current_month_queryset.values_list(
+            'shift_date__day',
+            'summary_revenue')
+        previous_month_list = self.previous_month_queryset.values_list(
+            'shift_date__day',
+            'summary_revenue')
+        linechart_data_list = list()
+        for first_element in previous_month_list:
+            for second_element in current_month_list:
+                if first_element[0] == second_element[0]:
+                    data_row = list(first_element)
+                    data_row.append(second_element[1])
+                    linechart_data_list.append(data_row)
+
+        return linechart_data_list
+
+    def get_piechart_data(self, analytic_data: dict) -> list:
+        categories = {
+            'bar_revenue': 'Бар',
+            'game_zone_subtotal': 'Game zone',
+            'vr_revenue': 'Доп. услуги и VR',
+            'hookah_revenue': 'Кальян',
+        }
+
+        piechart_data = list()
+
+        for category in categories.keys():
+            piechart_data.append(
+                [categories.get(category), analytic_data.get(f'{category}__sum')[1]]
+            )
+
+        return piechart_data
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        analytic_data = self.get_fields_dict()
+        context.update({
+            'analytic': analytic_data,
+            'piechart_data': self.get_piechart_data(analytic_data),
+            'min_revenue_workshift': self.current_month_queryset.order_by(
+                'summary_revenue').first(),
+            'max_revenue_workshift': self.current_month_queryset.order_by(
+                'summary_revenue').last(),
+            'current_month_date': self.current_date,
+            'previous_month_date': self.previous_month_date,
+            'linechart_data': self.get_linechart_data(),
+        })
+
+        return context
 
 
 class IndexEmployeeView(LoginRequiredMixin, TitleMixin, ListView):
