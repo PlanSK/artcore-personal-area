@@ -40,4 +40,6 @@ urlpatterns = [
     path('password_reset/', ResetPasswordView.as_view(), name='password_reset'),
     path('password_reset_done/', ResetPasswordMailed.as_view(), name='password_reset_done'),
     path('password_reset/<uidb64>/<token>/', ResetPasswordConfirmView.as_view(), name='password_reset_confirm'),
+    path('monthly_analytics/<int:year>/<int:month>/', MonthlyAnalyticalReport.as_view(), name='monthly_analytics'),
+    path('analytics_reports/', AnalyticalView.as_view(), name='analytics_reports'),
 ]
