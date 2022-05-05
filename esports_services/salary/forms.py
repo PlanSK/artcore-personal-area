@@ -17,7 +17,9 @@ class UserRegistrationForm(UserCreationForm):
 
     def clean_email(self):
         entered_email = self.cleaned_data['email']
-        if User.objects.filter(email=entered_email).exists():
+        if not entered_email:
+            raise forms.ValidationError("Email field cannot be empty")
+        elif User.objects.filter(email=entered_email).exists():
             raise forms.ValidationError("This email already used")
         return entered_email
 

@@ -2,6 +2,7 @@ from django.contrib.auth.mixins import PermissionRequiredMixin, UserPassesTestMi
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.utils.text import slugify
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
 
 from unidecode import unidecode
 from typing import *
@@ -78,3 +79,10 @@ def return_misconduct_slug(last_name, date):
         return slug_name
     else:
         return f'{slug_name}-{count}'
+
+
+class TokenGenerator(PasswordResetTokenGenerator):
+    def _make_hash_value(self, user, timestamp):
+        return f"{user.pk}{timestamp}{user.is_active}"
+
+account_activation_token = TokenGenerator()

@@ -7,7 +7,10 @@ from django.contrib.auth import logout
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.contrib.auth.models import Group
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
-from django.db.models import Q, QuerySet, Sum, Avg, Min, Max, StdDev
+from django.db.models import Q, QuerySet, Sum, Avg
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_encode
+from django.contrib.sites.shortcuts import get_current_site
 
 from .forms import *
 from .utils import *
@@ -31,19 +34,32 @@ class RegistrationUser(TitleMixin, SuccessUrlMixin, TemplateView):
         return render(request, self.template_name, context=context)
 
     def post(self, request, **kwargs):
+        current_site = get_current_site(request)
         user_form_class = self.user_form(request.POST)
         profile_form_class = self.profile_form(request.POST, request.FILES)
         if user_form_class.is_valid() and profile_form_class.is_valid():
             user = user_form_class.save(commit=False) 
             profile = profile_form_class.save(commit=False)
-            user.save()
             user.is_active = False
+            user.save()
+
             user.groups.add(Group.objects.get(name='employee'))
             if profile.position.name == 'cash_admin':
                 user.groups.add(Group.objects.get(name='cashiers'))
             user.save()
+
             profile.user = user
             profile.save()
+
+            email_confirm_dict = {
+                "email": user.email,
+                "domain": current_site.domain,
+                "site_name": current_site.name,
+                "uid": urlsafe_base64_encode(force_bytes(user.pk)),
+                "user": user,
+                "token": account_activation_token.make_token(user),
+                "protocol": "https" if request.is_secure() else "http",
+            }
 
             return redirect(self.get_success_url())
         else:
