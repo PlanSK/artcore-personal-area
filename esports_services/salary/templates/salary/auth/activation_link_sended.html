@@ -1,0 +1,26 @@
+{% extends 'salary/base.html' %}
+{% load static %}
+
+{% block body %}
+<body class="bg-dark text-light h-100">
+    <div class="container h-100">
+        <div class="row h-100 align-items-center justify-content-md-center">
+            <div class="col-md-12">
+                <div class="text-center">
+                    <img class="mb-5" src="{% static 'salary/img/logo.png' %}" alt="" height="40">
+                    <h1 class="mb-1 text-success"><i class="fa-solid fa-envelope-circle-check fa-xl"></i></h1>
+                    <h2 class="mb-2">Поздравляем, {{ first_name }}!</h2>
+                    <div class="mb-5">
+                        Процесс регистрации почти окончен.<br>
+                        Ссылка для окончания процесса регистрации направлена на адрес электронной почты, указанный Вами.
+                    </div>
+                    <div class="">
+                        <a href="{% url 'index' %}" class="btn btn-primary btn-lg verysmall">
+                            <i class="fa-solid fa-house"></i>&nbsp;На главную
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
