@@ -85,7 +85,7 @@ class ActivationUserConfirm(TitleMixin, SuccessUrlMixin, TemplateView):
     def get_user(self, uidb64):
         try:
             uid = urlsafe_base64_decode(uidb64).decode()
-            user = User.objects.get(pk=uid)
+            user = User.objects.select_related('profile').get(pk=uid)
         except (TypeError, ValueError, OverflowError, User.DoesNotExist):
             user = None
         return user
@@ -97,6 +97,7 @@ class ActivationUserConfirm(TitleMixin, SuccessUrlMixin, TemplateView):
         token = kwargs['token']
         if self.user and account_activation_token.check_token(self.user, token):
             self.user.is_active = True
+            self.user.profile.email_is_confirmed = True
             self.user.save()
             return super().dispatch(request, *args, **kwargs)
         else:
