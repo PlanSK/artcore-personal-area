@@ -54,6 +54,7 @@ class Profile(models.Model):
     attestation_date = models.DateField(blank=True, null=True, verbose_name='Дата прохождения аттестации')
     dismiss_date = models.DateField(blank=True, null=True, verbose_name='Дата увольнения')
     photo = models.ImageField(blank=True, null=True, upload_to=user_directory_path, verbose_name='Фото профиля')
+    email_is_confirmed = models.BooleanField(default=False, verbose_name='Адрес эл. почты подтвержден')
 
     def __str__(self) -> str:
         return f'{self.user.first_name} {self.user.last_name} [{self.user.username}]'

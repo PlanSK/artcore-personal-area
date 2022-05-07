@@ -1,5 +1,5 @@
 from django.contrib.auth.forms import AuthenticationForm, AdminPasswordChangeForm
-from django.http import Http404, JsonResponse, HttpResponseNotFound
+from django.http import Http404, JsonResponse, HttpResponseNotFound, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import TemplateView, ListView, DetailView
 from django.contrib.auth.views import LoginView, PasswordChangeView, PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView
@@ -7,7 +7,12 @@ from django.contrib.auth import logout
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.contrib.auth.models import Group
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
-from django.db.models import Q, QuerySet, Sum, Avg, Min, Max, StdDev
+from django.db.models import Q, QuerySet, Sum, Avg
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.contrib.sites.shortcuts import get_current_site
+from django.template.loader import render_to_string
+from django.core.mail import EmailMessage
 
 from .forms import *
 from .utils import *
@@ -18,7 +23,8 @@ from dateutil.relativedelta import relativedelta
 
 
 class RegistrationUser(TitleMixin, SuccessUrlMixin, TemplateView):
-    template_name = 'salary/registration.html'
+    template_name = 'salary/auth/registration.html'
+    success_registration_template = 'salary/auth/activation_link_sended.html'
     title = 'Регистрация сотрудника'
     user_form = UserRegistrationForm
     profile_form = EmployeeRegistrationForm
@@ -31,27 +37,76 @@ class RegistrationUser(TitleMixin, SuccessUrlMixin, TemplateView):
         return render(request, self.template_name, context=context)
 
     def post(self, request, **kwargs):
+        current_site = get_current_site(request)
         user_form_class = self.user_form(request.POST)
         profile_form_class = self.profile_form(request.POST, request.FILES)
         if user_form_class.is_valid() and profile_form_class.is_valid():
             user = user_form_class.save(commit=False) 
             profile = profile_form_class.save(commit=False)
-            user.save()
             user.is_active = False
+            user.save()
+
             user.groups.add(Group.objects.get(name='employee'))
             if profile.position.name == 'cash_admin':
                 user.groups.add(Group.objects.get(name='cashiers'))
             user.save()
+
             profile.user = user
             profile.save()
 
-            return redirect(self.get_success_url())
+            email_address = user.email
+            mail_subject = 'Активация Вашей учетной записи.'
+            message = render_to_string('salary/auth/activation_email.html', {
+                "domain": current_site.domain,
+                "uid": urlsafe_base64_encode(force_bytes(user.pk)),
+                "user": user,
+                "token": account_activation_token.make_token(user),
+                "protocol": "https" if request.is_secure() else "http",
+            })
+
+            email = EmailMessage(
+                        mail_subject, message, to=[email_address]
+            )
+            email.send()
+
+            return render(request, self.success_registration_template, context={ 'first_name': user.first_name })
         else:
             context = self.get_context_data(
                 profile_form=profile_form_class,
                 user_form=user_form_class
             )
             return render(request, self.template_name, context=context)
+
+
+class ActivationUserConfirm(TitleMixin, SuccessUrlMixin, TemplateView):
+    template_name = 'salary/auth/activation_confirmed.html'
+    title = 'Учетная запись активирована'
+
+    def get_user(self, uidb64):
+        try:
+            uid = urlsafe_base64_decode(uidb64).decode()
+            user = User.objects.select_related('profile').get(pk=uid)
+        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+            user = None
+        return user
+
+    def dispatch(self, request, *args: Any, **kwargs: Any):
+        if "uidb64" not in kwargs or "token" not in kwargs:
+            return HttpResponseNotFound
+        self.user = self.get_user(kwargs['uidb64'])
+        token = kwargs['token']
+        if self.user and account_activation_token.check_token(self.user, token):
+            self.user.is_active = True
+            self.user.profile.email_is_confirmed = True
+            self.user.save()
+            return super().dispatch(request, *args, **kwargs)
+        else:
+            return HttpResponse('Activation link is invalid!')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['first_name'] = self.user.first_name
+        return context
 
 
 class DismissalEmployee(EmployeePermissionsMixin, TitleMixin,

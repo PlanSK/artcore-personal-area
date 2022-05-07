@@ -11,10 +11,17 @@ class DateInput(forms.DateInput):
 
 
 class UserRegistrationForm(UserCreationForm):
-
     class Meta:
         model = User
         fields = ['username', 'first_name', 'last_name', 'email', 'password1', 'password2']
+
+    def clean_email(self):
+        entered_email = self.cleaned_data['email']
+        if not entered_email:
+            raise forms.ValidationError("Email field cannot be empty")
+        elif User.objects.filter(email=entered_email).exists():
+            raise forms.ValidationError("This email already used")
+        return entered_email
 
 
 class DismissalEmployeeForm(forms.ModelForm):
