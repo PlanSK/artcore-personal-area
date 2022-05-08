@@ -20,11 +20,14 @@ from .utils import *
 import datetime
 from typing import *
 from dateutil.relativedelta import relativedelta
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 
 class RegistrationUser(TitleMixin, SuccessUrlMixin, TemplateView):
     template_name = 'salary/auth/registration.html'
-    success_registration_template = 'salary/auth/activation_link_sended.html'
     title = 'Регистрация сотрудника'
     user_form = UserRegistrationForm
     profile_form = EmployeeRegistrationForm
@@ -37,7 +40,6 @@ class RegistrationUser(TitleMixin, SuccessUrlMixin, TemplateView):
         return render(request, self.template_name, context=context)
 
     def post(self, request, **kwargs):
-        current_site = get_current_site(request)
         user_form_class = self.user_form(request.POST)
         profile_form_class = self.profile_form(request.POST, request.FILES)
         if user_form_class.is_valid() and profile_form_class.is_valid():
@@ -54,22 +56,7 @@ class RegistrationUser(TitleMixin, SuccessUrlMixin, TemplateView):
             profile.user = user
             profile.save()
 
-            email_address = user.email
-            mail_subject = 'Активация Вашей учетной записи.'
-            message = render_to_string('salary/auth/activation_email.html', {
-                "domain": current_site.domain,
-                "uid": urlsafe_base64_encode(force_bytes(user.pk)),
-                "user": user,
-                "token": account_activation_token.make_token(user),
-                "protocol": "https" if request.is_secure() else "http",
-            })
-
-            email = EmailMessage(
-                        mail_subject, message, to=[email_address]
-            )
-            email.send()
-
-            return render(request, self.success_registration_template, context={ 'first_name': user.first_name })
+            return send_confirmation_link(request, user)
         else:
             context = self.get_context_data(
                 profile_form=profile_form_class,
@@ -78,9 +65,34 @@ class RegistrationUser(TitleMixin, SuccessUrlMixin, TemplateView):
             return render(request, self.template_name, context=context)
 
 
+def send_confirmation_link(request, user):
+    template_name = 'salary/auth/activation_link_sended.html'
+    mail_template = 'salary/auth/activation_email.html'
+    current_site = get_current_site(request)
+    token_genertor = account_activation_token
+
+    email_address = user.email
+    mail_subject = 'Активация Вашей учетной записи.'
+    message = render_to_string(mail_template, {
+        "domain": current_site.domain,
+        "uid": urlsafe_base64_encode(force_bytes(user.pk)),
+        "user": user,
+        "token": token_genertor.make_token(user),
+        "protocol": "https" if request.is_secure() else "http",
+    })
+    email = EmailMessage(mail_subject, message, to=[email_address])
+    email.send()
+
+    context = {
+        'first_name': user.first_name,
+    }
+    return render(request, template_name, context=context)
+
+
 class ActivationUserConfirm(TitleMixin, SuccessUrlMixin, TemplateView):
     template_name = 'salary/auth/activation_confirmed.html'
     title = 'Учетная запись активирована'
+    token_generator = account_activation_token
 
     def get_user(self, uidb64):
         try:
@@ -95,7 +107,7 @@ class ActivationUserConfirm(TitleMixin, SuccessUrlMixin, TemplateView):
             return HttpResponseNotFound
         self.user = self.get_user(kwargs['uidb64'])
         token = kwargs['token']
-        if self.user and account_activation_token.check_token(self.user, token):
+        if self.user and self.token_generator.check_token(self.user, token):
             self.user.is_active = True
             self.user.profile.email_is_confirmed = True
             self.user.save()
