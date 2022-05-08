@@ -20,6 +20,21 @@
         </div>
       </div>
       {% endif %}
+      {% if wait_explanation %}
+      <div class="position-fixed top-0 end-0 p-3" style="z-index: 11">
+        <div id="liveToast" class="toast align-items-center text-white bg-danger border-1" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="false">
+          <div class="toast-header bg-warning text-black">
+            <strong class="me-auto">Необходимо подать объяснение.</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+          <div class="toast-body">
+            У вас имеется нарушений: {{ wait_explanation }}.<br>
+            По ним необходимо дать объяснения.
+            <a href="{% url 'misconducts_user_view' username=request.user %}?next={{ request.path }}" class="stretched-link"></a>
+          </div>
+        </div>
+      </div>
+      {% endif %}
       <div class="row m-3">
         <div class="col">
           <div class="row row-cols-md-4 row-cols-sm-1 justify-content-center">

@@ -1,6 +1,5 @@
 from django import template
-
-import math
+from django.db.models import Q
 
 from salary.models import *
 
@@ -19,6 +18,7 @@ def inactive_user():
         profile__dismiss_date=None
     ).count()
 
+
 @register.simple_tag()
-def absolute_value(value):
-    return abs(value)
+def unclosed_misconducts():
+    return Misconduct.objects.filter(Q(status='AD') | Q(status='WT')).count()
