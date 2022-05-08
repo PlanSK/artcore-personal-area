@@ -717,7 +717,7 @@ class IndexEmployeeView(LoginRequiredMixin, TitleMixin, ListView):
 
             'wait_explanation': misconducts.filter(
                 status=Misconduct.MisconductStatus.ADDED
-            ).exists(),
+            ).count(),
 
             'penalty_sum': misconducts.filter(
                 status=Misconduct.MisconductStatus.CLOSED,
