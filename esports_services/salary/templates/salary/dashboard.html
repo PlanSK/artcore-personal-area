@@ -43,19 +43,6 @@
               </div>
             </div>
             <div class="col-sm-12 col-md-3 mb-1">
-              <div class="card orange-snippet text-light h-100">
-                <div class="card-body">
-                  <p class="card-text fst-italic">
-                    <span class="me-2"><i class="fa-solid fa-chart-column fa-xl"></i></span>
-                    Отчеты
-                  </p>
-                  <a href="{% url 'reports_list' %}" class="stretched-link"></a>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="row row-cols-md-3 row-cols-sm-1 justify-content-center">
-            <div class="col-sm-12 col-md-3 mb-1">
               <div class="card red-snippet text-light h-100">
                 <div class="card-body">
                   <p class="card-text fst-italic">
@@ -63,6 +50,25 @@
                     Нарушения
                   </p>
                   <a href="{% url 'misconducts_view' %}" class="stretched-link"></a>
+                </div>
+                {% unclosed_misconducts as unclosed_misconducts %}
+                {% if unclosed_misconducts %}
+                <div class="card-footer">
+                  <p class="card-text text-light verysmall">Не закрыто: {{ unclosed_misconducts }}</p>
+                </div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          <div class="row row-cols-md-3 row-cols-sm-1 justify-content-center">
+            <div class="col-sm-12 col-md-3 mb-1">
+              <div class="card orange-snippet text-light h-100">
+                <div class="card-body">
+                  <p class="card-text fst-italic">
+                    <span class="me-2"><i class="fa-solid fa-chart-column fa-xl"></i></span>
+                    Отчеты
+                  </p>
+                  <a href="{% url 'reports_list' %}" class="stretched-link"></a>
                 </div>
               </div>
             </div>

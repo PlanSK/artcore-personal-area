@@ -24,6 +24,9 @@
             var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
             return new bootstrap.Tooltip(tooltipTriggerEl)
             })
+            var toastLiveExample = document.getElementById('liveToast')
+            var toast = new bootstrap.Toast(toastLiveExample)
+            toast.show()
         </script>
     </body>
 </html>
