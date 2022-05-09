@@ -1,0 +1,95 @@
+{% extends 'salary/dashboard.html' %}
+{% load humanize %}
+
+{% block data %}
+<div class="col">
+  <div class="row">
+    <div class="col table-responsive border rounded m-3">
+      <table class="table table-dark table-hover">
+        <thead class="text-warning text-center verysmall">
+          <tr>
+            <th scope="col">Пользователь</th>
+            <th scope="col">Активирован</th>
+            <th scope="col">Ссылка направлена</th>
+            <th scope="col">Ящик подтвержден</th>
+          </tr>
+        </thead>
+        <tbody class="text-center verysmall">
+          {% for user in object_list %}
+          <tr>
+            <td>
+              <a href="#" class="link-primary">{{ user.get_full_name }}</a>
+            </td>
+            <td>
+              {% if user.is_active %}
+              <span class="text-acid"><i class="fa-solid fa-person-circle-check"></i></span>
+              {% else %}
+              <span class="text-danger"><i class="fa-solid fa-user-xmark"></i></span>
+              {% endif %}
+            </td>
+            <td>
+              {% if user.is_active %}
+              <span class="text-acid"><i class="fa-solid fa-paper-plane"></i></span>
+              {% else %}
+              <span class="text-danger"><i class="fa-solid fa-xmark"></i></span>
+              {% endif %}
+            </td>
+            <td>
+              {% if user.profile.email_is_confirmed %}
+              <span class="text-acid"><i class="fa-solid fa-envelope-circle-check"></i></span>
+              {% else %}
+              <span class="text-danger"><i class="fa-solid fa-xmark"></i></span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="7" class="text-center">
+              <a href="{% url 'confirm_mail_send' %}?next={{ request.path }}" class="link-primary verysmall">Отправить ссылки для подтверждения</a>
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+   </div>
+  </div>
+  <div class="row">
+    <div class="col">
+      {% if is_paginated %}
+      <div class="row border-bottom mb-1">
+        <div class="col">
+            <ul class="pagination pagination-sm justify-content-center">
+                {% if page_obj.has_previous %}
+              <li class="page-item">
+                <a href="?page={{ page_obj.previous_page_number }}" class="page-link">Назад</a>
+                {% else %}
+              <li class="page-item disabled">
+                <span class="page-link">Назад</span>
+                {% endif %}
+                
+              </li>
+                {% for page_num in paginator.page_range %}
+                {% if page_num == page_obj.number %}
+              <li class="page-item active" aria-current="page">
+                <span class="page-link">{{ page_obj.number }}</span>
+              </li>
+                {% else %}
+              <li class="page-item"><a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a></li>
+                {% endif %}
+                {% endfor %}
+                {% if page_obj.has_next %}
+              <li class="page-item">
+                {% else %}
+              <li class="page-item disabled">
+                {% endif %}
+                <a href="?page={{ page_obj.next_page_number }}" class="page-link">Вперёд</a>
+              </li>
+            </ul>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

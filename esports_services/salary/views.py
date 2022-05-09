@@ -1,7 +1,7 @@
 from django.contrib.auth.forms import AuthenticationForm, AdminPasswordChangeForm
 from django.http import Http404, JsonResponse, HttpResponseNotFound, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.views.generic import TemplateView, ListView, DetailView
+from django.views.generic import TemplateView, ListView, DetailView, FormView
 from django.contrib.auth.views import LoginView, PasswordChangeView, PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView
 from django.contrib.auth import logout
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
@@ -9,6 +9,7 @@ from django.contrib.auth.models import Group
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.db.models import Q, QuerySet, Sum, Avg
 from django.utils.http import urlsafe_base64_decode
+from django.core import mail
 
 from .forms import *
 from .utils import *
@@ -98,6 +99,34 @@ class ActivationUserConfirm(TitleMixin, SuccessUrlMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         context['first_name'] = self.user.first_name
         return context
+
+
+class ConfirmMailSendView(EmployeePermissionsMixin, TitleMixin, SuccessUrlMixin,
+                          FormView):
+    form_class = UserChoicesForm
+    template_name = 'salary/staff_send_mail_form.html'
+    title = 'Рассылка сообщений'
+
+    def form_valid(self, form):
+        connection = mail.get_connection()
+        messages = [
+            get_confirmation_message(User.objects.get(username=user), self.request)
+            for user in form.cleaned_data['users']
+        ]
+        connection.send_messages(messages)
+        return super().form_valid(form)
+
+
+class ConfirmMailStatus(EmployeePermissionsMixin, TitleMixin, ListView):
+    model = User
+    title = 'Состояние активации учетных записей.'
+    template_name = 'salary/staff_user_confirmation_status.html'
+
+    def get_queryset(self):
+        queryset = User.objects.select_related('profile').filter(
+            profile__dismiss_date=None
+        )
+        return queryset
 
 
 class DismissalEmployee(EmployeePermissionsMixin, TitleMixin,

@@ -43,4 +43,6 @@ urlpatterns = [
     path('monthly_analytics/<int:year>/<int:month>/', MonthlyAnalyticalReport.as_view(), name='monthly_analytics'),
     path('analytics_reports/', AnalyticalView.as_view(), name='analytics_reports'),
     path('activation_confirm/<uidb64>/<token>/', ActivationUserConfirm.as_view(), name='activation_confirm'),
+    path('confirm_mail_send/', ConfirmMailSendView.as_view(), name='confirm_mail_send'),
+    path('confirm_mail_status/', ConfirmMailStatus.as_view(), name='confirm_mail_status'),
 ]
