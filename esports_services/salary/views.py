@@ -8,11 +8,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMix
 from django.contrib.auth.models import Group
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.db.models import Q, QuerySet, Sum, Avg
-from django.utils.encoding import force_bytes
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from django.contrib.sites.shortcuts import get_current_site
-from django.template.loader import render_to_string
-from django.core.mail import EmailMessage
+from django.utils.http import urlsafe_base64_decode
 
 from .forms import *
 from .utils import *
@@ -28,6 +24,7 @@ logger = logging.getLogger(__name__)
 
 class RegistrationUser(TitleMixin, SuccessUrlMixin, TemplateView):
     template_name = 'salary/auth/registration.html'
+    success_template_name = 'salary/auth/confirmation_link_sended.html'
     title = 'Регистрация сотрудника'
     user_form = UserRegistrationForm
     profile_form = EmployeeRegistrationForm
@@ -56,7 +53,13 @@ class RegistrationUser(TitleMixin, SuccessUrlMixin, TemplateView):
             profile.user = user
             profile.save()
 
-            return send_confirmation_link(request, user)
+            activation_message = get_confirmation_message(user, request=request)
+            activation_message.send()
+
+            context = {
+                'first_name': user.first_name,
+            }
+            return render(request, self.success_template_name, context=context)
         else:
             context = self.get_context_data(
                 profile_form=profile_form_class,
@@ -65,32 +68,8 @@ class RegistrationUser(TitleMixin, SuccessUrlMixin, TemplateView):
             return render(request, self.template_name, context=context)
 
 
-def send_confirmation_link(request, user):
-    template_name = 'salary/auth/activation_link_sended.html'
-    mail_template = 'salary/auth/activation_email.html'
-    current_site = get_current_site(request)
-    token_genertor = account_activation_token
-
-    email_address = user.email
-    mail_subject = 'Активация Вашей учетной записи.'
-    message = render_to_string(mail_template, {
-        "domain": current_site.domain,
-        "uid": urlsafe_base64_encode(force_bytes(user.pk)),
-        "user": user,
-        "token": token_genertor.make_token(user),
-        "protocol": "https" if request.is_secure() else "http",
-    })
-    email = EmailMessage(mail_subject, message, to=[email_address])
-    email.send()
-
-    context = {
-        'first_name': user.first_name,
-    }
-    return render(request, template_name, context=context)
-
-
 class ActivationUserConfirm(TitleMixin, SuccessUrlMixin, TemplateView):
-    template_name = 'salary/auth/activation_confirmed.html'
+    template_name = 'salary/auth/email_confirmed.html'
     title = 'Учетная запись активирована'
     token_generator = account_activation_token
 
