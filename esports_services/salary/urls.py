@@ -45,4 +45,5 @@ urlpatterns = [
     path('analytics_reports/', AnalyticalView.as_view(), name='analytics_reports'),
     path('confirm_user_mail/<uidb64>/<token>/', ConfirmUserView.as_view(), name='confirm_user_mail'),
     path('confirm_mail_status/', ConfirmMailStatus.as_view(), name='confirm_mail_status'),
+    path('request_confirmation_link/', request_confirmation_link, name='request_confirmation_link'),
 ]

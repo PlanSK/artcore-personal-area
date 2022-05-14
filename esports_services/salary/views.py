@@ -66,6 +66,17 @@ class RegistrationUser(TitleMixin, SuccessUrlMixin, TemplateView):
             return render(request, self.template_name, context=context)
 
 
+def request_confirmation_link(request):
+    username = request.POST.get('user')
+    user = User.objects.get(username=username)
+    confirm_message = get_confirmation_message(user, request=request)
+    confirm_message.send()
+    user.profile.confirmation_link_sent = True
+    user.save()
+
+    return HttpResponse('Success sent.')
+
+
 class ConfirmUserView(TitleMixin, SuccessUrlMixin, TemplateView):
     template_name = 'salary/auth/email_confirmed.html'
     title = 'Учетная запись активирована'

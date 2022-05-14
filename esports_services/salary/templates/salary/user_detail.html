@@ -3,15 +3,32 @@
 {% block content %}
 <main>
   <div class="container">
-    {% if not user.profile.email_is_confirmed and user.profile.confiration_link_sent %}
-    <div class="alert alert-warning verysmall mt-2 text-center" role="alert">
-      Ссылка для подтверждения направлена на Ваш адрес электронной почты.<br>Нажмите <a href="#" class="alert-link">сюда</a>, чтобы направить повторно.
+    <script>
+      function requestConfirmLink() {
+        if (confirm('Вы уверены, что хотите запросить ссылку?')) {
+          let request = new XMLHttpRequest();
+          request.open('POST', '{% url "request_confirmation_link" %}', true);
+          request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+          request.setRequestHeader('X-CSRFToken', '{{ csrf_token }}');
+          request.send('user={{ user }}');
+          alert("Ссылка для подтверждения направлена");
+        }
+      }
+    </script>
+    <div class="row justify-content-center">
+      <div class="col-md-5 col-sm-12">
+        {% if user.profile.confirmation_link_sent and not user.profile.email_is_confirmed %}
+        <div class="alert alert-info d-flex align-items-center mt-2" role="alert">
+          <i class="bi bi-info-circle-fill"></i> <div class="ms-2 verysmall">Ссылка для подтверждения направлена на Ваш адрес электронной почты. <br>
+          Если Вы ее не получили, нажмите <a href="" class="alert-link" onclick="requestConfirmLink()">сюда</a>, чтобы запросить повторно.</div>
+        </div>
+        {% elif not user.profile.email_is_confirmed %}
+        <div class="alert alert-warning d-flex align-items-center mt-2" role="alert">
+          <i class="bi bi-info-circle-fill"></i> <div class="ms-2 verysmall">Необходимо подтвердить Ваш адрес электронной почты.<br> Нажмите <a href="" class="alert-link" onclick="requestConfirmLink()">сюда</a>, чтобы запросить подтверждение.</div>
+        </div>
+        {% endif %}
+      </div>
     </div>
-    {% elif not user.profile.email_is_confirmed %}
-    <div class="alert alert-warning verysmall mt-2 text-center" role="alert">
-      Адрес электронной почты не подтвержден. Нажмите <a href="#" class="alert-link">сюда</a>, чтобы запросить подтверждение.
-    </div>
-    {% endif %}
     <div class="row justify-content-center">
       <div class="card border-light bg-dark text-light h-100 m-2" style="max-width: 17rem;">
         <div class="card-header text-center bg-black-50">
