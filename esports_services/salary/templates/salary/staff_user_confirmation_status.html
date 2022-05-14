@@ -28,7 +28,9 @@
               {% endif %}
             </td>
             <td>
-              {% if user.is_active %}
+              {% if not user.profile.confirmation_link_sent and user.profile.email_is_confirmed %}
+              <span class="text-primary"><i class="fa-solid fa-check-double"></i></span>
+              {% elif user.profile.confirmation_link_sent %}
               <span class="text-acid"><i class="fa-solid fa-paper-plane"></i></span>
               {% else %}
               <span class="text-danger"><i class="fa-solid fa-xmark"></i></span>
@@ -44,13 +46,6 @@
           </tr>
           {% endfor %}
         </tbody>
-        <tfoot>
-          <tr>
-            <td colspan="7" class="text-center">
-              <a href="{% url 'confirm_mail_send' %}?next={{ request.path }}" class="link-primary verysmall">Отправить ссылки для подтверждения</a>
-            </td>
-          </tr>
-        </tfoot>
       </table>
    </div>
   </div>

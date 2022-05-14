@@ -3,7 +3,7 @@ from django.http import Http404, JsonResponse, HttpResponseNotFound, HttpRespons
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import TemplateView, ListView, DetailView, FormView
 from django.contrib.auth.views import LoginView, PasswordChangeView, PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView
-from django.contrib.auth import logout
+from django.contrib.auth import login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.contrib.auth.models import Group
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
@@ -45,17 +45,15 @@ class RegistrationUser(TitleMixin, SuccessUrlMixin, TemplateView):
             profile = profile_form_class.save(commit=False)
             user.is_active = False
             user.save()
-
+            profile.user = user
             user.groups.add(Group.objects.get(name='employee'))
             if profile.position.name == 'cash_admin':
                 user.groups.add(Group.objects.get(name='cashiers'))
-            user.save()
-
-            profile.user = user
-            profile.save()
 
             activation_message = get_confirmation_message(user, request=request)
             activation_message.send()
+            profile.confirmation_link_sent = True
+            user.save()
 
             context = {
                 'first_name': user.first_name,
@@ -85,19 +83,22 @@ class ActivationUserConfirm(TitleMixin, SuccessUrlMixin, TemplateView):
     def dispatch(self, request, *args: Any, **kwargs: Any):
         if "uidb64" not in kwargs or "token" not in kwargs:
             return HttpResponseNotFound
-        self.user = self.get_user(kwargs['uidb64'])
+        self.requested_user = self.get_user(kwargs['uidb64'])
         token = kwargs['token']
-        if self.user and self.token_generator.check_token(self.user, token):
-            self.user.is_active = True
-            self.user.profile.email_is_confirmed = True
-            self.user.save()
+        if (self.requested_user and
+                self.token_generator.check_token(self.requested_user, token)):
+            self.requested_user.is_active = True
+            self.requested_user.profile.email_is_confirmed = True
+            self.requested_user.profile.confirmation_link_sent = False
+            self.requested_user.save()
+            login(request, self.requested_user)
             return super().dispatch(request, *args, **kwargs)
         else:
             return HttpResponse('Activation link is invalid!')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['first_name'] = self.user.first_name
+        context['first_name'] = self.requested_user.first_name
         return context
 
 
