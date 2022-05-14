@@ -2,6 +2,18 @@
 
 {% block data %}
 <div class="row row-cols-sm-1 row-cols-md-4 g-2 border-top">
+  <script>
+    function requestConfirmLink(user) {
+      if (confirm('Вы уверены, что хотите направить ссылку?')) {
+        let request = new XMLHttpRequest();
+        request.open('POST', '{% url "request_confirmation_link" %}', true);
+        request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        request.setRequestHeader('X-CSRFToken', '{{ csrf_token }}');
+        request.send('user='+ user);
+        alert("Ссылка для подтверждения направлена");
+      }
+    }
+  </script>
     {% for current_user in object_list %}
     <div class="col">
       <div class="card border-light bg-dark text-light h-100" style="max-width: 17rem;">
@@ -26,12 +38,15 @@
           </p>
           <p class="card-text verysmall">
             Email: 
-            {% if user.profile.email_is_confirmed %}
-              <span class="text-primary">{{ user.email }}</span>
+            {% if current_user.profile.email_is_confirmed %}
+              <span class="text-primary">{{ current_user.email }}</span>
               <i class="fa-solid fa-envelope-circle-check fa-xs text-success"></i>
+            {% elif current_user.profile.confirmation_link_sent %}
+              <span class="text-warning">{{ current_user.email }}</span>
+              <i class="fa-solid fa-envelope fa-xs text-info" onclick="requestConfirmLink('{{current_user}}')" title="Письмо направлено"></i>
             {% else %}
-              <span class="text-warning">{{ user.email }}</span>
-              <i class="fa-solid fa-circle-question fa-xs fa-fade text-warning"></i>
+              <span class="text-warning">{{ current_user.email }}</span>
+              <i class="fa-solid fa-square-envelope fa-xs fa-fade text-warning" onclick="requestConfirmLink('{{current_user}}')" title="Требуется подтверждение"></i>
             {% endif %}
             <br>
             Дата рождения: {{ current_user.profile.birth_date }} <br>
