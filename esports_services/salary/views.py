@@ -101,22 +101,6 @@ class ActivationUserConfirm(TitleMixin, SuccessUrlMixin, TemplateView):
         return context
 
 
-class ConfirmMailSendView(EmployeePermissionsMixin, TitleMixin, SuccessUrlMixin,
-                          FormView):
-    form_class = UserChoicesForm
-    template_name = 'salary/staff_send_mail_form.html'
-    title = 'Рассылка сообщений'
-
-    def form_valid(self, form):
-        connection = mail.get_connection()
-        messages = [
-            get_confirmation_message(User.objects.get(username=user), self.request)
-            for user in form.cleaned_data['users']
-        ]
-        connection.send_messages(messages)
-        return super().form_valid(form)
-
-
 class ConfirmMailStatus(EmployeePermissionsMixin, TitleMixin, ListView):
     model = User
     title = 'Состояние активации учетных записей.'

@@ -24,22 +24,6 @@ class UserRegistrationForm(UserCreationForm):
         return entered_email
 
 
-class UserChoicesForm(forms.Form):
-    users_list = list()
-    for user in User.objects.select_related('profile').filter(is_active=True):
-        mail_confirm_status = "+" if user.profile.email_is_confirmed else "-"
-        users_list.append(
-            ((user), f'[{mail_confirm_status}] {user.get_full_name()}')
-        )
-
-    users = forms.MultipleChoiceField(
-        choices=users_list,
-        label='Список пользователей',
-        required=True,
-        widget=forms.widgets.SelectMultiple(attrs={'size': 20})
-    )
-
-
 class DismissalEmployeeForm(forms.ModelForm):
 
     class Meta:
