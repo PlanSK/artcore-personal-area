@@ -22,6 +22,7 @@ urlpatterns = [
     path('workshifts_archive_view/<int:year>/<int:month>/', StaffArchiveWorkshiftsView.as_view(), name='workshift_archive_view'),
     path('workshifts_months/', StaffWorkshiftsMonthlyList.as_view(), name='workshifts_months'),
     path('dismissal/<int:pk>/', DismissalEmployee.as_view(), name='dismissal_user'),
+    path('show_user_detail/', ShowUserProfile.as_view(), name='show_user_detail'),
     path('edit_profile/', EditUser.as_view(), name='profile_edit'),
     path('add_misconduct/', AddMisconductView.as_view(), name='add_misconduct'),
     path('misconducts/', MisconductListView.as_view(), name='misconducts_view'),
@@ -42,6 +43,6 @@ urlpatterns = [
     path('password_reset/<uidb64>/<token>/', ResetPasswordConfirmView.as_view(), name='password_reset_confirm'),
     path('monthly_analytics/<int:year>/<int:month>/', MonthlyAnalyticalReport.as_view(), name='monthly_analytics'),
     path('analytics_reports/', AnalyticalView.as_view(), name='analytics_reports'),
-    path('activation_confirm/<uidb64>/<token>/', ActivationUserConfirm.as_view(), name='activation_confirm'),
+    path('confirm_user_mail/<uidb64>/<token>/', ConfirmUserView.as_view(), name='confirm_user_mail'),
     path('confirm_mail_status/', ConfirmMailStatus.as_view(), name='confirm_mail_status'),
 ]

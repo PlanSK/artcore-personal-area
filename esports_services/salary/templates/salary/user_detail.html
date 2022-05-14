@@ -1,0 +1,70 @@
+{% extends 'salary/logined_page.html' %}
+
+{% block content %}
+<main>
+  <div class="container">
+    {% if not user.profile.email_is_confirmed and user.profile.confiration_link_sent %}
+    <div class="alert alert-warning verysmall mt-2 text-center" role="alert">
+      Ссылка для подтверждения направлена на Ваш адрес электронной почты.<br>Нажмите <a href="#" class="alert-link">сюда</a>, чтобы направить повторно.
+    </div>
+    {% elif not user.profile.email_is_confirmed %}
+    <div class="alert alert-warning verysmall mt-2 text-center" role="alert">
+      Адрес электронной почты не подтвержден. Нажмите <a href="#" class="alert-link">сюда</a>, чтобы запросить подтверждение.
+    </div>
+    {% endif %}
+    <div class="row justify-content-center">
+      <div class="card border-light bg-dark text-light h-100 m-2" style="max-width: 17rem;">
+        <div class="card-header text-center bg-black-50">
+          {% if user.profile.photo %}
+            <img src="{{ user.profile.photo.url }}" alt="" class="rounded-circle" style="width: 100px; height: 100px;">
+          {% else %}
+            <i class="fa-solid fa-circle-user fa-6x text-secondary"></i>
+          {% endif %}
+          <br>{{ user.get_full_name }}<br>
+          <span class="text-muted verysmall" style="font-size: x-small;">Авторизация: {{ user.last_login|default:"нет данных" }}</span>
+        </div>
+        <div class="card-body">
+          <p class="card-text fst-italic">
+              {% if user.profile.dismiss_date %}
+                <span class="text-danger verysmall">Уволен {{ user.profile.dismiss_date }}</span>
+              {% elif not user.is_active %}
+                <span class="text-warning verysmall">Ожидает активации</span>
+              {% else %}
+                {{ user.profile.position }}
+              {% endif %}
+          </p>
+          <p class="card-text verysmall">
+            Email: <span class="text-primary">{{ user.email }}</span>
+            {% if not user.profile.email_is_confirmed %}
+              <i class="fa-solid fa-circle-question fa-xs fa-fade text-warning"></i>
+            {% else %}
+              <i class="fa-solid fa-envelope-circle-check fa-xs text-success"></i>
+            {% endif %}
+            <br>
+            Дата рождения: {{ user.profile.birth_date }} <br>
+            Дата трудоустройства: {{ user.profile.employment_date|date:"d.m.Y" }} <br>
+            Стаж работы: {{ user.profile.get_experience_text }} <br>
+            {% if not user.is_staff %}
+              Аттестация: 
+              {% if user.profile.attestation_date %} 
+              <span class="text-success">{{ user.profile.attestation_date }}</span> 
+              {% else %}
+              <span class="text-warning">Не пройдена</span> 
+              {% endif %}
+            {% endif %}
+          </p>
+        </div>
+        <div class="card-footer text-center">
+          <a href="{% url 'profile_edit' %}?next={{ request.path }}" class="btn btn-secondary verysmall"><i class="fa-solid fa-user-pen"></i> Изменить данные</a>
+          <a href="{% url 'passowrd_change' %}?next={{ request.path }}" class="btn btn-secondary verysmall mt-2"><i class="fa-solid fa-key"></i> Изменить пароль</a>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col text-center">
+          <a href="{% url 'index' %}" class="btn btn-primary verysmall mt-2"><i class="fa-solid fa-house"></i>&nbsp;На главную</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+{% endblock %}

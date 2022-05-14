@@ -1,7 +1,7 @@
 from django.contrib.auth.forms import AuthenticationForm, AdminPasswordChangeForm
 from django.http import Http404, JsonResponse, HttpResponseNotFound, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.views.generic import TemplateView, ListView, DetailView, FormView
+from django.views.generic import TemplateView, ListView, DetailView
 from django.contrib.auth.views import LoginView, PasswordChangeView, PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView
 from django.contrib.auth import login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
@@ -9,7 +9,6 @@ from django.contrib.auth.models import Group
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.db.models import Q, QuerySet, Sum, Avg
 from django.utils.http import urlsafe_base64_decode
-from django.core import mail
 
 from .forms import *
 from .utils import *
@@ -67,7 +66,7 @@ class RegistrationUser(TitleMixin, SuccessUrlMixin, TemplateView):
             return render(request, self.template_name, context=context)
 
 
-class ActivationUserConfirm(TitleMixin, SuccessUrlMixin, TemplateView):
+class ConfirmUserView(TitleMixin, SuccessUrlMixin, TemplateView):
     template_name = 'salary/auth/email_confirmed.html'
     title = 'Учетная запись активирована'
     token_generator = account_activation_token
@@ -510,6 +509,19 @@ class StaffEditUser(EmployeePermissionsMixin, EditUser):
     userform = StaffEditUserForm
     profileform = StaffEditProfileForm
     title = 'Редактирование профиля'
+
+
+class ShowUserProfile(LoginRequiredMixin, TitleMixin, DetailView):
+    model = User
+    title = 'Просмотр профиля'
+    queryset = User.objects.select_related('profile')
+    template_name = 'salary/user_detail.html'
+
+    def get_object(self, queryset=None):
+        return get_object_or_404(
+            queryset if queryset else self.get_queryset(),
+            pk=self.request.user.pk
+        )
 
 
 class WorkshiftDetailView(LoginRequiredMixin, PermissionRequiredMixin,
