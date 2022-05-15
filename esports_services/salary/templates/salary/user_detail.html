@@ -5,14 +5,20 @@
   <div class="container">
     <script>
       function requestConfirmLink() {
-        if (confirm('Вы уверены, что хотите запросить ссылку?')) {
-          let request = new XMLHttpRequest();
-          request.open('POST', '{% url "request_confirmation_link" %}', true);
-          request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-          request.setRequestHeader('X-CSRFToken', '{{ csrf_token }}');
-          request.send('user={{ user }}');
-          alert("Ссылка для подтверждения направлена");
-        }
+        let request = new XMLHttpRequest();
+        request.open('POST', '{% url "request_confirmation_link" %}', true);
+        request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        request.setRequestHeader('X-CSRFToken', '{{ csrf_token }}');
+        request.onreadystatechange = function(){ 
+          if ( request.readyState == 4 ) {
+            if ( request.status == 200 ) {
+              alert("Ссылка для подтверждения направлена");
+            } else { 
+              alert("Ошибка направления запроса");
+            } 
+          } 
+        }; 
+        request.send('user={{ user }}');
       }
     </script>
     <div class="row justify-content-center">
