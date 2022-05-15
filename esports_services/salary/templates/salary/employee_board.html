@@ -29,8 +29,8 @@
           </div>
           <div class="toast-body">
             У вас имеется нарушений: {{ wait_explanation }}.<br>
-            По ним необходимо дать объяснения.
-            <a href="{% url 'misconducts_user_view' username=request.user %}?next={{ request.path }}" class="stretched-link"></a>
+            По ним необходимо дать объяснения. <br>Для перехода нажмите
+            <a href="{% url 'misconducts_user_view' username=request.user %}?next={{ request.path }}" class="link-warning">сюда</a>
           </div>
         </div>
       </div>
