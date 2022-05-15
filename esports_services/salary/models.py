@@ -55,6 +55,7 @@ class Profile(models.Model):
     dismiss_date = models.DateField(blank=True, null=True, verbose_name='Дата увольнения')
     photo = models.ImageField(blank=True, null=True, upload_to=user_directory_path, verbose_name='Фото профиля')
     email_is_confirmed = models.BooleanField(default=False, verbose_name='Адрес эл. почты подтвержден')
+    confirmation_link_sent = models.BooleanField(default=False, verbose_name='Ссылка для подтверждения адреса эл. почты направлена')
 
     def __str__(self) -> str:
         return f'{self.user.first_name} {self.user.last_name} [{self.user.username}]'
