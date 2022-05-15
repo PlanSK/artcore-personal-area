@@ -501,6 +501,8 @@ class EditUser(LoginRequiredMixin, TitleMixin, SuccessUrlMixin, TemplateView):
         user_form_class = self.userform(request.POST, instance=self.edited_user)
         profile_form_class = self.profileform(request.POST, request.FILES, instance=self.edited_user.profile)
         if user_form_class.is_valid() and profile_form_class.is_valid():
+            if 'email' in user_form_class.changed_data:
+                self.edited_user.profile.email_is_confirmed = False
             user = user_form_class.save(commit=False)
             profile = profile_form_class.save(commit=False)
             user.save()
