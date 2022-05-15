@@ -3,16 +3,12 @@ from django.http import Http404, JsonResponse, HttpResponseNotFound, HttpRespons
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import TemplateView, ListView, DetailView
 from django.contrib.auth.views import LoginView, PasswordChangeView, PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView
-from django.contrib.auth import logout
+from django.contrib.auth import login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.contrib.auth.models import Group
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.db.models import Q, QuerySet, Sum, Avg
-from django.utils.encoding import force_bytes
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from django.contrib.sites.shortcuts import get_current_site
-from django.template.loader import render_to_string
-from django.core.mail import EmailMessage
+from django.utils.http import urlsafe_base64_decode
 
 from .forms import *
 from .utils import *
@@ -28,6 +24,7 @@ logger = logging.getLogger(__name__)
 
 class RegistrationUser(TitleMixin, SuccessUrlMixin, TemplateView):
     template_name = 'salary/auth/registration.html'
+    success_template_name = 'salary/auth/confirmation_link_sended.html'
     title = 'Регистрация сотрудника'
     user_form = UserRegistrationForm
     profile_form = EmployeeRegistrationForm
@@ -47,16 +44,20 @@ class RegistrationUser(TitleMixin, SuccessUrlMixin, TemplateView):
             profile = profile_form_class.save(commit=False)
             user.is_active = False
             user.save()
-
+            profile.user = user
             user.groups.add(Group.objects.get(name='employee'))
             if profile.position.name == 'cash_admin':
                 user.groups.add(Group.objects.get(name='cashiers'))
+
+            activation_message = get_confirmation_message(user, request=request)
+            activation_message.send()
+            profile.confirmation_link_sent = True
             user.save()
 
-            profile.user = user
-            profile.save()
-
-            return send_confirmation_link(request, user)
+            context = {
+                'first_name': user.first_name,
+            }
+            return render(request, self.success_template_name, context=context)
         else:
             context = self.get_context_data(
                 profile_form=profile_form_class,
@@ -65,32 +66,19 @@ class RegistrationUser(TitleMixin, SuccessUrlMixin, TemplateView):
             return render(request, self.template_name, context=context)
 
 
-def send_confirmation_link(request, user):
-    template_name = 'salary/auth/activation_link_sended.html'
-    mail_template = 'salary/auth/activation_email.html'
-    current_site = get_current_site(request)
-    token_genertor = account_activation_token
+def request_confirmation_link(request):
+    username = request.POST.get('user')
+    user = User.objects.get(username=username)
+    confirm_message = get_confirmation_message(user, request=request)
+    confirm_message.send()
+    user.profile.confirmation_link_sent = True
+    user.save()
 
-    email_address = user.email
-    mail_subject = 'Активация Вашей учетной записи.'
-    message = render_to_string(mail_template, {
-        "domain": current_site.domain,
-        "uid": urlsafe_base64_encode(force_bytes(user.pk)),
-        "user": user,
-        "token": token_genertor.make_token(user),
-        "protocol": "https" if request.is_secure() else "http",
-    })
-    email = EmailMessage(mail_subject, message, to=[email_address])
-    email.send()
-
-    context = {
-        'first_name': user.first_name,
-    }
-    return render(request, template_name, context=context)
+    return HttpResponse('Success sent.')
 
 
-class ActivationUserConfirm(TitleMixin, SuccessUrlMixin, TemplateView):
-    template_name = 'salary/auth/activation_confirmed.html'
+class ConfirmUserView(TitleMixin, SuccessUrlMixin, TemplateView):
+    template_name = 'salary/auth/email_confirmed.html'
     title = 'Учетная запись активирована'
     token_generator = account_activation_token
 
@@ -105,20 +93,35 @@ class ActivationUserConfirm(TitleMixin, SuccessUrlMixin, TemplateView):
     def dispatch(self, request, *args: Any, **kwargs: Any):
         if "uidb64" not in kwargs or "token" not in kwargs:
             return HttpResponseNotFound
-        self.user = self.get_user(kwargs['uidb64'])
+        self.requested_user = self.get_user(kwargs['uidb64'])
         token = kwargs['token']
-        if self.user and self.token_generator.check_token(self.user, token):
-            self.user.is_active = True
-            self.user.profile.email_is_confirmed = True
-            self.user.save()
+        if (self.requested_user and
+                self.token_generator.check_token(self.requested_user, token)):
+            self.requested_user.is_active = True
+            self.requested_user.profile.email_is_confirmed = True
+            self.requested_user.profile.confirmation_link_sent = False
+            self.requested_user.save()
+            login(request, self.requested_user)
             return super().dispatch(request, *args, **kwargs)
         else:
             return HttpResponse('Activation link is invalid!')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['first_name'] = self.user.first_name
+        context['first_name'] = self.requested_user.first_name
         return context
+
+
+class ConfirmMailStatus(EmployeePermissionsMixin, TitleMixin, ListView):
+    model = User
+    title = 'Состояние активации учетных записей.'
+    template_name = 'salary/staff_user_confirmation_status.html'
+
+    def get_queryset(self):
+        queryset = User.objects.select_related('profile').filter(
+            profile__dismiss_date=None
+        )
+        return queryset
 
 
 class DismissalEmployee(EmployeePermissionsMixin, TitleMixin,
@@ -498,6 +501,8 @@ class EditUser(LoginRequiredMixin, TitleMixin, SuccessUrlMixin, TemplateView):
         user_form_class = self.userform(request.POST, instance=self.edited_user)
         profile_form_class = self.profileform(request.POST, request.FILES, instance=self.edited_user.profile)
         if user_form_class.is_valid() and profile_form_class.is_valid():
+            if 'email' in user_form_class.changed_data:
+                self.edited_user.profile.email_is_confirmed = False
             user = user_form_class.save(commit=False)
             profile = profile_form_class.save(commit=False)
             user.save()
@@ -517,6 +522,19 @@ class StaffEditUser(EmployeePermissionsMixin, EditUser):
     userform = StaffEditUserForm
     profileform = StaffEditProfileForm
     title = 'Редактирование профиля'
+
+
+class ShowUserProfile(LoginRequiredMixin, TitleMixin, DetailView):
+    model = User
+    title = 'Просмотр профиля'
+    queryset = User.objects.select_related('profile')
+    template_name = 'salary/user_detail.html'
+
+    def get_object(self, queryset=None):
+        return get_object_or_404(
+            queryset if queryset else self.get_queryset(),
+            pk=self.request.user.pk
+        )
 
 
 class WorkshiftDetailView(LoginRequiredMixin, PermissionRequiredMixin,

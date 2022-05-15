@@ -28,9 +28,10 @@
                 <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end" aria-labelledby="navbarDarkDropdownMenuLink">
                   {% if request.user.is_staff %}
                   <li><a class="dropdown-item verysmall" href="{% url 'admin:index' %}"><i class="fa-solid fa-screwdriver-wrench"></i>&nbsp;Панель администрирования</a></li>
+                  <li><a class="dropdown-item verysmall" href="{% url 'confirm_mail_status' %}"><i class="fa-solid fa-envelope-circle-check"></i>&nbsp;Состояние активации сотрудников</a></li>
+                  <li><hr class="dropdown-divider"></li>
                   {% endif %}
-                  <li><a class="dropdown-item verysmall" href="{% url 'profile_edit' %}?next={{ request.path }}"><i class="fa-solid fa-user"></i>&nbsp;Редактировать профиль</a></li>
-                  <li><a class="dropdown-item verysmall" href="{% url 'passowrd_change' %}?next={{ request.path }}"><i class="fa-solid fa-key"></i>&nbsp;Смена пароля</a></li>
+                  <li><a class="dropdown-item verysmall" href="{% url 'show_user_detail' %}?next={{ request.path }}"><i class="fa-solid fa-user"></i>&nbsp;Мой профиль</a></li>
                   <li><hr class="dropdown-divider"></li>
                   <li><a class="dropdown-item verysmall" href="{% url 'logout' %}"><i class="fa-solid fa-arrow-right-from-bracket"></i>&nbsp;Выйти</i></a></li>
                 </ul>
