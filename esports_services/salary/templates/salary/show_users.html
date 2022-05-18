@@ -1,27 +1,9 @@
 {% extends 'salary/dashboard.html' %}
+{% load static %}
 
 {% block data %}
 <div class="row row-cols-sm-1 row-cols-md-4 g-2 border-top">
-  <script>
-    function requestConfirmLink(user) {
-      if (confirm('Вы уверены, что хотите направить ссылку?')) {
-        let request = new XMLHttpRequest();
-        request.open('POST', '{% url "request_confirmation_link" %}', true);
-        request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-        request.setRequestHeader('X-CSRFToken', '{{ csrf_token }}');
-        request.onreadystatechange = function(){ 
-          if ( request.readyState == 4 ) {
-            if ( request.status == 200 ) {
-              alert("Ссылка для подтверждения направлена");
-            } else { 
-              alert("Ошибка направления запроса");
-            } 
-          } 
-        }; 
-        request.send('user='+ user);
-      }
-    }
-  </script>
+  <script src="{% static 'salary/js/mail_request.js' %}"></script>
     {% for current_user in object_list %}
     <div class="col">
       <div class="card border-light bg-dark text-light h-100" style="max-width: 17rem;">
