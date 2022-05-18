@@ -1,10 +1,9 @@
 {% extends 'salary/logined_page.html' %}
-{% load static %}
 
 {% block content %}
 <main>
   <div class="container">
-    <script src="{% static 'salary/js/mail_request.js' %}"></script>
+    {% include 'salary/js/mail_request.js.html' %}
     <div class="row justify-content-center">
       <div class="col-md-5 col-sm-12">
         {% if user.profile.confirmation_link_sent and not user.profile.email_is_confirmed %}

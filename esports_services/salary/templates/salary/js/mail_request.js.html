@@ -1,3 +1,4 @@
+<script>
 function requestConfirmLink(user = '{{ request.user }}') {
     if (confirm('Вы уверены, что хотите направить ссылку?')) {
       let request = new XMLHttpRequest();
@@ -16,3 +17,4 @@ function requestConfirmLink(user = '{{ request.user }}') {
       request.send('user='+ user);
     }
 }
+</script>

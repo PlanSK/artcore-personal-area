@@ -1,9 +1,8 @@
 {% extends 'salary/dashboard.html' %}
-{% load staic %}
 {% load humanize %}
 
 {% block data %}
-<script src="{% static 'salary/js/mail_request.js' %}"></script>
+{% include 'salary/js/mail_request.js.html' %}
 <div class="col">
   <div class="row">
     <div class="col table-responsive border rounded m-3">

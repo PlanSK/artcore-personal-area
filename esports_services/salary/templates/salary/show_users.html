@@ -1,10 +1,9 @@
 {% extends 'salary/dashboard.html' %}
-{% load static %}
 
 {% block data %}
 <div class="row row-cols-sm-1 row-cols-md-4 g-2 border-top">
-  <script src="{% static 'salary/js/mail_request.js' %}"></script>
-    {% for current_user in object_list %}
+  {% include 'salary/js/mail_request.js.html' %}
+  {% for current_user in object_list %}
     <div class="col">
       <div class="card border-light bg-dark text-light h-100" style="max-width: 17rem;">
         <div class="card-header text-center bg-black-50">
