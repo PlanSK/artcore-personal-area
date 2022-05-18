@@ -5,7 +5,7 @@
 <div class="col">
   <div class="row">
     <div class="col table-responsive border rounded m-3">
-      <table class="table table-dark table-hover">
+      <table class="table table-dark">
         {% if object_list %}
         <thead class="text-warning text-center verysmall">
           <tr>
@@ -31,17 +31,27 @@
             <td>{{ workshift.cash_admin.get_full_name }}</td>
             <td>{{ workshift.hall_admin.get_full_name }}</td>
             <td>{{ workshift.summary_revenue | intcomma }}</td>
-            <td><a href="{{ workshift.get_absolute_url }}" class="link-primary verysmall">Смотреть</a></td>
             <td>
-              <a class="link-warning" href="{% url 'staff_edit_workshift' workshift.slug %}?next={{ request.path }}" data-bs-toggle="tooltip" data-bs-placement="top" title="Внести изменения">
-                <i class="fa-solid fa-square-pen fa-2xl"></i>
+              <a href="{{ workshift.get_absolute_url }}" class="btn btn-primary verysmall pb-0 pt-0"><i class="fa-solid fa-eye"></i> Смотреть</a>
+            </td>
+            <td>
+              <a class="btn btn-warning btn-sm pb-0 pt-0" href="{% url 'staff_edit_workshift' workshift.slug %}?next={{ request.path }}" data-bs-toggle="tooltip" data-bs-placement="top" title="Внести изменения">
+                <i class="fa-solid fa-square-pen"></i>
+              </a>
+              <a class="btn btn-danger btn-sm pb-0 pt-0" href="{% url 'delete_workshift' workshift.slug %}?next={{ request.path }}" data-bs-toggle="tooltip" data-bs-placement="top" title="Удалить смену">
+                <i class="fa-solid fa-square-minus"></i>
               </a>
             </td>
           </tr>
           {% endfor %}
         </tbody>
         {% else %}
-        <tr><td class="text-center text-warning"><b>Непроверенных смен нет.</b></td></tr>
+        <tr>
+          <td class="text-center text-warning"><b>Непроверенных смен нет.</b><br>
+            <a class="btn btn-outline-primary verysmall pt-0 pb-0" href="{% url 'add_workshift' %}?next={{ request.path }}">
+            <i class="fa-solid fa-calendar-plus"></i>&nbsp;Добавить смену</a>
+          </td>
+        </tr>
         {% endif %}
         <tfoot>
           <tr>
