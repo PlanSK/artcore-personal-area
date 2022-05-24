@@ -1,7 +1,8 @@
-*.sqlite3
 .vscode/
 venv/
 __pycache__/
 media/
 settings.py
 .env
+*.sqlite3
+*.log
