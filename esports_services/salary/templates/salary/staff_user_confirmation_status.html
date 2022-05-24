@@ -2,6 +2,7 @@
 {% load humanize %}
 
 {% block data %}
+{% include 'salary/js/mail_request.js.html' %}
 <div class="col">
   <div class="row">
     <div class="col table-responsive border rounded m-3">
@@ -18,7 +19,7 @@
           {% for user in object_list %}
           <tr>
             <td>
-              <a href="#" class="link-primary">{{ user.get_full_name }}</a>
+              <a href="" class="link-primary" onclick="requestConfirmLink('{{user}}')" title="Отправить ссылку для подтверждения">{{ user.get_full_name }}</a>
             </td>
             <td>
               {% if user.is_active %}

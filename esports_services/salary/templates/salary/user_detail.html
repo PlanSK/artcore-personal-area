@@ -3,24 +3,7 @@
 {% block content %}
 <main>
   <div class="container">
-    <script>
-      function requestConfirmLink() {
-        let request = new XMLHttpRequest();
-        request.open('POST', '{% url "request_confirmation_link" %}', true);
-        request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-        request.setRequestHeader('X-CSRFToken', '{{ csrf_token }}');
-        request.onreadystatechange = function(){ 
-          if ( request.readyState == 4 ) {
-            if ( request.status == 200 ) {
-              alert("Ссылка для подтверждения направлена");
-            } else { 
-              alert("Ошибка направления запроса");
-            } 
-          } 
-        }; 
-        request.send('user={{ user }}');
-      }
-    </script>
+    {% include 'salary/js/mail_request.js.html' %}
     <div class="row justify-content-center">
       <div class="col-md-5 col-sm-12">
         {% if user.profile.confirmation_link_sent and not user.profile.email_is_confirmed %}
