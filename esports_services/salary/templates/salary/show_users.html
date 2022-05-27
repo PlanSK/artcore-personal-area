@@ -17,7 +17,7 @@
         </div>
         <div class="card-body">
           <p class="card-text fst-italic">
-              {% if current_user.profile.dismiss_date %}
+              {% if current_user.profile.profile_status == 'DSM' %}
                 <span class="text-danger verysmall">Уволен {{ current_user.profile.dismiss_date }}</span>
               {% elif not current_user.is_active %}
                 <span class="text-warning verysmall">Ожидает активации</span>

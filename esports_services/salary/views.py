@@ -149,10 +149,10 @@ class DismissalEmployee(EmployeePermissionsMixin, TitleMixin,
     def post(self, request, **kwargs):
         profile_form_class = self.profile_form(request.POST, instance=self.object.profile)
         if profile_form_class.is_valid():
+            profile = profile_form_class.save(commit=False)
+            profile.profile_status = Profile.ProfileStatus.DISMISSED
             self.object.is_active = False
             self.object.save()
-            profile = profile_form_class.save(commit=False)
-            profile.save()
             return redirect(self.get_success_url())
         else:
             context = self.get_context_data(
