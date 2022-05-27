@@ -51,7 +51,8 @@ class RegistrationUser(TitleMixin, SuccessUrlMixin, TemplateView):
 
             activation_message = get_confirmation_message(user, request=request)
             activation_message.send()
-            profile.confirmation_link_sent = True
+            profile.profile_status = Profile.ProfileStatus.REGISTRED
+            profile.email_status = Profile.EmailStatus.SENT
             user.save()
 
             context = {
@@ -71,7 +72,7 @@ def request_confirmation_link(request):
     user = User.objects.get(username=username)
     confirm_message = get_confirmation_message(user, request=request)
     confirm_message.send()
-    user.profile.confirmation_link_sent = True
+    user.profile.email_status = Profile.EmailStatus.SENT
     user.save()
 
     return HttpResponse('Success sent.')
@@ -98,8 +99,8 @@ class ConfirmUserView(TitleMixin, SuccessUrlMixin, TemplateView):
         if (self.requested_user and
                 self.token_generator.check_token(self.requested_user, token)):
             self.requested_user.is_active = True
-            self.requested_user.profile.email_is_confirmed = True
-            self.requested_user.profile.confirmation_link_sent = False
+            self.requested_user.profile.email_status = Profile.EmailStatus.CONFIRMED
+            self.requested_user.profile.profile_status = Profile.ProfileStatus.ACTIVATED
             self.requested_user.save()
             login(request, self.requested_user)
             return super().dispatch(request, *args, **kwargs)
@@ -502,7 +503,7 @@ class EditUser(LoginRequiredMixin, TitleMixin, SuccessUrlMixin, TemplateView):
         profile_form_class = self.profileform(request.POST, request.FILES, instance=self.edited_user.profile)
         if user_form_class.is_valid() and profile_form_class.is_valid():
             if 'email' in user_form_class.changed_data:
-                self.edited_user.profile.email_is_confirmed = False
+                self.edited_user.profile.email_status = Profile.EmailStatus.ADDED
             user = user_form_class.save(commit=False)
             profile = profile_form_class.save(commit=False)
             user.save()

@@ -47,6 +47,17 @@ User.add_to_class("get_full_name", get_last_name)
 
 
 class Profile(models.Model):
+    class EmailStatus(models.TextChoices):
+        ADDED = 'ADD', 'Не подтвержден'
+        SENT = 'SNT', 'Ссылка направлена'
+        CONFIRMED = 'CNF', 'Подтвержден'
+
+    class ProfileStatus(models.TextChoices):
+        REGISTRED = 'RG', 'Ожидает проверки'
+        WAIT = 'WT', 'Ожидает активации'
+        ACTIVATED = 'ACT', 'Активирован'
+        DISMISSED = 'DSM', 'Уволен'
+
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     birth_date = models.DateField(null=True, verbose_name='Дата рождения')
     employment_date = models.DateField(null=True, verbose_name='Дата трудоустройства')
@@ -54,8 +65,8 @@ class Profile(models.Model):
     attestation_date = models.DateField(blank=True, null=True, verbose_name='Дата прохождения аттестации')
     dismiss_date = models.DateField(blank=True, null=True, verbose_name='Дата увольнения')
     photo = models.ImageField(blank=True, null=True, upload_to=user_directory_path, verbose_name='Фото профиля')
-    email_is_confirmed = models.BooleanField(default=False, verbose_name='Адрес эл. почты подтвержден')
-    confirmation_link_sent = models.BooleanField(default=False, verbose_name='Ссылка для подтверждения адреса эл. почты направлена')
+    email_status = models.CharField(max_length=10, choices=EmailStatus.choices, default=EmailStatus.ADDED, verbose_name='Состояние электронной почты')
+    profile_status = models.CharField(max_length=10, choices=ProfileStatus.choices, default=ProfileStatus.REGISTRED, verbose_name='Состояние профиля')
 
     def __str__(self) -> str:
         return f'{self.user.first_name} {self.user.last_name} [{self.user.username}]'
@@ -134,7 +145,7 @@ class Misconduct(models.Model):
     explanation_exist = models.BooleanField(verbose_name='Наличие объяснительной', default=False)
     moderator = models.ForeignKey(User, on_delete=models.PROTECT, verbose_name='Арбитр (кто выявил)', related_name='moderator')
     comment = models.TextField(verbose_name='Примечание', blank=True)
-    status = models.CharField(max_length=60, choices=MisconductStatus.choices, default=MisconductStatus.ADDED, verbose_name='Статус рассмотрения')
+    status = models.CharField(max_length=10, choices=MisconductStatus.choices, default=MisconductStatus.ADDED, verbose_name='Статус рассмотрения')
     slug = models.SlugField(max_length=60, unique=True, verbose_name='URL', null=True, blank=True)
     change_date = models.DateTimeField(verbose_name='Дата изменения', blank=True, null=True)
     editor = models.TextField(verbose_name='Редактор', blank=True, editable=False)

@@ -29,16 +29,16 @@
               {% endif %}
             </td>
             <td>
-              {% if not user.profile.confirmation_link_sent and user.profile.email_is_confirmed %}
+              {% if user.profile.email_status == 'CNF' %}
               <span class="text-primary"><i class="fa-solid fa-check-double"></i></span>
-              {% elif user.profile.confirmation_link_sent %}
+              {% elif user.profile.email_status == 'SNT' %}
               <span class="text-acid"><i class="fa-solid fa-paper-plane"></i></span>
               {% else %}
               <span class="text-danger"><i class="fa-solid fa-xmark"></i></span>
               {% endif %}
             </td>
             <td>
-              {% if user.profile.email_is_confirmed %}
+              {% if user.profile.email_status == 'CNF' %}
               <span class="text-acid"><i class="fa-solid fa-envelope-circle-check"></i></span>
               {% else %}
               <span class="text-danger"><i class="fa-solid fa-xmark"></i></span>

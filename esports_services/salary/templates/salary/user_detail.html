@@ -6,12 +6,12 @@
     {% include 'salary/js/mail_request.js.html' %}
     <div class="row justify-content-center">
       <div class="col-md-5 col-sm-12">
-        {% if user.profile.confirmation_link_sent and not user.profile.email_is_confirmed %}
+        {% if user.profile.email_status == 'SNT' %}
         <div class="alert alert-info d-flex align-items-center mt-2" role="alert">
           <i class="bi bi-info-circle-fill"></i> <div class="ms-2 verysmall">Ссылка для подтверждения направлена на Ваш адрес электронной почты. <br>
           Если Вы ее не получили, нажмите <a href="" class="alert-link" onclick="requestConfirmLink()">сюда</a>, чтобы запросить повторно.</div>
         </div>
-        {% elif not user.profile.email_is_confirmed %}
+        {% elif not user.profile.email_status == 'ADD' %}
         <div class="alert alert-warning d-flex align-items-center mt-2" role="alert">
           <i class="bi bi-info-circle-fill"></i> <div class="ms-2 verysmall">Необходимо подтвердить Ваш адрес электронной почты.<br> Нажмите <a href="" class="alert-link" onclick="requestConfirmLink()">сюда</a>, чтобы запросить подтверждение.</div>
         </div>
@@ -41,7 +41,7 @@
           </p>
           <p class="card-text verysmall">
             Email: <span class="text-primary">{{ user.email }}</span>
-            {% if not user.profile.email_is_confirmed %}
+            {% if not user.profile.email_status == 'CNF' %}
               <i class="fa-solid fa-circle-question fa-xs fa-fade text-warning"></i>
             {% else %}
               <i class="fa-solid fa-envelope-circle-check fa-xs text-success"></i>
