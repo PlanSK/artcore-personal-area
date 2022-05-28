@@ -11,7 +11,7 @@
           <i class="bi bi-info-circle-fill"></i> <div class="ms-2 verysmall">Ссылка для подтверждения направлена на Ваш адрес электронной почты. <br>
           Если Вы ее не получили, нажмите <a href="" class="alert-link" onclick="requestConfirmLink()">сюда</a>, чтобы запросить повторно.</div>
         </div>
-        {% elif not user.profile.email_status == 'ADD' %}
+        {% elif user.profile.email_status == 'ADD' %}
         <div class="alert alert-warning d-flex align-items-center mt-2" role="alert">
           <i class="bi bi-info-circle-fill"></i> <div class="ms-2 verysmall">Необходимо подтвердить Ваш адрес электронной почты.<br> Нажмите <a href="" class="alert-link" onclick="requestConfirmLink()">сюда</a>, чтобы запросить подтверждение.</div>
         </div>
