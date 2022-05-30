@@ -2,7 +2,7 @@ from .common import *
 
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
 if DEBUG_TOOLBAR:
     INSTALLED_APPS.append("debug_toolbar")
     MIDDLEWARE.insert(0, "debug_toolbar.middleware.DebugToolbarMiddleware")
