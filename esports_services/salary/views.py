@@ -7,6 +7,7 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.contrib.auth.models import Group
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
+from django.views.generic.base import RedirectView
 from django.db.models import Q, QuerySet, Sum, Avg
 from django.utils.http import urlsafe_base64_decode
 
@@ -51,7 +52,8 @@ class RegistrationUser(TitleMixin, SuccessUrlMixin, TemplateView):
 
             activation_message = get_confirmation_message(user, request=request)
             activation_message.send()
-            profile.confirmation_link_sent = True
+            profile.profile_status = Profile.ProfileStatus.REGISTRED
+            profile.email_status = Profile.EmailStatus.SENT
             user.save()
 
             context = {
@@ -71,7 +73,7 @@ def request_confirmation_link(request):
     user = User.objects.get(username=username)
     confirm_message = get_confirmation_message(user, request=request)
     confirm_message.send()
-    user.profile.confirmation_link_sent = True
+    user.profile.email_status = Profile.EmailStatus.SENT
     user.save()
 
     return HttpResponse('Success sent.')
@@ -98,8 +100,8 @@ class ConfirmUserView(TitleMixin, SuccessUrlMixin, TemplateView):
         if (self.requested_user and
                 self.token_generator.check_token(self.requested_user, token)):
             self.requested_user.is_active = True
-            self.requested_user.profile.email_is_confirmed = True
-            self.requested_user.profile.confirmation_link_sent = False
+            self.requested_user.profile.email_status = Profile.EmailStatus.CONFIRMED
+            self.requested_user.profile.profile_status = Profile.ProfileStatus.ACTIVATED
             self.requested_user.save()
             login(request, self.requested_user)
             return super().dispatch(request, *args, **kwargs)
@@ -148,10 +150,10 @@ class DismissalEmployee(EmployeePermissionsMixin, TitleMixin,
     def post(self, request, **kwargs):
         profile_form_class = self.profile_form(request.POST, instance=self.object.profile)
         if profile_form_class.is_valid():
+            profile = profile_form_class.save(commit=False)
+            profile.profile_status = Profile.ProfileStatus.DISMISSED
             self.object.is_active = False
             self.object.save()
-            profile = profile_form_class.save(commit=False)
-            profile.save()
             return redirect(self.get_success_url())
         else:
             context = self.get_context_data(
@@ -394,10 +396,13 @@ class AddMisconductView(MisconductPermissionsMixin, TitleMixin, SuccessUrlMixin,
         object.moderator = self.request.user
         object.editor = self.request.user.get_full_name()
         object.change_date = timezone.localtime(timezone.now())
-        object.slug = return_misconduct_slug(
+        slug_name = get_misconduct_slug(
             object.intruder.last_name,
-            object.misconduct_date
+            object.misconduct_date,
         )
+        count = Misconduct.objects.filter(slug__startswith=slug_name).count()
+        object.slug = slug_name if not count else f'{slug_name}-{count}'
+
         return super().form_valid(form)
 
 
@@ -502,7 +507,7 @@ class EditUser(LoginRequiredMixin, TitleMixin, SuccessUrlMixin, TemplateView):
         profile_form_class = self.profileform(request.POST, request.FILES, instance=self.edited_user.profile)
         if user_form_class.is_valid() and profile_form_class.is_valid():
             if 'email' in user_form_class.changed_data:
-                self.edited_user.profile.email_is_confirmed = False
+                self.edited_user.profile.email_status = Profile.EmailStatus.ADDED
             user = user_form_class.save(commit=False)
             profile = profile_form_class.save(commit=False)
             user.save()
@@ -892,6 +897,15 @@ class EditWorkshiftData(PermissionRequiredMixin, SuccessUrlMixin,
         context = super().get_context_data(**kwargs)
         context['start_date'] = context['object'].shift_date - relativedelta(days=1)
         return context
+
+
+class ShortagePayment(WorkingshiftPermissonsMixin, RedirectView):
+    def get_redirect_url(self, *args, **kwargs):
+        self.url = self.request.GET.get('next', reverse_lazy('index'))
+        workshift = get_object_or_404(WorkingShift, slug=kwargs['slug'])
+        workshift.shortage_paid = True
+        workshift.save()
+        return super().get_redirect_url(*args, **kwargs)
 
 
 class StaffEditWorkshift(EditWorkshiftData, WorkingshiftPermissonsMixin):

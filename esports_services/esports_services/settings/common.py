@@ -135,10 +135,10 @@ CRISPY_TEMPLATE_PACK = 'bootstrap5'
 
 LOGIN_URL = 'salary.views.sign_in'
 
-EMAIL_HOST = env('EMAIL_HOST')
-EMAIL_HOST_USER = env('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
-DEFAULT_FROM_EMAIL = env('EMAIL_HOST_USER')
-
+EMAIL_CONFIG = env.email(
+    'EMAIL_URL',
+    default='consolemail://user:password@localhost:25'
+)
+vars().update(EMAIL_CONFIG)
+SERVER_EMAIL = DEFAULT_FROM_EMAIL = env('SERVER_EMAIL')
 ADMINS = tuple(parseaddr(email) for email in env.list('DJANGO_ADMINS'))
-SERVER_EMAIL = env('SERVER_EMAIL')

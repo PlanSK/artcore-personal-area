@@ -17,7 +17,7 @@
         </div>
         <div class="card-body">
           <p class="card-text fst-italic">
-              {% if current_user.profile.dismiss_date %}
+              {% if current_user.profile.profile_status == 'DSM' %}
                 <span class="text-danger verysmall">Уволен {{ current_user.profile.dismiss_date }}</span>
               {% elif not current_user.is_active %}
                 <span class="text-warning verysmall">Ожидает активации</span>
@@ -27,10 +27,10 @@
           </p>
           <p class="card-text verysmall">
             Email: 
-            {% if current_user.profile.email_is_confirmed %}
+            {% if current_user.profile.email_status == 'CNF' %}
               <span class="text-primary">{{ current_user.email }}</span>
               <i class="fa-solid fa-envelope-circle-check fa-xs text-success"></i>
-            {% elif current_user.profile.confirmation_link_sent %}
+            {% elif current_user.profile.email_status == 'SNT' %}
               <span class="text-warning">{{ current_user.email }}</span>
               <i class="fa-solid fa-envelope fa-xs text-info" onclick="requestConfirmLink('{{current_user}}')" title="Письмо направлено"></i>
             {% else %}

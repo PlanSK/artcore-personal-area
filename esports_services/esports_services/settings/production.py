@@ -1,5 +1,5 @@
 import os.path
-from .common import BASE_DIR
+from .common import BASE_DIR, env
 
 PUBLIC_HTML_DIR = '/home/c/cv28116/public_html/'
 STATIC_ROOT = os.path.join(PUBLIC_HTML_DIR, 'static')
@@ -16,7 +16,7 @@ LOGGING = {
     },
     'handlers': {
         'file': {
-            'level': 'WARNING',
+            'level': env('LOGLEVEL'),
             'class': 'logging.FileHandler',
             'filename': os.path.join(BASE_DIR, 'django_debug.log'),
             'formatter': 'verbose',
@@ -25,6 +25,7 @@ LOGGING = {
     'loggers': {
         'root': {
             'handlers': ['file'],
+            'level': env('LOGLEVEL'),
             'propagate': True,
         },
     },
