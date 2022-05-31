@@ -7,6 +7,7 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.contrib.auth.models import Group
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
+from django.views.generic.base import RedirectView
 from django.db.models import Q, QuerySet, Sum, Avg
 from django.utils.http import urlsafe_base64_decode
 
@@ -896,6 +897,15 @@ class EditWorkshiftData(PermissionRequiredMixin, SuccessUrlMixin,
         context = super().get_context_data(**kwargs)
         context['start_date'] = context['object'].shift_date - relativedelta(days=1)
         return context
+
+
+class ShortagePayment(WorkingshiftPermissonsMixin, RedirectView):
+    def get_redirect_url(self, *args, **kwargs):
+        self.url = self.request.GET.get('next', reverse_lazy('index'))
+        workshift = get_object_or_404(WorkingShift, slug=kwargs['slug'])
+        workshift.shortage_paid = True
+        workshift.save()
+        return super().get_redirect_url(*args, **kwargs)
 
 
 class StaffEditWorkshift(EditWorkshiftData, WorkingshiftPermissonsMixin):
