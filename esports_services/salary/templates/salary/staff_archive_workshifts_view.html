@@ -12,7 +12,6 @@
         <th scope="col">Администратор зала</th>
         <th scope="col">Общая выручка</th>
         <th scope="col"></th>
-        <th scope="col"></th>
       </tr>
     </thead>
     <tbody class="text-center verysmall">
@@ -28,19 +27,50 @@
       {% endif %}
         </td>
         <td>{{ workshift.shift_date|date:"d.m.Y" }}</td>
-      {% if workshift.is_verified %}
-        <td>{{ workshift.cash_admin.get_full_name }}</td>
-        <td>{{ workshift.hall_admin.get_full_name }}</td>
-      {% else %}
-      <td>{{ workshift.cash_admin.get_full_name }}</td>
-      <td>{{ workshift.hall_admin.get_full_name }}</td>
-      {% endif %}
-        <td>{{ workshift.summary_revenue | intcomma }}</td>
-        <td><a href="{{ workshift.get_absolute_url }}?next={{ request.path }}" class="link-primary verysmall">Смотреть</a></td>
         <td>
-          <a class="link-warning" href="{% url 'staff_edit_workshift' workshift.slug %}?next={{ request.path }}" data-bs-toggle="tooltip" data-bs-placement="top" title="Внести изменения">
-            <i class="fa-solid fa-square-pen fa-2xl"></i>
-          </a>
+          <span id="{{ workshift.shift_date }}">{{ workshift.cash_admin.get_full_name }}</span>
+          {% if workshift.shortage and not workshift.shortage_paid %}
+          <script>
+            span = document.getElementById("{{ workshift.shift_date }}");
+            span.classList.add("text-warning");
+          </script>
+          {% endif %}
+        </td>
+        <td>{{ workshift.hall_admin.get_full_name }}</td>
+        <td>{{ workshift.summary_revenue | intcomma }}</td>
+        <td>
+          <div class="dropdown">
+            <button class="btn btn-outline-secondary btn-sm dropdown-toggle clear-after-toggle pb-0 pt-0" type="button" id="dropdownMenuActions" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="fa-solid fa-ellipsis"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end" aria-labelledby="dropdownMenuActions">
+              <li>
+                <a class="dropdown-item verysmall" href="{{ workshift.get_absolute_url }}">
+                  <i class="fa-solid fa-eye"></i>&nbsp;Детальный просмотр
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item verysmall" href="{% url 'staff_edit_workshift' workshift.slug %}?next={{ request.path }}">
+                  <i class="fa-solid fa-square-pen"></i>&nbsp;Редактировать смену
+                </a>
+              </li>
+              <li><hr class="dropdown-divider"></li>
+              <li>
+                <a class="dropdown-item verysmall text-danger" href="{% url 'delete_workshift' workshift.slug %}?next={{ request.path }}">
+                  <i class="fa-solid fa-square-minus"></i>&nbsp;Удалить смену
+                </a>
+              </li>
+              {% if workshift.shortage and not workshift.shortage_paid %}
+              <li><hr class="dropdown-divider"></li>
+              <li><span class="dropdown-item-text text-warning verysmall text-center">Недостача: {{ workshift.shortage | intcomma }}</span></li>
+              <li>
+                <a class="dropdown-item verysmall text-center" href="{% url 'shortage_payment' slug=workshift.slug %}?next={{ request.path }}">
+                  <i class="fa-solid fa-money-bill"></i>&nbsp;Погасить
+                </a>
+              </li>
+              {% endif %}
+            </ul>
+          </div>
         </td>
       </tr>
       {% endfor %}

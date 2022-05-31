@@ -14,7 +14,7 @@
             <th scope="col">Администратор кассы</th>
             <th scope="col">Администратор зала</th>
             <th scope="col">Общая выручка</th>
-            <th colspan="2">
+            <th>
               <a class="btn btn-outline-primary verysmall pt-0 pb-0" href="{% url 'add_workshift' %}?next={{ request.path }}">
                 <i class="fa-solid fa-calendar-plus"></i>&nbsp;Добавить смену
               </a>
@@ -32,15 +32,29 @@
             <td>{{ workshift.hall_admin.get_full_name }}</td>
             <td>{{ workshift.summary_revenue | intcomma }}</td>
             <td>
-              <a href="{{ workshift.get_absolute_url }}" class="btn btn-primary verysmall pb-0 pt-0"><i class="fa-solid fa-eye"></i> Смотреть</a>
-            </td>
-            <td>
-              <a class="btn btn-warning btn-sm pb-0 pt-0" href="{% url 'staff_edit_workshift' workshift.slug %}?next={{ request.path }}" data-bs-toggle="tooltip" data-bs-placement="top" title="Внести изменения">
-                <i class="fa-solid fa-square-pen"></i>
-              </a>
-              <a class="btn btn-danger btn-sm pb-0 pt-0" href="{% url 'delete_workshift' workshift.slug %}?next={{ request.path }}" data-bs-toggle="tooltip" data-bs-placement="top" title="Удалить смену">
-                <i class="fa-solid fa-square-minus"></i>
-              </a>
+              <div class="dropdown">
+                <button class="btn btn-outline-secondary btn-sm dropdown-toggle clear-after-toggle pb-0 pt-0" type="button" id="dropdownMenuActions" data-bs-toggle="dropdown" aria-expanded="false">
+                  <i class="fa-solid fa-ellipsis"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end" aria-labelledby="dropdownMenuActions">
+                  <li>
+                    <a class="dropdown-item verysmall" href="{{ workshift.get_absolute_url }}">
+                      <i class="fa-solid fa-eye"></i>&nbsp;Детальный просмотр
+                    </a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item verysmall" href="{% url 'staff_edit_workshift' workshift.slug %}?next={{ request.path }}">
+                      <i class="fa-solid fa-square-pen"></i>&nbsp;Редактировать смену
+                    </a>
+                  </li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li>
+                    <a class="dropdown-item verysmall text-danger" href="{% url 'delete_workshift' workshift.slug %}?next={{ request.path }}">
+                      <i class="fa-solid fa-square-minus"></i>&nbsp;Удалить смену
+                    </a>
+                  </li>
+                </ul>
+              </div>
             </td>
           </tr>
           {% endfor %}

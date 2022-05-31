@@ -12,7 +12,7 @@ from django.contrib.sites.shortcuts import get_current_site
 from unidecode import unidecode
 from typing import *
 
-from salary.models import Misconduct
+from .config import *
 
 
 class EmployeePermissionsMixin(PermissionRequiredMixin):
@@ -77,13 +77,8 @@ class EditModelEditorFields:
         return super().form_valid(form)
 
 
-def return_misconduct_slug(last_name, date):
-    slug_name = slugify(f'{unidecode(last_name)} {date.strftime("%d %m %Y")}')
-    count = Misconduct.objects.filter(slug__startswith=slug_name).count()
-    if not count:
-        return slug_name
-    else:
-        return f'{slug_name}-{count}'
+def get_misconduct_slug(last_name, date):
+    return slugify(f'{unidecode(last_name)} {date.strftime("%d %m %Y")}')
 
 
 class TokenGenerator(PasswordResetTokenGenerator):
@@ -108,3 +103,25 @@ def get_confirmation_message(user, request=None):
         'protocol': 'https' if request.is_secure() else 'http',
     })
     return EmailMessage(mail_subject, message, to=[email_address])
+
+
+def get_choice_plural(amount: int, variants: tuple) -> str:
+    """Возвращает слово во множественном числе, в зависимости от числа
+
+    Args:
+        amount (int): число
+        variants (tuple): набор вариантов слов во множественном числе
+
+    Returns:
+        str: слово из набора во множественном числе
+    """
+
+    if amount % 10 == 1 and amount % 100 != 11:
+        choice = 0
+    elif amount % 10 >= 2 and amount % 10 <= 4 and \
+            (amount % 100 < 10 or amount % 100 >= 20):
+        choice = 1
+    else:
+        choice = 2
+
+    return variants[choice]

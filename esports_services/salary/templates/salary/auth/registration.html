@@ -6,9 +6,9 @@
   <div class="container">
       <div class="row justify-content-center">
           <div class="col-md-5 border rounded mt-3 me-1">
-              <form class="needs-validation" method="post">
-                <p class="text-center">Персональные данные</p>
+              <form class="needs-validation" method="post" enctype="multipart/form-data">
                 {% csrf_token %}
+                <p class="text-center">Персональные данные</p>
                 <div class="form-error">{{ form.non_field_errors }}</div>
                 {{ user_form|crispy }}
                 {{ profile_form|crispy }}
