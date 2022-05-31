@@ -395,10 +395,13 @@ class AddMisconductView(MisconductPermissionsMixin, TitleMixin, SuccessUrlMixin,
         object.moderator = self.request.user
         object.editor = self.request.user.get_full_name()
         object.change_date = timezone.localtime(timezone.now())
-        object.slug = return_misconduct_slug(
+        slug_name = get_misconduct_slug(
             object.intruder.last_name,
-            object.misconduct_date
+            object.misconduct_date,
         )
+        count = Misconduct.objects.filter(slug__startswith=slug_name).count()
+        object.slug = slug_name if not count else f'{slug_name}-{count}'
+
         return super().form_valid(form)
 
 

@@ -1,3 +1,4 @@
+import imp
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save, post_delete
@@ -6,38 +7,18 @@ from django.urls import reverse_lazy
 from django.utils import timezone
 
 import datetime
+import os.path
 from dateutil.relativedelta import relativedelta
 
-
-HOURS_VARIANT = ('час', 'часа', 'часов')
-DAYS_VARIANT = ('день', 'дня', 'дней')
-MONTH_VARIANT = ('месяц','месяца','месяцев')
-YEARS_VARIANT = ('год', 'года', 'лет')
-
-REQUIRED_EXPERIENCE = 90
-EXPERIENCE_BONUS = 200.0
-PUBLICATION_BONUS = 100.0
-
-ATTESTATION_BONUS = 200.0
-DISCIPLINE_AWARD = 1000.0
-HALL_CLEANING_BONUS = 400.0
-HOOKAH_BONUS_RATIO = 0.2
-
-ADMIN_BONUS_CRITERIA = {
-    'bar' : [(0, 0.005), (3000, 0.01), (4000, 0.02), (6000, 0.025), (8000, 0.03)],
-    'game_zone': [(0, 0.005), (20000, 0.01), (25000, 0.0125), (27500, 0.015), (30000, 0.0175)],
-    'vr': [(0, 0.1), (1000, 0.12), (2000, 0.13), (3000, 0.14), (5000, 0.15)]
-}
-
-CASHIER_BONUS_CRITERIA = {
-    'bar' : [(0, 0.03), (3000, 0.04), (4000, 0.05), (6000, 0.06), (8000, 0.07)],
-    'game_zone': [(0, 0.005), (20000, 0.01), (25000, 0.0125), (27500, 0.015), (30000, 0.0175)],
-    'vr': [(0, 0.05), (1000, 0.06), (2000, 0.065), (3000, 0.07), (5000, 0.075)]
-}
+from .config import *
+from .utils import get_choice_plural
 
 
 def user_directory_path(instance, filename):
-    return 'user_{0}/{1}'.format(instance.user.id, filename)
+    return os.path.join(f'user_{instance.user.id}', os.path.normcase(filename))
+
+def documents_directory_path(instance, filename):
+    return os.path.join('documents', user_directory_path(instance, filename))
 
 
 def get_last_name(self):
@@ -75,32 +56,27 @@ class Profile(models.Model):
         verbose_name = 'Профиль сотрудника'
         verbose_name_plural = 'Профили сотрудников'
 
-    @classmethod
-    def get_choice_plural(cls, amount, variants):
-        if amount % 10 == 1 and amount % 100 != 11:
-            choice = 0
-        elif amount % 10 >= 2 and amount % 10 <= 4 and \
-                (amount % 100 < 10 or amount % 100 >= 20):
-            choice = 1
-        else:
-            choice = 2
+    def get_experience_text(self) -> str:
+        """Возвращает значение стажа разбитого по годам, месяцм и дням
+        в формате строки
 
-        return variants[choice]
+        Returns:
+            str: значение стажа, разбитое по годам, месяцам и дням
+        """
 
-    def get_experience_text(self):
         end_date = self.dismiss_date if self.dismiss_date else datetime.date.today()
         experience = relativedelta(end_date, self.employment_date)
         days, months, years = experience.days, experience.months, experience.years
         experience_text = ''
 
         if years:
-            experience_text = f'{years} {self.get_choice_plural(years, YEARS_VARIANT)} '
+            experience_text = f'{years} {get_choice_plural(years, YEARS_VARIANT)} '
 
         if months:
-            experience_text += f'{months} {self.get_choice_plural(months, MONTH_VARIANT)} '
+            experience_text += f'{months} {get_choice_plural(months, MONTH_VARIANT)} '
 
         if days or not experience_text:
-            experience_text += f'{days} {self.get_choice_plural(days, DAYS_VARIANT)}'
+            experience_text += f'{days} {get_choice_plural(days, DAYS_VARIANT)}'
 
         return experience_text
 
@@ -315,9 +291,13 @@ class WorkingShift(models.Model):
         return reverse_lazy('detail_workshift', kwargs={'slug': self.slug})
 
     def save(self, *args, **kwargs):
-        self.game_zone_subtotal = round(
-            self.game_zone_revenue - self.game_zone_error, 2
-        ) if self.game_zone_revenue >= self.game_zone_error  else 0.0
+        self.game_zone_subtotal = 0.0
+        self.summary_revenue = 0.0
+        
+        if self.game_zone_revenue >= self.game_zone_error:
+            self.game_zone_subtotal = round(
+                self.game_zone_revenue - self.game_zone_error, 2
+            ) 
 
         total_revenue = sum((
             self.bar_revenue,
@@ -325,8 +305,8 @@ class WorkingShift(models.Model):
             self.vr_revenue,
             self.hookah_revenue,
         ))
-        self.summary_revenue = round(
-            total_revenue, 2) if total_revenue > 0.0 else 0.0
+        if total_revenue > 0.0:
+            self.summary_revenue = round(total_revenue, 2)
 
         misconduct_queryset = Misconduct.objects.filter(
             workshift_date=self.shift_date,
@@ -339,6 +319,7 @@ class WorkingShift(models.Model):
                 self.cash_admin_penalty += misconduct.penalty
             elif misconduct.intruder == self.hall_admin:
                 self.hall_admin_penalty += misconduct.penalty
+
         super().save(*args, **kwargs)
 
 
