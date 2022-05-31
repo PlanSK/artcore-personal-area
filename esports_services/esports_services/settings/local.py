@@ -30,7 +30,7 @@ LOGGING = {
         'file': {
             'level': env('LOGLEVEL'),
             'class': 'logging.FileHandler',
-            'filename': 'django_error.log',
+            'filename': os.path.join(BASE_DIR, 'django_debug.log'),
             'formatter': 'verbose',
         },
     },
