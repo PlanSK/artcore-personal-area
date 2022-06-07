@@ -1,5 +1,5 @@
 from django.contrib.auth.forms import AuthenticationForm, AdminPasswordChangeForm
-from django.http import Http404, JsonResponse, HttpResponseNotFound, HttpResponse
+from django.http import Http404, HttpRequest, JsonResponse, HttpResponseNotFound, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import TemplateView, ListView, DetailView
 from django.contrib.auth.views import LoginView, PasswordChangeView, PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView
@@ -406,14 +406,19 @@ class AddMisconductView(MisconductPermissionsMixin, TitleMixin, SuccessUrlMixin,
         return super().form_valid(form)
 
 
-def load_regulation_data(request):
-    requested_article = request.GET.get('regulations_article')
-    regulation_article = DisciplinaryRegulations.objects.get(pk=requested_article)
+def load_regulation_data(request: HttpRequest) -> JsonResponse:
+    requested_article = request.POST.get('regulations_article')
+    regulation_article = get_object_or_404(
+        DisciplinaryRegulations,
+        pk=requested_article,
+    )
     response = {
-        'title': f'п. {regulation_article.article} {regulation_article.title}',
+        'article_number': regulation_article.article,
+        'title': regulation_article.title,
         'sanction': regulation_article.sanction,
         'penalty': regulation_article.base_penalty,
     }
+
     return JsonResponse(response)
 
 
