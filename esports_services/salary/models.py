@@ -110,7 +110,7 @@ class DisciplinaryRegulations(models.Model):
 class Misconduct(models.Model):
     class MisconductStatus(models.TextChoices):
         ADDED = 'AD', 'Ожидает объяснение'
-        WAIT = 'WT', 'Ожидает решение'
+        WAIT = 'WT', 'На рассмотрении'
         CLOSED = 'CL', 'Решение принято'
 
     misconduct_date = models.DateField(verbose_name='Дата нарушения')
