@@ -116,7 +116,7 @@ class Misconduct(models.Model):
     misconduct_date = models.DateField(verbose_name='Дата нарушения')
     workshift_date = models.DateField(verbose_name='Дата смены')
     intruder = models.ForeignKey(User, on_delete=models.PROTECT, verbose_name='Сотрудник', related_name='intruder')
-    regulations_article = models.ForeignKey(DisciplinaryRegulations, on_delete=models.PROTECT, verbose_name='Пункт дисциплинарного регламента')
+    regulations_article = models.ForeignKey(DisciplinaryRegulations, on_delete=models.PROTECT, verbose_name='Пункт дисциплинарного регламента', default=DEFAULT_MISCONDUCT_ARTICLE_NUMBER)
     penalty = models.FloatField(verbose_name='Сумма штрафа', default=0.0)
     explanation_exist = models.BooleanField(verbose_name='Наличие объяснительной', default=False)
     moderator = models.ForeignKey(User, on_delete=models.PROTECT, verbose_name='Арбитр (кто выявил)', related_name='moderator')

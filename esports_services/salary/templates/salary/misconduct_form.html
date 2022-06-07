@@ -22,27 +22,42 @@
       </div>
   </div>
 {% block javascript %}
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-  <script>
-    $(document).ready(function () {
-      $('#id_regulations_article').after('<div class="text-warning verysmall m-3">Санкция: <span id="sanction"></span></div>');
-      $('#id_regulations_article').bind('click keyup', function () {
-        $.ajax({
-          data: $(this).serialize(),
-          url: "{% url 'load_regulation_data' %}",
-          success: function(response) {
-              $('#sanction').empty().append(response.sanction);
-              $('#id_penalty').val(response.penalty)
-              $('#id_comment').val(response.title)
-          },
-          error: function (response) {
-            console.log(response.responseJSON.errors)
-          }
-        });
-        return false;
-      });
-    })
-  </script>
+<script>
+  function getMisconductDataJS(selected_article) {
+    let request = new XMLHttpRequest();
+    request.open('POST', '{% url "load_regulation_data" %}', true);
+    request.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+    request.setRequestHeader('X-CSRFToken', '{{ csrf_token }}');
+    request.onload = function() {
+      if (this.status >= 200 && this.status < 400) {
+        var responseData = JSON.parse(this.response);
+        document.getElementById('id_penalty').value = responseData['penalty'];
+        var container = document.getElementById('id_sanction');
+        if (!container) {
+          container = document.createElement('div');
+          container.classList.add('alert', 'alert-warning', 'mt-2', 'verysmall');
+          container.role = 'alert';
+          container.id = 'id_sanction';
+          document.getElementById('id_regulations_article').after(container);
+        };
+        container.innerHTML = responseData['article_number'] + '. ' + responseData['title'] + '.<br><br>Санкция: ' + responseData['sanction'] + '.';
+        document.getElementById('id_comment').value = 'Нарушен пункт ' + responseData['article_number'] + '. (' + responseData['title'] + ')';
+      } else {
+        console.log('ERR: We reached our target server, but it returned an error.')
+      };
+    };
+
+      request.onerror = function() { console.log('ERR: Connection error.') };
+      request.send('regulations_article=' + selected_article);
+  };
+
+    var requestArticle = document.getElementById('id_regulations_article').value;
+    getMisconductDataJS(requestArticle);
+
+    document.getElementById('id_regulations_article').onchange = function () { 
+      getMisconductDataJS(this.value); 
+    };
+</script>
 {% endblock %}
 </main>
 {% endblock %}
