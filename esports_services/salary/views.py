@@ -458,15 +458,25 @@ class MisconductUserView(LoginRequiredMixin, PermissionRequiredMixin,
     def get_queryset(self):
         return Misconduct.objects.filter(intruder__username=self.intruder).select_related('intruder', 'regulations_article')
 
+    def get_penalty_sum(self) -> float:
+        """Возвращает сумму штрафов по нарушениям
+
+        Returns:
+            float: сумма штрафов (число типа float)
+        """
+        if self.object_list.filter(status=Misconduct.MisconductStatus.CLOSED):
+            return self.object_list.filter(
+                status=Misconduct.MisconductStatus.CLOSED,
+            ).aggregate(Sum('penalty')).get('penalty__sum')
+        
+        return 0.0
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
         context.update({
             'intruder': get_object_or_404(User, username=self.intruder),
-
-            'penalty_sum': self.object_list.filter(
-                status=Misconduct.MisconductStatus.CLOSED,
-            ).aggregate(Sum('penalty')).get('penalty__sum'),
+            'penalty_sum': self.get_penalty_sum(),
         })
 
         return context
