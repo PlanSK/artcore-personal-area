@@ -427,22 +427,24 @@ class MisconductListView(MisconductPermissionsMixin, TitleMixin, ListView):
     title = 'Список нарушителей'
     template_name = 'salary/intruders_list.html'
 
-    def get_queryset(self):
-        queryset = Misconduct.objects.all().select_related('intruder')
-        intruder_dict = dict()
-        for misconduct in queryset:
-            count = intruder_dict.get(misconduct.intruder)
-            if count:
-                count += 1
-                intruder_dict.update({
-                    misconduct.intruder: count
-                })
-            else:
-                intruder_dict.update({
-                    misconduct.intruder: 1
-                })
-
-        return dict(sorted(intruder_dict.items(), key=lambda item: item[1], reverse=True))
+    def get_queryset(self) -> List[Intruder]:
+        database_tuple_list = Misconduct.objects.values_list(
+            'intruder',
+        ).annotate(n=models.Count('intruder'))
+        intruders_tuple_list = sorted(
+            database_tuple_list, key=lambda i: i[1], reverse=True
+        )
+        intruders_list = list()
+        for intruder_id, count in intruders_tuple_list:
+            intruders_list.append(Intruder(
+                employee=User.objects.get(pk=intruder_id),
+                total_count=count,
+                wait_count=Misconduct.objects.filter(
+                    intruder=intruder_id,
+                    status=Misconduct.MisconductStatus.ADDED
+                ).count(),
+            ))
+        return intruders_list
 
 
 class MisconductUserView(LoginRequiredMixin, PermissionRequiredMixin,

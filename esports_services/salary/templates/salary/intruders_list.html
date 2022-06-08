@@ -8,22 +8,28 @@
     </a>
   </div>
 </div>
-<div class="col table-responsive border rounded m-3">
-  <table class="table table-dark">
-    <thead class="text-warning text-center verysmall">
-      <tr>
-        <th>Сотрудник</th>
-        <th>Количество нарушений</th>
-      </tr>
-    </thead>
-    <tbody class="text-center verysmall">
-      {% for intruder, count in object_list.items %}
-      <tr>
-        <td><a href="{% url 'misconducts_user_view' username=intruder.username %}" class="link-light">{{ intruder.get_full_name }}</a></td>
-        <td>{{ count }}</td>
-      </tr>
+<div class="row">
+  <div class="col-md-3 table-responsive m-3">
+    <div class="list-group">
+      {% for intruder in object_list %}
+      {% if intruder.wait_count %}
+      <a href="{% url 'misconducts_user_view' username=intruder.employee.username %}" class="list-group-item list-group-item-action list-group-item-warning">
+        <div class="d-flex w-100 justify-content-between">
+          <h5 class="mb-1">{{ intruder.employee.get_full_name }}</h5>
+        </div>
+        <span class="verysmall">Общее число нарушений: {{ intruder.total_count }}</span><br>
+        <span class="verysmall text-danger">Ожидает объяснение: {{ intruder.wait_count }}</span>
+      </a>
+      {% else %}
+      <a href="{% url 'misconducts_user_view' username=intruder.employee.username %}" class="list-group-item list-group-item-action list-group-item-secondary">
+        <div class="d-flex w-100 justify-content-between">
+          <h5 class="mb-1">{{ intruder.employee.get_full_name }}</h5>
+        </div>
+        <small>Общее число нарушений: {{ intruder.total_count }}</small>
+      </a>
+      {% endif %}
       {% endfor %}
-    </tbody>
-  </table>
+    </div>
+  </div>
 </div>
 {% endblock %}
