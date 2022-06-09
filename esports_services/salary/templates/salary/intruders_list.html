@@ -5,11 +5,25 @@
   <div class="col-md-6 col-sm-auto m-3 mb-0">
     <div class="list-group">
       {% for intruder in object_list %}
-      {% if intruder.wait_count %}
-      <a href="{% url 'misconducts_user_view' username=intruder.employee.username %}?next={{ request.path }}" class="list-group-item list-group-item-action list-group-item-warning" data-bs-toggle="tooltip" data-bs-placement="right" title="Ожидает объясенение: {{ intruder.wait_count }}">
+      {% if intruder.explanation_count and intruder.decision_count %}
+      <a href="{% url 'misconducts_user_view' username=intruder.employee.username %}?next={{ request.path }}" class="list-group-item list-group-item-action list-group-item-warning" data-bs-toggle="tooltip" data-bs-placement="right" title="Необходимо объяснение и решение">
         <div class="d-flex justify-content-between align-items-center">
           <div><span class="verysmall"><i class="fa-solid fa-file-circle-exclamation fa-fade"></i> {{ intruder.employee.get_full_name }}</span></div>
-          <div><span class="badge bg-danger rounded-pill">{{ intruder.wait_count }} / {{ intruder.total_count }}</span></div>
+          <div><span class="badge bg-warning rounded-pill">{{ intruder.decision_count }} / {{ intruder.explanation_count }} / {{ intruder.total_count }}</span></div>
+        </div>
+      </a>
+      {% elif intruder.explanation_count %}
+      <a href="{% url 'misconducts_user_view' username=intruder.employee.username %}?next={{ request.path }}" class="list-group-item list-group-item-action list-group-item-warning" data-bs-toggle="tooltip" data-bs-placement="right" title="Ожидает объяснение: {{ intruder.explanation_count }}">
+        <div class="d-flex justify-content-between align-items-center">
+          <div><span class="verysmall"><i class="fa-solid fa-file-circle-exclamation fa-fade"></i> {{ intruder.employee.get_full_name }}</span></div>
+          <div><span class="badge bg-danger rounded-pill">{{ intruder.explanation_count }} / {{ intruder.total_count }}</span></div>
+        </div>
+      </a>
+      {% elif intruder.decision_count %}
+      <a href="{% url 'misconducts_user_view' username=intruder.employee.username %}?next={{ request.path }}" class="list-group-item list-group-item-action list-group-item-warning" data-bs-toggle="tooltip" data-bs-placement="right" title="Ожидает решение: {{ intruder.decision_count }}">
+        <div class="d-flex justify-content-between align-items-center">
+          <div><span class="verysmall"><i class="fa-regular fa-clock fa-fade"></i> {{ intruder.employee.get_full_name }}</span></div>
+          <div><span class="badge bg-warning rounded-pill">{{ intruder.decision_count }} / {{ intruder.total_count }}</span></div>
         </div>
       </a>
       {% else %}
