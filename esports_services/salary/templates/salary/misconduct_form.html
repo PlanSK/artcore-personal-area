@@ -41,7 +41,6 @@
           document.getElementById('id_regulations_article').after(container);
         };
         container.innerHTML = responseData['article_number'] + '. ' + responseData['title'] + '.<br><br>Санкция: ' + responseData['sanction'] + '.';
-        document.getElementById('id_comment').value = 'Нарушен пункт ' + responseData['article_number'] + '. (' + responseData['title'] + ')';
       } else {
         console.log('ERR: We reached our target server, but it returned an error.')
       };

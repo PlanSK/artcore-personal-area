@@ -11,6 +11,7 @@ from django.contrib.sites.shortcuts import get_current_site
 
 from unidecode import unidecode
 from typing import *
+from collections import namedtuple
 
 from .config import *
 
@@ -125,3 +126,5 @@ def get_choice_plural(amount: int, variants: tuple) -> str:
         choice = 2
 
     return variants[choice]
+
+Intruder = namedtuple('Intruder', 'employee total_count wait_count')
