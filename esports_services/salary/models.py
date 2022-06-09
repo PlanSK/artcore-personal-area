@@ -1,10 +1,8 @@
-import imp
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.urls import reverse_lazy
-from django.utils import timezone
 
 import datetime
 import os.path
@@ -110,7 +108,7 @@ class DisciplinaryRegulations(models.Model):
 class Misconduct(models.Model):
     class MisconductStatus(models.TextChoices):
         ADDED = 'AD', 'Ожидает объяснение'
-        WAIT = 'WT', 'Ожидает решение'
+        WAIT = 'WT', 'На рассмотрении'
         CLOSED = 'CL', 'Решение принято'
 
     misconduct_date = models.DateField(verbose_name='Дата нарушения')

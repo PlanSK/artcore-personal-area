@@ -427,22 +427,36 @@ class MisconductListView(MisconductPermissionsMixin, TitleMixin, ListView):
     title = 'Список нарушителей'
     template_name = 'salary/intruders_list.html'
 
-    def get_queryset(self):
-        queryset = Misconduct.objects.all().select_related('intruder')
-        intruder_dict = dict()
-        for misconduct in queryset:
-            count = intruder_dict.get(misconduct.intruder)
-            if count:
-                count += 1
-                intruder_dict.update({
-                    misconduct.intruder: count
-                })
-            else:
-                intruder_dict.update({
-                    misconduct.intruder: 1
-                })
+    def get_queryset(self) -> List[Intruder]:
+        queryset = Misconduct.objects.select_related('intruder__profile')
 
-        return dict(sorted(intruder_dict.items(), key=lambda item: item[1], reverse=True))
+        if not self.request.GET.get('show'):
+            queryset = queryset.exclude(intruder__profile__profile_status='DSM')
+        
+        database_tuple_list = queryset.values_list('intruder',).annotate(
+            n=models.Count('intruder')
+        )
+        intruders_tuple_list = sorted(
+            database_tuple_list, key=lambda i: i[1], reverse=True
+        )
+        intruders_list = list()
+        for intruder_id, count in intruders_tuple_list:
+            intruders_list.append(Intruder(
+                employee=User.objects.get(pk=intruder_id),
+                total_count=count,
+                wait_count=Misconduct.objects.filter(
+                    intruder=intruder_id,
+                    status=Misconduct.MisconductStatus.ADDED
+                ).count(),
+            ))
+
+        return intruders_list
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if not self.request.GET.get('show'):
+            context['only_actived'] = True
+        return context
 
 
 class MisconductUserView(LoginRequiredMixin, PermissionRequiredMixin,
@@ -458,15 +472,25 @@ class MisconductUserView(LoginRequiredMixin, PermissionRequiredMixin,
     def get_queryset(self):
         return Misconduct.objects.filter(intruder__username=self.intruder).select_related('intruder', 'regulations_article')
 
+    def get_penalty_sum(self) -> float:
+        """Возвращает сумму штрафов по нарушениям
+
+        Returns:
+            float: сумма штрафов (число типа float)
+        """
+        if self.object_list.filter(status=Misconduct.MisconductStatus.CLOSED):
+            return self.object_list.filter(
+                status=Misconduct.MisconductStatus.CLOSED,
+            ).aggregate(Sum('penalty')).get('penalty__sum')
+        
+        return 0.0
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
         context.update({
             'intruder': get_object_or_404(User, username=self.intruder),
-
-            'penalty_sum': self.object_list.filter(
-                status=Misconduct.MisconductStatus.CLOSED,
-            ).aggregate(Sum('penalty')).get('penalty__sum'),
+            'penalty_sum': self.get_penalty_sum(),
         })
 
         return context
