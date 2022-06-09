@@ -1,35 +1,34 @@
 {% extends 'salary/dashboard.html' %}
 
 {% block data %}
-<div class="row border-top">
-  <div class="col text-center">
-    <a href="{% url 'add_misconduct' %}?next={{ request.path }}" class="btn btn-primary verysmall mt-3">
-      <i class="bi bi-plus-circle"></i>&nbsp;Добавить проступок
-    </a>
-  </div>
-</div>
-<div class="row">
-  <div class="col-md-3 table-responsive m-3">
+<div class="row justify-content-center border-top">
+  <div class="col-6 m-3">
     <div class="list-group">
       {% for intruder in object_list %}
       {% if intruder.wait_count %}
-      <a href="{% url 'misconducts_user_view' username=intruder.employee.username %}" class="list-group-item list-group-item-action list-group-item-warning">
-        <div class="d-flex w-100 justify-content-between">
-          <h5 class="mb-1">{{ intruder.employee.get_full_name }}</h5>
+      <a href="{% url 'misconducts_user_view' username=intruder.employee.username %}" class="list-group-item list-group-item-action list-group-item-warning" title="Ожидает объясенение">
+        <div class="d-flex justify-content-between align-items-center">
+          <span class="verysmall"><i class="fa-solid fa-file-circle-exclamation fa-fade"></i> {{ intruder.employee.get_full_name }}</span>
+          <span class="badge bg-danger rounded-pill">{{ intruder.total_count }} / {{ intruder.wait_count }}</span>
         </div>
-        <span class="verysmall">Общее число нарушений: {{ intruder.total_count }}</span><br>
-        <span class="verysmall text-danger">Ожидает объяснение: {{ intruder.wait_count }}</span>
       </a>
       {% else %}
       <a href="{% url 'misconducts_user_view' username=intruder.employee.username %}" class="list-group-item list-group-item-action list-group-item-secondary">
-        <div class="d-flex w-100 justify-content-between">
-          <h5 class="mb-1">{{ intruder.employee.get_full_name }}</h5>
+        <div class="d-flex justify-content-between align-items-center">
+          <span class="verysmall"><i class="fa-solid fa-file-circle-check"></i> {{ intruder.employee.get_full_name }}</span>
+          <span class="badge bg-secondary rounded-pill">{{ intruder.total_count }}</span>
         </div>
-        <small>Общее число нарушений: {{ intruder.total_count }}</small>
       </a>
       {% endif %}
       {% endfor %}
     </div>
+  </div>
+</div>
+<div class="row">
+  <div class="col text-center">
+    <a href="{% url 'add_misconduct' %}?next={{ request.path }}" class="btn btn-primary verysmall mt-3">
+      <i class="bi bi-plus-circle"></i>&nbsp;Добавить нарушение
+    </a>
   </div>
 </div>
 {% endblock %}
