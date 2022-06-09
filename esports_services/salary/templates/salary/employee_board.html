@@ -124,7 +124,7 @@
                   <a href="{% url 'misconducts_user_view' username=request.user %}?next={{ request.path }}" class="stretched-link"></a>
                   <span class="badge bg-secondary text-dark">{{ penalty_count }}</span>
                 </div>
-                {% if penalty_count %}
+                {% if wait_explanation %}
                 <div class="card-footer d-flex justify-content-between align-items-center">
                   <span class="card-text text-light verysmall"><b><i>Ожидает объяснение:</i></b></span><span class="badge bg-warning text-dark">{{ wait_explanation }}</span>
                 </div>

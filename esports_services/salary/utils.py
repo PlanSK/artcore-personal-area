@@ -127,4 +127,4 @@ def get_choice_plural(amount: int, variants: tuple) -> str:
 
     return variants[choice]
 
-Intruder = namedtuple('Intruder', 'employee total_count wait_count')
+Intruder = namedtuple('Intruder', 'employee total_count explanation_count decision_count')

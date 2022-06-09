@@ -87,7 +87,13 @@
   </div>
   <div class="row">
     <div class="col text-center">
-      <a class="btn btn-outline-secondary verysmall mt-1" href="{{ request.GET.next | default:'/' }}">Назад</a>
+      {% if request.GET.next %}
+      <a class="btn btn-outline-secondary verysmall mt-1" href="{{ request.GET.next }}">Назад</a>
+      {% elif perms.salary.change_misconduct and perms.salary.delete_misconduct %}
+      <a class="btn btn-outline-secondary verysmall mt-1" href="{% url 'misconducts_view' %}">К списку нарушенителей</a>
+      {% else %}
+      <a class="btn btn-outline-secondary verysmall mt-1" href="/">Назад</a>
+      {% endif %}
     </div>
   </div>
 </div>
