@@ -66,7 +66,7 @@
   </div>
   <div class="row">
     <div class="col text-center">
-      <button class="btn btn-outline-secondary verysmall" onclick="history.back()">Назад</button>
+      <a class="btn btn-outline-secondary verysmall" href="{{ request.GET.next | default:'/' }}">Назад</a>
     </div>
   </div>
 </div>

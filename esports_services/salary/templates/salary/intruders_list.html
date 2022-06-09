@@ -6,14 +6,14 @@
     <div class="list-group">
       {% for intruder in object_list %}
       {% if intruder.wait_count %}
-      <a href="{% url 'misconducts_user_view' username=intruder.employee.username %}" class="list-group-item list-group-item-action list-group-item-warning" data-bs-toggle="tooltip" data-bs-placement="right" title="Ожидает объясенение: {{ intruder.wait_count }}">
+      <a href="{% url 'misconducts_user_view' username=intruder.employee.username %}?next={{ request.path }}" class="list-group-item list-group-item-action list-group-item-warning" data-bs-toggle="tooltip" data-bs-placement="right" title="Ожидает объясенение: {{ intruder.wait_count }}">
         <div class="d-flex justify-content-between align-items-center">
           <div><span class="verysmall"><i class="fa-solid fa-file-circle-exclamation fa-fade"></i> {{ intruder.employee.get_full_name }}</span></div>
           <div><span class="badge bg-danger rounded-pill">{{ intruder.wait_count }} / {{ intruder.total_count }}</span></div>
         </div>
       </a>
       {% else %}
-      <a href="{% url 'misconducts_user_view' username=intruder.employee.username %}" class="list-group-item list-group-item-action list-group-item-secondary">
+      <a href="{% url 'misconducts_user_view' username=intruder.employee.username %}?next={{ request.path }}" class="list-group-item list-group-item-action list-group-item-secondary">
         <div class="d-flex justify-content-between align-items-center">
           <div><span class="verysmall"><i class="fa-solid fa-clipboard-check"></i> {{ intruder.employee.get_full_name }}</span></div>
           <div><span class="badge bg-secondary rounded-pill">{{ intruder.total_count }}</span></div>
