@@ -428,9 +428,14 @@ class MisconductListView(MisconductPermissionsMixin, TitleMixin, ListView):
     template_name = 'salary/intruders_list.html'
 
     def get_queryset(self) -> List[Intruder]:
-        database_tuple_list = Misconduct.objects.values_list(
-            'intruder',
-        ).annotate(n=models.Count('intruder'))
+        queryset = Misconduct.objects.select_related('intruder__profile')
+
+        if not self.request.GET.get('show'):
+            queryset = queryset.exclude(intruder__profile__profile_status='DSM')
+        
+        database_tuple_list = queryset.values_list('intruder',).annotate(
+            n=models.Count('intruder')
+        )
         intruders_tuple_list = sorted(
             database_tuple_list, key=lambda i: i[1], reverse=True
         )
@@ -444,7 +449,14 @@ class MisconductListView(MisconductPermissionsMixin, TitleMixin, ListView):
                     status=Misconduct.MisconductStatus.ADDED
                 ).count(),
             ))
+
         return intruders_list
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if not self.request.GET.get('show'):
+            context['only_actived'] = True
+        return context
 
 
 class MisconductUserView(LoginRequiredMixin, PermissionRequiredMixin,
