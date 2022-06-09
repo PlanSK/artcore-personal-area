@@ -20,21 +20,17 @@
         </div>
       </div>
       {% endif %}
+
       {% if wait_explanation %}
-      <div class="position-fixed top-0 end-0 p-3" style="z-index: 11">
-        <div id="liveToast" class="toast align-items-center text-white bg-danger border-1" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="false">
-          <div class="toast-header bg-warning text-black">
-            <strong class="me-auto">Необходимо подать объяснение.</strong>
-            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-          </div>
-          <div class="toast-body">
-            У вас имеется нарушений: {{ wait_explanation }}.<br>
-            По ним необходимо дать объяснения. <br>Для перехода нажмите
-            <a href="{% url 'misconducts_user_view' username=request.user %}?next={{ request.path }}" class="link-warning">сюда</a>
+      <div class="row justify-content-center">
+        <div class="col-md-6 col-sm-auto">
+          <div class="alert alert-danger d-flex align-items-center mt-2" role="alert">
+            <i class="fa-solid fa-triangle-exclamation fa-2xl fa-fade me-2"></i> <div class="verysmall text-justify">У вас имеются нарушения, по которым необходимо дать объяснения руководству. <br>
           </div>
         </div>
       </div>
       {% endif %}
+  
       <div class="row m-3">
         <div class="col">
           <div class="row row-cols-md-4 row-cols-sm-1 justify-content-center">
@@ -120,19 +116,19 @@
           <div class="row row-cols-md-3 row-cols-sm-1 justify-content-center">
             <div class="col-sm-12 col-md-4 mb-1">
               <div class="card red-snippet text-light h-100">
-                <div class="card-body">
-                  <p class="card-text fst-italic">
-                    <span class="me-2"><i class="fa-solid fa-graduation-cap fa-xl"></i></span>
-                    Нарушения 
-                    {% if penalty_count %}
-                    <span class="badge bg-danger rounded-circle">{{ penalty_count }}</span>
-                    {% endif %}
-                    {% if wait_explanation %}
-                    <i class="fa-solid fa-file-circle-question fa-fade fa-xl"></i>
-                    {% endif %}
-                  </p>
+                <div class="card-body d-flex justify-content-between align-items-center">
+                  <span class="card-text fst-italic">
+                    <i class="fa-solid fa-graduation-cap fa-xl me-2"></i>
+                    Нарушения
+                  </span>
                   <a href="{% url 'misconducts_user_view' username=request.user %}?next={{ request.path }}" class="stretched-link"></a>
+                  <span class="badge bg-secondary text-dark">{{ penalty_count }}</span>
                 </div>
+                {% if penalty_count %}
+                <div class="card-footer d-flex justify-content-between align-items-center">
+                  <span class="card-text text-light verysmall"><b><i>Ожидает объяснение:</i></b></span><span class="badge bg-warning text-dark">{{ wait_explanation }}</span>
+                </div>
+                {% endif %}
               </div>
             </div>
             <div class="col-sm-12 col-md-4 mb-1">
