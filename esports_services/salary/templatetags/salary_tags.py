@@ -20,5 +20,10 @@ def inactive_user():
 
 
 @register.simple_tag()
-def unclosed_misconducts():
-    return Misconduct.objects.filter(Q(status='AD') | Q(status='WT')).count()
+def wait_explanation_misconducts():
+    return Misconduct.objects.filter(status='AD').count()
+
+
+@register.simple_tag()
+def wait_decision_misconducts():
+    return Misconduct.objects.filter(status='WT').count()
