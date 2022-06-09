@@ -432,25 +432,37 @@ class MisconductListView(MisconductPermissionsMixin, TitleMixin, ListView):
 
         if not self.request.GET.get('show'):
             queryset = queryset.exclude(intruder__profile__profile_status='DSM')
-        
-        database_tuple_list = queryset.values_list('intruder',).annotate(
-            n=models.Count('intruder')
-        )
-        intruders_tuple_list = sorted(
-            database_tuple_list, key=lambda i: i[1], reverse=True
-        )
-        intruders_list = list()
-        for intruder_id, count in intruders_tuple_list:
-            intruders_list.append(Intruder(
-                employee=User.objects.get(pk=intruder_id),
-                total_count=count,
-                wait_count=Misconduct.objects.filter(
-                    intruder=intruder_id,
-                    status=Misconduct.MisconductStatus.ADDED
-                ).count(),
-            ))
 
-        return intruders_list
+        intruders_dict = dict()
+        for misconduct in queryset:
+            if intruders_dict.get(misconduct.intruder):
+                intruders_dict[misconduct.intruder].append(misconduct.status)
+            else:
+                intruders_dict[misconduct.intruder] = [misconduct.status,]
+        
+        intruders_list = [
+            Intruder(
+                employee=intruder,
+                total_count=len(intruders_dict[intruder]),
+                explanation_count=len(
+                    list(filter(
+                        lambda x: x == 'AD',
+                        intruders_dict[intruder]
+                    ))
+                ),
+                decision_count=len(
+                    list(filter(
+                        lambda x: x == 'WT',
+                        intruders_dict[intruder]
+                    ))
+                )
+            ) for intruder in intruders_dict.keys()
+        ]
+        sorted_intruders_list = sorted(
+            intruders_list, key=lambda i: i.total_count, reverse=True
+        )
+
+        return sorted_intruders_list
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

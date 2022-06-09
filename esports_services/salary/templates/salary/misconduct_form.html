@@ -31,7 +31,10 @@
     request.onload = function() {
       if (this.status >= 200 && this.status < 400) {
         var responseData = JSON.parse(this.response);
-        document.getElementById('id_penalty').value = responseData['penalty'];
+        var penalty = document.getElementById('id_penalty');
+        if (!penalty.value) {
+          penalty.value = responseData['penalty'];
+        };
         var container = document.getElementById('id_sanction');
         if (!container) {
           container = document.createElement('div');
@@ -53,8 +56,9 @@
     var requestArticle = document.getElementById('id_regulations_article').value;
     getMisconductDataJS(requestArticle);
 
-    document.getElementById('id_regulations_article').onchange = function () { 
-      getMisconductDataJS(this.value); 
+    document.getElementById('id_regulations_article').onchange = function () {
+      document.getElementById('id_penalty').value = null;
+      getMisconductDataJS(this.value);
     };
 </script>
 {% endblock %}
