@@ -8,12 +8,20 @@ from django.utils.http import urlsafe_base64_encode
 from django.template.loader import render_to_string
 from django.core.mail import EmailMessage
 from django.contrib.sites.shortcuts import get_current_site
+from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.conf import settings
 
 from unidecode import unidecode
 from typing import *
 from collections import namedtuple
 
 from .config import *
+from salary.models import *
+import os
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 
 class EmployeePermissionsMixin(PermissionRequiredMixin):
@@ -126,5 +134,55 @@ def get_choice_plural(amount: int, variants: tuple) -> str:
         choice = 2
 
     return variants[choice]
+
+def directory_make_if_not_exists(path: str) -> bool:
+    """Проверяет существование пути, при его отсутствии пробует создать его.
+
+    Args:
+        path (str): путь для проверки
+
+    Returns:
+        bool: True если путь существует или успешно создан, в остальных случаях False.
+    """
+
+    directories_list = list()
+    head_path = path
+
+    while not os.path.exists(head_path):
+        head_path, tail = os.path.split(head_path)
+        directories_list.append(tail)
+    
+    for directory_name in directories_list:
+        try:
+            current_path = os.path.join(head_path, directory_name)
+            os.mkdir(current_path)
+        except OSError:
+            logger.error(f'Unable to create target directory "{path}".')
+            return False
+
+    return True
+
+
+def document_file_handler(employee: User, file: InMemoryUploadedFile) -> None:
+    """Обработчик загружаемого файла для его сохранения в директории сотрудника.
+
+    Args:
+        employee (User): Объект модели сотрудника
+        file (InMemoryUploadedFile): Объект загружаемого файла
+    """
+    document_directory_path = os.path.join(
+        settings.MEDIA_ROOT,
+        f'user_{employee.id}',
+        DOCUMENTS_DIR_NAME,
+    )
+
+    if directory_make_if_not_exists(document_directory_path):
+        with open(
+            os.path.join(document_directory_path, os.path.normcase(file.name)),
+            'wb+',
+        ) as writable_file:
+            for chunk in file.chunks():
+                writable_file.write(chunk)
+
 
 Intruder = namedtuple('Intruder', 'employee total_count explanation_count decision_count')

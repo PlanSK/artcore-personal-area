@@ -13,10 +13,11 @@ from .utils import get_choice_plural
 
 
 def user_directory_path(instance, filename):
-    return os.path.join(f'user_{instance.user.id}', os.path.normcase(filename))
-
-def documents_directory_path(instance, filename):
-    return os.path.join('documents', user_directory_path(instance, filename))
+    file_extension = filename.split('.')[-1]
+    return os.path.join(
+        f'user_{instance.user.id}',
+        os.path.normcase('photo.' + file_extension)
+    )
 
 
 def get_last_name(self):
@@ -46,6 +47,7 @@ class Profile(models.Model):
     photo = models.ImageField(blank=True, null=True, upload_to=user_directory_path, verbose_name='Фото профиля')
     email_status = models.CharField(max_length=10, choices=EmailStatus.choices, default=EmailStatus.ADDED, verbose_name='Состояние электронной почты')
     profile_status = models.CharField(max_length=10, choices=ProfileStatus.choices, default=ProfileStatus.REGISTRED, verbose_name='Состояние профиля')
+    employment_documents = models.FileField(blank=True, null=True, verbose_name='Документы о трудоустройстве')
 
     def __str__(self) -> str:
         return f'{self.user.first_name} {self.user.last_name} [{self.user.username}]'
