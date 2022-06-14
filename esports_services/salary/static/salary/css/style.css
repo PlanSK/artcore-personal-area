@@ -2,6 +2,10 @@
     font-size: 0.75rem;
 }
 
+.footnote {
+    font-size: 0.5rem;
+}
+
 .blue-snippet {
     background: linear-gradient(100deg,#684ff7 0%,#3f0575 100%);
     border-color: #3f0575;
