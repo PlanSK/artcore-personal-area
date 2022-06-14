@@ -1,0 +1,37 @@
+{% extends 'salary/logined_page.html' %}
+{% load humanize %}
+
+{% block content %}
+  <main>
+    <div class="container">
+     <div class="row justify-content-center">
+        <div class="col-md-6 col-sm-auto">
+          <div class="alert alert-warning d-flex align-items-center mt-2" role="alert">
+            <i class="fa-solid fa-triangle-exclamation fa-2xl fa-fade me-2"></i> <div class="verysmall text-justify">Ваша учетная запись находится на проверке у руководства. Функционал временно органичен. Это может занимать до нескольких дней.</div>
+          </div>
+          <div class="text-justify verysmall">
+            Для продолжения процесса регистрации Вам необходимо представить отсканированные образы заполненных документов о трудоустройстве руководству.<br> Для перехода к загрузке документов нажмите 
+            <a href="{% url 'employment_documents_upload' %}" class="link-primary">сюда.</a>
+          </div>
+        </div>
+      </div>
+      {% if perms.salary.add_workingshift %}
+      <div class="row mt-2 justify-content-center">
+        <div class="col-md-6 col-sm-auto text-center verysmall text-secondary pt-1 border-top">
+          Для закрытия текущей смены воспользуйтесь кнопкой<br>
+          {% if today_workshift_is_exists %}
+          Текущая смена закрыта.<br>
+          Вы можете добавить смену за другую дату <a href="{% url 'add_workshift' %}?next={{ request.path }}" class="link-secondary verysmall">здесь.</a>
+          {% else %}
+          <a href="{% url 'add_workshift' %}?next={{ request.path }}" class="btn btn-outline-secondary verysmall">
+            <i class="fa-solid fa-calendar-plus fa-beat me-2"></i>
+            Закрыть смену
+          </a>
+          {% endif %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </main>
+
+{% endblock %}

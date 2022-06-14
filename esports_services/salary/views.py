@@ -30,14 +30,14 @@ class RegistrationUser(TitleMixin, SuccessUrlMixin, TemplateView):
     user_form = UserRegistrationForm
     profile_form = EmployeeRegistrationForm
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
         context = self.get_context_data(
             profile_form=self.profile_form,
             user_form=self.user_form
         )
         return render(request, self.template_name, context=context)
 
-    def post(self, request, **kwargs):
+    def post(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
         user_form_class = self.user_form(request.POST)
         profile_form_class = self.profile_form(request.POST, request.FILES)
         if user_form_class.is_valid() and profile_form_class.is_valid():
@@ -549,10 +549,6 @@ class EditUser(LoginRequiredMixin, TitleMixin, SuccessUrlMixin, TemplateView):
         if user_form_class.is_valid() and profile_form_class.is_valid():
             if 'email' in user_form_class.changed_data:
                 self.edited_user.profile.email_status = Profile.EmailStatus.ADDED
-            employment_files = request.FILES.getlist('employment_documents')
-            if employment_files:
-                for file in employment_files:
-                    document_file_handler(self.edited_user, file)
             user = user_form_class.save(commit=False)
             profile = profile_form_class.save(commit=False)
             user.save()
@@ -902,7 +898,7 @@ class StaffEmployeeMonthView(WorkingshiftPermissonsMixin, TitleMixin, ListView):
         return context
 
 
-class EmployeeDocumentsList(LoginRequiredMixin, TitleMixin, TemplateView):
+class DocumentsList(LoginRequiredMixin, TitleMixin, TemplateView):
     template_name = 'salary/employee_documents_list.html'
     title = 'Список документов'
 
@@ -973,6 +969,39 @@ class ResetPasswordConfirmView(TitleMixin, PasswordResetConfirmView):
     template_name = 'salary/auth/password_reset_confirm.html'
     title = 'Форма сброса пароля'
     success_url = reverse_lazy('login')
+
+
+class EmploymentDocumentsView(TitleMixin, LoginRequiredMixin, TemplateView):
+    title = 'Документы по трудоустройству'
+    template_name = 'salary/documents_view/documents_list.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['files_list'] = get_employee_documents_urls(self.request.user)
+        return context
+
+
+class EmploymentDocumentsUploadView(TitleMixin, LoginRequiredMixin, TemplateView):
+    title = 'Загрузка документов'
+    template_name = 'salary/documents_view/documents_upload.html'
+
+    def post(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+        employment_files = request.FILES.getlist('files')
+
+        if employment_files:
+            for file in employment_files:
+                document_file_handler(request.user, file)
+
+        return render(
+            request, 
+            self.template_name, 
+            context={'message': 'Файлы успешно загружены. Ожидайте проверку руководством.'},
+        )
+
+
+class UnverifiedEmployeeView(LoginRequiredMixin, TitleMixin, TemplateView):
+    title = 'Главная'
+    template_name = 'salary/unverified_employee.html'
 
 
 def page_not_found(request, exception):
