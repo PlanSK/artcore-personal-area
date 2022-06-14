@@ -44,7 +44,7 @@ class EmployeeRegistrationForm(forms.ModelForm):
         model = Profile
         fields = (
             'birth_date', 'employment_date',
-            'position', 'photo', 'employment_documents'
+            'position', 'photo',
         )
         widgets = {
             'birth_date': forms.DateInput(attrs={
@@ -52,7 +52,6 @@ class EmployeeRegistrationForm(forms.ModelForm):
                 'max': '2003-01-01'
             }),
             'employment_date': forms.DateInput(attrs={'type': 'date'}),
-            'employment_documents': forms.ClearableFileInput(attrs={'multiple': True}),
         }
 
 
@@ -63,15 +62,13 @@ class StaffEditProfileForm(forms.ModelForm):
         fields = (
             'birth_date', 'employment_date', 'position',
             'photo', 'attestation_date', 'dismiss_date',
-            'employment_documents', 'profile_status',
+            'profile_status',
         )
         widgets_injection = {
             field: forms.DateInput(attrs={'type': 'date',}, format='%Y-%m-%d')
             for field in fields if 'date' in field
         }
-        widgets = {
-            'employment_documents': forms.ClearableFileInput(attrs={'multiple': True}),
-        }
+        widgets = dict()
         widgets.update(widgets_injection)
 
 
@@ -97,15 +94,13 @@ class EditProfileForm(forms.ModelForm):
         model = Profile
         fields = (
             'birth_date', 'employment_date',
-            'photo', 'employment_documents',
+            'photo',
         )
         widgets_injection = {
             field: forms.DateInput(attrs={'type': 'date',}, format='%Y-%m-%d')
             for field in fields if 'date' in field
         }
-        widgets = {
-            'employment_documents': forms.ClearableFileInput(attrs={'multiple': True})
-        }
+        widgets = dict()
         widgets.update(widgets_injection)
 
 
