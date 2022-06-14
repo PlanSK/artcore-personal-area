@@ -10,6 +10,7 @@ from django.core.mail import EmailMessage
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.conf import settings
+from django.core.files.storage import FileSystemStorage
 
 from unidecode import unidecode
 from typing import *
@@ -135,32 +136,32 @@ def get_choice_plural(amount: int, variants: tuple) -> str:
 
     return variants[choice]
 
-def directory_make_if_not_exists(path: str) -> bool:
-    """Проверяет существование пути, при его отсутствии пробует создать его.
+
+def get_user_media_dir_name(employee: User) -> str:
+    """Return name of employee dirctory in MEDIA_ROOT
 
     Args:
-        path (str): путь для проверки
+        employee (User): Django User object
+    """
+    return f'user_{employee.id}'
 
-    Returns:
-        bool: True если путь существует или успешно создан, в остальных случаях False.
+
+def get_document_directory_path(employee: User) -> str:
+    """Возвращает предполагаемый путь к папке с документами пользователя.
     """
 
-    directories_list = list()
-    head_path = path
+    return os.path.join(
+        get_user_media_dir_name(employee),
+        DOCUMENTS_DIR_NAME,
+    )
 
-    while not os.path.exists(head_path):
-        head_path, tail = os.path.split(head_path)
-        directories_list.append(tail)
-    
-    for directory_name in directories_list:
-        try:
-            current_path = os.path.join(head_path, directory_name)
-            os.mkdir(current_path)
-        except OSError:
-            logger.error(f'Unable to create target directory "{path}".')
-            return False
 
-    return True
+def get_employee_file_url(employee: User, filename: str) -> str:
+    return '/'.join([
+        get_user_media_dir_name(employee),
+        DOCUMENTS_DIR_NAME,
+        filename
+    ])
 
 
 def document_file_handler(employee: User, file: InMemoryUploadedFile) -> None:
@@ -170,19 +171,39 @@ def document_file_handler(employee: User, file: InMemoryUploadedFile) -> None:
         employee (User): Объект модели сотрудника
         file (InMemoryUploadedFile): Объект загружаемого файла
     """
-    document_directory_path = os.path.join(
-        settings.MEDIA_ROOT,
-        f'user_{employee.id}',
-        DOCUMENTS_DIR_NAME,
-    )
 
-    if directory_make_if_not_exists(document_directory_path):
-        with open(
-            os.path.join(document_directory_path, os.path.normcase(file.name)),
-            'wb+',
-        ) as writable_file:
-            for chunk in file.chunks():
-                writable_file.write(chunk)
+    document_directory_path = get_document_directory_path(employee)
+    storage = FileSystemStorage()
+    file_ext = os.path.splitext(file.name)[1]
+    filename = storage.get_alternative_name(
+        slugify(f'doc_{unidecode(employee.last_name)}'),
+        file_ext
+    )
+    save_file_path = os.path.join(document_directory_path, filename)
+    storage.save(save_file_path, file)
+
+
+def get_employee_documents_urls(employee: User) -> tuple[str]:
+    """Возвращает список документов, находящихся в папке DOCUMENTS_DIR_NAME
+
+    Args:
+        employee (User): Объект модели сотрудника.
+    """
+
+    employee_document_dir_path = get_document_directory_path(employee)
+    file_urls_tuple = tuple()
+    file_storage = FileSystemStorage()
+    if os.path.exists(os.path.join(
+        file_storage.location,
+        employee_document_dir_path
+    )):
+        if file_storage.listdir(employee_document_dir_path)[-1]:
+            file_urls_tuple = (
+                file_storage.url(get_employee_file_url(employee, name))
+                for name in file_storage.listdir(employee_document_dir_path)[-1]
+            )
+
+    return file_urls_tuple
 
 
 Intruder = namedtuple('Intruder', 'employee total_count explanation_count decision_count')
