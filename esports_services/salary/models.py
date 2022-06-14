@@ -9,13 +9,13 @@ import os.path
 from dateutil.relativedelta import relativedelta
 
 from .config import *
-from .utils import get_choice_plural
+from .utils import get_choice_plural, get_user_media_dir_name
 
 
 def user_directory_path(instance, filename):
-    file_extension = filename.split('.')[-1]
+    file_extension = os.path.splitext(filename)[1]
     return os.path.join(
-        f'user_{instance.user.id}',
+        get_user_media_dir_name(instance.user),
         os.path.normcase('photo.' + file_extension)
     )
 
