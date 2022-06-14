@@ -33,9 +33,9 @@ class Profile(models.Model):
         CONFIRMED = 'CNF', 'Подтвержден'
 
     class ProfileStatus(models.TextChoices):
-        REGISTRED = 'RG', 'Ожидает проверки'
-        WAIT = 'WT', 'Ожидает активации'
-        ACTIVATED = 'ACT', 'Активирован'
+        REGISTRED = 'RG', 'Зарегистрирован'
+        WAIT = 'WT', 'Ожидает проверки'
+        VERIFIED = 'VD', 'Проверен'
         DISMISSED = 'DSM', 'Уволен'
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)

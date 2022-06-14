@@ -101,7 +101,7 @@ class ConfirmUserView(TitleMixin, SuccessUrlMixin, TemplateView):
                 self.token_generator.check_token(self.requested_user, token)):
             self.requested_user.is_active = True
             self.requested_user.profile.email_status = Profile.EmailStatus.CONFIRMED
-            self.requested_user.profile.profile_status = Profile.ProfileStatus.ACTIVATED
+            self.requested_user.profile.profile_status = Profile.ProfileStatus.VERIFIED
             self.requested_user.save()
             login(request, self.requested_user)
             return super().dispatch(request, *args, **kwargs)
