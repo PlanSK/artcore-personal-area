@@ -5,7 +5,7 @@
 <div class="container">
   <div class="row justify-content-center">
     <div class="col m-2 text-center border rounded shadow-sm">
-      <h5>Документы о трудоустройстве сотрудника <br>{{ request.user.get_full_name }}</h5>
+      <h5>Документы о трудоустройстве сотрудника <br>{{ employee.get_full_name }}</h5>
       <hr>
       <div class="row">
         {% if files_list %}

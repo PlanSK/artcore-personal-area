@@ -14,9 +14,7 @@ def unverified_shift():
 
 @register.simple_tag()
 def inactive_user():
-    return User.objects.exclude(is_active=True).filter(
-        profile__dismiss_date=None
-    ).count()
+    return Profile.objects.filter(profile_status='WT').count()
 
 
 @register.simple_tag()
@@ -27,3 +25,9 @@ def wait_explanation_misconducts():
 @register.simple_tag()
 def wait_decision_misconducts():
     return Misconduct.objects.filter(status='WT').count()
+
+
+@register.simple_tag()
+def today_workshift_exists_check():
+    return WorkingShift.objects.filter(
+        shift_date=datetime.date.today()).exists()

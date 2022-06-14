@@ -47,7 +47,7 @@ urlpatterns = [
     path('confirm_mail_status/', ConfirmMailStatus.as_view(), name='confirm_mail_status'),
     path('request_confirmation_link/', request_confirmation_link, name='request_confirmation_link'),
     path('shortage_payment/<slug:slug>/', ShortagePayment.as_view(), name='shortage_payment'),
-    path('employment_documents_view/', EmploymentDocumentsView.as_view(), name='employment_documents_view'),
+    path('employment_documents_view/<str:user>/', EmploymentDocumentsView.as_view(), name='employment_documents_view'),
     path('employment_documents_upload/', EmploymentDocumentsUploadView.as_view(), name='employment_documents_upload'),
     path('pending_verification/', UnverifiedEmployeeView.as_view(), name='pending_verification'),
 ]
