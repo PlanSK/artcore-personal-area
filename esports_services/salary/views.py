@@ -1032,6 +1032,16 @@ class DocumentDeleteView(EmployeePermissionsMixin, RedirectView):
         return super().get_redirect_url(*args, **kwargs)
 
 
+class ProfileStatusApprovalView(EmployeePermissionsMixin, RedirectView):
+    def get_redirect_url(self, *args, **kwargs):
+        self.url = self.request.GET.get('next', reverse_lazy('index'))
+        employee = get_object_or_404(User, pk=self.kwargs.get('pk', 0))
+        employee.profile.profile_status = Profile.ProfileStatus.VERIFIED
+        employee.save()
+
+        return super().get_redirect_url(*args, **kwargs)
+
+
 def page_not_found(request, exception):
     response = render(request, 'salary/404.html', {'title': 'Page not found'})
     response.status_code = 404

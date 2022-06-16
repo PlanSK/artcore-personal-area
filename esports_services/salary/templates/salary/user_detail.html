@@ -57,7 +57,8 @@
               {% else %}
               <span class="text-warning">Не пройдена</span> 
               {% endif %}
-            {% endif %}
+            {% endif %}<br>
+            <a href="{% url 'employment_documents_upload' %}" class="link-secondary verysmall">Загрузить документы...</a>
           </p>
         </div>
         <div class="card-footer text-center">
