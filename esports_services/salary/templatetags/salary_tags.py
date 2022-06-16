@@ -31,3 +31,8 @@ def wait_decision_misconducts():
 def today_workshift_exists_check():
     return WorkingShift.objects.filter(
         shift_date=datetime.date.today()).exists()
+
+
+@register.simple_tag()
+def get_verbose_status(status: str) -> str:
+    return Profile.ProfileStatus(status).label

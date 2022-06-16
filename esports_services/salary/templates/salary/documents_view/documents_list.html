@@ -16,6 +16,7 @@
             <a href="#" class="list-group-item list-group-item-dark pt-0 pb-0 verysmall" id="{{ file }}">{{ file }}</a>
             {% endfor %}
           </ul>
+          <a href="" class="btn btn-outline-primary verysmall mb-1" id="deleteButton" onclick="return confirm('Вы действительно хотите удалить этот файл?');"><i class="fa-solid fa-trash"></i>&nbsp;Удалить</a>
         </div>
         <div class="col m-2 border rounded">
           <p class="verysmall">Preview</p>
@@ -53,13 +54,18 @@
                 };
                 link.setAttribute('class', class_attr + ' active');
                 link.ariaCurrent = true;
+                var fileName = link.innerHTML.split('/').pop();
+                var deleteButton = document.getElementById('deleteButton');
+                var deleteLink = deleteButton.getAttribute('href');
+                var deleteUrlLink = "{% url 'document_delete' pk=employee.id filename='fileName' %}?next={{ request.path }}";
+                deleteButton.setAttribute('href', deleteUrlLink.replace('fileName', fileName));
               };
             };
           };
         </script>
         {% else %}
         <div class="col">
-          <p>Документы отсутствуют<br><a href="#" class="btn btn-secondary verysmall m-2"><i class="fa-solid fa-cloud-arrow-up"></i> Загрузить</a></p>
+          <p>Документы отсутствуют</p>
         </div>
         {% endif %}
       </div>

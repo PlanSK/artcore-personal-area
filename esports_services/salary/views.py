@@ -1020,6 +1020,18 @@ class UnverifiedEmployeeView(LoginRequiredMixin, TitleMixin, TemplateView):
     template_name = 'salary/unverified_employee.html'
 
 
+class DocumentDeleteView(EmployeePermissionsMixin, RedirectView):
+    def get_redirect_url(self, *args, **kwargs):
+        self.url = self.request.GET.get('next', reverse_lazy('index'))
+        employee = get_object_or_404(User, pk=self.kwargs.get('pk', 0))
+        
+        filename = self.kwargs.get('filename')
+        if filename:
+            delete_document_from_storage(employee, filename)
+
+        return super().get_redirect_url(*args, **kwargs)
+
+
 def page_not_found(request, exception):
     response = render(request, 'salary/404.html', {'title': 'Page not found'})
     response.status_code = 404

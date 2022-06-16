@@ -140,4 +140,15 @@ def get_employee_documents_urls(employee: User) -> tuple[str]:
     return file_urls_tuple
 
 
+def delete_document_from_storage(employee: User, filename: str) -> None:
+    """Delete document file from DOCUMENTS_DIR_NAME
+
+    Args:
+        employee (User): Django model User
+        filename (str): Filename
+    """
+    file_path = os.path.join(get_document_directory_path(employee), filename)
+    FileSystemStorage().delete(name=file_path)
+
+
 Intruder = namedtuple('Intruder', 'employee total_count explanation_count decision_count')
