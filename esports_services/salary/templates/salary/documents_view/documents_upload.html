@@ -29,6 +29,7 @@
       {% if message %}
       <div class="alert alert-success align-items-center m-2 text-center verysmall" role="alert">
         {{ message }}
+        Для возврата на главную страницу нажмите <a href="{% url 'index' %}" class="link-primary">сюда.</a>
       </div>
       {% endif %}
       <div class="col m-2 border rounded p-1">

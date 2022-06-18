@@ -45,6 +45,9 @@ class RegistrationUser(TitleMixin, SuccessUrlMixin, TemplateView):
             user = user_form_class.save(commit=False) 
             profile = profile_form_class.save(commit=False)
             user.is_active = False
+            for field in ('first_name', 'last_name'):
+                field_value = getattr(user, field)
+                setattr(user, field, field_value.strip().capitalize())
             user.save()
             profile.user = user
             user.groups.add(Group.objects.get(name='employee'))
@@ -1018,6 +1021,11 @@ class EmploymentDocumentsUploadView(LoginRequiredMixin, TitleMixin, TemplateView
 class UnverifiedEmployeeView(LoginRequiredMixin, TitleMixin, TemplateView):
     title = 'Главная'
     template_name = 'salary/unverified_employee.html'
+
+    def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+        if request.user.profile.profile_status == Profile.ProfileStatus.VERIFIED:
+            return redirect('index')
+        return super().dispatch(request, *args, **kwargs)
 
 
 class DocumentDeleteView(EmployeePermissionsMixin, RedirectView):

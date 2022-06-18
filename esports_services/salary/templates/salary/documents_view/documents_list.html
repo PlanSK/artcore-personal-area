@@ -73,7 +73,7 @@
         {% get_verbose_status status=employee.profile.profile_status as status %}
         {% if employee.profile.profile_status != 'VD' %}
           <p>В настоящее время профиль сотрудника имеет стутус <b class="text-warning">"{{ status }}"</b>.<br>Вы можете одобрить его регистрацию нажав кнопку ниже.<br>
-          <a href="{% url 'profile_approval' pk=employee.id %}?next={{ request.path }}" class="btn btn-outline-success verysmall mt-1" onclick="return confirm('Вы действительно хотите одобрить регистрицию сотруднику?');">Одобрить регистрацию</a></p>
+          <a href="{% url 'profile_approval' pk=employee.id %}?next={{ request.path }}" class="btn btn-outline-success verysmall mt-1" onclick="return confirm('Вы действительно хотите одобрить регистрицию сотрудника?');">Одобрить регистрацию</a></p>
         {% else %}
           <p>В настоящее время профиль сотрудника имеет стутус <b class="text-success">"{{ status }}"</b>
         {% endif %}

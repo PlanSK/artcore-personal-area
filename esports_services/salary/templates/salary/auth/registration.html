@@ -12,12 +12,56 @@
                 <div class="form-error">{{ form.non_field_errors }}</div>
                 {{ user_form|crispy }}
                 {{ profile_form|crispy }}
+                <div class="form-check mb-2">
+                  <input class="form-check-input" type="checkbox" value="" id="personalDataCheckbox" onchange="personalDataCheck()" required>
+                  <label class="form-check-label" for="flexCheckChecked">
+                    Прочитал <a href="#" class="link-primary" data-bs-toggle="modal" data-bs-target="#personalDataModal">соглашение</a> и даю согласие обработку своих персональных данных.
+                  </label>
+                </div>
                 <div class="m-6 d-flex justify-content-center">
-                  <button type="submit" class="btn btn-primary mb-4">Зарегистрироваться</button>
+                  <button type="submit" class="btn btn-primary mb-4" id="submitButton">Зарегистрироваться</button>
                 </div>
               </form>
           </div>
       </div>
+      <script>
+        function personalDataCheck() {
+          submitBtn = document.getElementById('submitButton');
+          if (!document.getElementById('personalDataCheckbox').checked) {
+            submitBtn.disabled = true;
+          } else {
+            submitBtn.disabled = false;
+          }
+        }
+        personalDataCheck();
+      </script>
+      <!-- Vertically centered scrollable modal -->
   </div>
+  <div class="modal fade" id="personalDataModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content bg-dark">
+        <div class="modal-header">
+          <h5 class="modal-title" id="staticBackdropLabel">Соглашение</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+        <h5>Согласие на обработку персональных данных</h5>
+        <div class="text-justify verysmall">Физическое лицо, являясь субъектом персональных данных, при регистрации на сайте {{ request.get_host }}, в соответствии с <nobr>п. 4 ст. 9 Федерального</nobr> закона от 27.07.2006  N 152-ФЗ  "О персональных данных", выражает свое согласие ООО “Арткор Джи”, на обработку своих персональных данных, а именно:
+        <ul>
+          <li>Фамилии имени и отчества.</li>
+          <li>Даты рождения.</li>
+          <li>Даты трудоустройства.</li>
+          <li>Адреса электронной почты.</li>
+        </ul>
+        То есть на совершение действий, предусмотренных <nobr>п. 3 ст. 3 Федерального</nobr> закона от 27.07.2006 N 152-ФЗ "О персональных данных".
+        Настоящее  согласие действует с даты регистрации на указанном ресурсе.</div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </main>
 {% endblock %}

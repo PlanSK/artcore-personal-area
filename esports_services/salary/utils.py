@@ -7,6 +7,7 @@ from django.core.mail import EmailMessage
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core.files.storage import FileSystemStorage
+from django.conf import settings
 
 from unidecode import unidecode
 from typing import *
@@ -149,6 +150,18 @@ def delete_document_from_storage(employee: User, filename: str) -> None:
     """
     file_path = os.path.join(get_document_directory_path(employee), filename)
     FileSystemStorage().delete(name=file_path)
+
+
+class OverwriteStorage(FileSystemStorage):
+
+    def get_available_name(self, name, max_length=None):
+        """Returns a filename that's free on the target storage system, and
+        available for new content to be written to.
+        """
+        # If the filename already exists, remove it as if it was a true file system
+        if self.exists(name):
+            os.remove(os.path.join(settings.MEDIA_ROOT, name))
+        return name
 
 
 Intruder = namedtuple('Intruder', 'employee total_count explanation_count decision_count')

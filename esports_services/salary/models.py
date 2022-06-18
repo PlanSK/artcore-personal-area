@@ -9,7 +9,7 @@ import os.path
 from dateutil.relativedelta import relativedelta
 
 from .config import *
-from .utils import get_choice_plural, get_user_media_dir_name
+from .utils import get_choice_plural, get_user_media_dir_name, OverwriteStorage
 
 
 def user_directory_path(instance, filename):
@@ -44,7 +44,7 @@ class Profile(models.Model):
     position = models.ForeignKey('Position', on_delete=models.PROTECT, null=True, verbose_name='Должность')
     attestation_date = models.DateField(blank=True, null=True, verbose_name='Дата прохождения аттестации')
     dismiss_date = models.DateField(blank=True, null=True, verbose_name='Дата увольнения')
-    photo = models.ImageField(blank=True, null=True, upload_to=user_directory_path, verbose_name='Фото профиля')
+    photo = models.ImageField(blank=True, null=True, storage=OverwriteStorage(),  upload_to=user_directory_path, verbose_name='Фото профиля')
     email_status = models.CharField(max_length=10, choices=EmailStatus.choices, default=EmailStatus.ADDED, verbose_name='Состояние электронной почты')
     profile_status = models.CharField(max_length=10, choices=ProfileStatus.choices, default=ProfileStatus.REGISTRED, verbose_name='Состояние профиля')
 
