@@ -16,7 +16,7 @@ def user_directory_path(instance, filename):
     file_extension = os.path.splitext(filename)[1]
     return os.path.join(
         get_user_media_dir_name(instance.user),
-        os.path.normcase('photo.' + file_extension)
+        os.path.normcase('photo' + file_extension)
     )
 
 

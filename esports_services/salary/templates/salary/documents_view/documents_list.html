@@ -29,7 +29,7 @@
             imageBlock.innerHTML = '';
             var imgAttrs = {
               'src': imageName,
-              'height': '100px',
+              'height': '200px',
               'wight': '200px',
               'class': 'mb-2',
             }
@@ -78,6 +78,7 @@
           <p>В настоящее время профиль сотрудника имеет стутус <b class="text-success">"{{ status }}"</b>
         {% endif %}
         </div>
+        <div class="mb-2"><a href="{% url 'user_view' %}" class="btn btn-outline-primary verysmall"><i class="fa-solid fa-users"></i>&nbsp;Управление персоналом</a></div>
       </div>
     </div>
   </div>
