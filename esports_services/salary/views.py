@@ -13,6 +13,7 @@ from django.utils.http import urlsafe_base64_decode
 
 from .forms import *
 from .utils import *
+from .mixins import *
 
 import datetime
 from typing import *
@@ -30,20 +31,23 @@ class RegistrationUser(TitleMixin, SuccessUrlMixin, TemplateView):
     user_form = UserRegistrationForm
     profile_form = EmployeeRegistrationForm
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
         context = self.get_context_data(
             profile_form=self.profile_form,
             user_form=self.user_form
         )
         return render(request, self.template_name, context=context)
 
-    def post(self, request, **kwargs):
+    def post(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
         user_form_class = self.user_form(request.POST)
         profile_form_class = self.profile_form(request.POST, request.FILES)
         if user_form_class.is_valid() and profile_form_class.is_valid():
             user = user_form_class.save(commit=False) 
             profile = profile_form_class.save(commit=False)
             user.is_active = False
+            for field in ('first_name', 'last_name'):
+                field_value = getattr(user, field)
+                setattr(user, field, field_value.strip().capitalize())
             user.save()
             profile.user = user
             user.groups.add(Group.objects.get(name='employee'))
@@ -101,7 +105,7 @@ class ConfirmUserView(TitleMixin, SuccessUrlMixin, TemplateView):
                 self.token_generator.check_token(self.requested_user, token)):
             self.requested_user.is_active = True
             self.requested_user.profile.email_status = Profile.EmailStatus.CONFIRMED
-            self.requested_user.profile.profile_status = Profile.ProfileStatus.ACTIVATED
+            self.requested_user.profile.profile_status = Profile.ProfileStatus.WAIT
             self.requested_user.save()
             login(request, self.requested_user)
             return super().dispatch(request, *args, **kwargs)
@@ -152,6 +156,7 @@ class DismissalEmployee(EmployeePermissionsMixin, TitleMixin,
         if profile_form_class.is_valid():
             profile = profile_form_class.save(commit=False)
             profile.profile_status = Profile.ProfileStatus.DISMISSED
+            self.object.groups.clear()
             self.object.is_active = False
             self.object.save()
             return redirect(self.get_success_url())
@@ -471,7 +476,7 @@ class MisconductListView(MisconductPermissionsMixin, TitleMixin, ListView):
         return context
 
 
-class MisconductUserView(LoginRequiredMixin, PermissionRequiredMixin,
+class MisconductUserView(ProfileStatusRedirectMixin, PermissionRequiredMixin,
                             TitleMixin, ListView):
     model = Misconduct
     title = 'Нарушения'
@@ -509,7 +514,7 @@ class MisconductUserView(LoginRequiredMixin, PermissionRequiredMixin,
 
 
 class MisconductUpdateView(MisconductPermissionsMixin, TitleMixin, 
-                            EditModelEditorFields, SuccessUrlMixin, UpdateView):
+                            EditModelEditorFieldsMixin, SuccessUrlMixin, UpdateView):
     model = Misconduct
     title = 'Редактирование данных нарушения'
     form_class = EditMisconductForm
@@ -521,7 +526,8 @@ class MisconductDeleteView(MisconductPermissionsMixin, TitleMixin,
     title = 'Удаление нарушения'
 
 
-class EditUser(LoginRequiredMixin, TitleMixin, SuccessUrlMixin, TemplateView):
+class EditUser(ProfileStatusRedirectMixin, TitleMixin, SuccessUrlMixin,
+               TemplateView):
     template_name = 'salary/edit_user_profile.html'
     title = 'Редактирование пользователя'
     userform = EditUserForm
@@ -529,7 +535,10 @@ class EditUser(LoginRequiredMixin, TitleMixin, SuccessUrlMixin, TemplateView):
 
     def dispatch(self, request, *args: Any, **kwargs: Any):
         if self.kwargs.get('pk'):
-            self.edited_user = get_object_or_404(User.objects.select_related('profile'), pk=self.kwargs.get('pk', 0))
+            self.edited_user = get_object_or_404(
+                User.objects.select_related('profile'),
+                pk=self.kwargs.get('pk', 0)
+            )
         else:
             self.edited_user = self.request.user
         return super().dispatch(request, *args, **kwargs)
@@ -583,7 +592,7 @@ class ShowUserProfile(LoginRequiredMixin, TitleMixin, DetailView):
         )
 
 
-class WorkshiftDetailView(LoginRequiredMixin, PermissionRequiredMixin,
+class WorkshiftDetailView(ProfileStatusRedirectMixin, PermissionRequiredMixin,
                             TitleMixin, DetailView):
     model = WorkingShift
     title = 'Детальный просмотр смены'
@@ -600,7 +609,7 @@ class WorkshiftDetailView(LoginRequiredMixin, PermissionRequiredMixin,
 
         return context
 
-class MisconductDetailView(LoginRequiredMixin, PermissionRequiredMixin,
+class MisconductDetailView(ProfileStatusRedirectMixin, PermissionRequiredMixin,
                             TitleMixin, DetailView):
     model = Misconduct
     title = 'Протокол нарушения'
@@ -609,7 +618,7 @@ class MisconductDetailView(LoginRequiredMixin, PermissionRequiredMixin,
     queryset = Misconduct.objects.select_related('intruder', 'moderator', 'regulations_article')
 
 
-class MonthlyAnalyticalReport(LoginRequiredMixin, TitleMixin, ListView):
+class MonthlyAnalyticalReport(WorkingshiftPermissonsMixin, TitleMixin, ListView):
     model = WorkingShift
     title = 'Аналитический отчёт'
     template_name = 'salary/monthly_analytical_report.html'
@@ -735,14 +744,14 @@ class MonthlyAnalyticalReport(LoginRequiredMixin, TitleMixin, ListView):
         return context
 
 
-class IndexEmployeeView(LoginRequiredMixin, TitleMixin, ListView):
+class IndexEmployeeView(ProfileStatusRedirectMixin, TitleMixin, ListView):
     model = WorkingShift
     template_name = 'salary/employee_board.html'
     title = 'Панель пользователя'
     login_url = reverse_lazy('login')
 
     def dispatch(self, request, *args, **kwargs):
-        if self.request.user.is_staff:
+        if request.user.is_authenticated and request.user.is_staff:
             return redirect('workshifts_view')
 
         return super().dispatch(request, *args, **kwargs)
@@ -793,9 +802,6 @@ class IndexEmployeeView(LoginRequiredMixin, TitleMixin, ListView):
                 cash_admin=self.request.user,
                 shortage_paid=False
             ).aggregate(Sum('shortage')).get('shortage__sum'),
-
-            'today_workshift_is_exists': self.object_list.filter(
-                shift_date=datetime.date.today()).exists(),
         })
 
         return context
@@ -807,8 +813,8 @@ class EmployeeWorkshiftsView(PermissionRequiredMixin, IndexEmployeeView):
     permission_required = 'salary.view_workingshift'
 
 
-class EmployeeMonthlyListView(LoginRequiredMixin, PermissionRequiredMixin,
-                                TitleMixin, ListView):
+class EmployeeMonthlyListView(ProfileStatusRedirectMixin, 
+                              PermissionRequiredMixin, TitleMixin, ListView):
     template_name = 'salary/employee_monthly_list.html'
     title = 'Архив смен'
     permission_required = 'salary.view_workingshift'
@@ -898,7 +904,7 @@ class StaffEmployeeMonthView(WorkingshiftPermissonsMixin, TitleMixin, ListView):
         return context
 
 
-class EmployeeDocumentsList(LoginRequiredMixin, TitleMixin, TemplateView):
+class DocumentsList(LoginRequiredMixin, TitleMixin, TemplateView):
     template_name = 'salary/employee_documents_list.html'
     title = 'Список документов'
 
@@ -927,8 +933,9 @@ class AddWorkshiftData(PermissionRequiredMixin, TitleMixin, SuccessUrlMixin,
         return super().form_valid(form)
 
 
-class EditWorkshiftData(PermissionRequiredMixin, SuccessUrlMixin,
-                        EditModelEditorFields, UpdateView):
+class EditWorkshiftData(ProfileStatusRedirectMixin, PermissionRequiredMixin,
+                        SuccessUrlMixin, EditModelEditorFieldsMixin,
+                        UpdateView):
     model = WorkingShift
     form_class = EditWorkshiftDataForm
     permission_required = 'salary.change_workingshift'
@@ -943,7 +950,7 @@ class EditWorkshiftData(PermissionRequiredMixin, SuccessUrlMixin,
 class ShortagePayment(WorkingshiftPermissonsMixin, RedirectView):
     def get_redirect_url(self, *args, **kwargs):
         self.url = self.request.GET.get('next', reverse_lazy('index'))
-        workshift = get_object_or_404(WorkingShift, slug=kwargs['slug'])
+        workshift = get_object_or_404(WorkingShift, slug=kwargs.get('slug'))
         workshift.shortage_paid = True
         workshift.save()
         return super().get_redirect_url(*args, **kwargs)
@@ -969,6 +976,78 @@ class ResetPasswordConfirmView(TitleMixin, PasswordResetConfirmView):
     template_name = 'salary/auth/password_reset_confirm.html'
     title = 'Форма сброса пароля'
     success_url = reverse_lazy('login')
+
+
+class EmploymentDocumentsView(EmployeePermissionsMixin, TitleMixin,
+                              TemplateView):
+    title = 'Документы по трудоустройству'
+    template_name = 'salary/documents_view/documents_list.html'
+
+    def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+        self.employee = get_object_or_404(
+            User, username=self.kwargs.get('user')
+        )
+
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'files_list': get_employee_documents_urls(self.employee),
+            'employee': self.employee,
+        })
+
+        return context
+
+
+class EmploymentDocumentsUploadView(LoginRequiredMixin, TitleMixin, TemplateView):
+    title = 'Загрузка документов'
+    template_name = 'salary/documents_view/documents_upload.html'
+
+    def post(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+        employment_files = request.FILES.getlist('files')
+
+        if employment_files:
+            for file in employment_files:
+                document_file_handler(request.user, file)
+
+        return render(
+            request, 
+            self.template_name, 
+            context={'message': 'Файлы успешно загружены. Ожидайте проверку руководством.'},
+        )
+
+
+class UnverifiedEmployeeView(LoginRequiredMixin, TitleMixin, TemplateView):
+    title = 'Главная'
+    template_name = 'salary/unverified_employee.html'
+
+    def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+        if request.user.profile.profile_status == Profile.ProfileStatus.VERIFIED:
+            return redirect('index')
+        return super().dispatch(request, *args, **kwargs)
+
+
+class DocumentDeleteView(EmployeePermissionsMixin, RedirectView):
+    def get_redirect_url(self, *args, **kwargs):
+        self.url = self.request.GET.get('next', reverse_lazy('index'))
+        employee = get_object_or_404(User, pk=self.kwargs.get('pk', 0))
+        
+        filename = self.kwargs.get('filename')
+        if filename:
+            delete_document_from_storage(employee, filename)
+
+        return super().get_redirect_url(*args, **kwargs)
+
+
+class ProfileStatusApprovalView(EmployeePermissionsMixin, RedirectView):
+    def get_redirect_url(self, *args, **kwargs):
+        self.url = self.request.GET.get('next', reverse_lazy('index'))
+        employee = get_object_or_404(User, pk=self.kwargs.get('pk', 0))
+        employee.profile.profile_status = Profile.ProfileStatus.VERIFIED
+        employee.save()
+
+        return super().get_redirect_url(*args, **kwargs)
 
 
 def page_not_found(request, exception):

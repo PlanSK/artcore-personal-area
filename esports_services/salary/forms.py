@@ -42,13 +42,16 @@ class EmployeeRegistrationForm(forms.ModelForm):
 
     class Meta:
         model = Profile
-        fields = ['birth_date', 'employment_date', 'position', 'photo']
+        fields = (
+            'birth_date', 'employment_date',
+            'position', 'photo',
+        )
         widgets = {
             'birth_date': forms.DateInput(attrs={
                 'type': 'date',
                 'max': '2003-01-01'
             }),
-            'employment_date': forms.DateInput(attrs={'type': 'date'})
+            'employment_date': forms.DateInput(attrs={'type': 'date'}),
         }
 
 
@@ -56,12 +59,16 @@ class StaffEditProfileForm(forms.ModelForm):
 
     class Meta:
         model = Profile
-        fields = ('birth_date', 'employment_date', 'position', 'photo', 'attestation_date', 'dismiss_date')
+        fields = (
+            'birth_date', 'employment_date', 'position',
+            'photo', 'attestation_date', 'dismiss_date',
+            'profile_status',
+        )
         widgets_injection = {
             field: forms.DateInput(attrs={'type': 'date',}, format='%Y-%m-%d')
             for field in fields if 'date' in field
         }
-        widgets = {}
+        widgets = dict()
         widgets.update(widgets_injection)
 
 
@@ -85,12 +92,15 @@ class EditProfileForm(forms.ModelForm):
 
     class Meta:
         model = Profile
-        fields = ('birth_date', 'employment_date', 'photo')
+        fields = (
+            'birth_date', 'employment_date',
+            'photo',
+        )
         widgets_injection = {
             field: forms.DateInput(attrs={'type': 'date',}, format='%Y-%m-%d')
             for field in fields if 'date' in field
         }
-        widgets = {}
+        widgets = dict()
         widgets.update(widgets_injection)
 
 

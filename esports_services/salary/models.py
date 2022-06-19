@@ -9,14 +9,15 @@ import os.path
 from dateutil.relativedelta import relativedelta
 
 from .config import *
-from .utils import get_choice_plural
+from .utils import get_choice_plural, get_user_media_dir_name, OverwriteStorage
 
 
 def user_directory_path(instance, filename):
-    return os.path.join(f'user_{instance.user.id}', os.path.normcase(filename))
-
-def documents_directory_path(instance, filename):
-    return os.path.join('documents', user_directory_path(instance, filename))
+    file_extension = os.path.splitext(filename)[1]
+    return os.path.join(
+        get_user_media_dir_name(instance.user),
+        os.path.normcase('photo' + file_extension)
+    )
 
 
 def get_last_name(self):
@@ -32,9 +33,9 @@ class Profile(models.Model):
         CONFIRMED = 'CNF', 'Подтвержден'
 
     class ProfileStatus(models.TextChoices):
-        REGISTRED = 'RG', 'Ожидает проверки'
-        WAIT = 'WT', 'Ожидает активации'
-        ACTIVATED = 'ACT', 'Активирован'
+        REGISTRED = 'RG', 'Зарегистрирован'
+        WAIT = 'WT', 'Ожидает проверки'
+        VERIFIED = 'VD', 'Проверен'
         DISMISSED = 'DSM', 'Уволен'
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
@@ -43,7 +44,7 @@ class Profile(models.Model):
     position = models.ForeignKey('Position', on_delete=models.PROTECT, null=True, verbose_name='Должность')
     attestation_date = models.DateField(blank=True, null=True, verbose_name='Дата прохождения аттестации')
     dismiss_date = models.DateField(blank=True, null=True, verbose_name='Дата увольнения')
-    photo = models.ImageField(blank=True, null=True, upload_to=user_directory_path, verbose_name='Фото профиля')
+    photo = models.ImageField(blank=True, null=True, storage=OverwriteStorage(),  upload_to=user_directory_path, verbose_name='Фото профиля')
     email_status = models.CharField(max_length=10, choices=EmailStatus.choices, default=EmailStatus.ADDED, verbose_name='Состояние электронной почты')
     profile_status = models.CharField(max_length=10, choices=ProfileStatus.choices, default=ProfileStatus.REGISTRED, verbose_name='Состояние профиля')
 

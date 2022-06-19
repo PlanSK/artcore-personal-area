@@ -1,0 +1,66 @@
+{% extends 'salary/logined_page.html' %}
+{% load humanize %}
+
+{% block content %}
+<div class="container">
+  <div class="row justify-content-center mt-2">
+    <div class="col-md-3 col-sm-auto text-center verysmall">
+      Вам необходимо загрузить скан-копии следующих документов:
+      <div class="list-group mt-1 mb-1">
+        <a class="list-group-item list-group-item-action list-group-item-dark disabled">Паспорт</a>
+        <a class="list-group-item list-group-item-action list-group-item-dark disabled">ИНН</a>
+        <a class="list-group-item list-group-item-action list-group-item-dark disabled">СНИЛС</a>
+        <a href="https://docs.google.com/document/d/1xIGNluY0oucIaejQnwlEiNR_UK1KaU8N/edit?usp=sharing&ouid=116164459080996863912&rtpof=true&sd=true" class="list-group-item list-group-item-action list-group-item-dark">Трудовой договор</a>
+        <a href="https://docs.google.com/document/d/1c9RSHpl7C2yS-nVvYPtJyRpz48FQpBmS/edit?usp=sharing&ouid=116164459080996863912&rtpof=true&sd=true" class="list-group-item list-group-item-action list-group-item-dark">Договор о материальной ответственности</a>
+        {% if request.user.profile.position.name == "hall_admin" or request.user.is_staff %}
+        <a href="https://docs.google.com/document/d/156jOnbpzoEhNHOVechs0MKqCR9RSSLMm/edit?usp=sharing&ouid=116164459080996863912&rtpof=true&sd=true" class="list-group-item list-group-item-action list-group-item-dark">Лист стажировки (админ)</a>
+        {% endif %}
+        {% if request.user.profile.position.name == "cash_admin" or request.user.is_staff %}
+        <a href="https://docs.google.com/document/d/1xWqL5LbViCOqCCSqoG5odOt3lx22KwMV/edit?usp=sharing&ouid=116164459080996863912&rtpof=true&sd=true" class="list-group-item list-group-item-action list-group-item-dark">Лист стажировки (кассир)</a>
+        {% endif %}
+        <a href="https://docs.google.com/document/d/1lgHF4qOzgGpnu1rPtDdVTcrc8FN1ROl0/edit?usp=sharing&ouid=116164459080996863912&rtpof=true&sd=true" class="list-group-item list-group-item-action list-group-item-dark">Заявление о приеме на работу</a>
+        <a href="https://docs.google.com/document/d/1mNCFg9Cq8mVe0bMPogt5EURm4XUYp4ry/edit?usp=sharing&ouid=116164459080996863912&rtpof=true&sd=true" class="list-group-item list-group-item-action list-group-item-dark">Заявление об увольнении</a>
+        <a href="https://docs.google.com/document/d/1cBDZLQN29EXbS55dGdjBtC5FxaDOs0j3/edit?usp=sharing&ouid=116164459080996863912&rtpof=true&sd=true" class="list-group-item list-group-item-action list-group-item-dark">Письмо об отстуствии претензий</a>
+        <a href="https://docs.google.com/document/d/1DAQ7dCxeu_sg-jdLCZbY_9sb1KaIjdFQ/edit?usp=sharing&ouid=116164459080996863912&rtpof=true&sd=true" class="list-group-item list-group-item-action list-group-item-dark">Договор о коллективной ответственности</a>
+      </div>
+      <span class="footnote text-warning">*бланки доступны для скачивания по ссылкам выше.</span>
+    </div>
+    <div class="col-md-9 col-sm-auto text-center border-start">
+      {% if message %}
+      <div class="alert alert-success align-items-center m-2 text-center verysmall" role="alert">
+        {{ message }}
+        Для возврата на главную страницу нажмите <a href="{% url 'index' %}" class="link-primary">сюда.</a>
+      </div>
+      {% endif %}
+      <div class="col m-2 border rounded p-1">
+        <form method="post" enctype="multipart/form-data" class="needs-validation mt-1" >
+          <p class="verysmall">Форма для загрузки файлов:<br><span class="footnote">(изображения формата *.jpg, *.png и др.)</span></p>
+          <div class="form-error">{{ form.non_field_errors }}</div>
+          <div class="input-group mb-3">
+            <label class="input-group-text verysmall" for="id_files">Выбрать&nbsp;<i class="fa-solid fa-folder-open"></i></label>
+            <input type="file" name="files" class="form-control" id="id_files" accept="image/*" multiple hidden required>
+            <textarea class="form-control verysmall" id="file-list"></textarea>
+          </div>
+          <button class="btn btn-outline-secondary verysmall" type="submit" onclick="checkInput()"><i class="fa-solid fa-cloud-arrow-up"></i>&nbsp;Загрузить</button>
+          {% csrf_token %}
+        </form>
+      </div>
+      <script>
+        function checkInput() {
+          if (!document.getElementById('id_files').value) {
+            alert('Сначала выберите файлы для загрузки!');
+          }
+        }
+        document.getElementById('id_files').onchange = function () {
+          var namesArray = new Array();
+
+          for (let i = 0; i < this.files.length; ++i) {
+            namesArray.push(this.files.item(i).name);
+          };
+          document.getElementById('file-list').value += namesArray.join('\n');
+        };
+      </script>
+    </div>
+  </div>
+</div>
+{% endblock %}
