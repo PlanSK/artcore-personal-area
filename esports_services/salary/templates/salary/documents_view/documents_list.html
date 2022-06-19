@@ -1,0 +1,86 @@
+{% extends 'salary/logined_page.html' %}
+{% load humanize %}
+{% load salary_tags %}
+
+{% block content %}
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col m-2 text-center border rounded shadow-sm">
+      <h5>Документы о трудоустройстве сотрудника <br>{{ employee.get_full_name }}</h5>
+      <hr>
+      <div class="row">
+        {% if files_list %}
+        <div class="col m-2 border rounded">
+          <p class="verysmall">Список документов:</p>
+          <ul class="list-group m-1">
+            {% for file in files_list %}
+            <a href="#" class="list-group-item list-group-item-dark pt-0 pb-0 verysmall" id="{{ file }}">{{ file }}</a>
+            {% endfor %}
+          </ul>
+          <a href="" class="btn btn-outline-primary verysmall mb-1" id="deleteButton" onclick="return confirm('Вы действительно хотите удалить этот файл?');"><i class="fa-solid fa-trash"></i>&nbsp;Удалить</a>
+        </div>
+        <div class="col m-2 border rounded">
+          <p class="verysmall">Preview</p>
+          <div id="image-block"></div>
+        </div>
+        <script>
+          function imageView(imageName) {
+            var imageBlock = document.getElementById('image-block');
+            imageBlock.innerHTML = '';
+            var imgAttrs = {
+              'src': imageName,
+              'height': '200px',
+              'wight': '200px',
+              'class': 'mb-2',
+            }
+            var image = document.createElement('img');
+            for (attr in imgAttrs) {
+              image.setAttribute(attr, imgAttrs[attr]);
+            };
+            var linkImage = document.createElement('a');
+            linkImage.href = imageName;
+            linkImage.appendChild(image)
+            imageBlock.appendChild(linkImage);
+          };
+          for (let link of document.getElementsByClassName('list-group-item')) {
+            link.onclick = function () { 
+              imageView(link.text);
+              let class_attr = link.getAttribute('class');
+              var actLinks = document.getElementsByClassName('list-group-item active');
+              if (!link.getAttribute('class').match('active')) {
+                for (let actLink of actLinks) {
+                  let classAttr = actLink.getAttribute('class').replace('active', '');
+                  actLink.setAttribute('class', classAttr);
+                  actLink.removeAttribute('aria-current');
+                };
+                link.setAttribute('class', class_attr + ' active');
+                link.ariaCurrent = true;
+                var fileName = link.innerHTML.split('/').pop();
+                var deleteButton = document.getElementById('deleteButton');
+                var deleteLink = deleteButton.getAttribute('href');
+                var deleteUrlLink = "{% url 'document_delete' pk=employee.id filename='fileName' %}?next={{ request.path }}";
+                deleteButton.setAttribute('href', deleteUrlLink.replace('fileName', fileName));
+              };
+            };
+          };
+        </script>
+        {% else %}
+        <div class="col">
+          <p>Документы отсутствуют</p>
+        </div>
+        {% endif %}
+        <div class="text-center mb-1 verysmall">
+        {% get_verbose_status status=employee.profile.profile_status as status %}
+        {% if employee.profile.profile_status != 'VD' %}
+          <p>В настоящее время профиль сотрудника имеет стутус <b class="text-warning">"{{ status }}"</b>.<br>Вы можете одобрить его регистрацию нажав кнопку ниже.<br>
+          <a href="{% url 'profile_approval' pk=employee.id %}?next={{ request.path }}" class="btn btn-outline-success verysmall mt-1" onclick="return confirm('Вы действительно хотите одобрить регистрицию сотрудника?');">Одобрить регистрацию</a></p>
+        {% else %}
+          <p>В настоящее время профиль сотрудника имеет стутус <b class="text-success">"{{ status }}"</b>
+        {% endif %}
+        </div>
+        <div class="mb-2"><a href="{% url 'user_view' %}" class="btn btn-outline-primary verysmall"><i class="fa-solid fa-users"></i>&nbsp;Управление персоналом</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

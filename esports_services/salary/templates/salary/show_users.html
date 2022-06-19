@@ -1,62 +1,74 @@
 {% extends 'salary/dashboard.html' %}
+{% load salary_tags %}
 
 {% block data %}
 <div class="row row-cols-sm-1 row-cols-md-4 g-2 border-top">
   {% include 'salary/js/mail_request.js.html' %}
   {% for current_user in object_list %}
     <div class="col">
-      <div class="card border-light bg-dark text-light h-100" style="max-width: 17rem;">
+      <div class="card border-light text-light h-100 bg-dark" style="max-width: 17rem;">
         <div class="card-header text-center bg-black-50">
           {% if current_user.profile.photo %}
-            <img src="{{ current_user.profile.photo.url }}" alt="" class="rounded-circle" style="width: 75px; height: 75px;">
+            <img src="{{ current_user.profile.photo.url }}" alt="" class="rounded-circle" style="width: 65px; height: 65px;">
           {% else %}
             <i class="fa-solid fa-circle-user fa-4x text-secondary"></i>
           {% endif %}
           <br>{{ current_user.get_full_name }}<br>
           <span class="text-muted verysmall" style="font-size: x-small;">Авторизация: {{ current_user.last_login|default:"нет данных" }}</span>
+          <div class="text-center verysmall">
+            {% get_verbose_status status=current_user.profile.profile_status as profile_status %}
+            {% if current_user.profile.profile_status == 'VD' %}
+            <span class="badge rounded-pill bg-success">
+            {% elif current_user.profile.profile_status == 'RG' or current_user.profile.profile_status == 'WT' %}
+            <span class="badge rounded-pill bg-warning text-dark">
+            {% else %}
+            <span class="text-danger">
+            {% endif %}
+            {{ profile_status }}
+            </span>
+          </div>
         </div>
         <div class="card-body">
           <p class="card-text fst-italic">
-              {% if current_user.profile.profile_status == 'DSM' %}
-                <span class="text-danger verysmall">Уволен {{ current_user.profile.dismiss_date }}</span>
-              {% elif not current_user.is_active %}
-                <span class="text-warning verysmall">Ожидает активации</span>
-              {% else %}
-                {{ current_user.profile.position }}
-              {% endif %}
+            {% if current_user.profile.profile_status == 'DSM' %}
+              <span class="text-danger verysmall">Уволен {{ current_user.profile.dismiss_date }}</span>
+            {% else %}
+              {{ current_user.profile.position }}
+            {% endif %}
           </p>
           <p class="card-text verysmall">
-            Email: 
-            {% if current_user.profile.email_status == 'CNF' %}
-              <span class="text-primary">{{ current_user.email }}</span>
-              <i class="fa-solid fa-envelope-circle-check fa-xs text-success"></i>
-            {% elif current_user.profile.email_status == 'SNT' %}
-              <span class="text-warning">{{ current_user.email }}</span>
-              <i class="fa-solid fa-envelope fa-xs text-info" onclick="requestConfirmLink('{{current_user}}')" title="Письмо направлено"></i>
-            {% else %}
-              <span class="text-warning">{{ current_user.email }}</span>
-              <i class="fa-solid fa-square-envelope fa-xs fa-fade text-warning" onclick="requestConfirmLink('{{current_user}}')" title="Требуется подтверждение"></i>
-            {% endif %}
-            <br>
-            Дата рождения: {{ current_user.profile.birth_date }} <br>
-            Дата трудоустройства: {{ current_user.profile.employment_date|date:"d.m.Y" }} <br>
-            Стаж работы: {{ current_user.profile.get_experience_text }} <br>
-            Аттестация: 
-            {% if current_user.profile.attestation_date %} 
-            <span class="text-success">{{ current_user.profile.attestation_date }}</span> 
-            {% else %}
-            <span class="text-warning">Не пройдена</span> 
-            {% endif %}
+          Email: 
+          {% if current_user.profile.email_status == 'CNF' %}
+            <span class="text-primary">{{ current_user.email }}</span>
+            <i class="fa-solid fa-envelope-circle-check fa-xs text-success"></i>
+          {% elif current_user.profile.email_status == 'SNT' %}
+            <span class="text-warning">{{ current_user.email }}</span>
+            <i class="fa-solid fa-envelope fa-xs text-info" onclick="requestConfirmLink('{{current_user}}')" title="Письмо направлено"></i>
+          {% else %}
+            <span class="text-warning">{{ current_user.email }}</span>
+            <i class="fa-solid fa-square-envelope fa-xs fa-fade text-warning" onclick="requestConfirmLink('{{current_user}}')" title="Требуется подтверждение"></i>
+          {% endif %}
+          <br>
+          Дата рождения: {{ current_user.profile.birth_date }} <br>
+          Дата трудоустройства: {{ current_user.profile.employment_date|date:"d.m.Y" }} <br>
+          Стаж работы: {{ current_user.profile.get_experience_text }} <br>
+          Аттестация: 
+          {% if current_user.profile.attestation_date %} 
+          <span class="text-success">{{ current_user.profile.attestation_date }}</span> 
+          {% else %}
+          <span class="text-warning">Не пройдена</span> 
+          {% endif %}
           </p>
         </div>
         <div class="card-footer text-center">
           <div class="dropdown">
             <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuActions" data-bs-toggle="dropdown" aria-expanded="false">
-              Редактирование профиля
+              Управление профилем
             </button>
             <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdownMenuActions">
               <li><a href="{% url 'staff_passowrd_change' user=current_user %}?next={{ request.path }}" class="dropdown-item verysmall"><i class="fa-solid fa-key"></i> Изменить пароль</a></li>
               <li><a href="{% url 'staff_user_edit' current_user.profile.pk %}?next={{ request.path }}" class="dropdown-item verysmall"><i class="fa-solid fa-user-pen"></i> Измениние профиля</a></li>
+              <li><a href="{% url 'employment_documents_view' user=current_user %}" class="dropdown-item verysmall"><i class="fa-solid fa-folder-open"></i> Управление документами</a></li>
               {% if current_user.is_active %}
               <li><hr class="dropdown-divider"></li>
               <li><a href="{% url 'dismissal_user' current_user.profile.pk %}?next={{ request.path }}" class="dropdown-item verysmall"><i class="fa-solid fa-user-xmark"></i> Уволить</a></li>
