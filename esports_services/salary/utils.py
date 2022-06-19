@@ -118,7 +118,7 @@ def document_file_handler(employee: User, file: InMemoryUploadedFile) -> None:
     storage.save(save_file_path, file)
 
 
-def get_employee_documents_urls(employee: User) -> tuple[str]:
+def get_employee_documents_urls(employee: User) -> Tuple[str]:
     """Возвращает список документов, находящихся в папке DOCUMENTS_DIR_NAME
 
     Args:
