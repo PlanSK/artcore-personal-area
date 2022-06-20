@@ -231,7 +231,7 @@ class AnalyticalView(ReportsView):
 
 
 class StaffWorkshiftsView(WorkingshiftPermissonsMixin, TitleMixin, ListView):
-    template_name = 'salary/staff_unverified_workshifts_view.html'
+    template_name = 'salary/staff_workshifts_view.html'
     model = WorkingShift
     title = 'Смены'
     paginate_by = 10
@@ -245,7 +245,7 @@ class StaffWorkshiftsView(WorkingshiftPermissonsMixin, TitleMixin, ListView):
 
 
 class StaffArchiveWorkshiftsView(WorkingshiftPermissonsMixin, TitleMixin, ListView):
-    template_name = 'salary/staff_archive_workshifts_view.html'
+    template_name = 'salary/staff_workshifts_view.html'
     model = WorkingShift
     title = 'Смены'
 
@@ -261,10 +261,15 @@ class StaffArchiveWorkshiftsView(WorkingshiftPermissonsMixin, TitleMixin, ListVi
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['summary_revenue'] = sum([
-            workshift.summary_revenue
-            for workshift in self.object_list 
-        ])
+        context.update({
+            'summary_revenue': sum([
+                workshift.summary_revenue
+                for workshift in self.object_list
+            ]),
+            'workshift_dates': datetime.date(
+                self.kwargs.get('year'), self.kwargs.get('month'), 1
+            ),
+        })
 
         return context
 
