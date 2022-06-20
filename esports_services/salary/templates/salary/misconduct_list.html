@@ -11,8 +11,8 @@
   <div class="row justify-content-center">
     <div class="col-md-6 col-sm-auto border-bottom border-top ps-0">
     {% if object_list %}
-      {% for misconduct in object_list %} 
       <ul class="list-group">
+        {% for misconduct in object_list %} 
         <li class="list-group-item list-group-item-action 
         {% if misconduct.status == 'AD' %}
           list-group-item-danger
@@ -21,7 +21,7 @@
         {% elif misconduct.status == 'CL' %}
           list-group-item-success
         {% endif %}
-        m-2" aria-current="true">
+        m-2 rounded">
           <div class="d-flex w-100 justify-content-between">
             <small class="mb-1">{{ misconduct.misconduct_date}}</small>
             <span class="verysmall">
@@ -75,8 +75,8 @@
             <a class="btn btn-outline-primary verysmall mt-1 pt-0 pb-0" href="{{ misconduct.get_absolute_url }}">Подробно</a>
           </div>
         </li>
+        {% endfor %}
       </ul>
-      {% endfor %}
       <p class="text-center verysmall">
       Сумма штрафов по нарушениям: <b>{{ penalty_sum }} руб.</b>
       </p>

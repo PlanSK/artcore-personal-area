@@ -1,0 +1,143 @@
+{% extends 'salary/dashboard.html' %}
+{% load humanize %}
+
+{% block data %}
+<div class="col border-top">
+  <div class="row justify-content-center mt-2">
+    <div class="col text-end">
+      <a class="btn btn-outline-primary verysmall pt-0 pb-0" href="{% url 'add_workshift' %}?next={{ request.path }}">
+        <i class="fa-solid fa-calendar-plus"></i>&nbsp;Добавить смену
+      </a>
+    </div>
+  </div>
+  <div class="row justify-content-center">
+    {% if object_list %}
+    <div class="col col-md-5 col-sm-auto">
+      {% if summary_revenue %}
+      <h5 class="text-center">Смены за {{ workshift_dates | date:"F Y г." }}</h5>
+      {% endif %}
+      {% if object_list %}
+      <ul class="list-group">
+        {% for workshift in object_list %}
+        {% if workshift.is_verified %}
+        <li class="list-group-item list-group-item-action list-group-item-success m-1 rounded">
+        {% else %}
+        <li class="list-group-item list-group-item-action list-group-item-warning m-1 rounded">
+        {% endif %}
+          <div class="d-flex w-100 justify-content-between verysmall">
+            <span class="mb-1">
+              {% if workshift.is_verified %}
+              <a class="btn btn-success verysmall pt-0 pb-0" href="{{ workshift.get_absolute_url }}"><i class="fa-solid fa-calendar-check"></i> {{ workshift.shift_date }}</a>
+              {% else %}
+              <a class="btn btn-warning verysmall verysmall pt-0 pb-0" href="{{ workshift.get_absolute_url }}"><i class="fa-regular fa-clock fa-fade"></i> {{ workshift.shift_date }}</a>
+              {% endif %}
+              
+            </span>
+            <div class="dropdown">
+              <button class="btn btn-outline-secondary btn-sm dropdown-toggle clear-after-toggle pb-0 pt-0 mb-1" type="button" id="dropdownMenuActions" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fa-solid fa-ellipsis"></i>
+              </button>
+              <ul class="dropdown-menu dropdown-menu-secondary dropdown-menu-end" aria-labelledby="dropdownMenuActions">
+                <li>
+                  <a class="dropdown-item verysmall" href="{% url 'staff_edit_workshift' workshift.slug %}?next={{ request.path }}">
+                    <i class="fa-solid fa-square-pen"></i>&nbsp;Редактировать
+                  </a>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                  <a class="dropdown-item verysmall text-danger" href="{% url 'delete_workshift' workshift.slug %}?next={{ request.path }}">
+                    <i class="fa-solid fa-square-minus"></i>&nbsp;Удалить
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <hr class="m-0">
+          <div class="row m-1">
+            <div class="col verysmall ps-0">
+              <i class="fa-solid fa-user-gear"></i> {{ workshift.hall_admin.get_full_name }}<br>
+              <i class="fa-solid fa-cash-register"></i> {{ workshift.cash_admin.get_full_name }}
+            </div>
+            <div class="col text-end align-bottom">
+              <span><i class="fa-solid fa-coins"></i> <i><b>{{ workshift.summary_revenue | intcomma }}</b></i></span>
+            </div>
+          </div>
+          <hr class="m-0 mb-1">
+          <div class="d-flex w-100 justify-content-between verysmall text-dark">
+            <span class="badge rounded-pill bg-secondary"><i class="fa-solid fa-utensils"></i> {{ workshift.bar_revenue | intcomma }}</span>
+            <span class="badge rounded-pill bg-secondary"><i class="fa-brands fa-playstation"></i> {{ workshift.game_zone_revenue | intcomma }}</span>
+            <span class="badge rounded-pill bg-secondary"><i class="fa-solid fa-circle-xmark"></i> {{ workshift.game_zone_error | intcomma }}</span>
+            <span class="badge rounded-pill bg-secondary"><i class="fa-solid fa-vr-cardboard"></i> {{ workshift.vr_revenue | intcomma }}</span>
+            <span class="badge rounded-pill bg-secondary"><i class="fa-solid fa-bong"></i> {{ workshift.hookah_revenue | intcomma }}</span>
+            {% if workshift.shortage and workshift.shortage_paid %}
+            <span class="badge rounded-pill bg-secondary"><i class="fa-solid fa-sack-xmark"></i> <s>{{ workshift.shortage | intcomma }}</s></span>
+            {% elif workshift.shortage %}
+            <a class="badge rounded-pill bg-danger link-light not-underlined" href="{% url 'shortage_payment' slug=workshift.slug %}?next={{ request.path }}" onclick="return confirm('Вы уверены, что хотите погасить недостачу?');">
+              <i class="fa-solid fa-sack-xmark"></i> <i><b>{{ workshift.shortage | intcomma }}</b></i>
+            </a>
+            {% endif %}
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+    </div>
+    {% else %}
+    <h5 class="text-info text-center">Все проверено <i class="fa-solid fa-thumbs-up fa-bounce"></i></h5>
+    {% endif %}
+  </div>
+  {% if is_paginated %}
+  <div class="row border-bottom m-2">
+    <div class="col">
+        <ul class="pagination pagination-sm justify-content-center">
+            {% if page_obj.has_previous %}
+          <li class="page-item">
+            <a href="?page={{ page_obj.previous_page_number }}" class="page-link">Назад</a>
+            {% else %}
+          <li class="page-item disabled">
+            <span class="page-link">Назад</span>
+            {% endif %}
+          </li>
+            {% for page_num in paginator.page_range %}
+            {% if page_num == page_obj.number %}
+          <li class="page-item active" aria-current="page">
+            <span class="page-link">{{ page_obj.number }}</span>
+          </li>
+            {% else %}
+          <li class="page-item"><a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a></li>
+            {% endif %}
+            {% endfor %}
+            {% if page_obj.has_next %}
+          <li class="page-item">
+            {% else %}
+          <li class="page-item disabled">
+            {% endif %}
+            <a href="?page={{ page_obj.next_page_number }}" class="page-link">Вперёд</a>
+          </li>
+        </ul>
+    </div>
+  </div>
+  {% endif %}
+  {% if summary_revenue %}
+  <div class="row justify-content-center m-2">
+    <div class="col-md-2 col-sm-auto text-center border rounded">
+      <i class="fa-solid fa-calendar-check"></i>&nbsp;<b>{{ object_list.count }}</b>
+    </div>
+    <div class="col-md-2 col-sm-auto text-center border rounded">
+      <i class="fa-solid fa-coins"></i>&nbsp;<b>{{ summary_revenue | intcomma }}</b>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col text-center">
+      <button class="btn btn-outline-secondary verysmall" onclick="history.back()">Назад</button>
+    </div>
+  </div>
+  {% else %}
+  <div class="row">
+    <div class="col text-center">
+      <a href="{% url 'workshifts_months' %}" class="btn btn-outline-success verysmall pt-0 pb-0"><i class="fa-solid fa-calendar-days"></i>&nbsp;Смотреть архив</a>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

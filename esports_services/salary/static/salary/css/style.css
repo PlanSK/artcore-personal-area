@@ -59,3 +59,7 @@
     margin-right: auto;
     height: 300px;
 }
+
+.not-underlined {
+    text-decoration: none;
+}
