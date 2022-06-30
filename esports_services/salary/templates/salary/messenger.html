@@ -1,0 +1,91 @@
+{% extends 'salary/logined_page.html' %}
+
+{% block content %}
+<main>
+  <div class="container">
+    <div class="row justify-content-between m-1">
+      <div class="col-md-3 col-sm-auto me-2">
+        {% if dialog %}
+        <div class="card bg-transparent text-light border-secondary mt-1">
+          <div class="card-body d-flex justify-content-between align-items-center">
+            <span class="card-text">
+              <i class="fa-solid fa-circle-user fa-xl me-2"></i>
+              Ivan Ivanov
+            </span>
+            <a href="{% url 'index' %}" class="stretched-link"></a>
+            <span class="badge bg-info rounded-pill text-dark verysmall">3</span>
+          </div>
+        </div>
+
+        <div class="card bg-transparent text-light border-secondary mt-1">
+          <div class="card-body d-flex justify-content-between align-items-center">
+            <span class="card-text">
+              <i class="fa-solid fa-circle-user fa-xl me-2"></i>
+              Ivan Ivanov
+            </span>
+            <a href="{% url 'index' %}" class="stretched-link"></a>
+          </div>
+        </div>
+        {% endif %}
+        <div class="card bg-transparent text-light mt-1">
+          <div class="card-body d-flex justify-content-center align-items-center">
+            <a href="{% url 'index' %}" class="btn btn-outline-primary verysmall"><i class="fa-solid fa-plus"></i>&nbsp;New dialog</a>
+          </div>
+        </div>
+      </div>
+      {% if messages_list %}
+      <div class="col-md-8 col-sm-auto p-1 border rounded border-secondary">
+        <div class="card ms-5 m-1 verysmall bg-chat-message rounded">
+          <div class="card-header border-bottom border-secondary pt-0 pb-0"><b>Ivan Ivanov</b></div>
+          <div class="card-body p-1">
+            <p class="card-title verysmall bg-secondary"></p>
+            <p class="card-text verysmall ms-1 mb-0">With supporting text below as a natural lead-in to additional content.</p>
+            <div class="text-end verysmall text-secondary">19:00</div>
+          </div>
+        </div>
+
+        <div class="card me-5 m-1 verysmall bg-my-chat-message rounded">
+          <div class="card-header border-bottom border-secondary pt-0 pb-0"><b>{{ request.user.get_full_name }}</b></div>
+          <div class="card-body p-1">
+            <p class="card-title verysmall bg-secondary"></p>
+            <p class="card-text verysmall ms-1 mb-0">
+              Lorem ipsum dolor sit amet consectetur adipisicing elit. Itaque reprehenderit perferendis, nihil non vero aliquam veniam blanditiis atque perspiciatis, nam ratione ducimus laudantium, aperiam quae suscipit sequi officia rerum exercitationem.
+              With supporting text below as a natural lead-in to additional content.</p>
+            <div class="text-end verysmall text-my-notify">19:00&nbsp;<i class="fa-solid fa-check-double"></i></div>
+          </div>
+        </div>
+
+        <div class="card ms-5 m-1 verysmall bg-chat-message rounded">
+          <div class="card-header border-bottom border-secondary pt-0 pb-0"><b>Ivan Ivanov</b></div>
+          <div class="card-body p-1">
+            <p class="card-title verysmall bg-secondary"></p>
+            <p class="card-text verysmall ms-1 mb-0">With supporting text below as a natural lead-in to additional content.</p>
+            <div class="text-end verysmall text-secondary">19:00</div>
+          </div>
+        </div>
+
+        <div class="card me-5 m-1 verysmall bg-my-chat-message rounded">
+          <div class="card-header border-bottom border-secondary pt-0 pb-0"><b>{{ request.user.get_full_name }}</b></div>
+          <div class="card-body p-1">
+            <p class="card-title verysmall bg-secondary"></p>
+            <p class="card-text verysmall ms-1 mb-0">
+              Lorem ipsum dolor sit amet consectetur adipisicing elit. Itaque reprehenderit perferendis, nihil non vero aliquam veniam blanditiis atque perspiciatis, nam ratione ducimus laudantium, aperiam quae suscipit sequi officia rerum exercitationem.
+              With supporting text below as a natural lead-in to additional content.</p>
+            <div class="text-end verysmall text-my-notify">19:00&nbsp;<i class="fa-solid fa-check"></i></div>
+          </div>
+        </div>
+        <hr>
+        <div class="input-group input-group-sm mt-2 mb-1">
+          <input type="text" class="form-control text-light bg-transparent" placeholder="Write a mesage..." aria-label="Your message" aria-describedby="button-addon2">
+          <button class="btn btn-outline-secondary rounded" type="button" id="button-addon2"><i class="fa-solid fa-envelope-circle-check"></i></button>
+        </div>
+      </div>
+      {% else %}
+      <div class="col text-center">
+        <span class="verysmall">No messages...</span>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</main>
+{% endblock %}

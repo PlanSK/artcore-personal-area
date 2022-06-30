@@ -1055,6 +1055,11 @@ class ProfileStatusApprovalView(EmployeePermissionsMixin, RedirectView):
         return super().get_redirect_url(*args, **kwargs)
 
 
+class MessengerView(LoginRequiredMixin, TitleMixin ,TemplateView):
+    template_name = 'salary/messenger.html'
+    title = 'Chat'
+
+
 def page_not_found(request, exception):
     response = render(request, 'salary/404.html', {'title': 'Page not found'})
     response.status_code = 404
