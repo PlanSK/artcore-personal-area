@@ -14,6 +14,7 @@ from django.utils.http import urlsafe_base64_decode
 from .forms import *
 from .utils import *
 from .mixins import *
+from salary.services.chat import *
 
 import datetime
 from typing import *
@@ -1055,9 +1056,54 @@ class ProfileStatusApprovalView(EmployeePermissionsMixin, RedirectView):
         return super().get_redirect_url(*args, **kwargs)
 
 
-class MessengerView(LoginRequiredMixin, TitleMixin ,TemplateView):
-    template_name = 'salary/messenger.html'
-    title = 'Chat'
+class MessengerMainView(LoginRequiredMixin, TitleMixin ,TemplateView):
+    template_name = 'salary/chat/main.html'
+    title = 'Чат'
+
+    def get_context_data(self, **kwargs):
+        context_data = super().get_context_data(**kwargs)
+        chats_list = get_chats_list(self.request.user.id)
+        context_data.update({
+            'active_users': get_acvite_users_list(),
+            'chats_list': chats_list,
+        })
+        return context_data
+
+
+class MessengerChatView(MessengerMainView):
+    template_name = 'salary/chat/chat_open.html'
+
+    def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+        selected_chat_slug = self.kwargs.get('slug')
+        self.chat_object = get_object_or_404(Chat, slug=selected_chat_slug)
+
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        messages_list = []
+        messages_list = get_messages_list(self.chat_object.slug)
+
+        chats_list = get_chats_list(
+            self.request.user.id,
+            self.chat_object.slug
+        )
+        selected_chat_info = get_chat_info(
+            self.chat_object,
+            self.request.user.id
+        )
+
+        context.update({
+            'chats_list': chats_list,
+            'messages_list': messages_list,
+            'chat_info': selected_chat_info,
+        })
+
+        return context
+    
+    def post(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+        return redirect(self.chat_object)
 
 
 def page_not_found(request, exception):

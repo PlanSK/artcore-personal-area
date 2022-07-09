@@ -52,5 +52,6 @@ urlpatterns = [
     path('pending_verification/', UnverifiedEmployeeView.as_view(), name='pending_verification'),
     path('document_delete/<int:pk>/<str:filename>/', DocumentDeleteView.as_view(), name='document_delete'),
     path('profile_approval/<int:pk>/', ProfileStatusApprovalView.as_view(), name='profile_approval'),
-    path('messenger/', MessengerView.as_view(), name='messenger'),
+    path('messenger/', MessengerMainView.as_view(), name='messenger'),
+    path('messenger/<slug:slug>/', MessengerChatView.as_view(), name='messenger_open_chat'),
 ]

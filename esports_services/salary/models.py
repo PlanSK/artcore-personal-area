@@ -9,6 +9,7 @@ import os.path
 from dateutil.relativedelta import relativedelta
 
 from .config import *
+from salary.services.utils import get_chat_slug
 from .utils import get_choice_plural, get_user_media_dir_name, OverwriteStorage, get_current_time
 
 
@@ -352,9 +353,19 @@ class Chat(models.Model):
 
     type = models.CharField(max_length=15, choices=ChatType.choices, default=ChatType.DIALOG, verbose_name='Тип чата')
     members = models.ManyToManyField(User, verbose_name='Участники')
+    slug = models.SlugField(max_length=60, unique=True, verbose_name='URL', null=True, blank=True)
 
     class Meta:
         verbose_name = 'Chat'
+
+    def save(self, *args, **kwargs) -> None:
+        super().save(*args, **kwargs)
+        if not self.slug:
+            self.slug = get_chat_slug(self.type, self.id)
+            self.save()
+    
+    def get_absolute_url(self):
+        return reverse_lazy('messenger_open_chat', kwargs={'slug': self.slug})
 
 
 class Message(models.Model):

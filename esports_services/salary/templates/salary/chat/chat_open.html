@@ -1,0 +1,79 @@
+{% extends 'salary/chat/messenger.html' %}
+
+{% block messages %}
+<div class="row bg-secondary juestify-content-between">
+  <div class="col">
+    <div class="row justify-content-between">
+      <div class="col-auto m-1 d-flex align-items-center">
+        {% if chat_info.photo %}
+        <img src="{{ chat_info.photo.url }}" alt="" class="rounded-circle" style="width: 2em; height: 2em;">
+        {% else %}
+        <i class="fa-solid fa-circle-user fa-2x"></i>
+        {% endif %}
+        <span class="m-1 verysmall">{{ chat_info.name }}</span>
+      </div>
+      <div class="col-1 d-flex align-items-center">
+        <button type="button" class="btn-close" aria-label="Close"></button>
+      </div>
+    </div>
+  </div>
+</div>
+{% if messages_list %}
+{% for message in messages_list %}
+<div class="row">
+  <div class="col-md-6 col-sm-auto">
+    <div class="row m-1">
+      <div class="col-auto d-flex align-items-center">
+        {% if message.author.profile.photo %}
+        <img src="{{ message.author.profile.photo.url }}" alt="" class="rounded-circle" style="width: 2em; height: 2em;">
+        {% else %}
+        <i class="fa-solid fa-circle-user fa-2x"></i>
+        {% endif %}
+      </div>
+      {% if message.author == request.user %}
+        <div class="col-auto p-1 verysmall bg-my-chat-message rounded">
+          <div class="card-body p-1">
+            <p class="card-text verysmall ms-1 mb-0">
+              {{ message.message_text }}</p>
+            <div class="text-end verysmall text-my-notify">
+              {{ message.sending_time | date:"j M H:i" }}&nbsp;
+              {% if message.is_read  %}
+              <i class="fa-solid fa-check-double"></i>
+              {% else %}
+              <i class="fa-solid fa-check"></i>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      {% else %}
+        <div class="col-auto p-1 verysmall bg-chat-message rounded">
+          <div class="card-body p-1">
+            <p class="card-text verysmall ms-1 mb-0">{{ message.message_text }}</p>
+            <div class="text-end verysmall text-secondary">{{ message.sending_time | date:"j M H:i" }}</div>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endfor %}
+{% else %}
+<div class="row text-center d-flex align-items-center">
+  <div class="col m-5">
+    <i class="fa-solid fa-comment-slash fa-2x"></i>
+    <p class="verysmall">No messages here yet...</p>
+  </div>
+</div>
+{% endif %}
+<div class="row">
+  <div class="col border-top border-secondary">
+    <form class="needs-validation" method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="input-group input-group-sm mt-2 mb-1">
+        <input type="text" class="form-control text-light bg-transparent" placeholder="Write a mesage..." aria-label="Your message" aria-describedby="button-addon2" required>
+        <button class="btn btn-outline-secondary rounded" type="submit" id="button-addon2"><i class="fa-solid fa-paper-plane"></i></button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
