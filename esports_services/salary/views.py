@@ -1057,17 +1057,19 @@ class ProfileStatusApprovalView(EmployeePermissionsMixin, RedirectView):
 
 
 class MessengerMainView(LoginRequiredMixin, TitleMixin ,TemplateView):
-    template_name = 'salary/chat/main.html'
+    template_name = 'salary/chat/main_window.html'
     title = 'Чат'
 
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
-        chats_list = get_chats_list(self.request.user.id)
         context_data.update({
-            'active_users': get_acvite_users_list(),
-            'chats_list': chats_list,
+            'active_users': get_acvite_users_list(self.request.user.id),
+            'chats_list': get_chats_list(self.request.user.id),
         })
         return context_data
+
+    def post(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+        return redirect(add_message_and_return_chat(request))
 
 
 class MessengerChatView(MessengerMainView):
@@ -1089,21 +1091,39 @@ class MessengerChatView(MessengerMainView):
             self.request.user.id,
             self.chat_object.slug
         )
-        selected_chat_info = get_chat_info(
+        recipient = get_chat_info(
             self.chat_object,
             self.request.user.id
-        )
+        ).member
 
+        mark_messages_as_read(messages_list, self.request.user)
         context.update({
             'chats_list': chats_list,
             'messages_list': messages_list,
-            'chat_info': selected_chat_info,
+            'recipient': recipient,
         })
 
         return context
-    
-    def post(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
-        return redirect(self.chat_object)
+
+
+class MessengerNewChatView(MessengerMainView):
+    template_name = 'salary/chat/chat_open.html'
+
+    def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+        self.recipient = get_object_or_404(User, pk=self.kwargs.get('pk'))
+        chat = get_members_chat((request.user, self.recipient))
+        if chat:
+            return redirect(chat)
+
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update(
+            { 'recipient': self.recipient }
+        )
+
+        return context
 
 
 def page_not_found(request, exception):

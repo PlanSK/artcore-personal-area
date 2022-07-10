@@ -54,4 +54,5 @@ urlpatterns = [
     path('profile_approval/<int:pk>/', ProfileStatusApprovalView.as_view(), name='profile_approval'),
     path('messenger/', MessengerMainView.as_view(), name='messenger'),
     path('messenger/<slug:slug>/', MessengerChatView.as_view(), name='messenger_open_chat'),
+    path('messenger/new_chat/<int:pk>/', MessengerNewChatView.as_view(), name='messenger_new_chat'),
 ]

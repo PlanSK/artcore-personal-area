@@ -10,6 +10,7 @@
           <a class="navbar-brand" href="{% url 'index' %}">
             <img src="{% static 'salary/img/logo.png' %}" height="30" class="d-inline-block align-top" alt="" loading="lazy">
           </a>
+          <div class="navbar-item"><i class="fa-regular fa-message"></i></div>
           {% if request.user.is_authenticated %}
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDarkDropdown" aria-controls="navbarNavDarkDropdown" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -19,9 +20,9 @@
               <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle clear-after-toggle" id="navbarDarkDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                 {% if request.user.profile.photo %}
-                  <img src="{{ request.user.profile.photo.url }}" alt="" class="rounded-circle" style="width: 40px; height: 40px;">
+                  <img src="{{ request.user.profile.photo.url }}" alt="" class="rounded-circle" style="width: 2em; height: 2em;">
                 {% else %}
-                  <i class="bi bi-person-circle" style="font-size: 1.5rem; color: white;"></i>
+                <i class="fa-solid fa-circle-user fa-2x"></i>
                 {% endif %}
                   <span class="text-light verysmall m-2">{{request.user.get_full_name}}</span>
                 </a>

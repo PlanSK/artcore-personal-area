@@ -16,11 +16,11 @@
             <div class="d-flex justify-content-between">
               <div class="d-flex align-items-center">
               {% if member.photo %}
-                <img src="{{ member.photo.url }}" alt="" class="rounded-circle" style="width: 2em; height: 2em;">
+                <img src="{{ member.photo }}" alt="" class="rounded-circle" style="width: 2em; height: 2em;">
               {% else %}
                 <i class="fa-solid fa-circle-user fa-2x"></i>
               {% endif %}
-                <span class="ms-2 verysmall">{{ member.name }}</span>
+                <span class="ms-2 verysmall">{{ member.member.get_full_name }}</span>
               </div>
               <div>
                 {% if member.unread_messages_count %}
@@ -53,7 +53,7 @@
           <div class="modal-body">
             <div class="list-group">
               {% for contact in active_users %}
-              <a href="#" class="list-group-item list-group-item-action list-group-item-dark">
+              <a href="{% url 'messenger_new_chat' pk=contact.id %}" class="list-group-item list-group-item-action list-group-item-dark">
                 <div class="d-flex align-items-center">
                   {% if contact.profile.photo %}
                     <img src="{{ contact.profile.photo.url }}" alt="" class="rounded-circle" style="width: 2em; height: 2em;">

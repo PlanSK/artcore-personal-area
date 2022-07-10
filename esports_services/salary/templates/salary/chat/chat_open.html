@@ -5,15 +5,15 @@
   <div class="col">
     <div class="row justify-content-between">
       <div class="col-auto m-1 d-flex align-items-center">
-        {% if chat_info.photo %}
-        <img src="{{ chat_info.photo.url }}" alt="" class="rounded-circle" style="width: 2em; height: 2em;">
+        {% if recipient.profile.photo %}
+        <img src="{{ recipient.profile.photo.url }}" alt="" class="rounded-circle" style="width: 2em; height: 2em;">
         {% else %}
         <i class="fa-solid fa-circle-user fa-2x"></i>
         {% endif %}
-        <span class="m-1 verysmall">{{ chat_info.name }}</span>
+        <span class="m-1 verysmall">{{ recipient.get_full_name }}</span>
       </div>
       <div class="col-1 d-flex align-items-center">
-        <button type="button" class="btn-close" aria-label="Close"></button>
+        <a href="{% url 'messenger' %}" class="btn-close" aria-label="Close"></a>
       </div>
     </div>
   </div>
@@ -70,7 +70,8 @@
     <form class="needs-validation" method="post" enctype="multipart/form-data">
       {% csrf_token %}
       <div class="input-group input-group-sm mt-2 mb-1">
-        <input type="text" class="form-control text-light bg-transparent" placeholder="Write a mesage..." aria-label="Your message" aria-describedby="button-addon2" required>
+        <input type="text" class="form-control text-light bg-transparent" placeholder="Write a mesage..." aria-label="Your message" name="message" aria-describedby="button-addon2" required>
+        <input type="hidden" name="recipient_id" value="{{ recipient.id }}">
         <button class="btn btn-outline-secondary rounded" type="submit" id="button-addon2"><i class="fa-solid fa-paper-plane"></i></button>
       </div>
     </form>
