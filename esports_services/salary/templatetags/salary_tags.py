@@ -39,7 +39,7 @@ def get_verbose_status(status: str) -> str:
 
 
 @register.simple_tag()
-def get_unread_messages(user: User) -> bool:
+def get_unread_messages(user: User) -> int:
     return Message.objects.select_related('chat').filter(
         chat__members__in=[user],
         is_read=False

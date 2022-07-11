@@ -1111,7 +1111,7 @@ class MessengerNewChatView(MessengerMainView):
 
     def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
         self.recipient = get_object_or_404(User, pk=self.kwargs.get('pk'))
-        chat = get_members_chat((request.user, self.recipient))
+        chat = members_chat_exists(request.user, self.recipient)
         if chat:
             return redirect(chat)
 

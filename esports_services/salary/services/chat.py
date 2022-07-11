@@ -97,6 +97,22 @@ def get_acvite_users_list(user_id: int) -> QuerySet:
     return active_users_queryset
 
 
+def members_chat_exists(author: User, recipient: User) -> QuerySet:
+    """Return queryset with Chats of author and recipient
+
+    Args:
+        author (User): author user
+        recipient (User): recipient user
+
+    Returns:
+        QuerySet: QuerySet of Chats
+    """
+    chat = (Chat.objects.filter(members=author) & 
+            Chat.objects.filter(members=recipient))
+
+    return chat
+
+
 def get_members_chat(author: User, recipient: User) -> Chat:
     """Return Chat model
 
@@ -107,8 +123,7 @@ def get_members_chat(author: User, recipient: User) -> Chat:
     Returns:
         Chat: Chat model
     """
-    chat = (Chat.objects.filter(members=author) & 
-            Chat.objects.filter(members=recipient))
+    chat = members_chat_exists(author, recipient)
 
     if chat and chat.count() == 1:
         if chat.count() > 1:
