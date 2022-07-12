@@ -20,7 +20,7 @@
     </div>
   </div>
   {% if messages_list %}
-  <div class="card-body overflow-auto" id="chat-window">
+  <div class="card-body" id="chat-window" style="height: 300px; overflow-y: auto;">
     {% for message in messages_list %}
     <div class="row">
       <div class="col-md-6 col-sm-auto">
@@ -63,6 +63,15 @@
   <script>
     let chatWindow = document.getElementById('chat-window');
     chatWindow.scrollTop = chatWindow.scrollHeight;
+
+    var messages = document.querySelectorAll('.bg-my-chat-message,.bg-chat-message');
+    for (var i = 0; i < messages.length; i++) {
+      let getMessage = messages[i].getElementsByClassName('card-text');
+      if (getMessage[0].innerText.length > 65) {
+        let newClassName = messages[i].className.replace('-auto', '');
+        messages[i].setAttribute('class', newClassName);
+      }
+    }
   </script>
   {% else %}
   <div class="card-body text-center d-flex align-items-center">
