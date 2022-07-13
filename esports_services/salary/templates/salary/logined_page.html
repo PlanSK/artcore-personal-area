@@ -13,15 +13,15 @@
           </a>
           <div class="navbar-item d-flex">
             <div class="d-flex align-items-center me-2">
-              <a class="link-secondary position-relative" href="{% url 'messenger' %}" title="Messenger">
+              <a class="btn btn-outline-secondary pt-0 pb-0 position-relative" href="{% url 'messenger' %}" title="Messenger">
               {% get_unread_messages user=request.user as unread_messages %}
               {% if unread_messages %}
-                <i class="fa-solid fa-comment-dots fa-2x fa-bounce" style="--fa-bounce-height: 1;"></i>
-                <span class="position-absolute top-0 start-100 translate-middle p-1 badge rounded-circle bg-danger">
+                <i class="fa-solid fa-paper-plane fa-fade"></i>
+                <span class="position-absolute top-0 start-100 translate-middle p-1 badge rounded-circle bg-danger fa-fade">
                   <span class="visually-hidden">unread messages</span>
                 </span>
               {% else %}
-              <i class="fa-solid fa-comment-dots fa-2x"></i>
+              <i class="fa-solid fa-paper-plane"></i>
               {% endif %}
               </a>
             </div>
