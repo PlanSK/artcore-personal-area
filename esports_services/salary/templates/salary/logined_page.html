@@ -1,5 +1,6 @@
 {% extends 'salary/base.html' %}
 {% load static %}
+{% load salary_tags %}
 
 {% block body %}
 <body class="bg-dark text-white font-italic">
@@ -10,36 +11,51 @@
           <a class="navbar-brand" href="{% url 'index' %}">
             <img src="{% static 'salary/img/logo.png' %}" height="30" class="d-inline-block align-top" alt="" loading="lazy">
           </a>
-          {% if request.user.is_authenticated %}
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDarkDropdown" aria-controls="navbarNavDarkDropdown" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-          </button>
-          <div class="collapse d-flex" id="navbarNavDarkDropdown">
-            <ul class="navbar-nav">
-              <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle clear-after-toggle" id="navbarDarkDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                {% if request.user.profile.photo %}
-                  <img src="{{ request.user.profile.photo.url }}" alt="" class="rounded-circle" style="width: 40px; height: 40px;">
-                {% else %}
-                  <i class="bi bi-person-circle" style="font-size: 1.5rem; color: white;"></i>
-                {% endif %}
-                  <span class="text-light verysmall m-2">{{request.user.get_full_name}}</span>
-                </a>
-                <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end" aria-labelledby="navbarDarkDropdownMenuLink">
-                  {% if request.user.is_staff %}
-                  <li><a class="dropdown-item verysmall" href="{% url 'admin:index' %}"><i class="fa-solid fa-screwdriver-wrench"></i>&nbsp;Панель администрирования</a></li>
-                  <li><a class="dropdown-item verysmall" href="{% url 'confirm_mail_status' %}"><i class="fa-solid fa-envelope-circle-check"></i>&nbsp;Состояние активации сотрудников</a></li>
-                  <li><hr class="dropdown-divider"></li>
+          <div class="navbar-item d-flex">
+            <div class="d-flex align-items-center me-2">
+              <a class="btn btn-outline-secondary pt-0 pb-0 position-relative" href="{% url 'messenger' %}" title="Messenger">
+              {% get_unread_messages user=request.user as unread_messages %}
+              {% if unread_messages %}
+                <i class="fa-solid fa-paper-plane fa-fade"></i>
+                <span class="position-absolute top-0 start-100 translate-middle p-1 badge rounded-circle bg-danger fa-fade">
+                  <span class="visually-hidden">unread messages</span>
+                </span>
+              {% else %}
+              <i class="fa-solid fa-paper-plane"></i>
+              {% endif %}
+              </a>
+            </div>
+            {% if request.user.is_authenticated %}
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDarkDropdown" aria-controls="navbarNavDarkDropdown" aria-expanded="false" aria-label="Toggle navigation">
+              <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse d-flex" id="navbarNavDarkDropdown">
+              <ul class="navbar-nav">
+                <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle clear-after-toggle" id="navbarDarkDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  {% if request.user.profile.photo %}
+                    <img src="{{ request.user.profile.photo.url }}" alt="" class="rounded-circle" style="width: 2em; height: 2em;">
+                  {% else %}
+                  <i class="fa-solid fa-circle-user fa-2x"></i>
                   {% endif %}
-                  <li><a href="/media/clubstat/userstat.html" class="dropdown-item verysmall"><i class="fa-solid fa-network-wired"></i> Состояние игровых зон</a></li>
-                  <li><a class="dropdown-item verysmall" href="{% url 'show_user_detail' %}?next={{ request.path }}"><i class="fa-solid fa-user"></i>&nbsp;Мой профиль</a></li>
-                  <li><hr class="dropdown-divider"></li>
-                  <li><a class="dropdown-item verysmall" href="{% url 'logout' %}"><i class="fa-solid fa-arrow-right-from-bracket"></i>&nbsp;Выйти</i></a></li>
-                </ul>
-              </li>
-            </ul>
+                    <span class="text-light verysmall m-2">{{request.user.get_full_name}}</span>
+                  </a>
+                  <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end" aria-labelledby="navbarDarkDropdownMenuLink">
+                    {% if request.user.is_staff %}
+                    <li><a class="dropdown-item verysmall" href="{% url 'admin:index' %}"><i class="fa-solid fa-screwdriver-wrench"></i>&nbsp;Панель администрирования</a></li>
+                    <li><a class="dropdown-item verysmall" href="{% url 'confirm_mail_status' %}"><i class="fa-solid fa-envelope-circle-check"></i>&nbsp;Состояние активации сотрудников</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    {% endif %}
+                    <li><a href="/media/clubstat/userstat.html" class="dropdown-item verysmall"><i class="fa-solid fa-network-wired"></i> Состояние игровых зон</a></li>
+                    <li><a class="dropdown-item verysmall" href="{% url 'show_user_detail' %}?next={{ request.path }}"><i class="fa-solid fa-user"></i>&nbsp;Мой профиль</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item verysmall" href="{% url 'logout' %}"><i class="fa-solid fa-arrow-right-from-bracket"></i>&nbsp;Выйти</i></a></li>
+                  </ul>
+                </li>
+              </ul>
+            </div>
+            {% endif %}
           </div>
-          {% endif %}
         </div>
       </nav>
     </div>

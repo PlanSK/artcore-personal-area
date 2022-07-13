@@ -36,3 +36,11 @@ def today_workshift_exists_check():
 @register.simple_tag()
 def get_verbose_status(status: str) -> str:
     return Profile.ProfileStatus(status).label
+
+
+@register.simple_tag()
+def get_unread_messages(user: User) -> int:
+    return Message.objects.select_related('chat').filter(
+        chat__members__in=[user],
+        is_read=False
+    ).exclude(author=user).count()

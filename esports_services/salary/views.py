@@ -14,6 +14,7 @@ from django.utils.http import urlsafe_base64_decode
 from .forms import *
 from .utils import *
 from .mixins import *
+from salary.services.chat import *
 
 import datetime
 from typing import *
@@ -1053,6 +1054,76 @@ class ProfileStatusApprovalView(EmployeePermissionsMixin, RedirectView):
         employee.save()
 
         return super().get_redirect_url(*args, **kwargs)
+
+
+class MessengerMainView(LoginRequiredMixin, TitleMixin ,TemplateView):
+    template_name = 'salary/chat/main_window.html'
+    title = 'Чат'
+
+    def get_context_data(self, **kwargs):
+        context_data = super().get_context_data(**kwargs)
+        context_data.update({
+            'active_users': get_acvite_users_list(self.request.user.id),
+            'chats_list': get_chats_list(self.request.user.id),
+        })
+        return context_data
+
+    def post(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+        return redirect(add_message_and_return_chat(request))
+
+
+class MessengerChatView(MessengerMainView):
+    template_name = 'salary/chat/chat_open.html'
+
+    def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+        selected_chat_slug = self.kwargs.get('slug')
+        self.chat_object = get_object_or_404(Chat, slug=selected_chat_slug)
+
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        messages_list = []
+        messages_list = get_messages_list(self.chat_object.slug)
+
+        chats_list = get_chats_list(
+            self.request.user.id,
+            self.chat_object.slug
+        )
+        recipient = get_chat_info(
+            self.chat_object,
+            self.request.user.id
+        ).member
+
+        mark_messages_as_read(messages_list, self.request.user)
+        context.update({
+            'chats_list': chats_list,
+            'messages_list': messages_list,
+            'recipient': recipient,
+        })
+
+        return context
+
+
+class MessengerNewChatView(MessengerMainView):
+    template_name = 'salary/chat/chat_open.html'
+
+    def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+        self.recipient = get_object_or_404(User, pk=self.kwargs.get('pk'))
+        chat = members_chat_exists(request.user, self.recipient)
+        if chat:
+            return redirect(chat)
+
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update(
+            { 'recipient': self.recipient }
+        )
+
+        return context
 
 
 def page_not_found(request, exception):
