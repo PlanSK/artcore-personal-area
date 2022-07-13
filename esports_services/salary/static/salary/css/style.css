@@ -63,3 +63,20 @@
 .not-underlined {
     text-decoration: none;
 }
+
+.bg-chat-message {
+    background-color: #333333;
+}
+
+.bg-my-chat-message {
+    background-color: #3372b6;
+}
+
+.text-my-notify {
+    color: #62b9ff;
+}
+
+.form-control, .form-control:focus{
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+    border: rgba(255, 255, 255, 0);
+ }

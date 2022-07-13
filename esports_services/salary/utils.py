@@ -8,6 +8,7 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core.files.storage import FileSystemStorage
 from django.conf import settings
+from django.utils import timezone
 
 from unidecode import unidecode
 from typing import *
@@ -162,6 +163,10 @@ class OverwriteStorage(FileSystemStorage):
         if self.exists(name):
             os.remove(os.path.join(settings.MEDIA_ROOT, name))
         return name
+
+
+def get_current_time():
+    return timezone.localtime(timezone.now())
 
 
 Intruder = namedtuple('Intruder', 'employee total_count explanation_count decision_count')

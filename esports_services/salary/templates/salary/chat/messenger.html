@@ -1,0 +1,74 @@
+{% extends 'salary/logined_page.html' %}
+
+{% block content %}
+<main>
+  <div class="container">
+    <div class="row justify-content-between m-1">
+      <div class="col-md-auto col-sm-auto m-1 p-1 text-center border rounded border-secondary">
+        {% if chats_list %}
+        <div class="list-group">
+          {% for member in chats_list %}
+          {% if member.is_selected %}
+          <a href="{% url 'messenger_open_chat' slug=member.slug %}" class="list-group-item list-group-item-action list-group-item-primary active">
+          {% else %}
+          <a href="{% url 'messenger_open_chat' slug=member.slug %}" class="list-group-item list-group-item-action list-group-item-dark">
+          {% endif %}
+            <div class="d-flex justify-content-between">
+              <div class="d-flex align-items-center">
+              {% if member.photo %}
+                <img src="{{ member.photo }}" alt="" class="rounded-circle" style="width: 2em; height: 2em;">
+              {% else %}
+                <i class="fa-solid fa-circle-user fa-2x"></i>
+              {% endif %}
+                <span class="ms-2 verysmall">{{ member.member.get_full_name }}</span>
+              </div>
+              <div>
+                {% if member.unread_messages_count %}
+                <span class="ms-1 badge rounded-pill bg-info text-dark opacity-50">{{ member.unread_messages_count }}</span>
+                {% endif %}
+              </div>
+            </div>
+          </a>
+          {% endfor %}
+        </div>
+        <hr>
+        {% endif %}
+        <a href="{% url 'index' %}" class="btn btn-outline-primary verysmall m-1" data-bs-toggle="modal" data-bs-target="#NewDialogWindow">
+          <i class="fa-solid fa-plus"></i>&nbsp;New dialog
+        </a>
+      </div>
+      <div class="col-md-9 col-sm-auto m-1 p-0 border rounded border-secondary">
+        {% block messages %}
+        {% endblock %}
+      </div>
+    </div>
+    <!-- New dialog window -->
+    <div class="modal fade" id="NewDialogWindow" tabindex="-1" aria-labelledby="NewDialogWindowLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-scrollable modal-sm">
+        <div class="modal-content bg-dark">
+          <div class="modal-header">
+            <h5 class="modal-title" id="staticBackdropLabel">New Message</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="list-group">
+              {% for contact in active_users %}
+              <a href="{% url 'messenger_new_chat' pk=contact.id %}" class="list-group-item list-group-item-action list-group-item-dark">
+                <div class="d-flex align-items-center">
+                  {% if contact.profile.photo %}
+                    <img src="{{ contact.profile.photo.url }}" alt="" class="rounded-circle" style="width: 2em; height: 2em;">
+                  {% else %}
+                    <i class="fa-solid fa-circle-user fa-2x text-secondary"></i>
+                  {% endif %}
+                    <span class="ms-2">{{ contact.get_full_name }}</span>
+                </div>
+              </a>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+{% endblock %}

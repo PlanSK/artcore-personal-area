@@ -9,7 +9,7 @@ import os.path
 from dateutil.relativedelta import relativedelta
 
 from .config import *
-from .utils import get_choice_plural, get_user_media_dir_name, OverwriteStorage
+from .utils import get_choice_plural, get_user_media_dir_name, OverwriteStorage, get_current_time
 
 
 def user_directory_path(instance, filename):
@@ -343,3 +343,31 @@ class Position(models.Model):
 
     def __str__(self) -> str:
         return self.title
+
+
+class Chat(models.Model):
+    members = models.ManyToManyField(User, verbose_name='Участники')
+    slug = models.SlugField(max_length=60, unique=True, verbose_name='URL', null=True, blank=True)
+
+    class Meta:
+        verbose_name = 'Chat'
+
+    def save(self, *args, **kwargs) -> None:
+        super().save(*args, **kwargs)
+        if not self.slug:
+            self.slug = f'chat_id{self.id}'
+            self.save()
+    
+    def get_absolute_url(self):
+        return reverse_lazy('messenger_open_chat', kwargs={'slug': self.slug})
+
+
+class Message(models.Model):
+    chat = models.ForeignKey(Chat, on_delete=models.CASCADE, related_name='chat', verbose_name='Чат')
+    message_text = models.TextField(verbose_name='Текст сообщения')
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='author', verbose_name='Автор')
+    sending_time = models.DateTimeField(verbose_name='Время отправления', default=get_current_time)
+    is_read = models.BooleanField(verbose_name='Отметка о прочтении', default=False)
+
+    class Meta:
+        verbose_name = 'Message'
