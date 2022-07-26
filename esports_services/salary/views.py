@@ -1126,6 +1126,18 @@ class MessengerNewChatView(MessengerMainView):
         return context
 
 
+class CalendarView(LoginRequiredMixin, TitleMixin, TemplateView):
+    template_name: str = 'salary/calendar/calendar.html'
+    title: str = 'Shift Calendar'
+
+    def get_context_data(self, **kwargs: Any) -> dict:
+        context: dict = super().get_context_data(**kwargs)
+        context.update({
+            'range': range(1, 31),
+        })
+        return context
+
+
 def page_not_found(request, exception):
     response = render(request, 'salary/404.html', {'title': 'Page not found'})
     response.status_code = 404
