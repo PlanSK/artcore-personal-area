@@ -24,62 +24,21 @@
               </tr>
           </thead>
           <tbody>
+            {% for week in month_calendar %}
             <tr>
-              <td id="disabled" class=""></td>
-              <td id="disabled" class=""></td>
-              <td id="disabled" class=""></td>
-              <td id="disabled" class=""></td>
-              <td id="disabled" class=""></td>
-              <td class="selected"><div style="line-height: 0.9rem;">1<br>
-                <span class="badge bg-primary" style="font-size: 0.5rem;">2 658</span></div>
-              </td>
-              <td id="" class="text-warning">2</td>
+              {% for day_date, _ in week %}
+                {% if not day_date %}
+                <td class="disabled"></td>
+                {% elif day_date == today %}
+                <td class="selected"><div style="line-height: 0.9rem;">{{ day_date }}<br>
+                  <span class="badge bg-primary" style="font-size: 0.5rem;">2 658</span></div>
+                </td>
+                {% else %}
+                <td>{{ day_date }}</td>
+                {% endif %}
+              {% endfor %}
             </tr>
-            <tr>
-              <td id="" class="selected">3</td>
-              <td id="" class="">4</td>
-              <td id="" class="">5</td>
-              <td id="" class="">6</td>
-              <td id="" class="">7</td>
-              <td id="" class="">8</td>
-              <td id="" class="">9</td>
-            </tr>
-            <tr>
-              <td id="" class="">10</td>
-              <td id="" class="">11</td>
-              <td id="" class="">12</td>
-              <td id="" class="">13</td>
-              <td id="" class="">14</td>
-              <td id="" class="">15</td>
-              <td id="" class="">16</td>
-            </tr>
-            <tr>
-              <td id="" class="">17</td>
-              <td id="" class="">18</td>
-              <td id="" class="">19</td>
-              <td id="" class="">20</td>
-              <td id="" class="">21</td>
-              <td id="" class="">22</td>
-              <td id="" class="">23</td>
-            </tr>
-            <tr>
-              <td id="" class="">24</td>
-              <td id="" class="">25</td>
-              <td id="" class="">26</td>
-              <td id="today" class="">27</td>
-              <td id="" class="">28</td>
-              <td id="" class="">29</td>
-              <td id="" class="">30</td>
-            </tr>
-            <tr>
-              <td id="" class="">31</td>
-              <td id="disabled" class=""></td>
-              <td id="disabled" class=""></td>
-              <td id="disabled" class=""></td>
-              <td id="disabled" class=""></td>
-              <td id="disabled" class=""></td>
-              <td id="disabled" class=""></td>
-            </tr>
+            {% endfor %}
           </tbody>
         </table>
       </div>

@@ -15,6 +15,7 @@ from .forms import *
 from .utils import *
 from .mixins import *
 from salary.services.chat import *
+from salary.services.shift_calendar import get_week_days_list
 
 import datetime
 from typing import *
@@ -1133,7 +1134,8 @@ class CalendarView(LoginRequiredMixin, TitleMixin, TemplateView):
     def get_context_data(self, **kwargs: Any) -> dict:
         context: dict = super().get_context_data(**kwargs)
         context.update({
-            'range': range(1, 8),
+            'month_calendar': get_week_days_list(),
+            'today': datetime.date.today().day
         })
         return context
 
