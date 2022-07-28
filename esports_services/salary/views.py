@@ -1133,9 +1133,12 @@ class CalendarView(LoginRequiredMixin, TitleMixin, TemplateView):
 
     def get_context_data(self, **kwargs: Any) -> dict:
         context: dict = super().get_context_data(**kwargs)
+        import random
+        closed = [random.randint(1, 28) for _ in range(1, 6)]
         context.update({
             'month_calendar': get_week_days_list(),
-            'today': datetime.date.today().day
+            'today': datetime.date.today().day,
+            'closed': closed,
         })
         return context
 

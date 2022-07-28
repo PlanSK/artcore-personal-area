@@ -6,14 +6,14 @@
   <div class="container">
     <div class="row justify-content-center">
       <div class="col-md-6 text-center mb-5">
-        Any text for calendar
+        График смен в июле 2022 г.
       </div>
     </div>
     <div class="row justify-content-center">
       <div class="col-md-6 bshadow p-1 rounded">
         <table id="calendar">
           <thead>
-              <tr class="text-info">
+              <tr class="text-warning">
                 <th>Пн</th>
                 <th>Вт</th>
                 <th>Ср</th>
@@ -25,14 +25,17 @@
           </thead>
           <tbody>
             {% for week in month_calendar %}
-            <tr>
+            <tr class="border-top border-secondary">
               {% for day_date, _ in week %}
                 {% if not day_date %}
                 <td class="disabled"></td>
-                {% elif day_date == today %}
-                <td class="selected"><div style="line-height: 0.9rem;">{{ day_date }}<br>
-                  <span class="badge bg-primary" style="font-size: 0.5rem;">2 658</span></div>
+                {% elif day_date in closed %}
+                <td class="verified"><div style="line-height: 0.9rem;">{{ day_date }}<br>
+                  <span class="badge bg-primary" style="font-size: 0.5rem;">2 658</span>
+                  <a href="#" class="stretched-link"></a></div>
                 </td>
+                {% elif day_date == today %}
+                <td class="planed">{{ day_date }}</td>
                 {% else %}
                 <td>{{ day_date }}</td>
                 {% endif %}
@@ -42,6 +45,11 @@
           </tbody>
         </table>
       </div>
+    </div>
+    <div class="row row-cols-3 row-cols-md-3 justify-content-center mt-2">
+      <div class="col-md-2 text-center"><i class="fa-solid fa-calendar-days" style="color: #5DE100;"></i> 6</div>
+      <div class="col-md-2 text-center"><i class="fa-solid fa-calendar-check" style="color: #370075;"></i> 5</div>
+      <div class="col-md-2 text-center"><i class="fa-solid fa-coins"></i> 15487</div>
     </div>
   </div>
 </main>

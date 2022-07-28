@@ -106,7 +106,14 @@
   text-align: center;
 }
 
-.selected:hover {
-    background-color: #0823be;
-    border: none;
+
+.verified {
+    background-color: #370075;
+}
+.verified:hover {
+    background-color: #1900ff;
+}
+.planed {
+    background-color: #5DE100;
+    color: #000;
 }
