@@ -6,7 +6,8 @@
   <div class="container">
     <div class="row justify-content-center">
       <div class="col-md-6 text-center mb-5">
-        График смен в июле 2022 г.
+        График смен в июле 2022 г.<br>
+        {{ test_user.get_full_name }}
       </div>
     </div>
     <div class="row justify-content-center">
@@ -26,18 +27,18 @@
           <tbody>
             {% for week in month_calendar %}
             <tr class="border-top border-secondary">
-              {% for day_date, _ in week %}
-                {% if not day_date %}
+              {% for day in week %}
+                {% if not day %}
                 <td class="disabled"></td>
-                {% elif day_date in closed %}
-                <td class="verified"><div style="line-height: 0.9rem;">{{ day_date }}<br>
-                  <span class="badge bg-primary" style="font-size: 0.5rem;">2 658</span>
+                {% elif day.earnings %}
+                <td class="verified"><div style="line-height: 0.9rem;">{{ day.date.day }}<br>
+                  <span class="badge bg-primary" style="font-size: 0.5rem;">{{ day.earnings }}</span>
                   <a href="#" class="stretched-link"></a></div>
                 </td>
-                {% elif day_date == today %}
-                <td class="planed">{{ day_date }}</td>
+                {% elif day.is_planed %}
+                <td class="planed">{{ day.date.day }}</td>
                 {% else %}
-                <td>{{ day_date }}</td>
+                <td>{{ day.date.day }}</td>
                 {% endif %}
               {% endfor %}
             </tr>

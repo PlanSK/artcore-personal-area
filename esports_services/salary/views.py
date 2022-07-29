@@ -15,7 +15,7 @@ from .forms import *
 from .utils import *
 from .mixins import *
 from salary.services.chat import *
-from salary.services.shift_calendar import get_week_days_list
+from salary.services.shift_calendar import get_user_calendar
 
 import datetime
 from typing import *
@@ -1130,15 +1130,15 @@ class MessengerNewChatView(MessengerMainView):
 class CalendarView(LoginRequiredMixin, TitleMixin, TemplateView):
     template_name: str = 'salary/calendar/calendar.html'
     title: str = 'Shift Calendar'
-
+    
     def get_context_data(self, **kwargs: Any) -> dict:
         context: dict = super().get_context_data(**kwargs)
-        import random
-        closed = [random.randint(1, 28) for _ in range(1, 6)]
+        test_user = get_object_or_404(User, pk=kwargs['pk'])
+        today = datetime.date.today()
         context.update({
-            'month_calendar': get_week_days_list(),
-            'today': datetime.date.today().day,
-            'closed': closed,
+            'month_calendar': get_user_calendar(test_user, today),
+            'today': today,
+            'test_user': test_user,
         })
         return context
 
