@@ -25,7 +25,7 @@
               </tr>
           </thead>
           <tbody>
-            {% for week in month_calendar %}
+            {% for week in month_calendar.weeks_list %}
             <tr class="border-top border-secondary">
               {% for day in week %}
                 {% if not day %}
@@ -48,9 +48,17 @@
       </div>
     </div>
     <div class="row row-cols-3 row-cols-md-3 justify-content-center mt-2">
-      <div class="col-md-2 text-center"><i class="fa-solid fa-calendar-days" style="color: #5DE100;"></i> 6</div>
-      <div class="col-md-2 text-center"><i class="fa-solid fa-calendar-check" style="color: #370075;"></i> 5</div>
-      <div class="col-md-2 text-center"><i class="fa-solid fa-coins"></i> 15487</div>
+      <div class="col-md-2 text-center">
+        <i class="fa-solid fa-calendar-days" style="color: #5DE100;"></i> 
+        {{month_calendar.complited_shifts_count}}
+      </div>
+      <div class="col-md-2 text-center">
+        <i class="fa-solid fa-calendar-check" style="color: #370075;"></i> 
+        {{month_calendar.all_shifts_count}}
+      </div>
+      <div class="col-md-2 text-center">
+        <i class="fa-solid fa-coins"></i> {{month_calendar.sum_of_earnings}}
+      </div>
     </div>
   </div>
 </main>
