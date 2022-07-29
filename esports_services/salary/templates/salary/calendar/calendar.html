@@ -33,7 +33,7 @@
                 {% elif day.earnings %}
                 <td class="verified"><div style="line-height: 0.9rem;">{{ day.date.day }}<br>
                   <span class="badge bg-primary" style="font-size: 0.5rem;">{{ day.earnings }}</span>
-                  <a href="#" class="stretched-link"></a></div>
+                  <a href="{{day.link}}" class="stretched-link"></a></div>
                 </td>
                 {% elif day.is_planed %}
                 <td class="planed">{{ day.date.day }}</td>

@@ -5,3 +5,4 @@ media/
 .env
 *.sqlite3
 *.log
+gsheets.json

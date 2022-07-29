@@ -7,7 +7,6 @@ from django.contrib.auth.models import User
 from django.db.models import QuerySet, Q
 
 from salary.models import WorkingShift
-from .utils import time_of_run
 
 
 CalendarDay = namedtuple(
@@ -57,10 +56,13 @@ def get_user_month_workshifts(user: User, date: datetime.date) -> QuerySet:
         ).order_by('shift_date')
 
 
-@time_of_run
 def get_user_calendar(user: User, date: datetime.date) -> UserCalendar:
     """
-    Return list of lists of namedtuples with days of month.
+    Return UserCalendar namedtuple.
+        weeks_list: List[List[CalendarDay]] - list of lists with namedtuples CalendarDay
+        complited_shifts_count: int - Closed shifts counter.
+        all_shifts_count: int - All shifts counter.
+        sum_of_earnings: float - Amount of earnings in closed shifts.
     """
     # Pass of google sheets shift dates
     import random
@@ -69,7 +71,7 @@ def get_user_calendar(user: User, date: datetime.date) -> UserCalendar:
     workshifts: QuerySet = get_user_month_workshifts(user, date)
     
     workshift_tuples_list = []
-    sum_of_earnings: float = 0
+    sum_of_earnings: float = 0.0
     for workshift in workshifts:
         if workshift.hall_admin == user:
             earnings = workshift.hall_admin_earnings_calc()

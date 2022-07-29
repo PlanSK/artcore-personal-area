@@ -1133,8 +1133,10 @@ class CalendarView(LoginRequiredMixin, TitleMixin, TemplateView):
     
     def get_context_data(self, **kwargs: Any) -> dict:
         context: dict = super().get_context_data(**kwargs)
+
         test_user = get_object_or_404(User, pk=kwargs['pk'])
         today = datetime.date.today()
+
         context.update({
             'month_calendar': get_user_calendar(test_user, today),
             'today': today,
