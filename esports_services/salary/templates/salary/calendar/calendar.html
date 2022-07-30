@@ -49,14 +49,18 @@
     </div>
     <div class="row row-cols-3 row-cols-md-3 justify-content-center mt-2">
       <div class="col-md-2 text-center">
+        <span style="font-size: 0.5rem;">запланировано:</span><br>
         <i class="fa-solid fa-calendar-days" style="color: #5DE100;"></i> 
+        {{month_calendar.planed_shifts_count}}
+        
+      </div>
+      <div class="col-md-2 text-center">
+        <span style="font-size: 0.5rem;">отработано:</span><br>
+        <i class="fa-solid fa-calendar-check" style="color: #6600db;"></i> 
         {{month_calendar.complited_shifts_count}}
       </div>
       <div class="col-md-2 text-center">
-        <i class="fa-solid fa-calendar-check" style="color: #370075;"></i> 
-        {{month_calendar.all_shifts_count}}
-      </div>
-      <div class="col-md-2 text-center">
+        <span style="font-size: 0.5rem;">заработано:</span><br>
         <i class="fa-solid fa-coins"></i> {{month_calendar.sum_of_earnings}}
       </div>
     </div>

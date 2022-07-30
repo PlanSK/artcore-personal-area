@@ -142,3 +142,6 @@ EMAIL_CONFIG = env.email(
 vars().update(EMAIL_CONFIG)
 SERVER_EMAIL = DEFAULT_FROM_EMAIL = env('SERVER_EMAIL')
 ADMINS = tuple(parseaddr(email) for email in env.list('DJANGO_ADMINS'))
+
+GSHEETS_API_KEY = env.json('GSHEETS_API_KEY', default=None)
+SPREADSHEET = env('SPREADSHEET')

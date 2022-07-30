@@ -7,6 +7,7 @@ from django.contrib.auth.models import User
 from django.db.models import QuerySet, Q
 
 from salary.models import WorkingShift
+from salary.services.google_sheets import get_employees_schedule_dict
 
 
 CalendarDay = namedtuple(
@@ -16,8 +17,9 @@ CalendarDay = namedtuple(
 UserCalendar = namedtuple(
     'UserCalendar',
     ['weeks_list', 'complited_shifts_count',
-     'all_shifts_count', 'sum_of_earnings']
+     'planed_shifts_count', 'sum_of_earnings']
 )
+
 
 def get_week_days_list(year: int = None, month: int = None) -> List[List]:
     """
@@ -26,6 +28,7 @@ def get_week_days_list(year: int = None, month: int = None) -> List[List]:
     (day number, weekday number) tuples. Day numbers outside this month
     are zero. If year or month is not defined, use date.today() values.
     """
+
     if not year:
         year = datetime.date.today().year
     if not month:
@@ -45,6 +48,10 @@ def get_week_days_list(year: int = None, month: int = None) -> List[List]:
 
 
 def get_user_month_workshifts(user: User, date: datetime.date) -> QuerySet:
+    """
+    Returns a QuerySet with shifts in the specified month of the year.
+    """
+
     return WorkingShift.objects.select_related(
             'hall_admin__profile__position',
             'cash_admin__profile__position'
@@ -56,17 +63,11 @@ def get_user_month_workshifts(user: User, date: datetime.date) -> QuerySet:
         ).order_by('shift_date')
 
 
-def get_user_calendar(user: User, date: datetime.date) -> UserCalendar:
+def get_workshift_tuples_list(user: User, 
+                              date: datetime.date) -> List[CalendarDay]:
     """
-    Return UserCalendar namedtuple.
-        weeks_list: List[List[CalendarDay]] - list of lists with namedtuples CalendarDay
-        complited_shifts_count: int - Closed shifts counter.
-        all_shifts_count: int - All shifts counter.
-        sum_of_earnings: float - Amount of earnings in closed shifts.
+    Return list of CalendarDay namedtuple from workshifts data.
     """
-    # Pass of google sheets shift dates
-    import random
-    planed_workshifts = [random.randrange(1, 30) for _ in range(1, 5)]
 
     workshifts: QuerySet = get_user_month_workshifts(user, date)
     
@@ -81,18 +82,26 @@ def get_user_calendar(user: User, date: datetime.date) -> UserCalendar:
         sum_of_earnings += current_earnings
         workshift_tuples_list.append(
             CalendarDay(
-                date=workshift.shift_date,
+                date=workshift.shift_date - datetime.timedelta(days=1),
                 earnings=current_earnings,
                 is_planed=False,
                 link=workshift.get_absolute_url()
             )
         )
-    complited_shifts_count = len(workshift_tuples_list)
-    all_shifts_count = complited_shifts_count + len(planed_workshifts)
-    
-    shift_dates_list = workshifts.dates('shift_date', 'day')
+    return workshift_tuples_list
 
-    weeks_days_list = get_week_days_list(date.year, date.month)
+
+def get_calendar_weeks_list(
+    weeks_days_list: List[List[int]],
+    shift_dates_list: List[datetime.date],
+    date: datetime.date,
+    workshift_tuples_list: List[CalendarDay],
+    planed_workshifts: List[int]
+    ) -> List[List[CalendarDay]]:
+    """
+    Returns List[List[CalendarDay]] - list of lists with CalendarDay
+    """
+
     calendar_weeks_list = []
     for week in weeks_days_list:
         day_tuples_list = []
@@ -122,10 +131,51 @@ def get_user_calendar(user: User, date: datetime.date) -> UserCalendar:
                     )
                 day_tuples_list.append(day_tuple)
         calendar_weeks_list.append(day_tuples_list)
+
+    return calendar_weeks_list
+
+
+def get_user_calendar(user: User, date: datetime.date) -> UserCalendar:
+    """
+    Return UserCalendar namedtuple.
+        weeks_list: List[List[CalendarDay]] - list of lists with CalendarDay
+        complited_shifts_count: int - Closed shifts counter.
+        all_shifts_count: int - All shifts counter.
+        sum_of_earnings: float - Amount of earnings in closed shifts.
+    """
+
+    worksheet_name = 'Shift Schedule'
+
+    planed_workshifts = get_employees_schedule_dict(
+        worksheet_name
+    ).get(user.get_full_name())
+
+    workshift_tuples_list = get_workshift_tuples_list(user, date)
+
+    complited_shifts_count: int = len(workshift_tuples_list)
+    planed_shifts_count: int = 0
+    
+    if len(planed_workshifts) >= complited_shifts_count:
+        planed_shifts_count = len(planed_workshifts) - complited_shifts_count
+
+    sum_of_earnings = sum([shift.earnings for shift in workshift_tuples_list])
+    shift_dates_list = [shift.date for shift in workshift_tuples_list]
+
+    weeks_days_list = get_week_days_list(date.year, date.month)
+
+    calendar_weeks_list = get_calendar_weeks_list(
+        weeks_days_list,
+        shift_dates_list,
+        date,
+        workshift_tuples_list,
+        planed_workshifts
+    )
+
     user_calendar = UserCalendar(
         weeks_list=calendar_weeks_list,
         complited_shifts_count=complited_shifts_count,
-        all_shifts_count=all_shifts_count,
+        planed_shifts_count=planed_shifts_count,
         sum_of_earnings=round(sum_of_earnings, 2)
     )
+
     return user_calendar
