@@ -1138,7 +1138,7 @@ class CalendarView(LoginRequiredMixin, TitleMixin, TemplateView):
         today = datetime.date.today()
 
         context.update({
-            'month_calendar': get_user_calendar(test_user, today),
+            'month_calendar': get_user_calendar(test_user, 2022, 7),
             'today': today,
             'test_user': test_user,
         })

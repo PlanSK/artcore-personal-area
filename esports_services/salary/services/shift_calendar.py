@@ -2,9 +2,11 @@ import calendar
 import datetime
 from typing import List
 from collections import namedtuple
+import logging
 
 from django.contrib.auth.models import User
 from django.db.models import QuerySet, Q
+from gspread.exceptions import GSpreadException
 
 from salary.models import WorkingShift
 from salary.services.google_sheets import get_employees_schedule_dict
@@ -12,13 +14,14 @@ from salary.services.google_sheets import get_employees_schedule_dict
 
 CalendarDay = namedtuple(
     'CalendarDay',
-    ['date', 'earnings', 'is_planed', 'link']
+    ['date', 'earnings', 'is_planed', 'is_verified', 'link']
 )
 UserCalendar = namedtuple(
     'UserCalendar',
     ['weeks_list', 'complited_shifts_count',
      'planed_shifts_count', 'sum_of_earnings']
 )
+logger = logging.getLogger(__name__)
 
 
 def get_week_days_list(year: int = None, month: int = None) -> List[List]:
@@ -47,7 +50,7 @@ def get_week_days_list(year: int = None, month: int = None) -> List[List]:
     return month_calender
 
 
-def get_user_month_workshifts(user: User, date: datetime.date) -> QuerySet:
+def get_user_month_workshifts(user: User, year: int, month: int) -> QuerySet:
     """
     Returns a QuerySet with shifts in the specified month of the year.
     """
@@ -56,35 +59,38 @@ def get_user_month_workshifts(user: User, date: datetime.date) -> QuerySet:
             'hall_admin__profile__position',
             'cash_admin__profile__position'
         ).filter(
-            shift_date__month=date.month,
-            shift_date__year=date.year,
+            shift_date__month=month,
+            shift_date__year=year,
         ).filter(
             Q(cash_admin=user) | Q(hall_admin=user)
         ).order_by('shift_date')
 
 
 def get_workshift_tuples_list(user: User, 
-                              date: datetime.date) -> List[CalendarDay]:
+                              year: int,
+                              month: int) -> List[CalendarDay]:
     """
     Return list of CalendarDay namedtuple from workshifts data.
     """
 
-    workshifts: QuerySet = get_user_month_workshifts(user, date)
+    workshifts: QuerySet = get_user_month_workshifts(user, year, month)
     
     workshift_tuples_list = []
-    sum_of_earnings: float = 0.0
     for workshift in workshifts:
         if workshift.hall_admin == user:
             earnings = workshift.hall_admin_earnings_calc()
         else:
             earnings = workshift.cashier_earnings_calc()
-        current_earnings = earnings.get('final_earnings')
-        sum_of_earnings += current_earnings
+        current_earnings: float = earnings.get('final_earnings')
+        displayed_date = workshift.shift_date - datetime.timedelta(days=1)
+        if workshift.shift_date == datetime.date(year, month, 1):
+            displayed_date = workshift.shift_date
         workshift_tuples_list.append(
             CalendarDay(
-                date=workshift.shift_date - datetime.timedelta(days=1),
+                date=displayed_date,
                 earnings=current_earnings,
                 is_planed=False,
+                is_verified=workshift.is_verified,
                 link=workshift.get_absolute_url()
             )
         )
@@ -94,9 +100,9 @@ def get_workshift_tuples_list(user: User,
 def get_calendar_weeks_list(
     weeks_days_list: List[List[int]],
     shift_dates_list: List[datetime.date],
-    date: datetime.date,
+    year: int, month: int,
     workshift_tuples_list: List[CalendarDay],
-    planed_workshifts: List[int]
+    planed_workshifts_list: List[int]
     ) -> List[List[CalendarDay]]:
     """
     Returns List[List[CalendarDay]] - list of lists with CalendarDay
@@ -109,17 +115,18 @@ def get_calendar_weeks_list(
             if day == 0:
                 day_tuples_list.append(None)
             else:
-                date_of_day = datetime.date(date.year, date.month, day)
+                date_of_day = datetime.date(year, month, day)
                 if date_of_day in shift_dates_list:
                     day_tuple = [
                         day for day in workshift_tuples_list 
                         if day.date == date_of_day
                     ][0]
-                elif date_of_day.day in planed_workshifts:
+                elif date_of_day.day in planed_workshifts_list:
                     day_tuple = CalendarDay(
                         date=date_of_day,
                         earnings=None,
                         is_planed=True,
+                        is_verified=False,
                         link=None
                     )
                 else:
@@ -127,6 +134,7 @@ def get_calendar_weeks_list(
                         date=date_of_day,
                         earnings=None,
                         is_planed=False,
+                        is_verified=False,
                         link=None
                     )
                 day_tuples_list.append(day_tuple)
@@ -135,7 +143,35 @@ def get_calendar_weeks_list(
     return calendar_weeks_list
 
 
-def get_user_calendar(user: User, date: datetime.date) -> UserCalendar:
+def get_planed_workshifts_list(user: User) -> List[int]:
+    """
+    Returns list of day numbers planed shifts.
+    """
+
+    worksheet_name = 'Shift Schedule'
+    planed_workshifts_list: list = []
+
+    try:
+        google_sheets_data = get_employees_schedule_dict(worksheet_name).get(
+            user.get_full_name()
+        )
+        if google_sheets_data:
+            planed_workshifts_list = google_sheets_data
+    except GSpreadException as error:
+        logger.error((
+            f'Error to open worksheet "{worksheet_name}". '
+            f'GSpreadException: {error.__class__.__name__}.'
+        ))
+    except Exception as error:
+        logger.error((
+            f'Unknown exception detected in GSpread (Google Sheets). '
+            f'Exception: {error.__class__.__name__}.'
+        ))
+
+    return planed_workshifts_list
+
+
+def get_user_calendar(user: User, year: int, month: int) -> UserCalendar:
     """
     Return UserCalendar namedtuple.
         weeks_list: List[List[CalendarDay]] - list of lists with CalendarDay
@@ -144,32 +180,39 @@ def get_user_calendar(user: User, date: datetime.date) -> UserCalendar:
         sum_of_earnings: float - Amount of earnings in closed shifts.
     """
 
-    worksheet_name = 'Shift Schedule'
+    planed_workshifts_list: list = get_planed_workshifts_list(user)
 
-    planed_workshifts = get_employees_schedule_dict(
-        worksheet_name
-    ).get(user.get_full_name())
+    workshift_tuples_list = get_workshift_tuples_list(user, year, month)
 
-    workshift_tuples_list = get_workshift_tuples_list(user, date)
+    shift_dates_list: list = [shift.date for shift in workshift_tuples_list]
 
-    complited_shifts_count: int = len(workshift_tuples_list)
-    planed_shifts_count: int = 0
-    
-    if len(planed_workshifts) >= complited_shifts_count:
-        planed_shifts_count = len(planed_workshifts) - complited_shifts_count
-
-    sum_of_earnings = sum([shift.earnings for shift in workshift_tuples_list])
-    shift_dates_list = [shift.date for shift in workshift_tuples_list]
-
-    weeks_days_list = get_week_days_list(date.year, date.month)
+    weeks_days_list = get_week_days_list(year, month)
 
     calendar_weeks_list = get_calendar_weeks_list(
         weeks_days_list,
         shift_dates_list,
-        date,
+        year,
+        month,
         workshift_tuples_list,
-        planed_workshifts
+        planed_workshifts_list
     )
+
+    complited_shifts_count: int = 0
+    planed_shifts_count: int = 0
+    sum_of_earnings: float = 0.0
+
+    for week in calendar_weeks_list:
+        for day in week:
+            if day:
+                if day.earnings:
+                    complited_shifts_count += 1
+                    if day.is_verified:
+                        sum_of_earnings += day.earnings
+                elif day.is_planed:
+                    planed_shifts_count += 1
+
+    if not planed_workshifts_list:
+        planed_shifts_count = -1
 
     user_calendar = UserCalendar(
         weeks_list=calendar_weeks_list,

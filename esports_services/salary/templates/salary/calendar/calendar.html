@@ -31,7 +31,12 @@
                 {% if not day %}
                 <td class="disabled"></td>
                 {% elif day.earnings %}
-                <td class="verified"><div style="line-height: 0.9rem;">{{ day.date.day }}<br>
+                {% if day.is_verified %}
+                <td class="verified">
+                {% else %}
+                <td class="bg-info text-dark">
+                {% endif %}
+                  <div style="line-height: 0.9rem;">{{ day.date.day }}<br>
                   <span class="badge bg-primary" style="font-size: 0.5rem;">{{ day.earnings }}</span>
                   <a href="{{day.link}}" class="stretched-link"></a></div>
                 </td>
@@ -51,8 +56,11 @@
       <div class="col-md-2 text-center">
         <span style="font-size: 0.5rem;">запланировано:</span><br>
         <i class="fa-solid fa-calendar-days" style="color: #5DE100;"></i> 
-        {{month_calendar.planed_shifts_count}}
-        
+        {% if month_calendar.planed_shifts_count >= 0 %}
+          {{month_calendar.planed_shifts_count}}
+        {% else %}
+          0
+        {% endif %}
       </div>
       <div class="col-md-2 text-center">
         <span style="font-size: 0.5rem;">отработано:</span><br>
@@ -64,6 +72,13 @@
         <i class="fa-solid fa-coins"></i> {{month_calendar.sum_of_earnings}}
       </div>
     </div>
+    {% if month_calendar.planed_shifts_count < 0 %}
+    <div class="row justify-content-center mt-2">
+      <div class="col-md-6 alert alert-info text-center verysmall" role="alert">
+        <i class="fa-solid fa-circle-info"></i> Данные о запланированных сменах недоступны либо отсутствуют.
+      </div>
+    </div>
+    {% endif %}
   </div>
 </main>
 {% endblock %}
