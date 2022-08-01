@@ -794,7 +794,7 @@ class IndexEmployeeView(ProfileStatusRedirectMixin, TitleMixin, ListView):
         context.update({
             'summary_earnings': self.get_summary_earnings(),
             'penalty_count': misconducts.count(),
-
+            'today_date': datetime.date.today(),
             'wait_explanation': misconducts.filter(
                 status=Misconduct.MisconductStatus.ADDED
             ).count(),
@@ -1133,15 +1133,13 @@ class CalendarView(LoginRequiredMixin, TitleMixin, TemplateView):
     
     def get_context_data(self, **kwargs: Any) -> dict:
         context: dict = super().get_context_data(**kwargs)
-
-        test_user = get_object_or_404(User, pk=kwargs['pk'])
-        month = kwargs.get('month')
-        year = kwargs.get('year')
+        month: int = kwargs.get('month')
+        year: int = kwargs.get('year')
+        requested_user = self.request.user
 
         context.update({
-            'month_calendar': get_user_calendar(test_user, year, month),
+            'month_calendar': get_user_calendar(requested_user, year, month),
             'requested_date': datetime.date(year, month, 1),
-            'test_user': test_user,
         })
         return context
 

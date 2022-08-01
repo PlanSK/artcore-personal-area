@@ -67,7 +67,6 @@
                       <p class="card-text fst-italic">Мой заработок</p>
                       <hr class="m-1">
                       <span class="fw-bold">{{ summary_earnings|default:"-" | intcomma }}</span>
-                      <a href="#" class="stretched-link"></a>
                     </div>
                   </div>
                 </div>
@@ -149,10 +148,10 @@
               <div class="card green-snippet text-light h-100">
                 <div class="card-body d-flex justify-content-between align-items-center">
                   <span class="card-text fst-italic">
-                    <i class="fa-solid fa-chart-line fa-2xl me-2"></i>
+                    <i class="fa-solid fa-calendar-days fa-2xl me-2"></i>
                     Графики
                   </span>
-                  <a href="#" class="stretched-link"></a>
+                  <a href="{% url 'calendar' month=today_date.month year=today_date.year %}" class="stretched-link"></a>
                 </div>
               </div>
             </div>
