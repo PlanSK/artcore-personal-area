@@ -6,7 +6,7 @@
   <div class="container">
     <div class="row justify-content-center">
       <div class="col-md-6 text-center mb-5">
-        График смен в июле 2022 г.<br>
+        График смен за {{ requested_date|date:"F Y" }} г.<br>
         {{ test_user.get_full_name }}
       </div>
     </div>
@@ -57,7 +57,7 @@
         <span style="font-size: 0.5rem;">запланировано:</span><br>
         <i class="fa-solid fa-calendar-days" style="color: #5DE100;"></i> 
         {% if month_calendar.planed_shifts_count >= 0 %}
-          {{month_calendar.planed_shifts_count}}
+          {{ month_calendar.planed_shifts_count }}
         {% else %}
           0
         {% endif %}
@@ -65,11 +65,11 @@
       <div class="col-md-2 text-center">
         <span style="font-size: 0.5rem;">отработано:</span><br>
         <i class="fa-solid fa-calendar-check" style="color: #6600db;"></i> 
-        {{month_calendar.complited_shifts_count}}
+        {{ month_calendar.complited_shifts_count }}
       </div>
       <div class="col-md-2 text-center">
         <span style="font-size: 0.5rem;">заработано:</span><br>
-        <i class="fa-solid fa-coins"></i> {{month_calendar.sum_of_earnings}}
+        <i class="fa-solid fa-coins"></i> {{ month_calendar.sum_of_earnings|intcomma }}
       </div>
     </div>
     {% if month_calendar.planed_shifts_count < 0 %}

@@ -143,12 +143,28 @@ def get_calendar_weeks_list(
     return calendar_weeks_list
 
 
-def get_planed_workshifts_list(user: User) -> List[int]:
+def get_worksheet_name(year: int, month: int) -> str:
+    """
+    Returns str with google worksheet name
+
+    Args:
+        year (int): requested year
+        month (int): requested month
+
+    Returns:
+        str: worksheet name, 'mm-yyyy'
+    """
+    if month < 10:
+        return f'0{month}-{year}'
+    
+    return f'{month}-{year}'
+
+
+def get_planed_workshifts_list(user: User, worksheet_name: str) -> List[int]:
     """
     Returns list of day numbers planed shifts.
     """
 
-    worksheet_name = 'Shift Schedule'
     planed_workshifts_list: list = []
 
     try:
@@ -180,7 +196,9 @@ def get_user_calendar(user: User, year: int, month: int) -> UserCalendar:
         sum_of_earnings: float - Amount of earnings in closed shifts.
     """
 
-    planed_workshifts_list: list = get_planed_workshifts_list(user)
+    worksheet_name: str = get_worksheet_name(year, month)
+    planed_workshifts_list: list = get_planed_workshifts_list(user, 
+                                                              worksheet_name)
 
     workshift_tuples_list = get_workshift_tuples_list(user, year, month)
 

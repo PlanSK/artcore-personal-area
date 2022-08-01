@@ -1129,17 +1129,18 @@ class MessengerNewChatView(MessengerMainView):
 
 class CalendarView(LoginRequiredMixin, TitleMixin, TemplateView):
     template_name: str = 'salary/calendar/calendar.html'
-    title: str = 'Shift Calendar'
+    title: str = 'График смен'
     
     def get_context_data(self, **kwargs: Any) -> dict:
         context: dict = super().get_context_data(**kwargs)
 
         test_user = get_object_or_404(User, pk=kwargs['pk'])
-        today = datetime.date.today()
+        month = kwargs.get('month')
+        year = kwargs.get('year')
 
         context.update({
-            'month_calendar': get_user_calendar(test_user, 2022, 7),
-            'today': today,
+            'month_calendar': get_user_calendar(test_user, year, month),
+            'requested_date': datetime.date(year, month, 1),
             'test_user': test_user,
         })
         return context
