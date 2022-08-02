@@ -1142,15 +1142,48 @@ class CalendarView(LoginRequiredMixin, TitleMixin, TemplateView):
     template_name: str = 'salary/calendar/calendar.html'
     title: str = 'График смен'
     
+    def dispatch(self, request: HttpRequest,
+                 *args: Any, **kwargs: Any) -> HttpResponse:
+        if self.kwargs.get('pk'):
+            self.requested_user = get_object_or_404(
+                User, pk=self.kwargs.get('pk')
+            )
+        else:
+            self.requested_user = self.request.user
+
+        return super().dispatch(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs: Any) -> dict:
         context: dict = super().get_context_data(**kwargs)
         month: int = kwargs.get('month')
         year: int = kwargs.get('year')
-        requested_user = self.request.user
+        user_calendar = get_user_calendar(self.requested_user, year, month)
 
         context.update({
-            'month_calendar': get_user_calendar(requested_user, year, month),
+            'month_calendar': user_calendar,
             'requested_date': datetime.date(year, month, 1),
+            'requested_user': self.requested_user,
+        })
+        return context
+
+
+class StaffCalendarView(StaffOnlyMixin, CalendarView):
+    pass
+
+
+class StaffCalendarListView(ListView):
+    model = User
+    queryset = User.objects.filter(
+        is_active=True).exclude(is_staff=True).select_related(
+            'profile',
+            'profile__position').order_by('-profile__position')
+
+    template_name: str = 'salary/calendar/calendar_users_list.html'
+
+    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'date': datetime.date.today()
         })
         return context
 

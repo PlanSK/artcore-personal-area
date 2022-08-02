@@ -56,4 +56,6 @@ urlpatterns = [
     path('messenger/<slug:slug>/', MessengerChatView.as_view(), name='messenger_open_chat'),
     path('messenger/new_chat/<int:pk>/', MessengerNewChatView.as_view(), name='messenger_new_chat'),
     path('calendar/<int:year>/<int:month>/', CalendarView.as_view(), name='calendar'),
+    path('staff_schedule_list/', StaffCalendarListView.as_view(), name='staff_schedule_list'),
+    path('staff_calendar/<int:pk>/<int:year>/<int:month>/', StaffCalendarView.as_view(), name='staff_calendar'),
 ]
