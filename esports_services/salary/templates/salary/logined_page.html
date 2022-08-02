@@ -12,6 +12,7 @@
             <img src="{% static 'salary/img/logo.png' %}" height="30" class="d-inline-block align-top" alt="" loading="lazy">
           </a>
           <div class="navbar-item d-flex">
+            {% if request.user.is_authenticated %}
             <div class="d-flex align-items-center me-2">
               <a class="btn btn-outline-secondary pt-0 pb-0 position-relative" href="{% url 'messenger' %}" title="Messenger">
               {% get_unread_messages user=request.user as unread_messages %}
@@ -25,7 +26,6 @@
               {% endif %}
               </a>
             </div>
-            {% if request.user.is_authenticated %}
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDarkDropdown" aria-controls="navbarNavDarkDropdown" aria-expanded="false" aria-label="Toggle navigation">
               <span class="navbar-toggler-icon"></span>
             </button>

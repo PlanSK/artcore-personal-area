@@ -5,21 +5,30 @@
 {% block content %}
   <main>
     <div class="container">
-      {% if perms.salary.add_workingshift %}
+      {% if permission_to_close %}
       <div class="row mt-2">
         <div class="col text-center verysmall text-secondary">
           {% today_workshift_exists_check as today_workshift_is_exists %}
           {% if today_workshift_is_exists %}
           Текущая смена закрыта.<br>
-          Вы можете добавить смену за другую дату <a href="{% url 'add_workshift' %}?next={{ request.path }}" class="link-secondary verysmall">здесь.</a>
           {% else %}
           Для закрытия текущей смены воспользуйтесь кнопкой<br>
-          <a href="{% url 'add_workshift' %}?next={{ request.path }}" class="btn btn-outline-secondary verysmall">
+          <a href="{% url 'add_workshift' %}?next={{ request.path }}" class="btn btn-outline-secondary verysmall mt-1">
             <i class="fa-solid fa-calendar-plus fa-beat me-2"></i>
             Закрыть смену
           </a>
           {% endif %}
           <hr>
+        </div>
+      </div>
+      {% endif %}
+
+      {% if notification_about_shift %}
+      <div class="row justify-content-center">
+        <div class="col-md-6 col-sm-auto">
+          <div class="alert alert-success mt-2 verysmall text-center" role="alert">
+            <i class="fa-solid fa-calendar-check"></i>&nbsp;Завтра Ваша рабочая смена.
+          </div>
         </div>
       </div>
       {% endif %}
@@ -67,7 +76,6 @@
                       <p class="card-text fst-italic">Мой заработок</p>
                       <hr class="m-1">
                       <span class="fw-bold">{{ summary_earnings|default:"-" | intcomma }}</span>
-                      <a href="#" class="stretched-link"></a>
                     </div>
                   </div>
                 </div>
@@ -149,10 +157,10 @@
               <div class="card green-snippet text-light h-100">
                 <div class="card-body d-flex justify-content-between align-items-center">
                   <span class="card-text fst-italic">
-                    <i class="fa-solid fa-chart-line fa-2xl me-2"></i>
+                    <i class="fa-solid fa-calendar-days fa-2xl me-2"></i>
                     Графики
                   </span>
-                  <a href="#" class="stretched-link"></a>
+                  <a href="{% url 'calendar' month=today_date.month year=today_date.year %}" class="stretched-link"></a>
                 </div>
               </div>
             </div>
