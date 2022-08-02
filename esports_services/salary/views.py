@@ -15,6 +15,9 @@ from .forms import *
 from .utils import *
 from .mixins import *
 from salary.services.chat import *
+from salary.services.shift_calendar import get_user_calendar
+from salary.services.workshift import (check_permission_to_close, 
+                                       notification_of_upcoming_shifts)
 
 import datetime
 from typing import *
@@ -787,29 +790,38 @@ class IndexEmployeeView(ProfileStatusRedirectMixin, TitleMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        misconducts = Misconduct.objects.filter(
-                intruder=self.request.user
-            )
+        misconducts = Misconduct.objects.filter(intruder=self.request.user)
+        permission_to_close = check_permission_to_close(
+            user=self.request.user,
+            date=datetime.date.today()
+        )
+        wait_explanation = misconducts.filter(
+            status=Misconduct.MisconductStatus.ADDED
+        )
+        penalty_sum = misconducts.filter(
+            status=Misconduct.MisconductStatus.CLOSED,
+            workshift_date__month=datetime.date.today().month,
+            workshift_date__year=datetime.date.today().year,
+        ).aggregate(Sum('penalty')).get('penalty__sum')
+        shortage_sum = self.object_list.filter(
+            cash_admin=self.request.user,
+            shortage_paid=False
+        ).aggregate(Sum('shortage')).get('shortage__sum')
+        notification_about_shift = notification_of_upcoming_shifts(
+            user=self.request.user,
+            date=datetime.date.today()
+        )
+
         context.update({
             'summary_earnings': self.get_summary_earnings(),
             'penalty_count': misconducts.count(),
-
-            'wait_explanation': misconducts.filter(
-                status=Misconduct.MisconductStatus.ADDED
-            ).count(),
-
-            'penalty_sum': misconducts.filter(
-                status=Misconduct.MisconductStatus.CLOSED,
-                workshift_date__month=datetime.date.today().month,
-                workshift_date__year=datetime.date.today().year,
-            ).aggregate(Sum('penalty')).get('penalty__sum'),
-
-            'shortage_sum': self.object_list.filter(
-                cash_admin=self.request.user,
-                shortage_paid=False
-            ).aggregate(Sum('shortage')).get('shortage__sum'),
+            'today_date': datetime.date.today(),
+            'wait_explanation': wait_explanation.count(),
+            'penalty_sum': penalty_sum,
+            'shortage_sum': shortage_sum,
+            'permission_to_close': permission_to_close,
+            'notification_about_shift': notification_about_shift,
         })
-
         return context
 
 
@@ -1123,6 +1135,56 @@ class MessengerNewChatView(MessengerMainView):
             { 'recipient': self.recipient }
         )
 
+        return context
+
+
+class CalendarView(LoginRequiredMixin, TitleMixin, TemplateView):
+    template_name: str = 'salary/calendar/calendar.html'
+    title: str = 'График смен'
+    
+    def dispatch(self, request: HttpRequest,
+                 *args: Any, **kwargs: Any) -> HttpResponse:
+        if self.kwargs.get('pk'):
+            self.requested_user = get_object_or_404(
+                User, pk=self.kwargs.get('pk')
+            )
+        else:
+            self.requested_user = self.request.user
+
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs: Any) -> dict:
+        context: dict = super().get_context_data(**kwargs)
+        month: int = kwargs.get('month')
+        year: int = kwargs.get('year')
+        user_calendar = get_user_calendar(self.requested_user, year, month)
+
+        context.update({
+            'month_calendar': user_calendar,
+            'requested_date': datetime.date(year, month, 1),
+            'requested_user': self.requested_user,
+        })
+        return context
+
+
+class StaffCalendarView(StaffOnlyMixin, CalendarView):
+    pass
+
+
+class StaffCalendarListView(ListView):
+    model = User
+    queryset = User.objects.filter(
+        is_active=True).exclude(is_staff=True).select_related(
+            'profile',
+            'profile__position').order_by('-profile__position')
+
+    template_name: str = 'salary/calendar/calendar_users_list.html'
+
+    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'date': datetime.date.today()
+        })
         return context
 
 

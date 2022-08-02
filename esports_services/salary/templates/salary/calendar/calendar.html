@@ -1,0 +1,87 @@
+{% extends 'salary/logined_page.html' %}
+{% load humanize %}
+
+{% block content %}
+<main>
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-6 text-center mb-5">
+        График смен за {{ requested_date|date:"F Y" }} г.<br>
+        {% if request.user.is_staff %}
+          {{ requested_user.get_full_name }}
+        {% endif %}
+      </div>
+    </div>
+    <div class="row justify-content-center">
+      <div class="col-md-6 bshadow p-1 rounded">
+        <table id="calendar">
+          <thead>
+              <tr class="text-warning">
+                <th>Пн</th>
+                <th>Вт</th>
+                <th>Ср</th>
+                <th>Чт</th>
+                <th>Пт</th>
+                <th>Сб</th>
+                <th>Вс</th>
+              </tr>
+          </thead>
+          <tbody>
+            {% for week in month_calendar.weeks_list %}
+            <tr class="border-top border-secondary">
+              {% for day in week %}
+                {% if not day %}
+                <td class="disabled"></td>
+                {% elif day.earnings %}
+                {% if day.is_verified %}
+                <td class="verified">
+                {% else %}
+                <td class="bg-info text-dark">
+                {% endif %}
+                  <div style="line-height: 0.9rem;">{{ day.date.day }}<br>
+                  <span class="badge bg-primary" style="font-size: 0.5rem;">{{ day.earnings }}</span>
+                  <a href="{{day.link}}" class="stretched-link"></a></div>
+                </td>
+                {% elif day.is_planed %}
+                <td class="planed">{{ day.date.day }}</td>
+                {% else %}
+                <td>{{ day.date.day }}</td>
+                {% endif %}
+              {% endfor %}
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="row row-cols-3 row-cols-md-3 justify-content-center mt-2">
+      <div class="col-md-2 text-center">
+        <span style="font-size: 0.5rem;">запланировано:</span><br>
+        <i class="fa-solid fa-calendar-days" style="color: #5DE100;"></i> 
+        {% if month_calendar.planed_shifts_count >= 0 %}
+          {{ month_calendar.planed_shifts_count }}
+        {% else %}
+          0
+        {% endif %}
+      </div>
+      <div class="col-md-2 text-center">
+        <span style="font-size: 0.5rem;">отработано:</span><br>
+        <i class="fa-solid fa-calendar-check" style="color: #6600db;"></i> 
+        {{ month_calendar.complited_shifts_count }}
+      </div>
+      <div class="col-md-2 text-center">
+        <span style="font-size: 0.5rem;">заработано:</span><br>
+        <i class="fa-solid fa-coins"></i> {{ month_calendar.sum_of_earnings|intcomma }}
+      </div>
+    </div>
+    {% if month_calendar.planed_shifts_count < 0 %}
+    <div class="row justify-content-center mt-2">
+      <div class="col-md-6 alert alert-info text-center verysmall" role="alert">
+        <i class="fa-solid fa-circle-info"></i> 
+        Данные о запланированных сменах недоступны либо отсутствуют.
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</main>
+{% endblock %}
