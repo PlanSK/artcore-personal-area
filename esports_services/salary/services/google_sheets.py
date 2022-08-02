@@ -1,7 +1,12 @@
 from typing import List
+import logging
 
 import gspread
 from django.conf import settings
+from django.core.cache import cache
+
+
+logger = logging.getLogger(__name__)
 
 
 def get_gsheets_worksheet_data(worksheet_name: str) -> List[List[str]]:
@@ -56,20 +61,26 @@ def get_employees_schedule_dict(worksheet_name: str) -> dict:
         dict: { 'FullName': List[int] }
     """
 
-    worksheet_data = get_gsheets_worksheet_data(worksheet_name)
-    full_names_list = get_full_names_list(worksheet_data)
+    employees_schedule_dict = cache.get(worksheet_name)
 
-    employees_schedule_dict = {}
-    days_numbers_list = []
-    for employee_full_name in full_names_list:
-        for row in worksheet_data:
-            if employee_full_name == row[0]:
-                for number, value in enumerate(row):
-                    if value == 'Р':
-                        days_numbers_list.append(number)
-        employees_schedule_dict.update({
-            employee_full_name: days_numbers_list.copy()
-        })
-        days_numbers_list.clear()
+    if not employees_schedule_dict:
+        worksheet_data = get_gsheets_worksheet_data(worksheet_name)
+        full_names_list = get_full_names_list(worksheet_data)
+        employees_schedule_dict = {}
+        days_numbers_list = []
+
+        for employee_full_name in full_names_list:
+            for row in worksheet_data:
+                if employee_full_name == row[0]:
+                    for number, value in enumerate(row):
+                        if value == 'Р':
+                            days_numbers_list.append(number)
+            employees_schedule_dict.update({
+                employee_full_name: days_numbers_list.copy()
+            })
+            days_numbers_list.clear()
+
+        logger.info(f'Caching worksheet {worksheet_name}.')
+        cache.set(worksheet_name, employees_schedule_dict, 600)
 
     return employees_schedule_dict
