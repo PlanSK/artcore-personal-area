@@ -16,7 +16,8 @@ from .utils import *
 from .mixins import *
 from salary.services.chat import *
 from salary.services.shift_calendar import get_user_calendar
-from salary.services.workshift import check_permission_to_close
+from salary.services.workshift import (check_permission_to_close, 
+                                       notification_of_upcoming_shifts)
 
 import datetime
 from typing import *
@@ -806,6 +807,10 @@ class IndexEmployeeView(ProfileStatusRedirectMixin, TitleMixin, ListView):
             cash_admin=self.request.user,
             shortage_paid=False
         ).aggregate(Sum('shortage')).get('shortage__sum')
+        notification_about_shift = notification_of_upcoming_shifts(
+            user=self.request.user,
+            date=datetime.date.today()
+        )
 
         context.update({
             'summary_earnings': self.get_summary_earnings(),
@@ -815,6 +820,7 @@ class IndexEmployeeView(ProfileStatusRedirectMixin, TitleMixin, ListView):
             'penalty_sum': penalty_sum,
             'shortage_sum': shortage_sum,
             'permission_to_close': permission_to_close,
+            'notification_about_shift': notification_about_shift,
         })
         return context
 
