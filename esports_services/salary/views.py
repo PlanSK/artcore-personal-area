@@ -16,6 +16,7 @@ from .utils import *
 from .mixins import *
 from salary.services.chat import *
 from salary.services.shift_calendar import get_user_calendar
+from salary.services.workshift import check_permission_to_close
 
 import datetime
 from typing import *
@@ -788,29 +789,33 @@ class IndexEmployeeView(ProfileStatusRedirectMixin, TitleMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        misconducts = Misconduct.objects.filter(
-                intruder=self.request.user
-            )
+        misconducts = Misconduct.objects.filter(intruder=self.request.user)
+        permission_to_close = check_permission_to_close(
+            user=self.request.user,
+            date=datetime.date.today()
+        )
+        wait_explanation = misconducts.filter(
+            status=Misconduct.MisconductStatus.ADDED
+        )
+        penalty_sum = misconducts.filter(
+            status=Misconduct.MisconductStatus.CLOSED,
+            workshift_date__month=datetime.date.today().month,
+            workshift_date__year=datetime.date.today().year,
+        ).aggregate(Sum('penalty')).get('penalty__sum')
+        shortage_sum = self.object_list.filter(
+            cash_admin=self.request.user,
+            shortage_paid=False
+        ).aggregate(Sum('shortage')).get('shortage__sum')
+
         context.update({
             'summary_earnings': self.get_summary_earnings(),
             'penalty_count': misconducts.count(),
             'today_date': datetime.date.today(),
-            'wait_explanation': misconducts.filter(
-                status=Misconduct.MisconductStatus.ADDED
-            ).count(),
-
-            'penalty_sum': misconducts.filter(
-                status=Misconduct.MisconductStatus.CLOSED,
-                workshift_date__month=datetime.date.today().month,
-                workshift_date__year=datetime.date.today().year,
-            ).aggregate(Sum('penalty')).get('penalty__sum'),
-
-            'shortage_sum': self.object_list.filter(
-                cash_admin=self.request.user,
-                shortage_paid=False
-            ).aggregate(Sum('shortage')).get('shortage__sum'),
+            'wait_explanation': wait_explanation.count(),
+            'penalty_sum': penalty_sum,
+            'shortage_sum': shortage_sum,
+            'permission_to_close': permission_to_close,
         })
-
         return context
 
 

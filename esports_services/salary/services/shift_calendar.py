@@ -73,8 +73,12 @@ def get_workshift_tuples_list(user: User,
     Return list of CalendarDay namedtuple from workshifts data.
     """
 
-    workshifts: QuerySet = get_user_month_workshifts(user, year, month)
-    
+    workshifts: QuerySet = get_user_month_workshifts(
+        user=user,
+        year=year,
+        month=month
+    )
+
     workshift_tuples_list = []
     for workshift in workshifts:
         if workshift.hall_admin == user:
@@ -160,13 +164,13 @@ def get_worksheet_name(year: int, month: int) -> str:
     return f'{month}-{year}'
 
 
-def get_planed_workshifts_list(user: User, worksheet_name: str) -> List[int]:
+def get_planed_workshifts_list(user: User, year: int, month: int) -> List[int]:
     """
     Returns list of day numbers planed shifts.
     """
 
     planed_workshifts_list: list = []
-
+    worksheet_name = get_worksheet_name(year=year, month=month)
     try:
         google_sheets_data = get_employees_schedule_dict(worksheet_name).get(
             user.get_full_name()
@@ -196,23 +200,29 @@ def get_user_calendar(user: User, year: int, month: int) -> UserCalendar:
         sum_of_earnings: float - Amount of earnings in closed shifts.
     """
 
-    worksheet_name: str = get_worksheet_name(year, month)
-    planed_workshifts_list: list = get_planed_workshifts_list(user, 
-                                                              worksheet_name)
+    planed_workshifts_list: list = get_planed_workshifts_list(
+        user=user,
+        year=year,
+        month=month
+    )
 
-    workshift_tuples_list = get_workshift_tuples_list(user, year, month)
+    workshift_tuples_list = get_workshift_tuples_list(
+        user=user,
+        year=year,
+        month=month
+    )
 
     shift_dates_list: list = [shift.date for shift in workshift_tuples_list]
 
-    weeks_days_list = get_week_days_list(year, month)
+    weeks_days_list = get_week_days_list(year=year, month=month)
 
     calendar_weeks_list = get_calendar_weeks_list(
         weeks_days_list,
-        shift_dates_list,
-        year,
-        month,
-        workshift_tuples_list,
-        planed_workshifts_list
+        shift_dates_list=shift_dates_list,
+        year=year,
+        month=month,
+        workshift_tuples_list=workshift_tuples_list,
+        planed_workshifts_list=planed_workshifts_list
     )
 
     complited_shifts_count: int = 0

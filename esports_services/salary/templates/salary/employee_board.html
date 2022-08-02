@@ -5,16 +5,15 @@
 {% block content %}
   <main>
     <div class="container">
-      {% if perms.salary.add_workingshift %}
+      {% if permission_to_close %}
       <div class="row mt-2">
         <div class="col text-center verysmall text-secondary">
           {% today_workshift_exists_check as today_workshift_is_exists %}
           {% if today_workshift_is_exists %}
           Текущая смена закрыта.<br>
-          Вы можете добавить смену за другую дату <a href="{% url 'add_workshift' %}?next={{ request.path }}" class="link-secondary verysmall">здесь.</a>
           {% else %}
           Для закрытия текущей смены воспользуйтесь кнопкой<br>
-          <a href="{% url 'add_workshift' %}?next={{ request.path }}" class="btn btn-outline-secondary verysmall">
+          <a href="{% url 'add_workshift' %}?next={{ request.path }}" class="btn btn-outline-secondary verysmall mt-1">
             <i class="fa-solid fa-calendar-plus fa-beat me-2"></i>
             Закрыть смену
           </a>
