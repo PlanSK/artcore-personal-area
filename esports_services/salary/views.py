@@ -1,28 +1,32 @@
+import datetime
+from typing import *
+from dateutil.relativedelta import relativedelta
+import logging
+
 from django.contrib.auth.forms import AuthenticationForm, AdminPasswordChangeForm
 from django.http import Http404, HttpRequest, JsonResponse, HttpResponseNotFound, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import TemplateView, ListView, DetailView
 from django.contrib.auth.views import LoginView, PasswordChangeView, PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView
-from django.contrib.auth import login, logout
+from django.contrib.auth import logout
+from django.contrib.auth.models import Permission
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
-from django.contrib.auth.models import Group
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.views.generic.base import RedirectView
 from django.db.models import Q, QuerySet, Sum, Avg
-from django.utils.http import urlsafe_base64_decode
 
 from .forms import *
 from .utils import *
 from .mixins import *
 from salary.services.chat import *
 from salary.services.shift_calendar import get_user_calendar
-from salary.services.workshift import (check_permission_to_close, 
-                                       notification_of_upcoming_shifts)
-
-import datetime
-from typing import *
-from dateutil.relativedelta import relativedelta
-import logging
+from salary.services.workshift import (
+    check_permission_to_close, notification_of_upcoming_shifts
+)
+from salary.services.registration import (
+    registration_user, sending_confirmation_link, confirmation_user_email,
+    get_user_instance_from_uidb64
+)
 
 
 logger = logging.getLogger(__name__)
@@ -35,54 +39,40 @@ class RegistrationUser(TitleMixin, SuccessUrlMixin, TemplateView):
     user_form = UserRegistrationForm
     profile_form = EmployeeRegistrationForm
 
-    def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+    def get(self, request: HttpRequest,
+            *args: Any, **kwargs: Any) -> HttpResponse:
+
         context = self.get_context_data(
             profile_form=self.profile_form,
             user_form=self.user_form
         )
         return render(request, self.template_name, context=context)
 
-    def post(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
-        user_form_class = self.user_form(request.POST)
-        profile_form_class = self.profile_form(request.POST, request.FILES)
-        if user_form_class.is_valid() and profile_form_class.is_valid():
-            user = user_form_class.save(commit=False) 
-            profile = profile_form_class.save(commit=False)
-            user.is_active = False
-            for field in ('first_name', 'last_name'):
-                field_value = getattr(user, field)
-                setattr(user, field, field_value.strip().capitalize())
-            user.save()
-            profile.user = user
-            user.groups.add(Group.objects.get(name='employee'))
-            if profile.position.name == 'cash_admin':
-                user.groups.add(Group.objects.get(name='cashiers'))
+    def post(self, request: HttpRequest,
+             *args: Any, **kwargs: Any) -> HttpResponse:
 
-            activation_message = get_confirmation_message(user, request=request)
-            activation_message.send()
-            profile.profile_status = Profile.ProfileStatus.REGISTRED
-            profile.email_status = Profile.EmailStatus.SENT
-            user.save()
+        user_form = self.user_form(request.POST)
+        profile_form = self.profile_form(request.POST, request.FILES)
+        if user_form.is_valid() and profile_form.is_valid():
+            user = registration_user(
+                request=request,
+                user_form=user_form,
+                profile_form=profile_form
+            )
 
-            context = {
-                'first_name': user.first_name,
-            }
+            context = { 'first_name': user.first_name }
             return render(request, self.success_template_name, context=context)
         else:
             context = self.get_context_data(
-                profile_form=profile_form_class,
-                user_form=user_form_class
+                profile_form=profile_form,
+                user_form=user_form
             )
             return render(request, self.template_name, context=context)
 
 
 def request_confirmation_link(request):
     username = request.POST.get('user')
-    user = User.objects.get(username=username)
-    confirm_message = get_confirmation_message(user, request=request)
-    confirm_message.send()
-    user.profile.email_status = Profile.EmailStatus.SENT
-    user.save()
+    sending_confirmation_link(request=request, username=username)
 
     return HttpResponse('Success sent.')
 
@@ -90,31 +80,20 @@ def request_confirmation_link(request):
 class ConfirmUserView(TitleMixin, SuccessUrlMixin, TemplateView):
     template_name = 'salary/auth/email_confirmed.html'
     title = 'Учетная запись активирована'
-    token_generator = account_activation_token
-
-    def get_user(self, uidb64):
-        try:
-            uid = urlsafe_base64_decode(uidb64).decode()
-            user = User.objects.select_related('profile').get(pk=uid)
-        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
-            user = None
-        return user
 
     def dispatch(self, request, *args: Any, **kwargs: Any):
-        if "uidb64" not in kwargs or "token" not in kwargs:
-            return HttpResponseNotFound
-        self.requested_user = self.get_user(kwargs['uidb64'])
-        token = kwargs['token']
-        if (self.requested_user and
-                self.token_generator.check_token(self.requested_user, token)):
-            self.requested_user.is_active = True
-            self.requested_user.profile.email_status = Profile.EmailStatus.CONFIRMED
-            self.requested_user.profile.profile_status = Profile.ProfileStatus.WAIT
-            self.requested_user.save()
-            login(request, self.requested_user)
-            return super().dispatch(request, *args, **kwargs)
-        else:
-            return HttpResponse('Activation link is invalid!')
+        user_uidb64 = kwargs.get('uidb64')
+        request_token = kwargs.get('token')
+
+        confirmation_user_email(
+            request=request,
+            user_uidb64_str=user_uidb64,
+            request_token=request_token
+        )
+        self.requested_user = get_user_instance_from_uidb64(
+            uidb64_str=user_uidb64
+        )
+        return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -1063,6 +1042,8 @@ class ProfileStatusApprovalView(EmployeePermissionsMixin, RedirectView):
         self.url = self.request.GET.get('next', reverse_lazy('index'))
         employee = get_object_or_404(User, pk=self.kwargs.get('pk', 0))
         employee.profile.profile_status = Profile.ProfileStatus.VERIFIED
+        chat_permission = Permission.objects.get(name='Can create new chats')
+        employee.user_permissions.add(chat_permission)
         employee.save()
 
         return super().get_redirect_url(*args, **kwargs)
