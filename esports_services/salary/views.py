@@ -1024,6 +1024,15 @@ class UnverifiedEmployeeView(LoginRequiredMixin, TitleMixin, TemplateView):
             return redirect('index')
         return super().dispatch(request, *args, **kwargs)
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        permission_to_close = check_permission_to_close(
+            user=self.request.user,
+            date=datetime.date.today()
+        )
+        context.update({ 'permission_to_close': permission_to_close })
+        return context
+
 
 class DocumentDeleteView(EmployeePermissionsMixin, RedirectView):
     def get_redirect_url(self, *args, **kwargs):
