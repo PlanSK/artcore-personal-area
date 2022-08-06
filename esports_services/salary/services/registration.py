@@ -62,8 +62,8 @@ def sending_confirmation_link(request: HttpRequest, username: str) -> None:
 def registration_user(request: HttpRequest,
                       user_form: ModelForm,
                       profile_form: ModelForm) -> User:
-    """Performs the procedure for registering an employee in the system
-
+    """
+    Performs the procedure for registering an employee in the system
     Returns:
         User: Registred User model instance
     """
@@ -75,23 +75,30 @@ def registration_user(request: HttpRequest,
     for field in ('first_name', 'last_name'):
         field_value = getattr(user, field)
         setattr(user, field, field_value.strip().capitalize())
-
     user.save()
     profile.user = user
 
-    # Полномочия убираем и даем после подтверждения
-    user.groups.add(Group.objects.get(name='employee'))
-    if profile.position.name == 'cash_admin':
-        user.groups.add(Group.objects.get(name='cashiers'))
-
-    activation_message = get_confirmation_message(user, request=request)
-    activation_message.send()
-
     profile.profile_status = Profile.ProfileStatus.REGISTRED
-    profile.email_status = Profile.EmailStatus.SENT
     user.save()
 
     return user
+
+
+def authentification_user(request: HttpRequest, user: User) -> None:
+    """
+    Authentication user account, add user to groups, and sending email.
+    """
+
+    activation_message = get_confirmation_message(user, request=request)
+    activation_message.send()
+    user.profile.email_status = Profile.EmailStatus.SENT
+
+    user.groups.add(Group.objects.get(name='employee'))
+    if user.profile.position.name == 'cash_admin':
+        user.groups.add(Group.objects.get(name='cashiers'))
+
+    user.profile.profile_status = Profile.ProfileStatus.AUTHENTICATED
+    user.save()
 
 
 def get_user_instance_from_uidb64(uidb64_str: str) -> User:

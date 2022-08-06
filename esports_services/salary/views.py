@@ -25,7 +25,7 @@ from salary.services.workshift import (
 )
 from salary.services.registration import (
     registration_user, sending_confirmation_link, confirmation_user_email,
-    get_user_instance_from_uidb64
+    get_user_instance_from_uidb64, authentification_user
 )
 
 
@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 
 class RegistrationUser(TitleMixin, SuccessUrlMixin, TemplateView):
     template_name = 'salary/auth/registration.html'
-    success_template_name = 'salary/auth/confirmation_link_sended.html'
+    success_template_name = 'salary/auth/registration_link_wait.html'
     title = 'Регистрация сотрудника'
     user_form = UserRegistrationForm
     profile_form = EmployeeRegistrationForm
@@ -1033,6 +1033,16 @@ class DocumentDeleteView(EmployeePermissionsMixin, RedirectView):
         filename = self.kwargs.get('filename')
         if filename:
             delete_document_from_storage(employee, filename)
+
+        return super().get_redirect_url(*args, **kwargs)
+
+
+class ProfileAuthenticationView(EmployeePermissionsMixin, RedirectView):
+    def get_redirect_url(self, *args, **kwargs):
+        self.url = self.request.GET.get('next', reverse_lazy('index'))
+        employee = get_object_or_404(User, pk=self.kwargs.get('pk', 0))
+        employee.profile.profile_status = Profile.ProfileStatus.AUTHENTICATED
+        authentification_user(request=self.request, user=employee)
 
         return super().get_redirect_url(*args, **kwargs)
 

@@ -36,7 +36,8 @@ class Profile(models.Model):
         CONFIRMED = 'CNF', 'Подтвержден'
 
     class ProfileStatus(models.TextChoices):
-        REGISTRED = 'RG', 'Зарегистрирован'
+        REGISTRED = 'RG', 'Ожидает разрешение'
+        AUTHENTICATED = 'AU', 'Письмо направлено'
         WAIT = 'WT', 'Ожидает проверки'
         VERIFIED = 'VD', 'Проверен'
         DISMISSED = 'DSM', 'Уволен'

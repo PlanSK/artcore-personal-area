@@ -21,6 +21,8 @@
             <span class="badge rounded-pill bg-success">
             {% elif current_user.profile.profile_status == 'RG' or current_user.profile.profile_status == 'WT' %}
             <span class="badge rounded-pill bg-warning text-dark">
+            {% elif current_user.profile.profile_status == 'AU' %}
+            <span class="badge rounded-pill bg-info text-dark">
             {% else %}
             <span class="text-danger">
             {% endif %}
@@ -66,12 +68,16 @@
               Управление профилем
             </button>
             <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdownMenuActions">
+              {% if current_user.profile.profile_status == 'RG' %}
+              <li><a href="{% url 'authentication' pk=current_user.pk %}?next={{ request.path }}" class="dropdown-item verysmall"><i class="fa-solid fa-user-check"></i> Разрешить регистрацию</a></li>
+              {% else %}
               <li><a href="{% url 'staff_passowrd_change' user=current_user %}?next={{ request.path }}" class="dropdown-item verysmall"><i class="fa-solid fa-key"></i> Изменить пароль</a></li>
               <li><a href="{% url 'staff_user_edit' current_user.profile.pk %}?next={{ request.path }}" class="dropdown-item verysmall"><i class="fa-solid fa-user-pen"></i> Измениние профиля</a></li>
               <li><a href="{% url 'employment_documents_view' user=current_user %}" class="dropdown-item verysmall"><i class="fa-solid fa-folder-open"></i> Управление документами</a></li>
-              {% if current_user.is_active %}
-              <li><hr class="dropdown-divider"></li>
-              <li><a href="{% url 'dismissal_user' current_user.profile.pk %}?next={{ request.path }}" class="dropdown-item verysmall"><i class="fa-solid fa-user-xmark"></i> Уволить</a></li>
+                {% if current_user.is_active %}
+                <li><hr class="dropdown-divider"></li>
+                <li><a href="{% url 'dismissal_user' current_user.profile.pk %}?next={{ request.path }}" class="dropdown-item verysmall"><i class="fa-solid fa-user-xmark"></i> Уволить</a></li>
+                {% endif %}
               {% endif %}
             </ul>
           </div>
