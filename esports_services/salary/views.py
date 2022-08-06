@@ -140,6 +140,7 @@ class DismissalEmployee(EmployeePermissionsMixin, TitleMixin,
             profile = profile_form_class.save(commit=False)
             profile.profile_status = Profile.ProfileStatus.DISMISSED
             self.object.groups.clear()
+            self.object.user_permissions.clear()
             self.object.is_active = False
             self.object.save()
             return redirect(self.get_success_url())
