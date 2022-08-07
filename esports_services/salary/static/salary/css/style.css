@@ -117,3 +117,9 @@
     background-color: #5DE100;
     color: #000;
 }
+
+@media screen and (max-width:350px) {
+    .mobile-hide {
+        display: none;
+    }
+}
