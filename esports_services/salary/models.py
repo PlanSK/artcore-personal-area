@@ -1,15 +1,18 @@
+import datetime
+import os.path
+from dateutil.relativedelta import relativedelta
+
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.urls import reverse_lazy
 
-import datetime
-import os.path
-from dateutil.relativedelta import relativedelta
-
 from .config import *
-from .utils import get_choice_plural, get_user_media_dir_name, OverwriteStorage, get_current_time
+from .utils import (
+    get_choice_plural, get_user_media_dir_name, OverwriteStorage, 
+    get_current_time
+)
 
 
 def user_directory_path(instance, filename):
@@ -33,7 +36,8 @@ class Profile(models.Model):
         CONFIRMED = 'CNF', 'Подтвержден'
 
     class ProfileStatus(models.TextChoices):
-        REGISTRED = 'RG', 'Зарегистрирован'
+        REGISTRED = 'RG', 'Ожидает разрешение'
+        AUTHENTICATED = 'AU', 'Письмо направлено'
         WAIT = 'WT', 'Ожидает проверки'
         VERIFIED = 'VD', 'Проверен'
         DISMISSED = 'DSM', 'Уволен'
@@ -351,6 +355,9 @@ class Chat(models.Model):
 
     class Meta:
         verbose_name = 'Chat'
+        permissions = [
+            ("can_create_new_chats", "Can create new chats"),
+        ]
 
     def save(self, *args, **kwargs) -> None:
         super().save(*args, **kwargs)

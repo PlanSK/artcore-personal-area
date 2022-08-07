@@ -1,3 +1,4 @@
+import profile
 from django import template
 from django.db.models import Q
 
@@ -14,7 +15,9 @@ def unverified_shift():
 
 @register.simple_tag()
 def inactive_user():
-    return Profile.objects.filter(profile_status='WT').count()
+    return Profile.objects.exclude(
+        Q(profile_status='VD') | Q(profile_status='DSM')
+    ).count()
 
 
 @register.simple_tag()

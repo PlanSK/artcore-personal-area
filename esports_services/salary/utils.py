@@ -1,23 +1,17 @@
+import os
+import logging
+from unidecode import unidecode
+from typing import Tuple
+from collections import namedtuple
+
 from django.utils.text import slugify
-from django.contrib.auth.tokens import PasswordResetTokenGenerator
-from django.utils.encoding import force_bytes
-from django.utils.http import urlsafe_base64_encode
-from django.template.loader import render_to_string
-from django.core.mail import EmailMessage
-from django.contrib.sites.shortcuts import get_current_site
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core.files.storage import FileSystemStorage
 from django.conf import settings
 from django.utils import timezone
 
-from unidecode import unidecode
-from typing import *
-from collections import namedtuple
-
 from .config import *
 from salary.models import *
-import os
-import logging
 
 
 logger = logging.getLogger(__name__)
@@ -25,30 +19,6 @@ logger = logging.getLogger(__name__)
 
 def get_misconduct_slug(last_name, date):
     return slugify(f'{unidecode(last_name)} {date.strftime("%d %m %Y")}')
-
-
-class TokenGenerator(PasswordResetTokenGenerator):
-    def _make_hash_value(self, user, timestamp):
-        return f"{user.pk}{timestamp}{user.is_active}"
-
-account_activation_token = TokenGenerator()
-
-
-def get_confirmation_message(user, request=None):
-    mail_template = 'salary/auth/confirmation_email.html'
-    token_genertor = account_activation_token
-    current_site = get_current_site(request)
-
-    email_address = user.email
-    mail_subject = 'Активация Вашей учетной записи.'
-    message = render_to_string(mail_template, {
-        'domain': current_site.domain,
-        'uid': urlsafe_base64_encode(force_bytes(user.pk)),
-        'user': user,
-        'token': token_genertor.make_token(user),
-        'protocol': 'https' if request.is_secure() else 'http',
-    })
-    return EmailMessage(mail_subject, message, to=[email_address])
 
 
 def get_choice_plural(amount: int, variants: tuple) -> str:
