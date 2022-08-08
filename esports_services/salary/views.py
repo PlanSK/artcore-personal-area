@@ -1021,8 +1021,10 @@ class UnverifiedEmployeeView(LoginRequiredMixin, TitleMixin, TemplateView):
     template_name = 'salary/unverified_employee.html'
 
     def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
-        if request.user.profile.profile_status == Profile.ProfileStatus.VERIFIED:
-            return redirect('index')
+        true_status = Profile.ProfileStatus.VERIFIED
+        if (request.user.is_authenticated
+            and request.user.profile.profile_status == true_status):
+                return redirect('index')
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
