@@ -1,9 +1,9 @@
-import profile
+import datetime
+
 from django import template
+from django.contrib.auth.models import User
 from django.db.models import Q
-
-from salary.models import *
-
+from salary.models import Message, Misconduct, Profile, WorkingShift
 
 register = template.Library()
 
