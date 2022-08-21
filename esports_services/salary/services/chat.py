@@ -1,13 +1,11 @@
-from typing import *
-from collections import namedtuple
 import logging
+from collections import namedtuple
+from typing import List, Optional
 
 from django.db.models import QuerySet
 from django.http import HttpRequest
 from django.shortcuts import get_object_or_404
-
 from salary.models import *
-
 
 Dialog = namedtuple('Dialog', ['member', 'photo', 'unread_messages_count', 'is_selected', 'slug'])
 
@@ -27,7 +25,8 @@ def get_user_chats_list(user_id: int) -> QuerySet:
     return User.objects.get(pk=user_id).chat_set.all()
 
 
-def get_chat_info(chat, user_id: int, is_selected: bool = False) -> Dialog:
+def get_chat_info(chat, user_id: int,
+                  is_selected: bool = False) -> Optional[Dialog]:
     """Return dialog information for user_id interlocutor
 
     Args:
@@ -37,16 +36,22 @@ def get_chat_info(chat, user_id: int, is_selected: bool = False) -> Dialog:
     Returns:
         Dialog: named tuple
     """
-    member=chat.members.exclude(id=user_id).select_related('profile').last()
-    unread_messages_count=chat.chat.filter(author=member, is_read=False).count()
-    return Dialog(
+    if chat.members.count() > 1:
+        member=chat.members.exclude(
+            id=user_id).select_related('profile').last()
+        unread_messages_count=chat.chat.filter(author=member,
+                                               is_read=False).count()
+        return Dialog(
             member=member,
             photo=member.profile.photo.url if member.profile.photo else None,
             unread_messages_count=unread_messages_count,
             is_selected=is_selected,
             slug=chat.slug,
         )
+    else:
+        chat_logger.error(f'Too little users in chat {chat.id}. Delete this.')
 
+    return None
 
 
 def get_chats_list(user_id: int, selected_slug: str = '') -> List[Dialog]:
@@ -54,17 +59,19 @@ def get_chats_list(user_id: int, selected_slug: str = '') -> List[Dialog]:
 
     Args:
         user_id (int): user id
-        selected_slug (str, optional): slug of the selected chat. Defaults to ''.
+        selected_slug (str, optional): slug of the selected chat. Default: ''.
 
     Returns:
         List[Dialog]: list of Dialog
     """
     chats_list = []
     for chat in get_user_chats_list(user_id):
-        is_selected = True if selected_slug and selected_slug == chat.slug else False
-        chats_list.append(
-            get_chat_info(chat, user_id, is_selected)
-        )
+        is_selected = False
+        if selected_slug and selected_slug == chat.slug:
+            is_selected = True
+        dialog = get_chat_info(chat, user_id, is_selected)
+        if dialog:
+            chats_list.append(dialog)
 
     return chats_list
 
