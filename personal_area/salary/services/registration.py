@@ -1,3 +1,5 @@
+import datetime
+
 from django.contrib.auth.models import Group, User
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.contrib.auth import login
@@ -129,3 +131,14 @@ def confirmation_user_email(request: HttpRequest,
         login(request, requested_user)
     else:
         raise Http404
+
+
+def coming_of_age_date_string() -> str:
+    """
+    Returns string format '00-00-0000' of today() - 18 years
+    """
+
+    coming_date_days = round(18 * 365.25)
+    today = datetime.date.today()
+    minimal_coming_date = today - datetime.timedelta(days=coming_date_days)
+    return minimal_coming_date.strftime('%Y-%m-%d')

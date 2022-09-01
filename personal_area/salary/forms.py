@@ -4,6 +4,7 @@ from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 import datetime
 
 from .models import *
+from salary.services.registration import coming_of_age_date_string
 
 
 class DateInput(forms.DateInput):
@@ -46,12 +47,16 @@ class EmployeeRegistrationForm(forms.ModelForm):
             'birth_date', 'employment_date',
             'position', 'photo',
         )
+
         widgets = {
             'birth_date': forms.DateInput(attrs={
                 'type': 'date',
-                'max': '2003-01-01'
+                'max': coming_of_age_date_string(),
             }),
-            'employment_date': forms.DateInput(attrs={'type': 'date'}),
+            'employment_date': forms.DateInput(attrs={
+                'type': 'date',
+                'max': datetime.date.today().strftime('%Y-%m-%d'),
+            }),
         }
 
 
