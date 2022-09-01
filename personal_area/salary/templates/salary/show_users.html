@@ -72,7 +72,7 @@
               <li><a href="{% url 'authentication' pk=current_user.pk %}?next={{ request.path }}" class="dropdown-item verysmall"><i class="fa-solid fa-user-check"></i> Разрешить регистрацию</a></li>
               {% else %}
               <li><a href="{% url 'staff_passowrd_change' user=current_user %}?next={{ request.path }}" class="dropdown-item verysmall"><i class="fa-solid fa-key"></i> Изменить пароль</a></li>
-              <li><a href="{% url 'staff_user_edit' current_user.profile.pk %}?next={{ request.path }}" class="dropdown-item verysmall"><i class="fa-solid fa-user-pen"></i> Измениние профиля</a></li>
+              <li><a href="{% url 'staff_user_edit' current_user.profile.pk %}?next={{ request.path }}" class="dropdown-item verysmall"><i class="fa-solid fa-user-pen"></i> Изменить профиль</a></li>
               <li><a href="{% url 'employment_documents_view' user=current_user %}" class="dropdown-item verysmall"><i class="fa-solid fa-folder-open"></i> Управление документами</a></li>
                 {% if current_user.is_active %}
                 <li><hr class="dropdown-divider"></li>

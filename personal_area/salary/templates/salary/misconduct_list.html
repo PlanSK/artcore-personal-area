@@ -90,7 +90,7 @@
       {% if request.GET.next %}
       <a class="btn btn-outline-secondary verysmall mt-1" href="{{ request.GET.next }}">Назад</a>
       {% elif perms.salary.change_misconduct and perms.salary.delete_misconduct %}
-      <a class="btn btn-outline-secondary verysmall mt-1" href="{% url 'misconducts_view' %}">К списку нарушенителей</a>
+      <a class="btn btn-outline-secondary verysmall mt-1" href="{% url 'misconducts_view' %}">К списку нарушителей</a>
       {% else %}
       <a class="btn btn-outline-secondary verysmall mt-1" href="/">Назад</a>
       {% endif %}
