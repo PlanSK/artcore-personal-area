@@ -1,4 +1,5 @@
 import datetime
+import profile
 
 from django.contrib.auth.models import Group, User
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
@@ -126,7 +127,9 @@ def confirmation_user_email(request: HttpRequest,
     if is_verified_token:
         requested_user.is_active = True
         requested_user.profile.email_status = Profile.EmailStatus.CONFIRMED
-        requested_user.profile.profile_status = Profile.ProfileStatus.WAIT
+        profile_status = requested_user.profile.profile_status
+        if profile_status != Profile.ProfileStatus.VERIFIED:
+            profile_status = Profile.ProfileStatus.WAIT
         requested_user.save()
         login(request, requested_user)
     else:
