@@ -1,0 +1,21 @@
+{% extends 'salary/base.html' %}
+{% load static %}
+
+{% block body %}
+<body class="bg-dark text-light h-100">
+    <div class="container h-100">
+        <div class="row h-100 align-items-center justify-content-md-center">
+            <div class="col-md-12">
+                <div class="text-center">
+                    <img class="mb-5" src="{% static 'salary/img/logo.png' %}" alt="" height="40">
+                    <h1 class="mb-5 text-warning"><i class="fa-solid fa-screwdriver-wrench fa-2x"></i></h1>
+                    <h2>Режим обслуживания</h2>
+                    <div class="mt-4">
+                        В настоящее время проводятся технические работы, работа с сайтом временно недоступна.<br>
+                        Приносим свои извинения за предоставленные неудобства.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

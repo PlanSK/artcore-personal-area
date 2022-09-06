@@ -35,6 +35,7 @@ SECRET_KEY = env('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 LOCAL_MODE = env.bool('LOCAL_MODE', default=False)
 DEBUG = env('DEBUG')
+MAINTRANCE_MODE = env.int('MAINTRANCE_MODE', default=0)
 DEBUG_TOOLBAR = env('DEBUG_TOOLBAR')
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS')
 
@@ -55,6 +56,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'salary.middleware.maintrance_middleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
