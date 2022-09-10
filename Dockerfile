@@ -31,7 +31,7 @@ RUN mkdir $APP_HOME/staticfiles
 RUN mkdir $APP_HOME/mediafiles
 WORKDIR $APP_HOME
 
-RUN apk update && apk add --no-cache mariadb-connector-c-dev
+RUN apk update && apk add --no-cache mariadb-connector-c-dev tzdata
 COPY --from=builder /usr/src/webapp/wheels /wheels
 COPY --from=builder /usr/src/webapp/requirements.txt .
 RUN pip install --no-cache /wheels/*
