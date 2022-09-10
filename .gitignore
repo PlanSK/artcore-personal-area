@@ -166,3 +166,4 @@ media/
 .pytest_cache/
 mediafiles/
 .db
+.secrets/

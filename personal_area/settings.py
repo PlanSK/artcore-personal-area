@@ -218,7 +218,17 @@ ADMINS = [
     for addr in os.environ.get('DJANGO_ADMINS').split(',')
 ]
 
-GSHEETS_API_KEY = json.loads(os.environ.get('GSHEETS_API_KEY', '')) #TEST
+GSHEETS_API_KEY_FILE = os.environ.get('GSHEETS_API_KEY_FILE')
+if GSHEETS_API_KEY_FILE:
+    api_key_full_path = os.path.join(
+        BASE_DIR,
+        '.secrets',
+        GSHEETS_API_KEY_FILE
+    )
+    if os.path.exists(api_key_full_path):
+        with open(api_key_full_path) as json_file:
+            GSHEETS_API_KEY = json.load(json_file)
+
 SPREADSHEET = os.environ.get('SPREADSHEET', '')
 if os.environ.get('CSRF_TRUSTED_ORIGINS'):
     CSRF_TRUSTED_ORIGINS = [
