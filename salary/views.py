@@ -181,20 +181,17 @@ class AdminUserView(EmployeePermissionsMixin, TitleMixin, ListView):
     title = 'Управление персоналом'
 
     def get_queryset(self):
-        query = User.objects.exclude(is_staff=True).select_related(
-            'profile',
-            'profile__position'
-        ).order_by('-profile__position')
+        queryset = User.objects.select_related(
+            'profile', 'profile__position').order_by('-profile__position')
 
         if not self.kwargs.get('all'):
-            return query.filter(profile__dismiss_date__isnull=True)
+            return queryset.filter(profile__dismiss_date__isnull=True)
 
-        return query
+        return queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        if not self.kwargs.get('all'):
-            context['only_actived'] = True
+        context['only_actived'] = True if not self.kwargs.get('all') else False
         return context
 
 
