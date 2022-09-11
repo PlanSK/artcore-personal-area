@@ -1,6 +1,7 @@
 import datetime
 
 from django import template
+from django.db.models import QuerySet
 from django.contrib.auth.models import User
 from django.db.models import Q
 from salary.models import Message, Misconduct, Profile, WorkingShift
@@ -47,3 +48,13 @@ def get_unread_messages(user: User) -> int:
         chat__members__in=[user],
         is_read=False
     ).exclude(author=user).count()
+
+@register.simple_tag()
+def get_birthday_person_list() -> QuerySet:
+    today = datetime.date.today()
+    birthday_person_list = User.objects.select_related('profile').filter(
+        profile__birth_date__day=today.day,
+        profile__birth_date__month=today.month,
+    ).exclude(profile__profile_status='DSM')
+    
+    return birthday_person_list
