@@ -2,9 +2,13 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 
 import datetime
+import logging
 
 from .models import *
 from salary.services.registration import coming_of_age_date_string
+
+
+logger = logging.getLogger(__name__)
 
 
 class DateInput(forms.DateInput):
@@ -153,11 +157,14 @@ class AddWorkshiftDataForm(EditWorkshiftDataForm):
             'hookah_revenue',
             'publication_link',
         )
+        today = datetime.date.today().strftime('%Y-%m-%d')
+        logger.debug(f'Today value is {today}')
+
         widgets = {
             'shift_date': forms.DateInput(attrs={
                 'type': 'date',
-                'value': datetime.datetime.now().strftime('%Y-%m-%d'),
-                'max': datetime.datetime.now().strftime('%Y-%m-%d'),
+                'value': today,
+                'max': today,
             }),
         }   
 

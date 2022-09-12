@@ -913,10 +913,12 @@ class AddWorkshiftData(PermissionRequiredMixin, TitleMixin, SuccessUrlMixin,
 
     def get_initial(self):
         initional = super().get_initial()
+        today = datetime.date.today().strftime('%Y-%m-%d')
         initional.update({
             'cash_admin': self.request.user,
-            'shift_date': datetime.date.today().strftime('%Y-%m-%d'),
+            'shift_date': today,
         })
+        logging.debug(f'Get initial set today date {today} in view.')
         return initional
 
     def form_valid(self, form):
