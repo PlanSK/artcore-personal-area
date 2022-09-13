@@ -913,12 +913,11 @@ class AddWorkshiftData(PermissionRequiredMixin, TitleMixin, SuccessUrlMixin,
 
     def get_initial(self):
         initional = super().get_initial()
-        today = datetime.date.today().strftime('%Y-%m-%d')
         initional.update({
             'cash_admin': self.request.user,
-            'shift_date': today,
+            'shift_date': datetime.date.today().strftime('%Y-%m-%d'),
         })
-        logging.debug(f'Get initial set today date {today} in view.')
+        logging.debug(f'Function get_initial update fields values.')
         return initional
 
     def form_valid(self, form):
@@ -926,7 +925,11 @@ class AddWorkshiftData(PermissionRequiredMixin, TitleMixin, SuccessUrlMixin,
         object.editor = self.request.user.get_full_name()
         object.change_date = timezone.localtime(timezone.now())
         object.slug = object.shift_date
-
+        if object.shift_date > datetime.date.today():
+            logger.debug('Validation error in view: date more than today.')
+            # form.add_error('shift_date', 'Shift date must no more today date.')
+        else:
+            logger.debug('Form validation in view successful.')
         return super().form_valid(form)
 
 
