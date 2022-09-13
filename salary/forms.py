@@ -157,16 +157,25 @@ class AddWorkshiftDataForm(EditWorkshiftDataForm):
             'hookah_revenue',
             'publication_link',
         )
-        today = datetime.date.today().strftime('%Y-%m-%d')
-        logger.debug(f'Today value is {today}')
-
         widgets = {
             'shift_date': forms.DateInput(attrs={
                 'type': 'date',
-                'value': today,
-                'max': today,
             }),
-        }   
+        }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        shift_date = cleaned_data.get('shift_date')
+        today = datetime.date.today()
+        logger.debug(f'Today date value set {today}')
+        if shift_date > datetime.date.today():
+            logger.debug(f'Current date value more than {today}. I must raise exception.')
+            # raise forms.ValidationError(
+            #     f'The date must be no more than {today}'
+            # )
+        else:
+            logger.debug(f'Successful validation in forms. Date: {shift_date}. Today: {today}.')
+        return cleaned_data
 
 
 class StaffEditWorkshiftForm(EditWorkshiftDataForm):
