@@ -386,7 +386,6 @@ class AddMisconductView(MisconductPermissionsMixin, TitleMixin, SuccessUrlMixin,
         object = form.save(commit=False)
         object.moderator = self.request.user
         object.editor = self.request.user.get_full_name()
-        object.change_date = timezone.localtime(timezone.now())
         slug_name = get_misconduct_slug(
             object.intruder.last_name,
             object.misconduct_date,
@@ -922,7 +921,6 @@ class AddWorkshiftData(PermissionRequiredMixin, TitleMixin, SuccessUrlMixin,
     def form_valid(self, form):
         object = form.save(commit=False)
         object.editor = self.request.user.get_full_name()
-        object.change_date = timezone.localtime(timezone.now())
         object.slug = object.shift_date
 
         return super().form_valid(form)

@@ -65,7 +65,6 @@ class SuccessUrlMixin:
 class EditModelEditorFieldsMixin:
     def form_valid(self, form):
         self.object.editor = self.request.user.get_full_name()
-        self.object.change_date = timezone.localtime(timezone.now())
         return super().form_valid(form)
 
 
