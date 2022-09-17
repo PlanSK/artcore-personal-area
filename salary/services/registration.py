@@ -127,9 +127,9 @@ def confirmation_user_email(request: HttpRequest,
     if is_verified_token:
         requested_user.is_active = True
         requested_user.profile.email_status = Profile.EmailStatus.CONFIRMED
-        profile_status = requested_user.profile.profile_status
-        if profile_status != Profile.ProfileStatus.VERIFIED:
-            profile_status = Profile.ProfileStatus.WAIT
+        user_profile = requested_user.profile
+        if user_profile.profile_status == Profile.ProfileStatus.AUTHENTICATED:
+            user_profile.profile_status = Profile.ProfileStatus.WAIT
         requested_user.save()
         login(request, requested_user)
     else:
