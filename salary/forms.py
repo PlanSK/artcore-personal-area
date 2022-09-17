@@ -167,14 +167,14 @@ class AddWorkshiftDataForm(EditWorkshiftDataForm):
         cleaned_data = super().clean()
         shift_date = cleaned_data.get('shift_date')
         today = datetime.date.today()
-        logger.debug(f'Today date value set {today}')
+        logger.debug(f'[2/3] Today date value set {today}')
         if shift_date > datetime.date.today():
-            logger.debug(f'Current date value more than {today}. I must raise exception.')
-            # raise forms.ValidationError(
-            #     f'The date must be no more than {today}'
-            # )
+            logger.debug(f'[3/3] Current date value more than {today}. I must raise exception.')
+            raise forms.ValidationError(
+                f'The date must be no more than {today}'
+            )
         else:
-            logger.debug(f'Successful validation in forms. Date: {shift_date}. Today: {today}.')
+            logger.debug(f'[3/3] Successful validation in forms. Date: {shift_date}. Today: {today}.')
         return cleaned_data
 
 
