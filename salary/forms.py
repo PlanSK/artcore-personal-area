@@ -101,10 +101,7 @@ class EditProfileForm(forms.ModelForm):
 
     class Meta:
         model = Profile
-        fields = (
-            'birth_date', 'employment_date',
-            'photo',
-        )
+        fields = ('birth_date', 'employment_date', 'photo')
         widgets_injection = {
             field: forms.DateInput(attrs={'type': 'date',}, format='%Y-%m-%d')
             for field in fields if 'date' in field
@@ -158,9 +155,7 @@ class AddWorkshiftDataForm(EditWorkshiftDataForm):
             'publication_link',
         )
         widgets = {
-            'shift_date': forms.DateInput(attrs={
-                'type': 'date',
-            }),
+            'shift_date': forms.DateInput(attrs={'type': 'date'}),
         }
 
     def clean(self):
@@ -169,12 +164,18 @@ class AddWorkshiftDataForm(EditWorkshiftDataForm):
         today = datetime.date.today()
         logger.debug(f'[2/3] Today date value set {today}')
         if shift_date > datetime.date.today():
-            logger.debug(f'[3/3] Current date value more than {today}. I must raise exception.')
+            logger.debug(
+                f'[3/3] Current date value more than {today}. '
+                f'I must raise exception.'
+            )
             raise forms.ValidationError(
                 f'The date must be no more than {today}'
             )
         else:
-            logger.debug(f'[3/3] Successful validation in forms. Date: {shift_date}. Today: {today}.')
+            logger.debug(
+                f'[3/3] Successful validation in forms. Date: {shift_date}. '
+                f'Today: {today}.'
+            )
         return cleaned_data
 
 
