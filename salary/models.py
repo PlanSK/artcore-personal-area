@@ -11,7 +11,6 @@ from django.urls import reverse_lazy
 from .config import *
 from .utils import (
     get_choice_plural, get_user_media_dir_name, OverwriteStorage, 
-    get_current_time
 )
 
 
@@ -126,7 +125,7 @@ class Misconduct(models.Model):
     comment = models.TextField(verbose_name='Примечание', blank=True)
     status = models.CharField(max_length=10, choices=MisconductStatus.choices, default=MisconductStatus.ADDED, verbose_name='Статус рассмотрения')
     slug = models.SlugField(max_length=60, unique=True, verbose_name='URL', null=True, blank=True)
-    change_date = models.DateTimeField(verbose_name='Дата изменения', blank=True, null=True)
+    change_date = models.DateTimeField(verbose_name='Дата изменения', auto_now=True, null=True)
     editor = models.TextField(verbose_name='Редактор', blank=True, editable=False)
 
     class Meta:
@@ -166,7 +165,7 @@ class WorkingShift(models.Model):
     comment_for_hall_admin = models.TextField(verbose_name='Примечание для админа', blank=True)
     publication_link = models.TextField(verbose_name='СММ-публикация (ссылка)', blank=True)
     publication_is_verified = models.BooleanField(verbose_name='СММ-публикация проверена', default=False)
-    change_date = models.DateTimeField(verbose_name='Дата изменения', blank=True, null=True)
+    change_date = models.DateTimeField(verbose_name='Дата изменения', auto_now=True, null=True)
     editor = models.TextField(verbose_name='Редактор', blank=True, editable=False)
     hall_admin_penalty = models.FloatField(verbose_name='Штраф администратора зала', default=0.0)
     cash_admin_penalty = models.FloatField(verbose_name='Штраф администратора кассы', default=0.0)
@@ -373,7 +372,7 @@ class Message(models.Model):
     chat = models.ForeignKey(Chat, on_delete=models.CASCADE, related_name='chat', verbose_name='Чат')
     message_text = models.TextField(verbose_name='Текст сообщения')
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='author', verbose_name='Автор')
-    sending_time = models.DateTimeField(verbose_name='Время отправления', default=get_current_time)
+    sending_time = models.DateTimeField(verbose_name='Время отправления', auto_now_add=True)
     is_read = models.BooleanField(verbose_name='Отметка о прочтении', default=False)
 
     class Meta:

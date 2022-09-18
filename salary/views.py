@@ -386,7 +386,6 @@ class AddMisconductView(MisconductPermissionsMixin, TitleMixin, SuccessUrlMixin,
         object = form.save(commit=False)
         object.moderator = self.request.user
         object.editor = self.request.user.get_full_name()
-        object.change_date = timezone.localtime(timezone.now())
         slug_name = get_misconduct_slug(
             object.intruder.last_name,
             object.misconduct_date,
@@ -917,14 +916,18 @@ class AddWorkshiftData(PermissionRequiredMixin, TitleMixin, SuccessUrlMixin,
             'cash_admin': self.request.user,
             'shift_date': datetime.date.today().strftime('%Y-%m-%d'),
         })
+        logging.debug(f'[1/3] Function get_initial update fields values.')
         return initional
 
     def form_valid(self, form):
         object = form.save(commit=False)
         object.editor = self.request.user.get_full_name()
-        object.change_date = timezone.localtime(timezone.now())
         object.slug = object.shift_date
-
+        # if object.shift_date > datetime.date.today():
+        #     logger.debug('Validation error in view: date more than today.')
+        #     # form.add_error('shift_date', 'Shift date must no more today date.')
+        # else:
+        #     logger.debug('Form validation in view successful.')
         return super().form_valid(form)
 
 

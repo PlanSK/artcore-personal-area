@@ -2,9 +2,13 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 
 import datetime
+import logging
 
 from .models import *
 from salary.services.registration import coming_of_age_date_string
+
+
+logger = logging.getLogger(__name__)
 
 
 class DateInput(forms.DateInput):
@@ -97,10 +101,7 @@ class EditProfileForm(forms.ModelForm):
 
     class Meta:
         model = Profile
-        fields = (
-            'birth_date', 'employment_date',
-            'photo',
-        )
+        fields = ('birth_date', 'employment_date', 'photo')
         widgets_injection = {
             field: forms.DateInput(attrs={'type': 'date',}, format='%Y-%m-%d')
             for field in fields if 'date' in field
@@ -154,12 +155,28 @@ class AddWorkshiftDataForm(EditWorkshiftDataForm):
             'publication_link',
         )
         widgets = {
-            'shift_date': forms.DateInput(attrs={
-                'type': 'date',
-                'value': datetime.datetime.now().strftime('%Y-%m-%d'),
-                'max': datetime.datetime.now().strftime('%Y-%m-%d'),
-            }),
-        }   
+            'shift_date': forms.DateInput(attrs={'type': 'date'}),
+        }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        shift_date = cleaned_data.get('shift_date')
+        today = datetime.date.today()
+        logger.debug(f'[2/3] Today date value set {today}')
+        if shift_date > datetime.date.today():
+            logger.debug(
+                f'[3/3] Current date value more than {today}. '
+                f'I must raise exception.'
+            )
+            raise forms.ValidationError(
+                f'The date must be no more than {today}'
+            )
+        else:
+            logger.debug(
+                f'[3/3] Successful validation in forms. Date: {shift_date}. '
+                f'Today: {today}.'
+            )
+        return cleaned_data
 
 
 class StaffEditWorkshiftForm(EditWorkshiftDataForm):
@@ -213,11 +230,11 @@ class AddMisconductForm(forms.ModelForm):
         widgets = {
             'misconduct_date': forms.DateInput(attrs={
                 'type': 'date',
-                'value': datetime.datetime.now().strftime('%Y-%m-%d'),
+                'value': datetime.date.today().strftime('%Y-%m-%d'),
             }),
             'workshift_date': forms.DateInput(attrs={
                 'type': 'date',
-                'value': datetime.datetime.now().strftime('%Y-%m-%d'),
+                'value': datetime.date.today().strftime('%Y-%m-%d'),
             }),
         }   
 

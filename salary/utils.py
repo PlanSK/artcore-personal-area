@@ -135,8 +135,4 @@ class OverwriteStorage(FileSystemStorage):
         return name
 
 
-def get_current_time():
-    return timezone.localtime(timezone.now())
-
-
 Intruder = namedtuple('Intruder', 'employee total_count explanation_count decision_count')
