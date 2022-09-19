@@ -33,7 +33,8 @@
               <ul class="navbar-nav">
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle clear-after-toggle d-flex align-items-center" id="navbarDarkDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    {% if request.user.profile.photo %}
+                    {% check_image_file_exists profile=request.user.profile as image_file_exists %}
+                    {% if image_file_exists %}
                       <img src="{{ request.user.profile.photo.url }}" alt="" class="rounded-circle" style="width: 2em; height: 2em;">
                     {% else %}
                     <i class="fa-solid fa-circle-user fa-2x"></i>
