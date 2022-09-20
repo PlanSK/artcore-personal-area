@@ -1,5 +1,4 @@
 import datetime
-import os.path
 from dateutil.relativedelta import relativedelta
 
 from django.db import models
@@ -10,16 +9,12 @@ from django.urls import reverse_lazy
 
 from .config import *
 from .utils import (
-    get_choice_plural, get_user_media_dir_name, OverwriteStorage, 
+    get_choice_plural
 )
-
-
-def user_directory_path(instance, filename):
-    file_extension = os.path.splitext(filename)[1]
-    return os.path.join(
-        get_user_media_dir_name(instance.user),
-        os.path.normcase('photo' + file_extension)
-    )
+from salary.services.filesystem import (
+    user_directory_path,
+    OverwriteStorage,
+)
 
 
 def get_last_name(self):

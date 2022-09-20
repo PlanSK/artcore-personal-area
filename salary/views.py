@@ -27,6 +27,10 @@ from salary.services.registration import (
     registration_user, sending_confirmation_link, confirmation_user_email,
     get_user_instance_from_uidb64, authentification_user
 )
+from salary.services.filesystem import (
+    get_employee_documents_urls, document_file_handler,
+    delete_document_from_storage
+)
 
 
 logger = logging.getLogger(__name__)
