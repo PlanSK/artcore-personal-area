@@ -41,18 +41,38 @@ class Profile(models.Model):
         VERIFIED = 'VD', 'Проверен'
         DISMISSED = 'DSM', 'Уволен'
 
-    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE,
+                                primary_key=True)
     birth_date = models.DateField(null=True, verbose_name='Дата рождения')
-    employment_date = models.DateField(null=True, verbose_name='Дата трудоустройства')
-    position = models.ForeignKey('Position', on_delete=models.PROTECT, null=True, verbose_name='Должность')
-    attestation_date = models.DateField(blank=True, null=True, verbose_name='Дата прохождения аттестации')
-    dismiss_date = models.DateField(blank=True, null=True, verbose_name='Дата увольнения')
-    photo = models.ImageField(blank=True, null=True, storage=OverwriteStorage(),  upload_to=user_directory_path, verbose_name='Фото профиля')
-    email_status = models.CharField(max_length=10, choices=EmailStatus.choices, default=EmailStatus.ADDED, verbose_name='Состояние электронной почты')
-    profile_status = models.CharField(max_length=10, choices=ProfileStatus.choices, default=ProfileStatus.REGISTRED, verbose_name='Состояние профиля')
+    employment_date = models.DateField(null=True, 
+                                       verbose_name='Дата трудоустройства')
+    position = models.ForeignKey(
+        'Position', on_delete=models.PROTECT, 
+        null=True, verbose_name='Должность'
+    )
+    attestation_date = models.DateField(
+        blank=True, null=True, 
+        verbose_name='Дата прохождения аттестации'
+    )
+    dismiss_date = models.DateField(
+        blank=True, null=True, verbose_name='Дата увольнения'
+    )
+    photo = models.ImageField(
+        blank=True, null=True, storage=OverwriteStorage(), 
+        upload_to=user_directory_path, verbose_name='Фото профиля')
+    email_status = models.CharField(
+        max_length=10, choices=EmailStatus.choices,
+        default=EmailStatus.ADDED, verbose_name='Состояние электронной почты'
+    )
+    profile_status = models.CharField(
+        max_length=10, 
+        choices=ProfileStatus.choices,
+        default=ProfileStatus.REGISTRED,
+        verbose_name='Состояние профиля'
+    )
 
     def __str__(self) -> str:
-        return f'{self.user.first_name} {self.user.last_name} [{self.user.username}]'
+        return f'{self.user.last_name} [{self.user.username}]'
 
     class Meta:
         verbose_name = 'Профиль сотрудника'
@@ -99,7 +119,8 @@ class DisciplinaryRegulations(models.Model):
     article = models.CharField(max_length=10, verbose_name='Пункт')
     title = models.CharField(max_length=255, verbose_name='Наименование')
     base_penalty = models.FloatField(default=0.0, verbose_name='Сумма штрафа')
-    sanction = models.CharField(max_length=255, verbose_name='Санкция', blank=True, null=True)
+    sanction = models.CharField(max_length=255, verbose_name='Санкция',
+                                blank=True, null=True)
 
     class Meta:
         verbose_name = 'Пункт регламента'
@@ -117,16 +138,37 @@ class Misconduct(models.Model):
 
     misconduct_date = models.DateField(verbose_name='Дата нарушения')
     workshift_date = models.DateField(verbose_name='Дата смены')
-    intruder = models.ForeignKey(User, on_delete=models.PROTECT, verbose_name='Сотрудник', related_name='intruder')
-    regulations_article = models.ForeignKey(DisciplinaryRegulations, on_delete=models.PROTECT, verbose_name='Пункт дисциплинарного регламента', default=DEFAULT_MISCONDUCT_ARTICLE_NUMBER)
+    intruder = models.ForeignKey(
+        User, on_delete=models.PROTECT, 
+        verbose_name='Сотрудник', related_name='intruder'
+    )
+    regulations_article = models.ForeignKey(
+        DisciplinaryRegulations, on_delete=models.PROTECT,
+        verbose_name='Пункт дисциплинарного регламента',
+        default=DEFAULT_MISCONDUCT_ARTICLE_NUMBER
+    )
     penalty = models.FloatField(verbose_name='Сумма штрафа', default=0.0)
-    explanation_exist = models.BooleanField(verbose_name='Наличие объяснительной', default=False)
-    moderator = models.ForeignKey(User, on_delete=models.PROTECT, verbose_name='Арбитр (кто выявил)', related_name='moderator')
+    explanation_exist = models.BooleanField(
+        verbose_name='Наличие объяснительной', default=False
+    )
+    moderator = models.ForeignKey(
+        User, on_delete=models.PROTECT, verbose_name='Арбитр (кто выявил)',
+        related_name='moderator'
+    )
     comment = models.TextField(verbose_name='Примечание', blank=True)
-    status = models.CharField(max_length=10, choices=MisconductStatus.choices, default=MisconductStatus.ADDED, verbose_name='Статус рассмотрения')
-    slug = models.SlugField(max_length=60, unique=True, verbose_name='URL', null=True, blank=True)
-    change_date = models.DateTimeField(verbose_name='Дата изменения', auto_now=True, null=True)
-    editor = models.TextField(verbose_name='Редактор', blank=True, editable=False)
+    status = models.CharField(
+        max_length=10, choices=MisconductStatus.choices,
+        default=MisconductStatus.ADDED, verbose_name='Статус рассмотрения'
+    )
+    slug = models.SlugField(
+        max_length=60, unique=True, verbose_name='URL', null=True, blank=True
+    )
+    change_date = models.DateTimeField(
+        verbose_name='Дата изменения', auto_now=True, null=True
+    )
+    editor = models.TextField(
+        verbose_name='Редактор', blank=True, editable=False
+    )
 
     class Meta:
         verbose_name = 'Дисциплинарный проступок'
@@ -137,7 +179,8 @@ class Misconduct(models.Model):
         return f'{self.misconduct_date} {self.intruder.get_full_name()}'
 
     def save(self, *args, **kwargs):
-        if self.explanation_exist and self.status == self.MisconductStatus.ADDED:
+        if (self.explanation_exist and
+                self.status == self.MisconductStatus.ADDED):
             self.status = self.MisconductStatus.WAIT
         super().save(*args, **kwargs)
 
@@ -146,29 +189,73 @@ class Misconduct(models.Model):
 
 
 class WorkingShift(models.Model):
-    hall_admin = models.ForeignKey(User, on_delete=models.PROTECT, related_name='hall_admin')
-    cash_admin = models.ForeignKey(User, on_delete=models.PROTECT, related_name='cash_admin')
-    shift_date = models.DateField(verbose_name='Дата смены', unique=True, db_index=True)
-    bar_revenue = models.FloatField(verbose_name='Выручка по бару', default=0.0)
-    game_zone_revenue = models.FloatField(verbose_name='Выручка игровой зоны (без доп. услуг)', default=0.0)
-    game_zone_error = models.FloatField(verbose_name='Сумма ошибок', default=0.0)
-    game_zone_subtotal = models.FloatField(verbose_name='Подытог по игоровой зоне', default=0.0)
-    vr_revenue = models.FloatField(verbose_name='Выручка доп. услуги и VR', default=0.0)
-    hookah_revenue = models.FloatField(verbose_name='Выручка по кальянам', default=0.0)
-    hall_cleaning = models.BooleanField(verbose_name='Наведение порядка', default=True)
+    hall_admin = models.ForeignKey(
+        User, on_delete=models.PROTECT, related_name='hall_admin'
+    )
+    cash_admin = models.ForeignKey(
+        User, on_delete=models.PROTECT, related_name='cash_admin'
+    )
+    shift_date = models.DateField(
+        verbose_name='Дата смены', unique=True, db_index=True
+    )
+    bar_revenue = models.FloatField(
+        verbose_name='Выручка по бару', default=0.0
+    )
+    game_zone_revenue = models.FloatField(
+        verbose_name='Выручка игровой зоны (без доп. услуг)', default=0.0
+    )
+    game_zone_error = models.FloatField(
+        verbose_name='Сумма ошибок', default=0.0
+    )
+    game_zone_subtotal = models.FloatField(
+        verbose_name='Подытог по игоровой зоне', default=0.0
+    )
+    vr_revenue = models.FloatField(
+        verbose_name='Выручка доп. услуги и VR', default=0.0
+    )
+    hookah_revenue = models.FloatField(
+        verbose_name='Выручка по кальянам', default=0.0
+    )
+    hall_cleaning = models.BooleanField(
+        verbose_name='Наведение порядка', default=True
+    )
     shortage = models.FloatField(verbose_name='Недостача', default=0.0)
-    shortage_paid = models.BooleanField(verbose_name='Отметка о погашении недостачи', default=False)
-    summary_revenue = models.FloatField(verbose_name='Суммарная выручка', default=0.0)
-    slug = models.SlugField(max_length=60, unique=True, verbose_name='URL', null=True, blank=True)
-    is_verified = models.BooleanField(verbose_name='Проверено', default=False, db_index=True)
-    comment_for_cash_admin = models.TextField(verbose_name='Примечание для кассира', blank=True)
-    comment_for_hall_admin = models.TextField(verbose_name='Примечание для админа', blank=True)
-    publication_link = models.TextField(verbose_name='СММ-публикация (ссылка)', blank=True)
-    publication_is_verified = models.BooleanField(verbose_name='СММ-публикация проверена', default=False)
-    change_date = models.DateTimeField(verbose_name='Дата изменения', auto_now=True, null=True)
-    editor = models.TextField(verbose_name='Редактор', blank=True, editable=False)
-    hall_admin_penalty = models.FloatField(verbose_name='Штраф администратора зала', default=0.0)
-    cash_admin_penalty = models.FloatField(verbose_name='Штраф администратора кассы', default=0.0)
+    shortage_paid = models.BooleanField(
+        verbose_name='Отметка о погашении недостачи', default=False
+    )
+    summary_revenue = models.FloatField(
+        verbose_name='Суммарная выручка', default=0.0
+    )
+    slug = models.SlugField(
+        max_length=60, unique=True, verbose_name='URL', null=True, blank=True
+    )
+    is_verified = models.BooleanField(
+        verbose_name='Проверено', default=False, db_index=True
+    )
+    comment_for_cash_admin = models.TextField(
+        verbose_name='Примечание для кассира', blank=True
+    )
+    comment_for_hall_admin = models.TextField(
+        verbose_name='Примечание для админа', blank=True
+    )
+    publication_link = models.TextField(
+        verbose_name='СММ-публикация (ссылка)', blank=True
+    )
+    publication_is_verified = models.BooleanField(
+        verbose_name='СММ-публикация проверена', default=False
+    )
+    change_date = models.DateTimeField(
+        verbose_name='Дата изменения', auto_now=True, null=True
+    )
+    editor = models.TextField(
+        verbose_name='Редактор', blank=True, editable=False
+    )
+    hall_admin_penalty = models.FloatField(
+        verbose_name='Штраф администратора зала', default=0.0
+    )
+    cash_admin_penalty = models.FloatField(
+        verbose_name='Штраф администратора кассы', default=0.0
+    )
 
     class Meta:
         verbose_name = 'Смена'
@@ -176,13 +263,14 @@ class WorkingShift(models.Model):
         ordering = ['-shift_date']
         permissions = [
             ("view_workshift_report", "Can view monthly reports"),
-            ("advanced_change_workshift", "Can edit the entire contents of the workingshift"),
+            ("advanced_change_workshift",
+             "Can edit the entire contents of the workingshift"),
         ]
 
     def __str__(self) -> str:
         return self.shift_date.strftime('%d-%m-%Y')
 
-     # Earnings block
+     # Earnings block (must moved to services)
 
     def get_experience_bonus(self, employee) -> float:
         current_experience = (self.shift_date - employee.profile.employment_date).days
@@ -213,8 +301,10 @@ class WorkingShift(models.Model):
 
         result_list = []
         for revenue, current_critera in zip(revenue_tuple, criteria.values()):
-            criteria_ratio = list(filter(lambda x: x[0] <= revenue, current_critera))[-1][1]
-            result_list.append((round(revenue * criteria_ratio, 2), round(criteria_ratio * 100, 1)))
+            criteria_ratio = list(
+                filter(lambda x: x[0] <= revenue, current_critera))[-1][1]
+            result_list.append((round(revenue * criteria_ratio, 2),
+                                round(criteria_ratio * 100, 1)))
 
         return {
             'bar': result_list[0],
@@ -314,7 +404,6 @@ class WorkingShift(models.Model):
                 earnings['final_earnings'] = (
                     round(earnings['final_earnings'] - self.shortage * 2, 2)
                 )
-
         return earnings
 
     def get_absolute_url(self):
@@ -378,7 +467,9 @@ class Position(models.Model):
 
 class Chat(models.Model):
     members = models.ManyToManyField(User, verbose_name='Участники')
-    slug = models.SlugField(max_length=60, unique=True, verbose_name='URL', null=True, blank=True)
+    slug = models.SlugField(
+        max_length=60, unique=True, verbose_name='URL', null=True, blank=True
+    )
 
     class Meta:
         verbose_name = 'Chat'
@@ -397,11 +488,20 @@ class Chat(models.Model):
 
 
 class Message(models.Model):
-    chat = models.ForeignKey(Chat, on_delete=models.CASCADE, related_name='chat', verbose_name='Чат')
+    chat = models.ForeignKey(
+        Chat, on_delete=models.CASCADE, related_name='chat', verbose_name='Чат'
+    )
     message_text = models.TextField(verbose_name='Текст сообщения')
-    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='author', verbose_name='Автор')
-    sending_time = models.DateTimeField(verbose_name='Время отправления', auto_now_add=True)
-    is_read = models.BooleanField(verbose_name='Отметка о прочтении', default=False)
+    author = models.ForeignKey(
+        User, on_delete=models.CASCADE,
+        related_name='author', verbose_name='Автор'
+    )
+    sending_time = models.DateTimeField(
+        verbose_name='Время отправления', auto_now_add=True
+    )
+    is_read = models.BooleanField(
+        verbose_name='Отметка о прочтении', default=False
+    )
 
     class Meta:
         verbose_name = 'Message'
