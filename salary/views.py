@@ -20,6 +20,7 @@ from .utils import *
 from .mixins import *
 from salary.services.chat import *
 from salary.services.shift_calendar import get_user_calendar
+from salary.services.misconduct import Intruder, get_misconduct_slug
 from salary.services.workshift import (
     check_permission_to_close, notification_of_upcoming_shifts
 )
