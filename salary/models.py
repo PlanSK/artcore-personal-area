@@ -8,7 +8,7 @@ from django.dispatch import receiver
 from django.urls import reverse_lazy
 
 from .config import *
-from salary.services.profile import (
+from salary.services.profile_services import (
     get_expirience_string
 )
 from salary.services.filesystem import (

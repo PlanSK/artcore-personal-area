@@ -16,7 +16,6 @@ from django.views.generic.base import RedirectView
 from django.db.models import Q, QuerySet, Sum, Avg
 
 from .forms import *
-from .utils import *
 from .mixins import *
 from salary.services.chat import *
 from salary.services.shift_calendar import get_user_calendar
@@ -932,11 +931,6 @@ class AddWorkshiftData(PermissionRequiredMixin, TitleMixin, SuccessUrlMixin,
         object = form.save(commit=False)
         object.editor = self.request.user.get_full_name()
         object.slug = object.shift_date
-        # if object.shift_date > datetime.date.today():
-        #     logger.debug('Validation error in view: date more than today.')
-        #     # form.add_error('shift_date', 'Shift date must no more today date.')
-        # else:
-        #     logger.debug('Form validation in view successful.')
         return super().form_valid(form)
 
 

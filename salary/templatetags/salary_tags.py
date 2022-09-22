@@ -5,7 +5,7 @@ from django.db.models import QuerySet
 from django.contrib.auth.models import User
 from django.db.models import Q
 from salary.models import Message, Misconduct, Profile, WorkingShift
-from salary.services.profile import profile_photo_is_exists
+from salary.services.profile_services import profile_photo_is_exists
 
 register = template.Library()
 

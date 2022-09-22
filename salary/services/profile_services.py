@@ -1,10 +1,14 @@
+from __future__ import annotations
+
 import os
 import datetime
 
 from dateutil.relativedelta import relativedelta
-from typing import Union
+from typing import Union, TYPE_CHECKING
 
-from salary.models import Profile
+if TYPE_CHECKING:
+    from salary.models import Profile
+
 
 HOURS_VARIANT = ('час', 'часа', 'часов')
 DAYS_VARIANT = ('день', 'дня', 'дней')
