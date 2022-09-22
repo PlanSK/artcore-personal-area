@@ -1,6 +1,15 @@
 import os
+import datetime
+
+from dateutil.relativedelta import relativedelta
+from typing import Union
 
 from salary.models import Profile
+
+HOURS_VARIANT = ('час', 'часа', 'часов')
+DAYS_VARIANT = ('день', 'дня', 'дней')
+MONTH_VARIANT = ('месяц','месяца','месяцев')
+YEARS_VARIANT = ('год', 'года', 'лет')
 
 
 def profile_photo_is_exists(profile: Profile) -> bool:
@@ -33,3 +42,32 @@ def get_choice_plural(amount: int, variants: tuple) -> str:
         choice = 2
 
     return variants[choice]
+
+
+def get_expirience_string(
+    employment_date: datetime.date,
+    expiration_date: Union[datetime.date, None] = None) -> str:
+    """
+    Return employee comprehended expirience in day, month, year format
+
+    Returns:
+        str: comprehended employee expirience value
+    """
+    if expiration_date and employment_date > expiration_date:
+        raise ValueError('Error in dates employment date later than'
+                         ' expiration date')
+    if not expiration_date:
+        expiration_date = datetime.date.today()
+    experience = relativedelta(expiration_date, employment_date)
+    experience_values_list = [
+        (experience.years, YEARS_VARIANT),
+        (experience.months, MONTH_VARIANT),
+        (experience.days, DAYS_VARIANT),
+    ]
+    experience_params_list = [
+        ' '.join((str(value), get_choice_plural(value, variants)))
+        for value, variants in experience_values_list
+        if value
+    ]
+    experience_text = ' '.join(experience_params_list)
+    return experience_text if experience_text else 'менее 1 дня'

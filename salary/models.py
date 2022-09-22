@@ -9,7 +9,7 @@ from django.urls import reverse_lazy
 
 from .config import *
 from salary.services.profile import (
-    get_choice_plural
+    get_expirience_string
 )
 from salary.services.filesystem import (
     user_directory_path,
@@ -74,28 +74,8 @@ class Profile(models.Model):
         verbose_name_plural = 'Профили сотрудников'
 
     def get_experience_text(self) -> str:
-        """Возвращает значение стажа разбитого по годам, месяцм и дням
-        в формате строки
-
-        Returns:
-            str: значение стажа, разбитое по годам, месяцам и дням
-        """
-
-        end_date = self.dismiss_date if self.dismiss_date else datetime.date.today()
-        experience = relativedelta(end_date, self.employment_date)
-        days, months, years = experience.days, experience.months, experience.years
-        experience_text = ''
-
-        if years:
-            experience_text = f'{years} {get_choice_plural(years, YEARS_VARIANT)} '
-
-        if months:
-            experience_text += f'{months} {get_choice_plural(months, MONTH_VARIANT)} '
-
-        if days or not experience_text:
-            experience_text += f'{days} {get_choice_plural(days, DAYS_VARIANT)}'
-
-        return experience_text
+        return get_expirience_string(employment_date=self.employment_date,
+                                     expiration_date=self.dismiss_date)
 
 
 @receiver(post_save, sender=User)
