@@ -5,6 +5,7 @@ from django.db.models import QuerySet
 from django.contrib.auth.models import User
 from django.db.models import Q
 from salary.models import Message, Misconduct, Profile, WorkingShift
+from salary.services.profile import profile_photo_is_exists
 
 register = template.Library()
 
@@ -58,3 +59,7 @@ def get_birthday_person_list() -> QuerySet:
     ).exclude(profile__profile_status='DSM')
     
     return birthday_person_list
+
+@register.simple_tag()
+def check_image_file_exists(profile: Profile):
+    return profile_photo_is_exists(profile)

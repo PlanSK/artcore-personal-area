@@ -1,4 +1,5 @@
 {% extends 'salary/logined_page.html' %}
+{% load salary_tags %}
 
 {% block content %}
 <main>
@@ -21,7 +22,8 @@
     <div class="row justify-content-center">
       <div class="card border-light bg-dark text-light h-100 m-2" style="max-width: 17rem;">
         <div class="card-header text-center bg-black-50">
-          {% if user.profile.photo %}
+          {% check_image_file_exists profile=user.profile as image_file_exists %}
+          {% if image_file_exists %}
             <img src="{{ user.profile.photo.url }}" alt="" class="rounded-circle" style="width: 100px; height: 100px;">
           {% else %}
             <i class="fa-solid fa-circle-user fa-6x text-secondary"></i>

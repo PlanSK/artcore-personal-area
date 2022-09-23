@@ -6,6 +6,7 @@ from django.db.models import QuerySet
 from django.http import HttpRequest
 from django.shortcuts import get_object_or_404
 from salary.models import *
+from salary.services.profile import profile_photo_is_exists
 
 Dialog = namedtuple('Dialog', ['member', 'photo', 'unread_messages_count', 'is_selected', 'slug'])
 
@@ -41,9 +42,10 @@ def get_chat_info(chat, user_id: int,
             id=user_id).select_related('profile').last()
         unread_messages_count=chat.chat.filter(author=member,
                                                is_read=False).count()
+        photo_is_exists = profile_photo_is_exists(member.profile)
         return Dialog(
             member=member,
-            photo=member.profile.photo.url if member.profile.photo else None,
+            photo=member.profile.photo.url if photo_is_exists else None,
             unread_messages_count=unread_messages_count,
             is_selected=is_selected,
             slug=chat.slug,

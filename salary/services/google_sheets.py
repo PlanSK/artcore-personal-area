@@ -1,10 +1,11 @@
-from typing import List
+from typing import List, Tuple
 import logging
 
 import gspread
 from django.conf import settings
 from django.core.cache import cache
-
+from django.contrib.auth.models import User
+from django.db.models import QuerySet
 
 logger = logging.getLogger(__name__)
 
@@ -30,26 +31,20 @@ def get_gsheets_worksheet_data(worksheet_name: str) -> List[List[str]]:
     return worksheet.get_all_values()
 
 
-def get_full_names_list(worksheet_data: List[List[str]]) -> List[str]:
+def get_full_names_tuple(worksheet_data: List[List[str]],
+                        full_names_from_db: QuerySet) -> Tuple[str]:
     """
     Returns list with full names employees in worksheet.
     """
     first_cols_list = [row[0] for row in worksheet_data]
 
-    is_names: bool = False
-    full_names_list: list = []
+    full_names_tuple = tuple(
+        user_instance.get_full_name()
+        for user_instance in full_names_from_db
+        if user_instance.get_full_name() in first_cols_list
+    )
 
-    for col in first_cols_list:
-        if not col:
-            is_names = False
-
-        if is_names:
-            full_names_list.append(col)
-
-        if col == 'Имя сотрудника':
-            is_names = True
-
-    return full_names_list
+    return full_names_tuple
 
 
 def get_employees_schedule_dict(worksheet_name: str) -> dict:
@@ -65,11 +60,15 @@ def get_employees_schedule_dict(worksheet_name: str) -> dict:
 
     if not employees_schedule_dict:
         worksheet_data = get_gsheets_worksheet_data(worksheet_name)
-        full_names_list = get_full_names_list(worksheet_data)
+        full_names_from_db = User.objects.select_related('profile').exclude(
+            profile__profile_status='DSM'
+        )
+        full_names_tuple = get_full_names_tuple(worksheet_data,
+                                              full_names_from_db)
         employees_schedule_dict = {}
         days_numbers_list = []
 
-        for employee_full_name in full_names_list:
+        for employee_full_name in full_names_tuple:
             for row in worksheet_data:
                 if employee_full_name == row[0]:
                     for number, value in enumerate(row):

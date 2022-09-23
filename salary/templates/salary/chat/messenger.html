@@ -1,4 +1,5 @@
 {% extends 'salary/logined_page.html' %}
+{% load salary_tags %}
 
 {% block content %}
 <main>
@@ -49,7 +50,8 @@
                   {% for contact in active_users %}
                   <a href="{% url 'messenger_new_chat' pk=contact.id %}" class="list-group-item list-group-item-action list-group-item-dark">
                     <div class="d-flex align-items-center">
-                      {% if contact.profile.photo %}
+                      {% check_image_file_exists profile=contact.profile as image_file_exists %}
+                      {% if image_file_exists %}
                         <img src="{{ contact.profile.photo.url }}" alt="" class="rounded-circle" style="width: 2em; height: 2em;">
                       {% else %}
                         <i class="fa-solid fa-circle-user fa-2x text-secondary"></i>

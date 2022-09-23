@@ -9,7 +9,8 @@
       <div class="card border-light text-light h-100 bg-dark" style="width: 18rem;">
         <div class="card-header text-center bg-black-50">
           <div class="d-flex justify-content-center mb-1">
-          {% if current_user.profile.photo %}
+          {% check_image_file_exists profile=current_user.profile as image_file_exists %}
+          {% if image_file_exists %}
             <img src="{{ current_user.profile.photo.url }}" alt="" class="rounded-circle" style="width: 65px; height: 65px;">
           {% else %}
             <i class="fa-solid fa-circle-user fa-4x text-secondary"></i>
