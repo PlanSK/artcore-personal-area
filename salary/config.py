@@ -1,8 +1,3 @@
-HOURS_VARIANT = ('час', 'часа', 'часов')
-DAYS_VARIANT = ('день', 'дня', 'дней')
-MONTH_VARIANT = ('месяц','месяца','месяцев')
-YEARS_VARIANT = ('год', 'года', 'лет')
-
 REQUIRED_EXPERIENCE = 90
 EXPERIENCE_BONUS = 200.0
 PUBLICATION_BONUS = 100.0

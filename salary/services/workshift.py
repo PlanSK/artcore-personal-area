@@ -1,8 +1,9 @@
 import datetime
 
 from django.contrib.auth.models import User
+from django.conf import settings
 
-from .shift_calendar import get_planed_workshifts_list
+from salary.services.shift_calendar import get_planed_workshifts_list
 
 
 def check_permission_to_close(user: User, date: datetime.date) -> bool:
@@ -23,7 +24,7 @@ def check_permission_to_close(user: User, date: datetime.date) -> bool:
     return False
 
 
-def notification_of_upcoming_shifts(user: User, date: datetime) -> bool:
+def notification_of_upcoming_shifts(user: User, date: datetime.date) -> bool:
     """
     Returning True if tomorrow in days list from schedule.
     """
@@ -37,3 +38,23 @@ def notification_of_upcoming_shifts(user: User, date: datetime) -> bool:
         return True
 
     return False
+
+def get_experience_bonus(employee, shift_date) -> float:
+    current_experience = (shift_date - employee.profile.employment_date).days
+    if settings.REQUIRED_EXPERIENCE <= current_experience:
+        return settings.EXPERIENCE_BONUS
+
+    return 0.0
+
+def get_publication_bonus(self) -> float:
+    if self.publication_link and self.publication_is_verified:
+        return settings.PUBLICATION_BONUS
+
+    return 0.0
+
+def get_attestation_bonus(self, employee) -> float:
+    if (employee.profile.attestation_date and
+            employee.profile.attestation_date <= self.shift_date):
+        return settings.ATTESTATION_BONUS
+
+    return 0.0
