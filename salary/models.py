@@ -224,22 +224,43 @@ class WorkingShift(models.Model):
 
     def employee_earnings_calc(self, employee) -> dict:
         base_earnings = {
-            'salary': employee.profile.position.position_salary,
-            'experience': self.get_experience_bonus(employee),
+            'salary': 0.0,
+            'experience': 0.0,
             'penalty': 0.0,
-            'award': DISCIPLINE_AWARD,
-            'attestation': self.get_attestation_bonus(employee),
-            'publication_bonus': self.get_publication_bonus(),
+            'award': 0.0,
+            'attestation': 0.0,
+            'publication_bonus': 0.0,
             'game_zone': (0.0, 0.0),
             'bar': (0.0, 0.0),
             'vr': (0.0, 0.0),
+            'basic_part': 0.0,
+            'bonus_part': 0.0,
+            'retention': 0.0,
+            'estimated_earnings': 0.0,
+            'final_earnings': 0.0,
+            'cleaning': 0.0,
+            'hookah': 0.0,
+            'before_shortage': 0.0,
         }
+        if employee.profile.position.name != 'trainee':
+            base_earnings.update({
+                'salary': employee.profile.position.position_salary,
+                'experience': self.get_experience_bonus(employee),
+                'penalty': 0.0,
+                'award': DISCIPLINE_AWARD,
+                'attestation': self.get_attestation_bonus(employee),
+                'publication_bonus': self.get_publication_bonus(),
+                'game_zone': (0.0, 0.0),
+                'bar': (0.0, 0.0),
+                'vr': (0.0, 0.0),
+            })
 
         return base_earnings
 
     def final_earnings_calculation(self, earnings: dict) -> dict:
         tuple_fields = ('bar', 'game_zone', 'vr')
-        exclude_bonus_fields = ('salary', 'penalty', 'experience', 'attestation')
+        exclude_bonus_fields = ('salary', 'penalty',
+                                'experience', 'attestation')
         bonus_part = 0.0
 
         for key, value in earnings.items():
@@ -270,22 +291,29 @@ class WorkingShift(models.Model):
 
     def hall_admin_earnings_calc(self) -> dict:
         earnings = self.employee_earnings_calc(self.hall_admin)
-        earnings['penalty'] = self.hall_admin_penalty
-        earnings['cleaning'] = HALL_CLEANING_BONUS if self.hall_cleaning else 0.0
-        earnings['hookah'] = round(self.hookah_revenue * HOOKAH_BONUS_RATIO, 2)
-        earnings.update(self.get_revenue_bonuses(ADMIN_BONUS_CRITERIA))
-        earnings.update(self.final_earnings_calculation(earnings))
+        if self.hall_admin.profile.position.name != 'trainee':
+            earnings['penalty'] = self.hall_admin_penalty
+            if self.hall_cleaning:
+                earnings['cleaning'] = HALL_CLEANING_BONUS
+            earnings['hookah'] = round(
+                self.hookah_revenue * HOOKAH_BONUS_RATIO, 2
+            )
+            earnings.update(self.get_revenue_bonuses(ADMIN_BONUS_CRITERIA))
+            earnings.update(self.final_earnings_calculation(earnings))
 
         return earnings
 
     def cashier_earnings_calc(self) -> dict:
         earnings = self.employee_earnings_calc(self.cash_admin)
-        earnings['penalty'] = self.cash_admin_penalty
-        earnings.update(self.get_revenue_bonuses(CASHIER_BONUS_CRITERIA))
-        earnings.update(self.final_earnings_calculation(earnings))
-        earnings['before_shortage'] = earnings['final_earnings']
-        if self.shortage and not self.shortage_paid:
-            earnings['final_earnings'] = round(earnings['final_earnings'] - self.shortage * 2, 2)
+        if self.cash_admin.profile.position.name != 'trainee':
+            earnings['penalty'] = self.cash_admin_penalty
+            earnings.update(self.get_revenue_bonuses(CASHIER_BONUS_CRITERIA))
+            earnings.update(self.final_earnings_calculation(earnings))
+            earnings['before_shortage'] = earnings['final_earnings']
+            if self.shortage and not self.shortage_paid:
+                earnings['final_earnings'] = (
+                    round(earnings['final_earnings'] - self.shortage * 2, 2)
+                )
 
         return earnings
 

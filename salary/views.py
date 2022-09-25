@@ -182,7 +182,8 @@ class AdminUserView(EmployeePermissionsMixin, TitleMixin, ListView):
 
     def get_queryset(self):
         queryset = User.objects.select_related(
-            'profile', 'profile__position').order_by('-profile__position')
+            'profile', 'profile__position').order_by(
+                '-profile__position').exclude(profile__position=4)
 
         if not self.kwargs.get('all'):
             return queryset.filter(profile__dismiss_date__isnull=True)
@@ -294,7 +295,7 @@ class MonthlyReportListView(WorkingshiftPermissonsMixin, TitleMixin, ListView):
 
         return queryset
 
-    def get_sum_dict_values(self, first_dict: dict, second_dict:dict) -> dict:
+    def get_sum_dict_values(self, first_dict: dict, second_dict: dict) -> dict:
         summable_fields = (
             'summary_revenue',
             'count',
@@ -323,37 +324,40 @@ class MonthlyReportListView(WorkingshiftPermissonsMixin, TitleMixin, ListView):
                 'summary_revenue': workshift.summary_revenue,
                 'count': 1,
             }
-
-            admin_dict.update({
-                'username': workshift.hall_admin,
-                'penalties': admin_earnings_dict['penalty'],
-                'estimated_earnings': admin_earnings_dict['estimated_earnings'],
-            })
-            admin_dict.update(general_dict)
-
-            cashier_dict.update({
-                'username': workshift.cash_admin,
-                'shortage': workshift.shortage if not workshift.shortage_paid else 0.0,
-                'penalties': cashier_earnings_dict['penalty'],
-                'estimated_earnings': cashier_earnings_dict['estimated_earnings'],
-            })
-            cashier_dict.update((general_dict))
+            if workshift.hall_admin.profile.position.name != 'trainee':
+                admin_dict.update({
+                    'username': workshift.hall_admin,
+                    'penalties': admin_earnings_dict['penalty'],
+                    'estimated_earnings': admin_earnings_dict['estimated_earnings'],
+                })
+                admin_dict.update(general_dict)
+            if workshift.cash_admin.profile.position.name != 'trainee':
+                cashier_dict.update({
+                    'username': workshift.cash_admin,
+                    'shortage': workshift.shortage if not workshift.shortage_paid else 0.0,
+                    'penalties': cashier_earnings_dict['penalty'],
+                    'estimated_earnings': cashier_earnings_dict['estimated_earnings'],
+                })
+                cashier_dict.update((general_dict))
 
             earnings_data_list.extend([admin_dict, cashier_dict])
 
         for current_dict in earnings_data_list:
-            existing_dict = earnings_data_dict.get(current_dict['username'].get_full_name())
-            if existing_dict:
-                existing_dict.update(
-                    self.get_sum_dict_values(existing_dict, current_dict)
+            if current_dict:
+                existing_dict = earnings_data_dict.get(
+                    current_dict['username'].get_full_name()
                 )
-            else:
-                earnings_data_dict.update({
-                    current_dict['username'].get_full_name(): current_dict
-                })
-            summary_data_dict.update(
-                self.get_sum_dict_values(summary_data_dict, current_dict)
-            )
+                if existing_dict:
+                    existing_dict.update(
+                        self.get_sum_dict_values(existing_dict, current_dict)
+                    )
+                else:
+                    earnings_data_dict.update({
+                        current_dict['username'].get_full_name(): current_dict
+                    })
+                summary_data_dict.update(
+                    self.get_sum_dict_values(summary_data_dict, current_dict)
+                )
         earnings_data_dict = dict(
             sorted(earnings_data_dict.items(), key=lambda item: item[1]['summary_revenue'], reverse=True)
         )
