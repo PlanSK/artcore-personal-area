@@ -7,6 +7,7 @@
           <th colspan="2">{{work_shift.cash_admin.get_full_name}}</th>
         </tr>
       </thead>
+      {% if work_shift.cash_admin.profile.position.name != 'trainee' %}
       <tbody class="verysmall">
         <tr><td colspan="2" class="text-info text-center">Базовая часть</td></tr>
         <tr>
@@ -89,6 +90,7 @@
           {% endif %}
         </tr>
       </tfoot>
+      {% endif %}
     </table>
     {% if not work_shift.is_verified %}
     <p class="text-secondary verysmall">*Смена не проверена, данные могут измениться.</p>

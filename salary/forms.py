@@ -41,7 +41,8 @@ class DismissalEmployeeForm(forms.ModelForm):
 
 class EmployeeRegistrationForm(forms.ModelForm):
     position = forms.ModelChoiceField(
-        queryset=Position.objects.all().exclude(name='staff'), 
+        queryset=Position.objects.all().exclude(name='staff').exclude(
+            name='trainee'),
         label='Должность', empty_label=None
     )
 
@@ -117,11 +118,13 @@ class EmplModelChoiceField(forms.ModelChoiceField):
 
 class EditWorkshiftDataForm(forms.ModelForm):
     hall_admin = EmplModelChoiceField(
-        queryset=User.objects.filter(is_active=True, profile__position=1),
+        queryset=User.objects.filter(is_active=True,
+                                     profile__position__in=[1, 4]),
         label='Администратор зала',
     )
     cash_admin = EmplModelChoiceField(
-        queryset=User.objects.filter(is_active=True, profile__position=2),
+        queryset=User.objects.filter(is_active=True,
+                                     profile__position__in=[2, 4]),
         label='Администратор кассы',
     )
 
@@ -181,11 +184,11 @@ class AddWorkshiftDataForm(EditWorkshiftDataForm):
 
 class StaffEditWorkshiftForm(EditWorkshiftDataForm):
     hall_admin = EmplModelChoiceField(
-        queryset=User.objects.filter(profile__position=1),
+        queryset=User.objects.filter(profile__position__in=[1, 4]),
         label='Администратор кассы',
     )
     cash_admin = EmplModelChoiceField(
-        queryset=User.objects.filter(profile__position=2),
+        queryset=User.objects.filter(profile__position__in=[2, 4]),
         label='Администратор кассы',
     )
     class Meta:
