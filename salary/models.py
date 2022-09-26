@@ -15,6 +15,7 @@ from salary.services.filesystem import (
     user_directory_path,
     OverwriteStorage,
 )
+from salary.services.workshift import WorkshiftData
 
 
 def get_last_name(self):
@@ -245,7 +246,17 @@ class WorkingShift(models.Model):
     def __str__(self) -> str:
         return self.shift_date.strftime('%d-%m-%Y')
 
+
+    def get_workshift_data(self):
+        return WorkshiftData(shift_date=self.shift_date)
+
+
+    def get_hall_admin_earnings(self):
+        workshift_data = self.get_workshift_data()
+        employee = self.hall_admin
+
      # Earnings block (must moved to services)
+
 
     def get_experience_bonus(self, employee) -> float:
         current_experience = (self.shift_date - employee.profile.employment_date).days
