@@ -185,7 +185,7 @@ class AddWorkshiftDataForm(EditWorkshiftDataForm):
 class StaffEditWorkshiftForm(EditWorkshiftDataForm):
     hall_admin = EmplModelChoiceField(
         queryset=User.objects.filter(profile__position__in=[1, 4]),
-        label='Администратор кассы',
+        label='Администратор зала',
     )
     cash_admin = EmplModelChoiceField(
         queryset=User.objects.filter(profile__position__in=[2, 4]),
