@@ -248,7 +248,18 @@ class WorkingShift(models.Model):
 
 
     def get_workshift_data(self):
-        return WorkshiftData(shift_date=self.shift_date)
+        return WorkshiftData(
+            shift_date=self.shift_date,
+            bar_revenue=self.bar_revenue,
+            game_zone_revenue=self.game_zone_subtotal,
+            vr_revenue=self.vr_revenue,
+            hookah_revenue=self.hookah_revenue,
+            shortage=self.shortage,
+            shortage_paid=self.shortage_paid,
+            publication=self.publication_is_verified,
+            admin_penalty=self.hall_admin_penalty,
+            cashier_penalty=self.cash_admin_penalty
+        )
 
 
     def get_hall_admin_earnings(self):

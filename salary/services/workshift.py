@@ -44,7 +44,16 @@ def notification_of_upcoming_shifts(user: User, date: datetime.date) -> bool:
 # Earnings block moved from models.py
 class WorkshiftData(NamedTuple):
     shift_date: datetime.date
-    
+    bar_revenue: float
+    game_zone_revenue: float
+    vr_revenue: float
+    hookah_revenue: float
+    hall_cleaning: bool
+    shortage: float
+    shortage_paid: bool
+    publication: bool
+    admin_penalty: float
+    cashier_penalty: float
 
 
 class BasicPart(NamedTuple):
@@ -129,3 +138,28 @@ def get_basic_part(employee: User, workshift_date: datetime.date) -> BasicPart:
         attestation=attestation,
         summary=summary
     )
+
+
+def get_applied_revenue(value: float,
+                        criterias: Tuple[Tuple[int, float]]) -> Tuple[float]:
+    for max_value, ratio in criterias:
+        if value > max_value:
+            continue
+
+
+def get_percent_revenue(workshift_data: WorkshiftData):
+    revenue_tuple = (
+        workshift_data.bar_revenue,
+        workshift_data.game_zone_revenue,
+        workshift_data.vr_revenue
+    )
+
+
+def get_current_earnings(employee: User,
+                         workshift_data: WorkshiftData,
+                         is_cashier: bool = False) -> Earnings:
+    """
+    Return employee earnings
+    """
+    basic_part = get_basic_part(employee=employee,
+                                workshift_date=workshift_data.shift_date)
