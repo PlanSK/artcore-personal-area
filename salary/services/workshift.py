@@ -2,7 +2,7 @@ import datetime
 
 from django.contrib.auth.models import User
 from django.conf import settings
-from typing import NamedTuple, Union, Tuple
+from typing import NamedTuple, Union
 
 from salary.services.shift_calendar import get_planed_workshifts_list
 
@@ -68,11 +68,15 @@ class PercentValue(NamedTuple):
     value: float
 
 
-class BonusPart(NamedTuple):
-    award: float
+class Revenues(NamedTuple):
     bar: PercentValue
     game_zone: PercentValue
     vr: PercentValue
+
+
+class BonusPart(NamedTuple):
+    award: float
+    revenues: Revenues
     publication: float
     cleaning: float
     hookah: float
@@ -140,18 +144,46 @@ def get_basic_part(employee: User, workshift_date: datetime.date) -> BasicPart:
     )
 
 
-def get_applied_revenue(value: float,
-                        criterias: Tuple[Tuple[int, float]]) -> Tuple[float]:
+def get_percent_of_revenue(
+        value: float,
+        criterias: tuple[tuple[int, float], ...]) -> PercentValue:
+    """
+    Return right value of ratio, and calculated revenue with current ratio
+    """
+    current_ratio: float = 0.0
     for max_value, ratio in criterias:
-        if value > max_value:
-            continue
+        if value >= max_value:
+            current_ratio = ratio
+        else:
+            break
+
+    return PercentValue(
+        percent=current_ratio, value=value * current_ratio
+    )
 
 
-def get_percent_revenue(workshift_data: WorkshiftData):
-    revenue_tuple = (
-        workshift_data.bar_revenue,
-        workshift_data.game_zone_revenue,
-        workshift_data.vr_revenue
+def get_calculated_revenues(workshift_data: WorkshiftData,
+                            is_cashier: bool = False) -> Revenues:
+    """
+    Return calculated revenues according to the criteria
+    """
+    criteria = settings.ADMIN_BONUS_CRITERIA
+    if is_cashier:
+        criteria = settings.CASHIER_BONUS_CRITERIA
+
+    return Revenues(
+        bar=get_percent_of_revenue(
+            workshift_data.bar_revenue,
+            criteria.bar
+        ),
+        game_zone=get_percent_of_revenue(
+            workshift_data.game_zone_revenue,
+            criteria.game_zone
+        ),
+        vr=get_percent_of_revenue(
+            workshift_data.vr_revenue,
+            criteria.vr
+        )
     )
 
 
@@ -163,3 +195,4 @@ def get_current_earnings(employee: User,
     """
     basic_part = get_basic_part(employee=employee,
                                 workshift_date=workshift_data.shift_date)
+    calculated_revenues = get_calculated_revenues(workshift_data, is_cashier)

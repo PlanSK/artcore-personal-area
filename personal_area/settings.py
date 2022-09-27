@@ -15,7 +15,7 @@ import json
 
 from email.utils import parseaddr
 from pathlib import Path
-from typing import NamedTuple, Tuple
+from typing import NamedTuple
 
 
 def options_parse(options: str) -> dict():
@@ -251,10 +251,11 @@ DISCIPLINE_AWARD = 1000.0
 HALL_CLEANING_BONUS = 400.0
 HOOKAH_BONUS_RATIO = 0.2
 
+
 class Criteria(NamedTuple):
-    bar: Tuple[Tuple]
-    game_zone: Tuple[Tuple]
-    vr: Tuple[Tuple]
+    bar: tuple[tuple[int, float], ...]
+    game_zone: tuple[tuple[int, float], ...]
+    vr: tuple[tuple[int, float], ...]
 
 
 ADMIN_BONUS_CRITERIA = Criteria(
