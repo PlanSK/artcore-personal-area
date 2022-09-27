@@ -2,7 +2,7 @@ import datetime
 
 from django.contrib.auth.models import User
 from django.conf import settings
-from typing import NamedTuple, Union
+from typing import NamedTuple, Union, Tuple
 
 from salary.services.shift_calendar import get_planed_workshifts_list
 
@@ -44,12 +44,40 @@ def notification_of_upcoming_shifts(user: User, date: datetime.date) -> bool:
 # Earnings block moved from models.py
 class WorkshiftData(NamedTuple):
     shift_date: datetime.date
+    
+
 
 class BasicPart(NamedTuple):
     salary: Union[float, None]
     experience: float
     attestation: float
     summary: float
+
+
+class PercentValue(NamedTuple):
+    percent: float
+    value: float
+
+
+class BonusPart(NamedTuple):
+    award: float
+    bar: PercentValue
+    game_zone: PercentValue
+    vr: PercentValue
+    publication: float
+    cleaning: float
+    hookah: float
+    summary: float
+
+
+class Earnings(NamedTuple):
+    basic_part: BasicPart
+    bonus_part: BonusPart
+    penalty: float
+    retention: float
+    estimate_earnings: float
+    before_shortage: float
+    final_earnings: float
 
 
 def get_experience_bonus(employment_date: datetime.date,
@@ -89,7 +117,7 @@ def get_basic_part(employee: User, workshift_date: datetime.date) -> BasicPart:
         experience = get_experience_bonus(
             employee.profile.employment_date,
             workshift_date
-        ),
+        )
         attestation = get_attestation_bonus(
             employee.profile.attestation_date,
             workshift_date
