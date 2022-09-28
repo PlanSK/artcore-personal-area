@@ -44,7 +44,7 @@ class BonusPart(NamedTuple):
     revenues: Revenues
     publication: float
     cleaning: float
-    hookah: float
+    hookah: PercentValue
     summary: float
 
 
@@ -123,7 +123,8 @@ def get_percent_of_revenue(
             break
 
     return PercentValue(
-        percent=current_ratio, value=round(value * current_ratio, 2)
+        percent=round(current_ratio * 100, 2),
+        value=round(value * current_ratio, 2)
     )
 
 
@@ -158,6 +159,17 @@ def get_calculated_revenues(workshift_data: WorkshiftData,
     )
 
 
+def get_hookah_earnings(workshift_data: WorkshiftData) -> PercentValue:
+    """
+    Return hookah calculated earnings and percent
+    """
+    return PercentValue(
+        percent=round(settings.HOOKAH_BONUS_RATIO * 100, 2),
+        value=round(
+            workshift_data.hookah_revenue * settings.HOOKAH_BONUS_RATIO, 2
+        ))
+
+
 def get_bonus_part(workshift_data: WorkshiftData,
                    is_cashier: bool = False) -> BonusPart:
     """
@@ -167,19 +179,16 @@ def get_bonus_part(workshift_data: WorkshiftData,
     revenues = get_calculated_revenues(workshift_data, is_cashier)
     publication = 0.0
     cleaning = 0.0
-    hookah = 0.0
+    hookah = PercentValue(percent=0.0, value=0.0)
     summary = 0.0
     if workshift_data.publication:
         publication = settings.PUBLICATION_BONUS
     if not is_cashier:
+        hookah = get_hookah_earnings(workshift_data)
         if workshift_data.hall_cleaning:
             cleaning = settings.HALL_CLEANING_BONUS
-        if workshift_data.hookah_revenue:
-            hookah = round(
-                workshift_data.hookah_revenue * settings.HOOKAH_BONUS_RATIO, 2
-            )
     summary = sum(
-        (award, publication, cleaning, hookah, revenues.summary)
+        (award, publication, cleaning, hookah.value, revenues.summary)
     )
 
     return BonusPart(
@@ -206,7 +215,7 @@ def get_current_earnings(employee: User,
             remaining_bonus_part = bonus_part.summary - penalty
     retention = round(bonus_part.summary - remaining_bonus_part, 2)
     estimate_earnings = round(bonus_part.summary + basic_part.summary, 2)
-    final_earnings = round(remaining_bonus_part + basic_part.summary)
+    final_earnings = round(remaining_bonus_part + basic_part.summary, 2)
     before_shortage = final_earnings
 
     if (is_cashier and
