@@ -318,8 +318,8 @@ class MonthlyReportListView(WorkingshiftPermissonsMixin, TitleMixin, ListView):
     def get_earnings_data_dict(self, workshifts: QuerySet) -> tuple:
         earnings_data_list = list()
         for workshift in workshifts:
-            admin_earnings_dict = workshift.hall_admin_earnings_calc()
-            cashier_earnings_dict = workshift.cashier_earnings_calc()
+            admin_earnings = workshift.get_hall_admin_earnings
+            cashier_earnings = workshift.get_cashier_earnings
             admin_dict = dict()
             cashier_dict = dict()
             earnings_data_dict = dict()
@@ -331,16 +331,16 @@ class MonthlyReportListView(WorkingshiftPermissonsMixin, TitleMixin, ListView):
             if workshift.hall_admin.profile.position.name != 'trainee':
                 admin_dict.update({
                     'username': workshift.hall_admin,
-                    'penalties': admin_earnings_dict['penalty'],
-                    'estimated_earnings': admin_earnings_dict['estimated_earnings'],
+                    'penalties': admin_earnings.penalty,
+                    'estimated_earnings': admin_earnings.estimated_earnings,
                 })
                 admin_dict.update(general_dict)
             if workshift.cash_admin.profile.position.name != 'trainee':
                 cashier_dict.update({
                     'username': workshift.cash_admin,
                     'shortage': workshift.shortage if not workshift.shortage_paid else 0.0,
-                    'penalties': cashier_earnings_dict['penalty'],
-                    'estimated_earnings': cashier_earnings_dict['estimated_earnings'],
+                    'penalties': cashier_earnings.penalty,
+                    'estimated_earnings': cashier_earnings.estimated_earnings,
                 })
                 cashier_dict.update((general_dict))
 
@@ -764,9 +764,9 @@ class IndexEmployeeView(ProfileStatusRedirectMixin, TitleMixin, ListView):
 
     def get_summary_earnings(self):
         summary_earnings = sum([
-            workshift.hall_admin_earnings_calc().get('final_earnings')
+            workshift.get_hall_admin_earnings.final_earnings
             if workshift.hall_admin == self.request.user
-            else workshift.cashier_earnings_calc().get('final_earnings')
+            else workshift.get_cashier_earnings.final_earnings
             for workshift in self.object_list.filter(is_verified=True)
         ])
 
@@ -874,9 +874,9 @@ class StaffEmployeeMonthView(WorkingshiftPermissonsMixin, TitleMixin, ListView):
 
     def get_summary_earnings(self):
         summary_earnings = sum([
-            workshift.hall_admin_earnings_calc().get('final_earnings')
+            workshift.get_hall_admin_earnings.final_earnings
             if workshift.hall_admin == self.employee
-            else workshift.cashier_earnings_calc().get('final_earnings')
+            else workshift.get_cashier_earnings.final_earnings
             for workshift in self.object_list
         ])
 

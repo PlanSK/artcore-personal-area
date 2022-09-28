@@ -41,9 +41,9 @@
               <td>{{ workshift.shift_date|date:"d.m.Y" }}</td>
               {% if workshift.is_verified %}
                 {% if request.user == workshift.hall_admin %}
-              <td>{{ workshift.hall_admin_earnings_calc.final_earnings | intcomma }}</td>
+              <td>{{ workshift.get_hall_admin_earnings.final_earnings | intcomma }}</td>
                 {% elif request.user == workshift.cash_admin %}
-              <td>{{ workshift.cashier_earnings_calc.final_earnings | intcomma }}</td>
+              <td>{{ workshift.get_cashier_earnings.final_earnings | intcomma }}</td>
                 {% endif %}
               {% else %}
               <td><i class="fa-solid fa-calculator fa-fade"></i></td>

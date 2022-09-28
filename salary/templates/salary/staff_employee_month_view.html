@@ -34,7 +34,7 @@
               </td>
               <td>{{ workshift.shift_date|date:"d.m.Y" }}</td>
               {% if employee == workshift.cash_admin %}
-              <td>{{ workshift.cashier_earnings_calc.final_earnings | intcomma }}</td>
+              <td>{{ workshift.get_cashier_earnings.final_earnings | intcomma }}</td>
               <td>{{ workshift.cash_admin_penalty|default:"-" | intcomma }}</td>
               <td>
                 {% if workshift.shortage_paid %}
@@ -44,7 +44,7 @@
                 {% endif %}
               </td>
               {% else %}
-              <td>{{ workshift.hall_admin_earnings_calc.final_earnings | intcomma }}</td>
+              <td>{{ workshift.get_hall_admin_earnings.final_earnings | intcomma }}</td>
               <td>{{ workshift.hall_admin_penalty|default:"-" | intcomma }}</td>
               <td>-</td>
               {% endif %}

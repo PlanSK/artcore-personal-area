@@ -263,153 +263,19 @@ class WorkingShift(models.Model):
         )
 
 
+    @property
     def get_hall_admin_earnings(self):
         workshift_data = self.get_workshift_data()
         employee = self.hall_admin
         return get_current_earnings(employee, workshift_data)
 
 
+    @property
     def get_cashier_earnings(self):
         workshift_data = self.get_workshift_data()
         employee = self.cash_admin
         return get_current_earnings(employee, workshift_data, is_cashier=True)
 
-     # Earnings block (must moved to services)
-
-
-    def get_experience_bonus(self, employee) -> float:
-        current_experience = (self.shift_date - employee.profile.employment_date).days
-        if REQUIRED_EXPERIENCE <= current_experience:
-            return EXPERIENCE_BONUS
-
-        return 0.0
-
-    def get_publication_bonus(self) -> float:
-        if self.publication_link and self.publication_is_verified:
-            return PUBLICATION_BONUS
-
-        return 0.0
-
-    def get_attestation_bonus(self, employee) -> float:
-        if (employee.profile.attestation_date and
-                employee.profile.attestation_date <= self.shift_date):
-            return ATTESTATION_BONUS
-
-        return 0.0
-
-    def get_revenue_bonuses(self, criteria: dict) -> dict:
-        revenue_tuple = (
-            self.bar_revenue,
-            self.game_zone_subtotal,
-            self.vr_revenue
-        )
-
-        result_list = []
-        for revenue, current_critera in zip(revenue_tuple, criteria.values()):
-            criteria_ratio = list(
-                filter(lambda x: x[0] <= revenue, current_critera))[-1][1]
-            result_list.append((round(revenue * criteria_ratio, 2),
-                                round(criteria_ratio * 100, 1)))
-
-        return {
-            'bar': result_list[0],
-            'game_zone': result_list[1],
-            'vr': result_list[2]
-        }
-
-    def employee_earnings_calc(self, employee) -> dict:
-        base_earnings = {
-            'salary': 0.0,
-            'experience': 0.0,
-            'penalty': 0.0,
-            'award': 0.0,
-            'attestation': 0.0,
-            'publication_bonus': 0.0,
-            'game_zone': (0.0, 0.0),
-            'bar': (0.0, 0.0),
-            'vr': (0.0, 0.0),
-            'basic_part': 0.0,
-            'bonus_part': 0.0,
-            'retention': 0.0,
-            'estimated_earnings': 0.0,
-            'final_earnings': 0.0,
-            'cleaning': 0.0,
-            'hookah': 0.0,
-            'before_shortage': 0.0,
-        }
-        if employee.profile.position.name != 'trainee':
-            base_earnings.update({
-                'salary': employee.profile.position.position_salary,
-                'experience': self.get_experience_bonus(employee),
-                'penalty': 0.0,
-                'award': DISCIPLINE_AWARD,
-                'attestation': self.get_attestation_bonus(employee),
-                'publication_bonus': self.get_publication_bonus(),
-                'game_zone': (0.0, 0.0),
-                'bar': (0.0, 0.0),
-                'vr': (0.0, 0.0),
-            })
-
-        return base_earnings
-
-    def final_earnings_calculation(self, earnings: dict) -> dict:
-        tuple_fields = ('bar', 'game_zone', 'vr')
-        exclude_bonus_fields = ('salary', 'penalty',
-                                'experience', 'attestation')
-        bonus_part = 0.0
-
-        for key, value in earnings.items():
-            if key not in exclude_bonus_fields:
-                if key not in tuple_fields:
-                    bonus_part += value
-                else:
-                    bonus_part += value[0]
-
-        if bonus_part > earnings['penalty']:
-            remaining_bonus_part = bonus_part - earnings['penalty']
-        else: 
-            remaining_bonus_part = 0.0
-
-        basic_part = sum([
-                earnings.get('salary'),
-                earnings.get('experience'),
-                earnings.get('attestation')
-        ])
-
-        return {
-            'basic_part': round(basic_part, 2),
-            'bonus_part': round(bonus_part, 2),
-            'retention': round(bonus_part - remaining_bonus_part, 2),
-            'estimated_earnings': round(bonus_part + basic_part, 2),
-            'final_earnings': round(remaining_bonus_part + basic_part,2),
-        }
-
-    def hall_admin_earnings_calc(self) -> dict:
-        earnings = self.employee_earnings_calc(self.hall_admin)
-        if self.hall_admin.profile.position.name != 'trainee':
-            earnings['penalty'] = self.hall_admin_penalty
-            if self.hall_cleaning:
-                earnings['cleaning'] = HALL_CLEANING_BONUS
-            earnings['hookah'] = round(
-                self.hookah_revenue * HOOKAH_BONUS_RATIO, 2
-            )
-            earnings.update(self.get_revenue_bonuses(ADMIN_BONUS_CRITERIA))
-            earnings.update(self.final_earnings_calculation(earnings))
-
-        return earnings
-
-    def cashier_earnings_calc(self) -> dict:
-        earnings = self.employee_earnings_calc(self.cash_admin)
-        if self.cash_admin.profile.position.name != 'trainee':
-            earnings['penalty'] = self.cash_admin_penalty
-            earnings.update(self.get_revenue_bonuses(CASHIER_BONUS_CRITERIA))
-            earnings.update(self.final_earnings_calculation(earnings))
-            earnings['before_shortage'] = earnings['final_earnings']
-            if self.shortage and not self.shortage_paid:
-                earnings['final_earnings'] = (
-                    round(earnings['final_earnings'] - self.shortage * 2, 2)
-                )
-        return earnings
 
     def get_absolute_url(self):
         return reverse_lazy('detail_workshift', kwargs={'slug': self.slug})
