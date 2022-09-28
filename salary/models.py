@@ -452,7 +452,7 @@ def run_calculating_penalties(sender, instance, created=None, **kwargs):
 class Position(models.Model):
     title = models.CharField(max_length=255)
     name = models.CharField(max_length=60)
-    position_salary = models.FloatField(blank=True, null=True)
+    position_salary = models.FloatField(default=0.0)
 
     class Meta:
         verbose_name = 'Должность'
