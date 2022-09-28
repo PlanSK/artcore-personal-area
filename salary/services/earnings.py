@@ -53,7 +53,7 @@ class Earnings(NamedTuple):
     bonus_part: BonusPart
     penalty: float
     retention: float
-    estimate_earnings: float
+    estimated_earnings: float
     before_shortage: float
     final_earnings: float
 
@@ -214,7 +214,7 @@ def get_current_earnings(employee: User,
     if bonus_part.summary > penalty:
             remaining_bonus_part = bonus_part.summary - penalty
     retention = round(bonus_part.summary - remaining_bonus_part, 2)
-    estimate_earnings = round(bonus_part.summary + basic_part.summary, 2)
+    estimated_earnings = round(bonus_part.summary + basic_part.summary, 2)
     final_earnings = round(remaining_bonus_part + basic_part.summary, 2)
     before_shortage = final_earnings
 
@@ -225,6 +225,6 @@ def get_current_earnings(employee: User,
     return Earnings(
         basic_part=basic_part, bonus_part=bonus_part, 
         penalty=penalty, retention=retention, 
-        estimate_earnings=estimate_earnings, before_shortage=before_shortage,
+        estimated_earnings=estimated_earnings, before_shortage=before_shortage,
         final_earnings=final_earnings
     )

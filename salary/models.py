@@ -268,6 +268,12 @@ class WorkingShift(models.Model):
         employee = self.hall_admin
         return get_current_earnings(employee, workshift_data)
 
+
+    def get_cashier_earnings(self):
+        workshift_data = self.get_workshift_data()
+        employee = self.cash_admin
+        return get_current_earnings(employee, workshift_data, is_cashier=True)
+
      # Earnings block (must moved to services)
 
 

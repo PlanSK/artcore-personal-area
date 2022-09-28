@@ -75,7 +75,7 @@
         {% if work_shift.hall_admin_penalty %}
         <tr>
           <td>Предполагаемый заработок</td>
-          <td>{{ work_shift.get_hall_admin_earnings.estimate_earnings|default:"-" | intcomma }}</td>
+          <td>{{ work_shift.get_hall_admin_earnings.estimated_earnings|default:"-" | intcomma }}</td>
         </tr>
         <tr>
           <td>Штраф за нарушение дисциплинарного регламента</td>
