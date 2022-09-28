@@ -123,7 +123,7 @@ def get_basic_part(employee: User, workshift_date: datetime.date) -> BasicPart:
     Return named tuple with basic part values: salary, experience, attestation
     and summry (sum of all values)
     """
-    salary: Union[float, None] = employee.profile.position.salary,
+    salary = employee.profile.position.salary,
     experience = 0.0
     attestation = 0.0
     summary = 0.0
@@ -136,12 +136,12 @@ def get_basic_part(employee: User, workshift_date: datetime.date) -> BasicPart:
             employee.profile.attestation_date,
             workshift_date
         )
-        summary: float = sum((salary, experience, attestation))
+        summary = sum((salary, experience, attestation))
     return BasicPart(
         salary=salary,
         experience=experience,
         attestation=attestation,
-        summary=summary
+        summary=round(summary, 2)
     )
 
 
@@ -159,7 +159,7 @@ def get_percent_of_revenue(
             break
 
     return PercentValue(
-        percent=current_ratio, value=value * current_ratio
+        percent=current_ratio, value=round(value * current_ratio, 2)
     )
 
 
@@ -190,7 +190,7 @@ def get_calculated_revenues(workshift_data: WorkshiftData,
         bar=bar,
         game_zone=game_zone,
         vr=vr,
-        summary=summary
+        summary=round(summary, 2)
     )
 
 
@@ -207,16 +207,20 @@ def get_bonus_part(workshift_data: WorkshiftData,
     summary = 0.0
     if workshift_data.publication:
         publication = settings.PUBLICATION_BONUS
-    if workshift_data.hall_cleaning:
-        cleaning = settings.HALL_CLEANING_BONUS
-    if workshift_data.hookah_revenue:
-        hookah = workshift_data.hookah_revenue * settings.HOOKAH_BONUS_RATIO
+    if not is_cashier:
+        if workshift_data.hall_cleaning:
+            cleaning = settings.HALL_CLEANING_BONUS
+        if workshift_data.hookah_revenue:
+            hookah = round(
+                workshift_data.hookah_revenue * settings.HOOKAH_BONUS_RATIO, 2
+            )
     summary = sum(
         (award, publication, cleaning, hookah, revenues.summary)
     )
+
     return BonusPart(
         award=award, revenues=revenues, publication=publication,
-        cleaning=cleaning, hookah=hookah, summary=summary
+        cleaning=cleaning, hookah=hookah, summary=round(summary, 2)
     )
 
 
@@ -228,4 +232,26 @@ def get_current_earnings(employee: User,
     """
     basic_part = get_basic_part(employee=employee,
                                 workshift_date=workshift_data.shift_date)
-    calculated_revenues = get_calculated_revenues(workshift_data, is_cashier)
+    bonus_part = get_bonus_part(workshift_data=workshift_data,
+                                is_cashier=is_cashier)
+    penalty = workshift_data.admin_penalty
+    if is_cashier:
+        penalty = workshift_data.cashier_penalty
+    remaining_bonus_part = 0.0
+    if bonus_part > penalty:
+            remaining_bonus_part = bonus_part.summary - penalty
+    retention = round(bonus_part - remaining_bonus_part, 2)
+    estimate_earnings = round(bonus_part.summary + basic_part.summary, 2)
+    final_earnings = round(remaining_bonus_part + basic_part.summary)
+    before_shortage = final_earnings
+
+    if (is_cashier and
+            workshift_data.shortage and not workshift_data.shortage_paid):
+        final_earnings = round(final_earnings - workshift_data.shortage * 2, 2)
+
+    return Earnings(
+        basic_part=basic_part, bonus_part=bonus_part, 
+        penalty=penalty, retention=retention, 
+        estimate_earnings=estimate_earnings, before_shortage=before_shortage,
+        final_earnings=final_earnings
+    )
