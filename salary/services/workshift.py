@@ -72,6 +72,7 @@ class Revenues(NamedTuple):
     bar: PercentValue
     game_zone: PercentValue
     vr: PercentValue
+    summary: float
 
 
 class BonusPart(NamedTuple):
@@ -167,23 +168,55 @@ def get_calculated_revenues(workshift_data: WorkshiftData,
     """
     Return calculated revenues according to the criteria
     """
+    summary = 0.0
     criteria = settings.ADMIN_BONUS_CRITERIA
     if is_cashier:
         criteria = settings.CASHIER_BONUS_CRITERIA
+    bar = get_percent_of_revenue(
+        workshift_data.bar_revenue,
+        criteria.bar
+    ),
+    game_zone = get_percent_of_revenue(
+        workshift_data.game_zone_revenue,
+        criteria.game_zone
+    ),
+    vr = get_percent_of_revenue(
+        workshift_data.vr_revenue,
+        criteria.vr
+    )
+    summary = sum((bar.value, game_zone.value, vr.value))
 
     return Revenues(
-        bar=get_percent_of_revenue(
-            workshift_data.bar_revenue,
-            criteria.bar
-        ),
-        game_zone=get_percent_of_revenue(
-            workshift_data.game_zone_revenue,
-            criteria.game_zone
-        ),
-        vr=get_percent_of_revenue(
-            workshift_data.vr_revenue,
-            criteria.vr
-        )
+        bar=bar,
+        game_zone=game_zone,
+        vr=vr,
+        summary=summary
+    )
+
+
+def get_bonus_part(workshift_data: WorkshiftData,
+                   is_cashier: bool = False) -> BonusPart:
+    """
+    Return the bonus part of earnings.
+    """
+    award = settings.DISCIPLINE_AWARD
+    revenues = get_calculated_revenues(workshift_data, is_cashier)
+    publication = 0.0
+    cleaning = 0.0
+    hookah = 0.0
+    summary = 0.0
+    if workshift_data.publication:
+        publication = settings.PUBLICATION_BONUS
+    if workshift_data.hall_cleaning:
+        cleaning = settings.HALL_CLEANING_BONUS
+    if workshift_data.hookah_revenue:
+        hookah = workshift_data.hookah_revenue * settings.HOOKAH_BONUS_RATIO
+    summary = sum(
+        (award, publication, cleaning, hookah, revenues.summary)
+    )
+    return BonusPart(
+        award=award, revenues=revenues, publication=publication,
+        cleaning=cleaning, hookah=hookah, summary=summary
     )
 
 
