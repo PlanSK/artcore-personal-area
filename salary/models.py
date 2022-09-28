@@ -15,7 +15,7 @@ from salary.services.filesystem import (
     user_directory_path,
     OverwriteStorage,
 )
-from salary.services.workshift import WorkshiftData
+from salary.services.earnings import WorkshiftData, get_current_earnings
 
 
 def get_last_name(self):
@@ -254,6 +254,7 @@ class WorkingShift(models.Model):
             game_zone_revenue=self.game_zone_subtotal,
             vr_revenue=self.vr_revenue,
             hookah_revenue=self.hookah_revenue,
+            hall_cleaning=self.hall_cleaning,
             shortage=self.shortage,
             shortage_paid=self.shortage_paid,
             publication=self.publication_is_verified,
@@ -265,6 +266,7 @@ class WorkingShift(models.Model):
     def get_hall_admin_earnings(self):
         workshift_data = self.get_workshift_data()
         employee = self.hall_admin
+        return get_current_earnings(employee, workshift_data)
 
      # Earnings block (must moved to services)
 
