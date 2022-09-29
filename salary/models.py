@@ -1,16 +1,11 @@
-import datetime
-from dateutil.relativedelta import relativedelta
-
 from django.db import models
 from django.contrib.auth.models import User
+from django.conf import settings
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.urls import reverse_lazy
 
-from .config import *
-from salary.services.profile_services import (
-    get_expirience_string
-)
+from salary.services.profile_services import get_expirience_string
 from salary.services.filesystem import (
     user_directory_path,
     OverwriteStorage,
@@ -121,7 +116,7 @@ class Misconduct(models.Model):
     regulations_article = models.ForeignKey(
         DisciplinaryRegulations, on_delete=models.PROTECT,
         verbose_name='Пункт дисциплинарного регламента',
-        default=DEFAULT_MISCONDUCT_ARTICLE_NUMBER
+        default=settings.DEFAULT_MISCONDUCT_ARTICLE_NUMBER
     )
     penalty = models.FloatField(verbose_name='Сумма штрафа', default=0.0)
     explanation_exist = models.BooleanField(
