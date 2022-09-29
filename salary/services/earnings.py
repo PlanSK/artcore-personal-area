@@ -1,9 +1,8 @@
-# Earnings block moved from models.py
 import datetime
 
 from django.contrib.auth.models import User
 from django.conf import settings
-from typing import NamedTuple, Union
+from typing import NamedTuple
 
 
 class WorkshiftData(NamedTuple):
@@ -21,7 +20,7 @@ class WorkshiftData(NamedTuple):
 
 
 class BasicPart(NamedTuple):
-    salary: Union[float, None]
+    salary: float
     experience: float
     attestation: float
     summary: float

@@ -275,6 +275,7 @@ class WorkingShift(models.Model):
     def get_absolute_url(self):
         return reverse_lazy('detail_workshift', kwargs={'slug': self.slug})
 
+
     def save(self, *args, **kwargs):
         self.game_zone_subtotal = 0.0
         self.summary_revenue = 0.0

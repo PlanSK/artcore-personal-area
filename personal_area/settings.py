@@ -18,7 +18,7 @@ from pathlib import Path
 from typing import NamedTuple
 
 
-def options_parse(options: str) -> dict():
+def options_parse(options: str) -> dict:
     options_dict = dict()
     for parameter in options.split(','):
         attr, value = parameter.split('=')
@@ -216,7 +216,7 @@ EMAIL_USE_SSL = int(os.environ.get('EMAIL_USE_SSL', default=0))
 SERVER_EMAIL = DEFAULT_FROM_EMAIL = os.environ.get('SERVER_EMAIL')
 ADMINS = [
     parseaddr(addr)
-    for addr in os.environ.get('DJANGO_ADMINS').split(',')
+    for addr in os.environ.get('DJANGO_ADMINS', '').split(',')
 ]
 
 GSHEETS_API_KEY_FILE = os.environ.get('GSHEETS_API_KEY_FILE')
@@ -234,7 +234,7 @@ SPREADSHEET = os.environ.get('SPREADSHEET', '')
 if os.environ.get('CSRF_TRUSTED_ORIGINS'):
     CSRF_TRUSTED_ORIGINS = [
         'https://' + addr 
-        for addr in os.environ.get('CSRF_TRUSTED_ORIGINS').split(',')
+        for addr in os.environ['CSRF_TRUSTED_ORIGINS'].split(',')
     ]
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 USE_X_FORWARDED_HOST = True
