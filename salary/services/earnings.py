@@ -51,6 +51,7 @@ class Earnings(NamedTuple):
     basic_part: BasicPart
     bonus_part: BonusPart
     penalty: float
+    shortage: float
     retention: float
     estimated_earnings: float
     before_shortage: float
@@ -207,6 +208,7 @@ def get_current_earnings(employee: User,
     bonus_part = get_bonus_part(workshift_data=workshift_data,
                                 is_cashier=is_cashier)
     penalty = workshift_data.admin_penalty
+    shortage = 0.0
     if is_cashier:
         penalty = workshift_data.cashier_penalty
     remaining_bonus_part = 0.0
@@ -219,11 +221,12 @@ def get_current_earnings(employee: User,
 
     if (is_cashier and
             workshift_data.shortage and not workshift_data.shortage_paid):
+        shortage = workshift_data.shortage
         final_earnings = round(final_earnings - workshift_data.shortage * 2, 2)
 
     return Earnings(
         basic_part=basic_part, bonus_part=bonus_part, 
-        penalty=penalty, retention=retention, 
+        penalty=penalty, shortage=shortage, retention=retention, 
         estimated_earnings=estimated_earnings, before_shortage=before_shortage,
         final_earnings=final_earnings
     )
