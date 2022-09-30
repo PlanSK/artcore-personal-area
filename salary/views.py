@@ -318,8 +318,8 @@ class MonthlyReportListView(WorkingshiftPermissonsMixin, TitleMixin, ListView):
     def get_earnings_data_dict(self, workshifts: QuerySet) -> tuple:
         earnings_data_list = list()
         for workshift in workshifts:
-            admin_earnings = workshift.get_hall_admin_earnings
-            cashier_earnings = workshift.get_cashier_earnings
+            admin_earnings = workshift.hall_admin_earnings
+            cashier_earnings = workshift.cashier_earnings
             admin_dict = dict()
             cashier_dict = dict()
             earnings_data_dict = dict()
@@ -764,9 +764,9 @@ class IndexEmployeeView(ProfileStatusRedirectMixin, TitleMixin, ListView):
 
     def get_summary_earnings(self):
         summary_earnings = sum([
-            workshift.get_hall_admin_earnings.final_earnings
+            workshift.hall_admin_earnings.final_earnings
             if workshift.hall_admin == self.request.user
-            else workshift.get_cashier_earnings.final_earnings
+            else workshift.cashier_earnings.final_earnings
             for workshift in self.object_list.filter(is_verified=True)
         ])
 
@@ -874,9 +874,9 @@ class StaffEmployeeMonthView(WorkingshiftPermissonsMixin, TitleMixin, ListView):
 
     def get_summary_earnings(self):
         summary_earnings = sum([
-            workshift.get_hall_admin_earnings.final_earnings
+            workshift.hall_admin_earnings.final_earnings
             if workshift.hall_admin == self.employee
-            else workshift.get_cashier_earnings.final_earnings
+            else workshift.cashier_earnings.final_earnings
             for workshift in self.object_list
         ])
 

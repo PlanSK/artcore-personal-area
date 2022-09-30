@@ -259,14 +259,14 @@ class WorkingShift(models.Model):
 
 
     @property
-    def get_hall_admin_earnings(self):
+    def hall_admin_earnings(self):
         workshift_data = self.get_workshift_data()
         employee = self.hall_admin
         return get_current_earnings(employee, workshift_data)
 
 
     @property
-    def get_cashier_earnings(self):
+    def cashier_earnings(self):
         workshift_data = self.get_workshift_data()
         employee = self.cash_admin
         return get_current_earnings(employee, workshift_data, is_cashier=True)

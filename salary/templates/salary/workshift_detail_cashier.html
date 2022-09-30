@@ -12,69 +12,69 @@
         <tr><td colspan="2" class="text-info text-center">Базовая часть</td></tr>
         <tr>
           <td>Оклад за смену</td>
-          <td>{{ work_shift.get_cashier_earnings.basic_part.salary | intcomma }}</td>
+          <td>{{ work_shift.cashier_earnings.basic_part.salary | intcomma }}</td>
         </tr>
         <tr>
           <td>Надбавка за стаж (более 3 мес.)</td>
-          <td>{{ work_shift.get_cashier_earnings.basic_part.experience|default:"-" | intcomma }}</td>
+          <td>{{ work_shift.cashier_earnings.basic_part.experience|default:"-" | intcomma }}</td>
         </tr>
         <tr>
           <td>Надбавка за прохождение аттестации</td>
-          <td>{{ work_shift.get_cashier_earnings.basic_part.attestation|default:"-" | intcomma }}</td>
+          <td>{{ work_shift.cashier_earnings.basic_part.attestation|default:"-" | intcomma }}</td>
         </tr>
         <tr class="table-active text-warning">
           <td>Суммарный оклад</td>
-          <td>{{ work_shift.get_cashier_earnings.basic_part.summary|default:"-" | intcomma }}</td>
+          <td>{{ work_shift.cashier_earnings.basic_part.summary|default:"-" | intcomma }}</td>
         </tr>
         <tr><td colspan="2" class="text-info text-center">Премиальная часть</td></tr>
         <tr>
           <td>Премия за дисциплину</td>
-          <td>{{ work_shift.get_cashier_earnings.bonus_part.award|default:"-" | intcomma }}</td>
+          <td>{{ work_shift.cashier_earnings.bonus_part.award|default:"-" | intcomma }}</td>
         </tr>
         <tr>
           <td>Премия за СММ (1 публикация)</td>
-          <td>{{ work_shift.get_cashier_earnings.bonus_part.publication|default:"-" | intcomma }}</td>
+          <td>{{ work_shift.cashier_earnings.bonus_part.publication|default:"-" | intcomma }}</td>
         </tr>
         <tr>
           <td>% от выручки по бару</td>
           <td>
-            {{ work_shift.get_cashier_earnings.bonus_part.revenues.bar.value|default:"-" | intcomma }}&emsp;
-            ({{ work_shift.get_cashier_earnings.bonus_part.revenues.bar.percent }}%)
+            {{ work_shift.cashier_earnings.bonus_part.revenues.bar.value|default:"-" | intcomma }}&emsp;
+            ({{ work_shift.cashier_earnings.bonus_part.revenues.bar.percent }}%)
           </td>
         </tr>
         <tr>
           <td>% от выручки от игровой зоны (КНА)</td>
           <td>
-            {{ work_shift.get_cashier_earnings.bonus_part.revenues.game_zone.value|default:"-" | intcomma }}&emsp;
-            ({{ work_shift.get_cashier_earnings.bonus_part.revenues.game_zone.percent }}%)
+            {{ work_shift.cashier_earnings.bonus_part.revenues.game_zone.value|default:"-" | intcomma }}&emsp;
+            ({{ work_shift.cashier_earnings.bonus_part.revenues.game_zone.percent }}%)
           </td>
         </tr>
         <tr>
           <td>% от выручки от доп. услуг.</td>
           <td>
-            {{ work_shift.get_cashier_earnings.bonus_part.revenues.vr.value|default:"-" | intcomma }}&emsp;
-            ({{ work_shift.get_cashier_earnings.bonus_part.revenues.vr.percent }}%)
+            {{ work_shift.cashier_earnings.bonus_part.revenues.vr.value|default:"-" | intcomma }}&emsp;
+            ({{ work_shift.cashier_earnings.bonus_part.revenues.vr.percent }}%)
           </td>
         </tr>
         <tr class="text-warning table-active">
           <td>Сумма премиальной части</td>
-          <td>{{ work_shift.get_cashier_earnings.bonus_part.summary|default:"-" | intcomma }}</td>
+          <td>{{ work_shift.cashier_earnings.bonus_part.summary|default:"-" | intcomma }}</td>
         </tr>
         </tbody>
         <tfoot class="verysmall">
         {% if work_shift.cash_admin_penalty or work_shift.shortage %}
         <tr>
           <td>Предполагаемый заработок</td>
-          <td>{{ work_shift.get_cashier_earnings.estimated_earnings|default:"-" | intcomma }}</td>
+          <td>{{ work_shift.cashier_earnings.estimated_earnings|default:"-" | intcomma }}</td>
         </tr>
         {% if work_shift.cash_admin_penalty %}
         <tr>
           <td>Штраф за нарушение дисциплинарного регламента</td>
-          <td class="text-danger">{{ work_shift.get_cashier_earnings.penalty | intcomma }}</td>
+          <td class="text-danger">{{ work_shift.cashier_earnings.penalty | intcomma }}</td>
         </tr>
         <tr>
           <td>Удержано за нарушение дисциплины</td>
-          <td class="text-danger">{{ work_shift.get_cashier_earnings.retention|default:"-" | intcomma }}</td>
+          <td class="text-danger">{{ work_shift.cashier_earnings.retention|default:"-" | intcomma }}</td>
         </tr>
         {% endif %}
         {% if work_shift.shortage %}
@@ -93,9 +93,9 @@
         <tr class="table-active">
           <td>Итоговый заработок</td>
           {% if not work_shift.is_verified %}
-          <td class="text-secondary">{{ work_shift.get_cashier_earnings.final_earnings|default:"-" | intcomma }}*</td>
+          <td class="text-secondary">{{ work_shift.cashier_earnings.final_earnings|default:"-" | intcomma }}*</td>
           {% else %}
-          <td>{{ work_shift.get_cashier_earnings.final_earnings|default:"-" | intcomma }}</td>
+          <td>{{ work_shift.cashier_earnings.final_earnings|default:"-" | intcomma }}</td>
           {% endif %}
         </tr>
       </tfoot>
