@@ -82,10 +82,10 @@ def get_workshift_tuples_list(user: User,
     workshift_tuples_list = []
     for workshift in workshifts:
         if workshift.hall_admin == user:
-            earnings = workshift.hall_admin_earnings_calc()
+            earnings = workshift.hall_admin_earnings
         else:
-            earnings = workshift.cashier_earnings_calc()
-        current_earnings: float = earnings.get('final_earnings')
+            earnings = workshift.cashier_earnings
+        current_earnings: float = earnings.final_earnings
         displayed_date = workshift.shift_date - datetime.timedelta(days=1)
         if workshift.shift_date == datetime.date(year, month, 1):
             displayed_date = workshift.shift_date

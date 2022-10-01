@@ -2,7 +2,7 @@ import datetime
 
 from django.contrib.auth.models import User
 
-from .shift_calendar import get_planed_workshifts_list
+from salary.services.shift_calendar import get_planed_workshifts_list
 
 
 def check_permission_to_close(user: User, date: datetime.date) -> bool:
@@ -23,7 +23,7 @@ def check_permission_to_close(user: User, date: datetime.date) -> bool:
     return False
 
 
-def notification_of_upcoming_shifts(user: User, date: datetime) -> bool:
+def notification_of_upcoming_shifts(user: User, date: datetime.date) -> bool:
     """
     Returning True if tomorrow in days list from schedule.
     """

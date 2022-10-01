@@ -20,16 +20,16 @@
             </tr>
           </thead>
           <tbody class="text-center verysmall">
-            {% for employee in employee_earnings_data.values %}
+            {% for employee in report_data.employees %}
             <tr>
-              <td>{{ employee.username.get_full_name }}</td>
-              <td>{{ employee.count|default:"-"  }}</td>
-              <td>{{ employee.summary_revenue|default:"-" | intcomma }}</td>
-              <td>{{ employee.estimated_earnings|default:"-" | intcomma }}</td>
-              <td>{{ employee.penalties|default:"-" | intcomma }}</td>
+              <td>{{ employee.employee.get_full_name }}</td>
+              <td>{{ employee.shift_counter|default:"-"  }}</td>
+              <td>{{ employee.revenue|default:"-" | intcomma }}</td>
+              <td>{{ employee.earnings|default:"-" | intcomma }}</td>
+              <td>{{ employee.penalty|default:"-" | intcomma }}</td>
               <td>{{ employee.shortage|default:"-" | intcomma }}</td>
               <td>
-                <a href="{% url 'staff_employee_month_view' year=current_date.year month=current_date.month employee=employee.username %}?next={{ request.path }}" class="link-primary verysmall">
+                <a href="{% url 'staff_employee_month_view' year=current_date.year month=current_date.month employee=employee.employee.username %}?next={{ request.path }}" class="link-primary verysmall">
                   Детально
                 </a>
               </td>
@@ -39,11 +39,11 @@
           <tfoot class="text-center verysmall text-white">
             <tr>
               <td></td>
-              <td>{{ summary_earnings_data.count|default:"-"  }}</td>
-              <td>{{ summary_earnings_data.summary_revenue|default:"-" | intcomma }}</td>
-              <td>{{ summary_earnings_data.estimated_earnings|default:"-" | intcomma }}</td>
-              <td>{{ summary_earnings_data.penalties|default:"-" | intcomma }}</td>
-              <td>{{ summary_earnings_data.shortage|default:"-" | intcomma }}</td>
+              <td>{{ report_data.shift_counter|default:"-"  }}</td>
+              <td>{{ report_data.monthly_summary_revenue|default:"-" | intcomma }}</td>
+              <td>{{ report_data.summary_all_earnings|default:"-" | intcomma }}</td>
+              <td>{{ report_data.summary_all_penalties|default:"-" | intcomma }}</td>
+              <td>{{ report_data.summary_all_shortages|default:"-" | intcomma }}</td>
               <td></td>
             </tr>
           </tfoot>

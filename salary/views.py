@@ -16,10 +16,10 @@ from django.views.generic.base import RedirectView
 from django.db.models import Q, QuerySet, Sum, Avg
 
 from .forms import *
-from .utils import *
 from .mixins import *
 from salary.services.chat import *
 from salary.services.shift_calendar import get_user_calendar
+from salary.services.misconduct import Intruder, get_misconduct_slug
 from salary.services.workshift import (
     check_permission_to_close, notification_of_upcoming_shifts
 )
@@ -27,7 +27,11 @@ from salary.services.registration import (
     registration_user, sending_confirmation_link, confirmation_user_email,
     get_user_instance_from_uidb64, authentification_user
 )
-
+from salary.services.filesystem import (
+    get_employee_documents_urls, document_file_handler,
+    delete_document_from_storage
+)
+from salary.services.monthly_reports import get_monthly_report
 
 logger = logging.getLogger(__name__)
 
@@ -273,8 +277,8 @@ class DeleteWorkshift(WorkingshiftPermissonsMixin, TitleMixin, SuccessUrlMixin,
     title = 'Удаление смены'
 
 
-class MonthlyReportListView(WorkingshiftPermissonsMixin, TitleMixin, ListView):
-    model = WorkingShift
+class MonthlyReportListView(WorkingshiftPermissonsMixin, TitleMixin,
+                            TemplateView):
     template_name = 'salary/monthlyreport_list.html'
     title = 'Сводный отчёт'
 
@@ -283,97 +287,11 @@ class MonthlyReportListView(WorkingshiftPermissonsMixin, TitleMixin, ListView):
         self.month = self.kwargs.get('month')
         return super().dispatch(request, *args, **kwargs)
 
-    def get_queryset(self):
-        queryset = WorkingShift.objects.select_related(
-            'cash_admin__profile__position',
-            'hall_admin__profile__position',
-        ).filter(
-            shift_date__month=self.month,
-            shift_date__year=self.year,
-            is_verified=True
-        )
-
-        return queryset
-
-    def get_sum_dict_values(self, first_dict: dict, second_dict: dict) -> dict:
-        summable_fields = (
-            'summary_revenue',
-            'count',
-            'penalties',
-            'estimated_earnings',
-            'shortage',
-        )
-
-        total_values_dict = {
-            key: round(sum((first_dict.get(key, 0), second_dict.get(key, 0))), 2)
-            for key in summable_fields
-        }
-
-        return total_values_dict
-
-    def get_earnings_data_dict(self, workshifts: QuerySet) -> tuple:
-        earnings_data_list = list()
-        for workshift in workshifts:
-            admin_earnings_dict = workshift.hall_admin_earnings_calc()
-            cashier_earnings_dict = workshift.cashier_earnings_calc()
-            admin_dict = dict()
-            cashier_dict = dict()
-            earnings_data_dict = dict()
-            summary_data_dict = dict()
-            general_dict = {
-                'summary_revenue': workshift.summary_revenue,
-                'count': 1,
-            }
-            if workshift.hall_admin.profile.position.name != 'trainee':
-                admin_dict.update({
-                    'username': workshift.hall_admin,
-                    'penalties': admin_earnings_dict['penalty'],
-                    'estimated_earnings': admin_earnings_dict['estimated_earnings'],
-                })
-                admin_dict.update(general_dict)
-            if workshift.cash_admin.profile.position.name != 'trainee':
-                cashier_dict.update({
-                    'username': workshift.cash_admin,
-                    'shortage': workshift.shortage if not workshift.shortage_paid else 0.0,
-                    'penalties': cashier_earnings_dict['penalty'],
-                    'estimated_earnings': cashier_earnings_dict['estimated_earnings'],
-                })
-                cashier_dict.update((general_dict))
-
-            earnings_data_list.extend([admin_dict, cashier_dict])
-
-        for current_dict in earnings_data_list:
-            if current_dict:
-                existing_dict = earnings_data_dict.get(
-                    current_dict['username'].get_full_name()
-                )
-                if existing_dict:
-                    existing_dict.update(
-                        self.get_sum_dict_values(existing_dict, current_dict)
-                    )
-                else:
-                    earnings_data_dict.update({
-                        current_dict['username'].get_full_name(): current_dict
-                    })
-                summary_data_dict.update(
-                    self.get_sum_dict_values(summary_data_dict, current_dict)
-                )
-        earnings_data_dict = dict(
-            sorted(earnings_data_dict.items(), key=lambda item: item[1]['summary_revenue'], reverse=True)
-        )
-        summary_data_dict['count'] = workshifts.count()
-        summary_data_dict['summary_revenue'] = sum(
-            [workshift.summary_revenue for workshift in workshifts]
-        )
-        return (earnings_data_dict, summary_data_dict, )
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        employee_earnings_data, summary_earnings_data = self.get_earnings_data_dict(self.object_list)
-
         context.update({
-            'employee_earnings_data': employee_earnings_data,
-            'summary_earnings_data': summary_earnings_data,
+            'report_data': get_monthly_report(month=self.month,
+                                                  year=self.year),
             'current_date': datetime.date(self.year, self.month, 1),
         })
 
@@ -760,9 +678,9 @@ class IndexEmployeeView(ProfileStatusRedirectMixin, TitleMixin, ListView):
 
     def get_summary_earnings(self):
         summary_earnings = sum([
-            workshift.hall_admin_earnings_calc().get('final_earnings')
+            workshift.hall_admin_earnings.final_earnings
             if workshift.hall_admin == self.request.user
-            else workshift.cashier_earnings_calc().get('final_earnings')
+            else workshift.cashier_earnings.final_earnings
             for workshift in self.object_list.filter(is_verified=True)
         ])
 
@@ -870,9 +788,9 @@ class StaffEmployeeMonthView(WorkingshiftPermissonsMixin, TitleMixin, ListView):
 
     def get_summary_earnings(self):
         summary_earnings = sum([
-            workshift.hall_admin_earnings_calc().get('final_earnings')
+            workshift.hall_admin_earnings.final_earnings
             if workshift.hall_admin == self.employee
-            else workshift.cashier_earnings_calc().get('final_earnings')
+            else workshift.cashier_earnings.final_earnings
             for workshift in self.object_list
         ])
 
@@ -927,11 +845,6 @@ class AddWorkshiftData(PermissionRequiredMixin, TitleMixin, SuccessUrlMixin,
         object = form.save(commit=False)
         object.editor = self.request.user.get_full_name()
         object.slug = object.shift_date
-        # if object.shift_date > datetime.date.today():
-        #     logger.debug('Validation error in view: date more than today.')
-        #     # form.add_error('shift_date', 'Shift date must no more today date.')
-        # else:
-        #     logger.debug('Form validation in view successful.')
         return super().form_valid(form)
 
 

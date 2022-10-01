@@ -6,7 +6,7 @@ from django.db.models import QuerySet
 from django.http import HttpRequest
 from django.shortcuts import get_object_or_404
 from salary.models import *
-from salary.services.profile import profile_photo_is_exists
+from salary.services.profile_services import profile_photo_is_exists
 
 Dialog = namedtuple('Dialog', ['member', 'photo', 'unread_messages_count', 'is_selected', 'slug'])
 

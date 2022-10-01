@@ -15,9 +15,10 @@ import json
 
 from email.utils import parseaddr
 from pathlib import Path
+from typing import NamedTuple
 
 
-def options_parse(options: str) -> dict():
+def options_parse(options: str) -> dict:
     options_dict = dict()
     for parameter in options.split(','):
         attr, value = parameter.split('=')
@@ -215,7 +216,7 @@ EMAIL_USE_SSL = int(os.environ.get('EMAIL_USE_SSL', default=0))
 SERVER_EMAIL = DEFAULT_FROM_EMAIL = os.environ.get('SERVER_EMAIL')
 ADMINS = [
     parseaddr(addr)
-    for addr in os.environ.get('DJANGO_ADMINS').split(',')
+    for addr in os.environ.get('DJANGO_ADMINS', '').split(',')
 ]
 
 GSHEETS_API_KEY_FILE = os.environ.get('GSHEETS_API_KEY_FILE')
@@ -233,8 +234,76 @@ SPREADSHEET = os.environ.get('SPREADSHEET', '')
 if os.environ.get('CSRF_TRUSTED_ORIGINS'):
     CSRF_TRUSTED_ORIGINS = [
         'https://' + addr 
-        for addr in os.environ.get('CSRF_TRUSTED_ORIGINS').split(',')
+        for addr in os.environ['CSRF_TRUSTED_ORIGINS'].split(',')
     ]
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 USE_X_FORWARDED_HOST = True
 USE_X_FORWARDED_PORT = True
+
+DOCUMENTS_DIR_NAME = 'documents'
+
+REQUIRED_EXPERIENCE = 90
+EXPERIENCE_BONUS = 200.0
+PUBLICATION_BONUS = 100.0
+
+ATTESTATION_BONUS = 200.0
+DISCIPLINE_AWARD = 1000.0
+HALL_CLEANING_BONUS = 400.0
+HOOKAH_BONUS_RATIO = 0.2
+
+
+class Criteria(NamedTuple):
+    bar: tuple[tuple[int, float], ...]
+    game_zone: tuple[tuple[int, float], ...]
+    vr: tuple[tuple[int, float], ...]
+
+
+ADMIN_BONUS_CRITERIA = Criteria(
+    bar=(
+        (0, 0.005),
+        (3000, 0.01),
+        (4000, 0.02),
+        (6000, 0.025),
+        (8000, 0.03)
+    ),
+    game_zone=(
+        (0, 0.005),
+        (20000, 0.01),
+        (25000, 0.0125),
+        (27500, 0.015), 
+        (30000, 0.0175)
+    ),
+    vr=(
+        (0, 0.1),
+        (1000, 0.12),
+        (2000, 0.13),
+        (3000, 0.14),
+        (5000, 0.15)
+    )
+)
+
+CASHIER_BONUS_CRITERIA = Criteria(
+    bar=(
+        (0, 0.03),
+        (3000, 0.04),
+        (4000, 0.05),
+        (6000, 0.06),
+        (8000, 0.07)
+    ),
+    game_zone=(
+        (0, 0.005),
+        (20000, 0.01),
+        (25000, 0.0125),
+        (27500, 0.015),
+        (30000, 0.0175)
+    ),
+    vr=(
+        (0, 0.05),
+        (1000, 0.06),
+        (2000, 0.065),
+        (3000, 0.07),
+        (5000, 0.075)
+    )
+)
+
+DEFAULT_MISCONDUCT_ARTICLE_NUMBER = 1
