@@ -12,8 +12,8 @@
             <tr>
               <th>Сотрудник</th>
               <th>Количество смен</th>
-              <th>Выручка</th>
-              <th>Сумма начислений</th>
+              <th>Оклад</th>
+              <th>Бонусная часть</th>
               <th>Штрафы</th>
               <th>Недостачи</th>
               <th></th>
@@ -24,8 +24,8 @@
             <tr>
               <td>{{ employee.employee.get_full_name }}</td>
               <td>{{ employee.shift_counter|default:"-"  }}</td>
-              <td>{{ employee.revenue|default:"-" | intcomma }}</td>
-              <td>{{ employee.earnings|default:"-" | intcomma }}</td>
+              <td>{{ employee.basic_revenues|default:"-" | intcomma }}</td>
+              <td>{{ employee.bonus_revenues|default:"-" | intcomma }}</td>
               <td>{{ employee.penalty|default:"-" | intcomma }}</td>
               <td>{{ employee.shortage|default:"-" | intcomma }}</td>
               <td>
@@ -40,8 +40,8 @@
             <tr>
               <td></td>
               <td>{{ report_data.shift_counter|default:"-"  }}</td>
-              <td>{{ report_data.monthly_summary_revenue|default:"-" | intcomma }}</td>
-              <td>{{ report_data.summary_all_earnings|default:"-" | intcomma }}</td>
+              <td>{{ report_data.summary_basic_revenue|default:"-" | intcomma }}</td>
+              <td>{{ report_data.summary_bonus_revenue|default:"-" | intcomma }}</td>
               <td>{{ report_data.summary_all_penalties|default:"-" | intcomma }}</td>
               <td>{{ report_data.summary_all_shortages|default:"-" | intcomma }}</td>
               <td></td>
