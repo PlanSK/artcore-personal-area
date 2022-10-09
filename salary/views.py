@@ -31,7 +31,7 @@ from salary.services.filesystem import (
     get_employee_documents_urls, document_file_handler,
     delete_document_from_storage
 )
-from salary.services.monthly_reports import get_monthly_report
+from salary.services.monthly_reports import get_monthly_report, get_awards_data
 
 logger = logging.getLogger(__name__)
 
@@ -1107,6 +1107,19 @@ class StaffCalendarListView(ListView):
         })
         return context
 
+
+class AwardRatingView(TemplateView):
+    template_name: str = 'salary/award_rating.html'
+
+    def dispatch(self, request: HttpRequest,
+                 *args: Any, **kwargs: Any) -> HttpResponse:
+        self.award_data = get_awards_data(9, 2022)
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        context.update({'award_data': self.award_data})
+        return context
 
 def page_not_found(request, exception):
     response = render(request, 'salary/404.html', {'title': 'Page not found'})
