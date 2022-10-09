@@ -21,7 +21,8 @@ from salary.services.chat import *
 from salary.services.shift_calendar import get_user_calendar
 from salary.services.misconduct import Intruder, get_misconduct_slug
 from salary.services.workshift import (
-    check_permission_to_close, notification_of_upcoming_shifts
+    check_permission_to_close, notification_of_upcoming_shifts,
+    get_missed_dates_list
 )
 from salary.services.registration import (
     registration_user, sending_confirmation_link, confirmation_user_email,
@@ -254,6 +255,9 @@ class StaffArchiveWorkshiftsView(WorkingshiftPermissonsMixin, TitleMixin, ListVi
             ]),
             'workshift_dates': datetime.date(
                 self.kwargs.get('year'), self.kwargs.get('month'), 1
+            ),
+            'missed_dates': get_missed_dates_list(
+                self.object_list.dates('shift_date', 'day')
             ),
         })
 
