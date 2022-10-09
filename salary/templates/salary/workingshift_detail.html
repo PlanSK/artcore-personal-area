@@ -132,9 +132,9 @@
               <td>Поддержание чистоты</td>
               <td colspan="2">
               {% if work_shift.hall_cleaning %}
-              <i class="bi bi-check2-circle" style="color: green;"></i>
+              <i class="fa-solid fa-circle-check text-success"></i>
               {% else %}
-              <i class="bi bi-x-circle" style="color: red;"></i>
+              <i class="fa-solid fa-circle-xmark text-danger"></i>
               {% endif %}
               </td>
             </tr>
@@ -172,21 +172,21 @@
     <div class="row text-center">
       {% if perms.salary.advanced_change_workshift and perms.salary.delete_workingshift %}
       <div class="col">
-        <a title="Внести изменения" class="btn btn-secondary verysmall" href="{% url 'staff_edit_workshift' work_shift.slug %}?next={{ request.path }}">
-          <i class="bi bi-pencil-square" style="color: yellow;"></i>
+        <a title="Внести изменения" class="btn btn-warning verysmall text-dark" href="{% url 'staff_edit_workshift' work_shift.slug %}?next={{ request.path }}">
+          <i class="fa-solid fa-square-pen"></i>
           Внести изменения
         </a>
       </div>
       <div class="col">
-        <a title="Удалить смену" class="btn btn-secondary verysmall" href="{% url 'delete_workshift' work_shift.slug %}">
-          <i class="bi bi-x-square" style="color: red;"></i>
+        <a title="Удалить смену" class="btn btn-danger verysmall text-light" href="{% url 'delete_workshift' work_shift.slug %}">
+          <i class="fa-solid fa-square-xmark"></i>
           Удалить смену
         </a>
       </div>
       {% elif not work_shift.is_verified and perms.salary.change_workingshift %}
       <div class="col">
-        <a title="Внести изменения" class="btn btn-secondary verysmall" href="{% url 'edit_workshift' work_shift.slug %}?next={{ request.path }}">
-          <i class="bi bi-pencil-square" style="color: yellow;"></i>
+        <a title="Внести изменения" class="btn btn-warning verysmall text-dark" href="{% url 'edit_workshift' work_shift.slug %}?next={{ request.path }}">
+          <i class="fa-solid fa-square-pen"></i>
           Внести изменения
         </a>
       </div>
