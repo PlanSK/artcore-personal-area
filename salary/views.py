@@ -1108,18 +1108,18 @@ class StaffCalendarListView(ListView):
         return context
 
 
-class AwardRatingView(TemplateView):
+class AwardRatingView(MonthlyReportListView):
     template_name: str = 'salary/award_rating.html'
-
-    def dispatch(self, request: HttpRequest,
-                 *args: Any, **kwargs: Any) -> HttpResponse:
-        self.award_data = get_awards_data(9, 2022)
-        return super().dispatch(request, *args, **kwargs)
+    title = 'Рейтинговый отчёт'
 
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
         context = super().get_context_data(**kwargs)
-        context.update({'award_data': self.award_data})
+        context.update({
+            'award_data': get_awards_data(month=self.month, year=self.year),
+            'current_date': datetime.date(self.year, self.month, 1),
+        })
         return context
+
 
 def page_not_found(request, exception):
     response = render(request, 'salary/404.html', {'title': 'Page not found'})

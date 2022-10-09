@@ -147,7 +147,7 @@ def get_employee_workshift_data_list(
             employee=workshift.hall_admin,
             earnings_data=workshift.hall_admin_earnings,
             game_zone_revenue=workshift.game_zone_subtotal,
-            hookah_revenue=workshift.bar_revenue
+            hookah_revenue=workshift.hookah_revenue
         )
         hall_admin_list.append(hall_admin_earnings_data)
         cashiers_list.append(cashier_earnings_data)
@@ -208,30 +208,29 @@ def get_monthly_report(month: int, year: int) -> MonthlyData:
 def get_awards_data(month: int, year: int) -> AwardData:
     workshifts = get_queryset_data(month=month, year=year)
     categories_list = get_employee_workshift_data_list(workshifts)
-    bar_max_revenue = max([
-        employee.summary_bar_revenue 
-        for employee in categories_list.cashier_list
-        if employee.shift_counter >= 4
-    ])
-    hookah_max_revenue = max([
-        employee.summary_hookah_revenue 
-        for employee in categories_list.hall_admin_list
-        if employee.shift_counter >= 4
-    ])
-    hall_admin_max_gamezone_revenue = max([
-        employee.average_gamezone_revenue
-        for employee in categories_list.hall_admin_list
-        if employee.shift_counter >= 4
-    ])
-    cash_admin_max_gamezone_revenue = max([
-        employee.average_gamezone_revenue
-        for employee in categories_list.cashier_list
-        if employee.shift_counter >= 4
-    ])
+    bar_max_revenue = 0.0
+    cash_admin_max_gamezone_revenue = 0.0
+    for employee in filter(lambda x: x.shift_counter >= 4,
+                           categories_list.cashier_list):
+        if bar_max_revenue < employee.summary_bar_revenue:
+            bar_max_revenue = employee.summary_bar_revenue
+        if cash_admin_max_gamezone_revenue < employee.average_gamezone_revenue:
+            cash_admin_max_gamezone_revenue = employee.average_gamezone_revenue
+
+    hookah_max_revenue = 0.0
+    hall_admin_max_gamezone_revenue = 0.0
+    for employee in filter(lambda x: x.shift_counter >= 4,
+                           categories_list.hall_admin_list):
+        if hookah_max_revenue < employee.summary_hookah_revenue:
+            hookah_max_revenue = employee.summary_hookah_revenue
+        if hall_admin_max_gamezone_revenue < employee.average_gamezone_revenue:
+            hall_admin_max_gamezone_revenue = employee.average_gamezone_revenue
+
     categories_list.cashier_list.sort(key=lambda x: x.summary_bar_revenue,
                                       reverse=True)
-    categories_list.hall_admin_list.sort(key=lambda x: x.summary_hookah_revenue,
-                                      reverse=True)
+    categories_list.hall_admin_list.sort(
+        key=lambda x: x.summary_hookah_revenue, reverse=True
+    )
     return AwardData(
         cashiers_list=categories_list.cashier_list,
         hall_admin_list=categories_list.hall_admin_list,

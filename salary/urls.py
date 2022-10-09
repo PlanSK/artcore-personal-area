@@ -59,5 +59,5 @@ urlpatterns = [
     path('staff_schedule_list/', StaffCalendarListView.as_view(), name='staff_schedule_list'),
     path('staff_calendar/<int:pk>/<int:year>/<int:month>/', StaffCalendarView.as_view(), name='staff_calendar'),
     path('authentication/<int:pk>/', ProfileAuthenticationView.as_view(), name='authentication'),
-    path('award_rating/', AwardRatingView.as_view(), name='award_rating'),
+    path('award_rating/<int:year>/<int:month>/', AwardRatingView.as_view(), name='award_rating'),
 ]

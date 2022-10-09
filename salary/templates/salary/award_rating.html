@@ -2,74 +2,77 @@
 {% load salary_tags %}
 
 {% block data %}
-<div class="row row-cols-md-3 row-cols-1 g-3 border-top">
- <table class="table table-dark verysmall">
-  <thead class="text-warning text-center verysmall">
-    <tr>
-      <th>Сотрудник</th>
-      <th>Количество смен</th>
-      <th>Суммарная выручка по бару / по кальянам</th>
-      <th>Средняя выручка по КНА</th>
-    </tr>
-  </thead>
-  <tbody class="text-center verysmall">
-    <tr><td colspan="4" class="bg-dark bg-gradient">Кассиры</td></tr>
-  {% for employee in award_data.cashiers_list %}
-    {% if employee.shift_counter >= 4 %}
-    <tr>
-      <td>{{employee.employee.get_full_name}}</td>
-      <td>{{employee.shift_counter}}</td>
-      {% if employee.summary_bar_revenue == award_data.max_bar_revenue_sum %}
-      <td class="bg-warning text-dark"><i class="fa-solid fa-award"></i>
-      {% else %}
-      <td>
-      {% endif %}
-      {{employee.summary_bar_revenue}}</td>
-      {% if employee.average_gamezone_revenue == award_data.max_cashier_game_zone_avg_revenue %}
-      <td class="bg-warning text-dark"><i class="fa-solid fa-award"></i>
-      {% else %}
-      <td>
-      {% endif %}
-      {{employee.average_gamezone_revenue}}</td>
-    </tr>
-    {% else %}
-    <tr class="text-muted">
-      <td>{{employee.employee.get_full_name}}</td>
-      <td>{{employee.shift_counter}}</td>
-      <td>{{employee.summary_bar_revenue}}</td>
-      <td>{{employee.average_gamezone_revenue}}</td>
-    </tr>
-    {% endif %}
-  {% endfor %}
-  <tr><td colspan="4" class="bg-dark bg-gradient">Админы</td></tr>
-  {% for employee in award_data.hall_admin_list %}
-    {% if employee.shift_counter >= 4 %}
-    <tr>
-      <td>{{employee.employee.get_full_name}}</td>
-      <td>{{employee.shift_counter}}</td>
-      {% if employee.summary_hookah_revenue == award_data.max_hookah_revenue_sum %}
-      <td class="bg-warning text-dark"><i class="fa-solid fa-award"></i>
-      {% else %}
-      <td>
-      {% endif %}
-      {{employee.summary_hookah_revenue}}</td>
-      {% if employee.average_gamezone_revenue == award_data.max_hall_admin_game_zone_avg_revenue %}
-      <td class="bg-warning text-dark"><i class="fa-solid fa-award"></i>
-      {% else %}
-      <td>
-      {% endif %}
-      {{employee.average_gamezone_revenue}}</td>
-    </tr>
-    {% else %}
-    <tr class="text-muted">
-      <td>{{employee.employee.get_full_name}}</td>
-      <td>{{employee.shift_counter}}</td>
-      <td>{{employee.summary_hookah_revenue}}</td>
-      <td>{{employee.average_gamezone_revenue}}</td>
-    </tr>
-    {% endif %}
-  {% endfor %}
-  </tbody>
- </table>
+<div class="row justify-content-center border-top">
+  <div class="col-md-12 col-sm-suto table-responsive">
+    <p class="text-center verysmall">{{ title }} за {{ current_date|date:"F" }}</p>
+    <table class="table table-dark verysmall">
+      <thead class="text-warning text-center verysmall">
+        <tr>
+          <th>Сотрудник</th>
+          <th>Количество смен</th>
+          <th>Суммарная выручка по бару / по кальянам</th>
+          <th>Средняя выручка по КНА</th>
+        </tr>
+      </thead>
+      <tbody class="text-center verysmall">
+        <tr><td colspan="4" class="bg-dark bg-gradient">Кассиры</td></tr>
+      {% for employee in award_data.cashiers_list %}
+        {% if employee.shift_counter >= 4 %}
+        <tr>
+          <td>{{employee.employee.get_full_name}}</td>
+          <td>{{employee.shift_counter}}</td>
+          {% if employee.summary_bar_revenue == award_data.max_bar_revenue_sum %}
+          <td class="bg-warning text-dark"><i class="fa-solid fa-award"></i>
+          {% else %}
+          <td>
+          {% endif %}
+          {{employee.summary_bar_revenue}}</td>
+          {% if employee.average_gamezone_revenue == award_data.max_cashier_game_zone_avg_revenue %}
+          <td class="bg-warning text-dark"><i class="fa-solid fa-award"></i>
+          {% else %}
+          <td>
+          {% endif %}
+          {{employee.average_gamezone_revenue}}</td>
+        </tr>
+        {% else %}
+        <tr class="text-muted">
+          <td>{{employee.employee.get_full_name}}</td>
+          <td>{{employee.shift_counter}}</td>
+          <td>{{employee.summary_bar_revenue}}</td>
+          <td>{{employee.average_gamezone_revenue}}</td>
+        </tr>
+        {% endif %}
+      {% endfor %}
+        <tr><td colspan="4" class="bg-dark bg-gradient">Админы</td></tr>
+      {% for employee in award_data.hall_admin_list %}
+        {% if employee.shift_counter >= 4 %}
+        <tr>
+          <td>{{employee.employee.get_full_name}}</td>
+          <td>{{employee.shift_counter}}</td>
+          {% if employee.summary_hookah_revenue and employee.summary_hookah_revenue == award_data.max_hookah_revenue_sum %}
+          <td class="bg-warning text-dark"><i class="fa-solid fa-award"></i>
+          {% else %}
+          <td>
+          {% endif %}
+          {{employee.summary_hookah_revenue|default:"-"}}</td>
+          {% if employee.average_gamezone_revenue == award_data.max_hall_admin_game_zone_avg_revenue %}
+          <td class="bg-warning text-dark"><i class="fa-solid fa-award"></i>
+          {% else %}
+          <td>
+          {% endif %}
+          {{employee.average_gamezone_revenue}}</td>
+        </tr>
+        {% else %}
+        <tr class="text-muted">
+          <td>{{employee.employee.get_full_name}}</td>
+          <td>{{employee.shift_counter}}</td>
+          <td>{{employee.summary_hookah_revenue}}</td>
+          <td>{{employee.average_gamezone_revenue}}</td>
+        </tr>
+        {% endif %}
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>
 {% endblock %}
