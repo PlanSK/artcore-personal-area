@@ -27,19 +27,19 @@
           <td>
           {% endif %}
           {{employee.summary_bar_revenue}}</td>
-          {% if employee.average_gamezone_revenue == award_data.max_cashier_game_zone_avg_revenue %}
+          {% if employee.average_revenue == award_data.max_cashier_avg_revenue %}
           <td class="bg-warning text-dark"><i class="fa-solid fa-award"></i>
           {% else %}
           <td>
           {% endif %}
-          {{employee.average_gamezone_revenue}}</td>
+          {{employee.average_revenue}}</td>
         </tr>
         {% else %}
         <tr class="text-muted">
           <td>{{employee.employee.get_full_name}}</td>
           <td>{{employee.shift_counter}}</td>
           <td>{{employee.summary_bar_revenue}}</td>
-          <td>{{employee.average_gamezone_revenue}}</td>
+          <td>{{employee.average_revenue}}</td>
         </tr>
         {% endif %}
       {% endfor %}
@@ -55,19 +55,19 @@
           <td>
           {% endif %}
           {{employee.summary_hookah_revenue|default:"-"}}</td>
-          {% if employee.average_gamezone_revenue == award_data.max_hall_admin_game_zone_avg_revenue %}
+          {% if employee.average_revenue == award_data.max_hall_admin_avg_revenue %}
           <td class="bg-warning text-dark"><i class="fa-solid fa-award"></i>
           {% else %}
           <td>
           {% endif %}
-          {{employee.average_gamezone_revenue}}</td>
+          {{employee.average_revenue}}</td>
         </tr>
         {% else %}
         <tr class="text-muted">
           <td>{{employee.employee.get_full_name}}</td>
           <td>{{employee.shift_counter}}</td>
           <td>{{employee.summary_hookah_revenue}}</td>
-          <td>{{employee.average_gamezone_revenue}}</td>
+          <td>{{employee.average_revenue}}</td>
         </tr>
         {% endif %}
       {% endfor %}

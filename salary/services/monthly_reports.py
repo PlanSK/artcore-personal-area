@@ -13,7 +13,7 @@ class EmployeeData(NamedTuple):
     bonus_revenues: float
     shortage: float
     penalty: float
-    average_gamezone_revenue: float
+    average_revenue: float
     summary_bar_revenue: float
     summary_hookah_revenue: float
 
@@ -37,13 +37,13 @@ class AwardData(NamedTuple):
     hall_admin_list: list
     max_bar_revenue_sum: float
     max_hookah_revenue_sum: float
-    max_cashier_game_zone_avg_revenue: float
-    max_hall_admin_game_zone_avg_revenue: float
+    max_cashier_avg_revenue: float
+    max_hall_admin_avg_revenue: float
 
 
 def get_employee_data(employee: User,
                       earnings_data: Earnings,
-                      game_zone_revenue: float,
+                      summary_revenue: float,
                       bar_revenue: float = 0.0,
                       hookah_revenue: float = 0.0,
                       ) -> EmployeeData:
@@ -54,7 +54,7 @@ def get_employee_data(employee: User,
         bonus_revenues=earnings_data.bonus_part.summary,
         shortage=earnings_data.shortage,
         penalty=earnings_data.penalty,
-        average_gamezone_revenue=game_zone_revenue,
+        average_revenue=summary_revenue,
         summary_bar_revenue=bar_revenue,
         summary_hookah_revenue=hookah_revenue,
     )
@@ -74,8 +74,8 @@ def get_summary_employees_list(
                 data['bonus_part'].append(employee_data.bonus_revenues)
                 data['shortage'].append(employee_data.shortage)
                 data['penalty'].append(employee_data.penalty)
-                data['game_zone_revenues'].append(
-                    employee_data.average_gamezone_revenue
+                data['revenue'].append(
+                    employee_data.average_revenue
                 )
                 data['bar_revenues'].append(employee_data.summary_bar_revenue)
                 data['hookah_revenues'].append(
@@ -87,8 +87,8 @@ def get_summary_employees_list(
                     'bonus_part': [employee_data.bonus_revenues],
                     'shortage': [employee_data.shortage],
                     'penalty': [employee_data.penalty],
-                    'game_zone_revenues': [
-                        employee_data.average_gamezone_revenue
+                    'revenue': [
+                        employee_data.average_revenue
                     ],
                     'bar_revenues': [employee_data.summary_bar_revenue],
                     'hookah_revenues': [employee_data.summary_hookah_revenue],
@@ -97,8 +97,8 @@ def get_summary_employees_list(
         employee_shift_counter = len(
             employee_data_dict[employee].get('basic_part')
         )
-        summary_game_zone_revenues = sum(
-            employee_data_dict[employee].get('game_zone_revenues')
+        summary_revenues = sum(
+            employee_data_dict[employee].get('revenue')
         )
         current_employee_data = EmployeeData(
             employee=employee,
@@ -113,8 +113,8 @@ def get_summary_employees_list(
                 sum(employee_data_dict[employee].get('shortage')), 2
             ),
             penalty=round(sum(employee_data_dict[employee].get('penalty')), 2),
-            average_gamezone_revenue=round(
-                summary_game_zone_revenues / employee_shift_counter, 2
+            average_revenue=round(
+                summary_revenues / employee_shift_counter, 2
             ),
             summary_bar_revenue=round(
                 sum(employee_data_dict[employee].get('bar_revenues')), 2
@@ -137,16 +137,17 @@ def get_employee_workshift_data_list(
 
     for workshift in workshifts:
         all_workshifts_counter += 1
+        summary_revenue = workshift.game_zone_subtotal + workshift.vr_revenue
         cashier_earnings_data = get_employee_data(
             employee=workshift.cash_admin,
             earnings_data=workshift.cashier_earnings,
-            game_zone_revenue=workshift.game_zone_subtotal,
+            summary_revenue=summary_revenue,
             bar_revenue=workshift.bar_revenue
         )
         hall_admin_earnings_data = get_employee_data(
             employee=workshift.hall_admin,
             earnings_data=workshift.hall_admin_earnings,
-            game_zone_revenue=workshift.game_zone_subtotal,
+            summary_revenue=summary_revenue,
             hookah_revenue=workshift.hookah_revenue
         )
         hall_admin_list.append(hall_admin_earnings_data)
@@ -209,22 +210,22 @@ def get_awards_data(month: int, year: int) -> AwardData:
     workshifts = get_queryset_data(month=month, year=year)
     categories_list = get_employee_workshift_data_list(workshifts)
     bar_max_revenue = 0.0
-    cash_admin_max_gamezone_revenue = 0.0
+    cash_admin_max_avg_revenue = 0.0
     for employee in filter(lambda x: x.shift_counter >= 4,
                            categories_list.cashier_list):
         if bar_max_revenue < employee.summary_bar_revenue:
             bar_max_revenue = employee.summary_bar_revenue
-        if cash_admin_max_gamezone_revenue < employee.average_gamezone_revenue:
-            cash_admin_max_gamezone_revenue = employee.average_gamezone_revenue
+        if cash_admin_max_avg_revenue < employee.average_revenue:
+            cash_admin_max_avg_revenue = employee.average_revenue
 
     hookah_max_revenue = 0.0
-    hall_admin_max_gamezone_revenue = 0.0
+    hall_admin_max_avg_revenue = 0.0
     for employee in filter(lambda x: x.shift_counter >= 4,
                            categories_list.hall_admin_list):
         if hookah_max_revenue < employee.summary_hookah_revenue:
             hookah_max_revenue = employee.summary_hookah_revenue
-        if hall_admin_max_gamezone_revenue < employee.average_gamezone_revenue:
-            hall_admin_max_gamezone_revenue = employee.average_gamezone_revenue
+        if hall_admin_max_avg_revenue < employee.average_revenue:
+            hall_admin_max_avg_revenue = employee.average_revenue
 
     categories_list.cashier_list.sort(key=lambda x: x.summary_bar_revenue,
                                       reverse=True)
@@ -236,6 +237,6 @@ def get_awards_data(month: int, year: int) -> AwardData:
         hall_admin_list=categories_list.hall_admin_list,
         max_bar_revenue_sum=bar_max_revenue,
         max_hookah_revenue_sum=hookah_max_revenue,
-        max_cashier_game_zone_avg_revenue=cash_admin_max_gamezone_revenue,
-        max_hall_admin_game_zone_avg_revenue=hall_admin_max_gamezone_revenue,
+        max_cashier_avg_revenue=cash_admin_max_avg_revenue,
+        max_hall_admin_avg_revenue=hall_admin_max_avg_revenue,
     )
