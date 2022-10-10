@@ -225,8 +225,8 @@ def get_current_earnings(employee: User,
         final_earnings = round(final_earnings - workshift_data.shortage * 2, 2)
 
     return Earnings(
-        basic_part=basic_part, bonus_part=bonus_part, 
-        penalty=penalty, shortage=shortage, retention=retention, 
+        basic_part=basic_part, bonus_part=bonus_part,
+        penalty=penalty, shortage=shortage, retention=retention,
         estimated_earnings=estimated_earnings, before_shortage=before_shortage,
         final_earnings=final_earnings
     )
