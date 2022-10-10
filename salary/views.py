@@ -32,7 +32,7 @@ from salary.services.filesystem import (
     get_employee_documents_urls, document_file_handler,
     delete_document_from_storage
 )
-from salary.services.monthly_reports import get_monthly_report
+from salary.services.monthly_reports import get_monthly_report, get_awards_data
 
 logger = logging.getLogger(__name__)
 
@@ -1108,6 +1108,19 @@ class StaffCalendarListView(ListView):
         context = super().get_context_data(**kwargs)
         context.update({
             'date': datetime.date.today()
+        })
+        return context
+
+
+class AwardRatingView(MonthlyReportListView):
+    template_name: str = 'salary/award_rating.html'
+    title = 'Рейтинговый отчёт'
+
+    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'award_data': get_awards_data(month=self.month, year=self.year),
+            'current_date': datetime.date(self.year, self.month, 1),
         })
         return context
 
