@@ -221,20 +221,33 @@ class StaffWorkshiftsView(WorkingshiftPermissonsMixin, TitleMixin, ListView):
     template_name = 'salary/staff_workshifts_view.html'
     model = WorkingShift
     title = 'Смены'
-    paginate_by = 10
 
     def get_queryset(self):
-        workshifts = WorkingShift.objects.filter(
-            is_verified=False
-        ).select_related('hall_admin', 'cash_admin')
-
+        workshifts = WorkingShift.objects.select_related('hall_admin',
+                                                         'cash_admin')
         return workshifts
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        year = datetime.date.today().year
+        month = datetime.date.today().month
+        current_month_workshifts_dates = self.object_list.filter(
+            shift_date__month=month,
+            shift_date__year=year).dates('shift_date', 'day')
+        context.update({
+            'workshift_list': self.object_list.filter(is_verified=False),
+            'missed_workshifts_dates': get_missed_dates_list(
+                current_month_workshifts_dates
+            ),
+        })
+        return context
 
 
 class StaffArchiveWorkshiftsView(WorkingshiftPermissonsMixin, TitleMixin, ListView):
     template_name = 'salary/staff_workshifts_view.html'
     model = WorkingShift
     title = 'Смены'
+    context_object_name = 'workshift_list'
 
     def get_queryset(self):
         if self.kwargs.get('year') and self.kwargs.get('month'):
@@ -256,7 +269,7 @@ class StaffArchiveWorkshiftsView(WorkingshiftPermissonsMixin, TitleMixin, ListVi
             'workshift_dates': datetime.date(
                 self.kwargs.get('year'), self.kwargs.get('month'), 1
             ),
-            'missed_dates': get_missed_dates_list(
+            'missed_workshifts_dates': get_missed_dates_list(
                 self.object_list.dates('shift_date', 'day')
             ),
         })

@@ -5,21 +5,15 @@
 <div class="col border-top">
   <div class="row justify-content-center mt-2">
     <div class="col text-end">
-      {% if missed_dates %}
+      {% if missed_workshifts_dates %}
       <div class="row justify-content-center">
         <div class="col-md-4 col-sm-auto">
-          <div class="alert alert-warning verysmall" role="alert">
-            <div class="row">
-              <div class="col d-flex align-items-center text-center">
-                <i class="fa-solid fa-triangle-exclamation"></i>&nbsp;
-                Обнаружены пропущенные смены:
-              </div>
-              <div class="col-md-3 text-start">
-                  {% for day in missed_dates %}
-                  {{ day|date:"j E" }}<br>
-                  {% endfor %}
-              </div>
-            </div>
+          <div class="alert alert-warning verysmall text-center" role="alert">
+            <i class="fa-solid fa-triangle-exclamation"></i>&nbsp;
+            Обнаружены пропущенные смены:<br>
+            {% for day in missed_workshifts_dates %}
+            {{ day|date:"j E" }}&nbsp;
+            {% endfor %}
           </div>
         </div>
       </div>
@@ -30,14 +24,14 @@
     </div>
   </div>
   <div class="row justify-content-center">
-    {% if object_list %}
+    {% if workshift_list %}
     <div class="col col-md-5 col-sm-auto">
       {% if summary_revenue %}
       <h5 class="text-center">Смены за {{ workshift_dates | date:"F Y г." }}</h5>
       {% endif %}
-      {% if object_list %}
+      {% if workshift_list %}
       <ul class="list-group">
-        {% for workshift in object_list %}
+        {% for workshift in workshift_list %}
         {% if workshift.is_verified %}
         <li class="list-group-item list-group-item-action list-group-item-success m-1 rounded">
         {% else %}
@@ -105,42 +99,10 @@
     <h5 class="text-info text-center">Все проверено <i class="fa-solid fa-thumbs-up"></i></h5>
     {% endif %}
   </div>
-  {% if is_paginated %}
-  <div class="row border-bottom m-2">
-    <div class="col">
-        <ul class="pagination pagination-sm justify-content-center">
-            {% if page_obj.has_previous %}
-          <li class="page-item">
-            <a href="?page={{ page_obj.previous_page_number }}" class="page-link">Назад</a>
-            {% else %}
-          <li class="page-item disabled">
-            <span class="page-link">Назад</span>
-            {% endif %}
-          </li>
-            {% for page_num in paginator.page_range %}
-            {% if page_num == page_obj.number %}
-          <li class="page-item active" aria-current="page">
-            <span class="page-link">{{ page_obj.number }}</span>
-          </li>
-            {% else %}
-          <li class="page-item"><a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a></li>
-            {% endif %}
-            {% endfor %}
-            {% if page_obj.has_next %}
-          <li class="page-item">
-            {% else %}
-          <li class="page-item disabled">
-            {% endif %}
-            <a href="?page={{ page_obj.next_page_number }}" class="page-link">Вперёд</a>
-          </li>
-        </ul>
-    </div>
-  </div>
-  {% endif %}
   {% if summary_revenue %}
   <div class="row justify-content-center m-2">
     <div class="col-md-2 col-sm-auto text-center border rounded">
-      <i class="fa-solid fa-calendar-check"></i>&nbsp;<b>{{ object_list.count }}</b>
+      <i class="fa-solid fa-calendar-check"></i>&nbsp;<b>{{ workshift_list.count }}</b>
     </div>
     <div class="col-md-2 col-sm-auto text-center border rounded">
       <i class="fa-solid fa-coins"></i>&nbsp;<b>{{ summary_revenue | intcomma }}</b>
