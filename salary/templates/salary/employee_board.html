@@ -42,7 +42,21 @@
         </div>
       </div>
       {% endif %}
-
+      <div class="row">
+        <div class="col text-center">
+          {% if is_bar_leader and is_avg_leader or is_hookah_leader and is_avg_leader%}
+          <span class="badge bg-success"><i class="fa-solid fa-award fa-fade"></i> Вы являетесь абсолютным лидером! <i class="fa-solid fa-award fa-fade"></i></span>
+          {% elif is_bar_leader %}
+          <span class="badge bg-success"><i class="fa-solid fa-award"></i> Вы лидер в категории "Бар"</span>
+          {% elif is_hookah_leader %}
+          <span class="badge bg-success"><i class="fa-solid fa-award"></i> Вы лидер в категории "Кальян"</span>
+          {% elif is_avg_leader %}
+          <span class="badge bg-success"><i class="fa-solid fa-award"></i> Вы лидер по средней выручке</span>
+          {% else %}
+          <span class="badge bg-secondary"><i class="fa-regular fa-face-frown-open"></i> Вы не являетесь лидером</span>
+          {% endif %}
+        </div>
+      </div>
       <div class="row m-3">
         <div class="col">
           <div class="row row-cols-md-4 row-cols-sm-1 justify-content-center">

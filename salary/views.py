@@ -727,6 +727,29 @@ class IndexEmployeeView(ProfileStatusRedirectMixin, TitleMixin, ListView):
             date=datetime.date.today()
         )
 
+        employee = self.request.user
+        is_bar_leader = False
+        is_hookah_leader = False
+        is_avg_leader = False
+        award_data = get_awards_data(
+            month=datetime.date.today().month,
+            year=datetime.date.today().year
+        )
+
+        if (award_data.bar_leader
+                and award_data.bar_leader.leader.employee == employee):
+            is_bar_leader = True
+        elif (award_data.hookah_leader
+                and award_data.hookah_leader.employee == employee):
+            is_hookah_leader = True
+
+        if (award_data.cashiers_leader
+                and award_data.cashiers_leader.leader.employee == employee):
+            is_avg_leader = True
+        elif (award_data.hall_admins_leader
+                and award_data.hall_admins_leader.leader.employee == employee):
+            is_avg_leader = True
+
         context.update({
             'summary_earnings': self.get_summary_earnings(),
             'penalty_count': misconducts.count(),
@@ -736,6 +759,9 @@ class IndexEmployeeView(ProfileStatusRedirectMixin, TitleMixin, ListView):
             'shortage_sum': shortage_sum,
             'permission_to_close': permission_to_close,
             'notification_about_shift': notification_about_shift,
+            'is_bar_leader': is_bar_leader,
+            'is_hookah_leader': is_hookah_leader,
+            'is_avg_leader': is_avg_leader,
         })
         return context
 
