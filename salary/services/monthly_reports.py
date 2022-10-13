@@ -19,8 +19,8 @@ class EmployeeData(NamedTuple):
 
 
 class EmployeeCategories(NamedTuple):
-    cashier_list: list
-    hall_admin_list: list
+    cashier_list: list[EmployeeData]
+    hall_admin_list: list[EmployeeData]
 
 
 class MonthlyData(NamedTuple):
@@ -32,13 +32,18 @@ class MonthlyData(NamedTuple):
     summary_all_penalties: float
 
 
+class Leader(NamedTuple):
+    leader: EmployeeData
+    total_sum: float
+
+
 class AwardData(NamedTuple):
-    cashiers_list: list
-    hall_admin_list: list
-    max_bar_revenue_sum: float
-    max_hookah_revenue_sum: float
-    max_cashier_avg_revenue: float
-    max_hall_admin_avg_revenue: float
+    cashiers_list: list[EmployeeData]
+    hall_admin_list: list[EmployeeData]
+    bar_leader: Leader | None
+    hookah_leader: Leader | None
+    cashiers_leader: Leader | None
+    hall_admins_leader: Leader | None
 
 
 def get_employee_data(employee: User,
@@ -209,34 +214,58 @@ def get_monthly_report(month: int, year: int) -> MonthlyData:
 def get_awards_data(month: int, year: int) -> AwardData:
     workshifts = get_queryset_data(month=month, year=year)
     categories_list = get_employee_workshift_data_list(workshifts)
+
+    bar_current_leader = None
     bar_max_revenue = 0.0
+    cashier_current_leader = None
     cash_admin_max_avg_revenue = 0.0
+
     for employee in filter(lambda x: x.shift_counter >= 4,
                            categories_list.cashier_list):
         if bar_max_revenue < employee.summary_bar_revenue:
             bar_max_revenue = employee.summary_bar_revenue
+            bar_current_leader = Leader(
+                leader=employee,
+                total_sum=employee.summary_bar_revenue
+            )
         if cash_admin_max_avg_revenue < employee.average_revenue:
             cash_admin_max_avg_revenue = employee.average_revenue
+            cashier_current_leader = Leader(
+                leader=employee,
+                total_sum=employee.average_revenue
+            )
 
+    hookah_current_leader = None
     hookah_max_revenue = 0.0
+    hall_admins_current_leader = None
     hall_admin_max_avg_revenue = 0.0
     for employee in filter(lambda x: x.shift_counter >= 4,
                            categories_list.hall_admin_list):
         if hookah_max_revenue < employee.summary_hookah_revenue:
             hookah_max_revenue = employee.summary_hookah_revenue
+            hookah_current_leader = Leader(
+                leader=employee,
+                total_sum=employee.summary_hookah_revenue
+            )
         if hall_admin_max_avg_revenue < employee.average_revenue:
             hall_admin_max_avg_revenue = employee.average_revenue
+            hall_admins_current_leader = Leader(
+                leader=employee,
+                total_sum=employee.average_revenue
+            )
 
-    categories_list.cashier_list.sort(key=lambda x: x.summary_bar_revenue,
-                                      reverse=True)
+    categories_list.cashier_list.sort(
+        key=lambda x: x.summary_bar_revenue, reverse=True
+    )
     categories_list.hall_admin_list.sort(
         key=lambda x: x.summary_hookah_revenue, reverse=True
     )
+
     return AwardData(
         cashiers_list=categories_list.cashier_list,
         hall_admin_list=categories_list.hall_admin_list,
-        max_bar_revenue_sum=bar_max_revenue,
-        max_hookah_revenue_sum=hookah_max_revenue,
-        max_cashier_avg_revenue=cash_admin_max_avg_revenue,
-        max_hall_admin_avg_revenue=hall_admin_max_avg_revenue,
+        bar_leader=bar_current_leader,
+        hookah_leader=hookah_current_leader,
+        cashiers_leader=cashier_current_leader,
+        hall_admins_leader=hall_admins_current_leader
     )
