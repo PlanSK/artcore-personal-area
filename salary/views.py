@@ -740,7 +740,7 @@ class IndexEmployeeView(ProfileStatusRedirectMixin, TitleMixin, ListView):
                 and award_data.bar_leader.leader.employee == employee):
             is_bar_leader = True
         elif (award_data.hookah_leader
-                and award_data.hookah_leader.employee == employee):
+                and award_data.hookah_leader.leader.employee == employee):
             is_hookah_leader = True
 
         if (award_data.cashiers_leader
