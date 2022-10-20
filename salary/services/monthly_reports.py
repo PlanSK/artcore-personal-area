@@ -54,10 +54,8 @@ class Category(NamedTuple):
 
 
 class Rating(NamedTuple):
-    bar: Category
-    hookah: Category
-    cashier_avg: Category
-    hall_admin_avg: Category
+    special_rating: Category
+    common_rating: Category
 
 
 def get_employee_data(employee: User,
@@ -310,18 +308,26 @@ def get_categories_from_list(employee_list: list) -> Category:
                 raise ValueError(f'Unknown data error in {employee_list}')
 
 
-def get_rating_data(award_data: AwardData) -> Rating:
-    bar_rating = get_categories_from_list(award_data.cashiers_list)
-    hookah_rating = get_categories_from_list(award_data.hall_admin_list)
-    cashiers_revenue = sorted(
-        award_data.cashiers_list, key=lambda x: x.average_revenue
-    )
-    hall_admins_revenue = sorted(
-        award_data.hall_admin_list, key=lambda x: x.average_revenue
-    )
-    cashiers_rating = get_categories_from_list(cashiers_revenue)
-    hall_admins_rating = get_categories_from_list(hall_admins_revenue)
-    return Rating(
-        bar=bar_rating, hookah=hookah_rating, cashier_avg=cashiers_rating,
-        hall_admin_avg=hall_admins_rating
-    )
+def get_rating_data(award_data: AwardData, username: str) -> Rating:
+    if filter(lambda x: x.employee.username == username,
+                award_data.cashiers_list):
+        bar_rating = get_categories_from_list(award_data.cashiers_list)
+        cashiers_revenue = sorted(
+            award_data.cashiers_list, key=lambda x: x.average_revenue
+        )
+        cashiers_rating = get_categories_from_list(cashiers_revenue)
+        return Rating(
+            special_rating=bar_rating,
+            common_rating=cashiers_rating
+        )
+    elif filter(lambda x: x.employee.username == username,
+                award_data.hall_admins_list):
+        hookah_rating = get_categories_from_list(award_data.hall_admin_list)
+        hall_admins_revenue = sorted(
+            award_data.hall_admin_list, key=lambda x: x.average_revenue
+        )
+        hall_admins_rating = get_categories_from_list(hall_admins_revenue)
+        return Rating(
+            special_rating=hookah_rating,
+            common_rating=hall_admins_rating
+        )

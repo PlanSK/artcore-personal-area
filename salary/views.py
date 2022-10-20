@@ -751,7 +751,7 @@ class IndexEmployeeView(ProfileStatusRedirectMixin, TitleMixin, ListView):
         elif (award_data.hall_admins_leader
                 and award_data.hall_admins_leader.leader.employee == employee):
             is_avg_leader = True
-        rating = get_rating_data(award_data)
+        rating = get_rating_data(award_data, self.request.user.username)
 
         context.update({
             'summary_earnings': self.get_summary_earnings(),
