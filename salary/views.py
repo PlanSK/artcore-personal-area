@@ -32,7 +32,9 @@ from salary.services.filesystem import (
     get_employee_documents_urls, document_file_handler,
     delete_document_from_storage
 )
-from salary.services.monthly_reports import get_monthly_report, get_awards_data
+from salary.services.monthly_reports import (
+    get_monthly_report, get_awards_data, get_rating_data
+)
 
 logger = logging.getLogger(__name__)
 
@@ -749,6 +751,7 @@ class IndexEmployeeView(ProfileStatusRedirectMixin, TitleMixin, ListView):
         elif (award_data.hall_admins_leader
                 and award_data.hall_admins_leader.leader.employee == employee):
             is_avg_leader = True
+        rating = get_rating_data(award_data)
 
         context.update({
             'summary_earnings': self.get_summary_earnings(),
@@ -762,6 +765,7 @@ class IndexEmployeeView(ProfileStatusRedirectMixin, TitleMixin, ListView):
             'is_bar_leader': is_bar_leader,
             'is_hookah_leader': is_hookah_leader,
             'is_avg_leader': is_avg_leader,
+            'rating': rating,
         })
         return context
 

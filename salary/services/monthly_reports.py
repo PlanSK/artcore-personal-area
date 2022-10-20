@@ -46,6 +46,20 @@ class AwardData(NamedTuple):
     hall_admins_leader: Leader | None
 
 
+class Category(NamedTuple):
+    first: EmployeeData | None
+    second: EmployeeData | None
+    third: EmployeeData | None
+    other: list
+
+
+class Rating(NamedTuple):
+    bar: Category
+    hookah: Category
+    cashier_avg: Category
+    hall_admin_avg: Category
+
+
 def get_employee_data(employee: User,
                       earnings_data: Earnings,
                       summary_revenue: float,
@@ -268,4 +282,46 @@ def get_awards_data(month: int, year: int) -> AwardData:
         hookah_leader=hookah_current_leader,
         cashiers_leader=cashier_current_leader,
         hall_admins_leader=hall_admins_current_leader
+    )
+
+
+def get_categories_from_list(employee_list: list) -> Category:
+    other = []
+    match employee_list:
+        case (first, second, third):
+            return Category(first=first, second=second,
+                            third=third, other=other)
+        case (first, second):
+            return Category(first=first, second=second,
+                            third=None, other=other)
+        case (first,):
+            return Category(first=first, second=None,
+                            third=None, other=other)
+        case ():
+            return Category(first=None, second=None,
+                            third=None, other=other)
+        case _:
+            if len(employee_list) > 3:
+                first, second, third = employee_list[:3]
+                other = employee_list[3:]
+                return Category(first=first, second=second,
+                                third=second, other=other)
+            else:
+                raise ValueError(f'Unknown data error in {employee_list}')
+
+
+def get_rating_data(award_data: AwardData) -> Rating:
+    bar_rating = get_categories_from_list(award_data.cashiers_list)
+    hookah_rating = get_categories_from_list(award_data.hall_admin_list)
+    cashiers_revenue = sorted(
+        award_data.cashiers_list, key=lambda x: x.average_revenue
+    )
+    hall_admins_revenue = sorted(
+        award_data.hall_admin_list, key=lambda x: x.average_revenue
+    )
+    cashiers_rating = get_categories_from_list(cashiers_revenue)
+    hall_admins_rating = get_categories_from_list(hall_admins_revenue)
+    return Rating(
+        bar=bar_rating, hookah=hookah_rating, cashier_avg=cashiers_rating,
+        hall_admin_avg=hall_admins_rating
     )
