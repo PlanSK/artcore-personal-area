@@ -7,33 +7,34 @@
     <div class="container">
       <div class="row m-2">
         <div class="col text-end">
-          # Если лидер
+          {% if is_leader %}
             <a class="btn btn-outline-success verysmall" data-bs-toggle="collapse" href="#expandRating" role="button" aria-expanded="false" aria-controls="expandRating">
               <i class="fa-solid fa-crown fa-xl fa-beat-fade"></i>
               <b>Вы - лидер рейтинга!</b>
-            </a><br><br>
-          # Если не лидер
+            </a>
+          {% else %}
             <a class="btn btn-outline-warning verysmall" data-bs-toggle="collapse" href="#expandRating" role="button" aria-expanded="false" aria-controls="expandRating">
               <i class="fa-solid fa-chart-column fa-xl"></i>
               <b>Текущий рейтинг</b>
             </a>
+          {% endif %}
         </div>
         <div class="collapse" id="expandRating">
           <div class="row justify-content-end mt-2">
             <div class="col-md-2 col-sm-auto text-center border rounded pb-2 m-1 border-secondary">
-              <span class="verysmall">Рейтинг по выручке бара</span><hr>
+              <span class="verysmall">Рейтинг<br> по категории</span><hr>
               <ol class="list-group list-group-numbered verysmall text-start">
-                <li class="list-group-item list-group-item-primary"><b>{{ request.user.get_full_name }}</b></li>
-                <li class="list-group-item list-group-item-success">A list item</li>
-                <li class="list-group-item list-group-item-dark">A list item</li>
+                <li class="list-group-item list-group-item-primary"><b>{{ rating.special_rating.first.employee.get_full_name }}</b></li>
+                <li class="list-group-item list-group-item-success">{{ rating.special_rating.second.employee.get_full_name }}</li>
+                <li class="list-group-item list-group-item-dark">{{ rating.special_rating.third.employee.get_full_name }}</li>
               </ol>
             </div>
             <div class="col-md-2 col-sm-auto text-center border rounded pb-2 m-1 border-secondary">
-              <span class="verysmall">Рейтинг по средней выручке</span><hr>
+              <span class="verysmall">Рейтинг<br> по средней выручке</span><hr>
               <ol class="list-group list-group-numbered verysmall text-start">
-                <li class="list-group-item list-group-item-primary"><b>{{ request.user.get_full_name }}</b></li>
-                <li class="list-group-item list-group-item-success">A list item</li>
-                <li class="list-group-item list-group-item-dark">A list item</li>
+                <li class="list-group-item list-group-item-primary"><b>{{ rating.common_rating.first.employee.get_full_name }}</b></li>
+                <li class="list-group-item list-group-item-success">{{ rating.common_rating.second.employee.get_full_name }}</li>
+                <li class="list-group-item list-group-item-dark">{{ rating.common_rating.third.employee.get_full_name }}</li>
               </ol>
             </div>
           </div>

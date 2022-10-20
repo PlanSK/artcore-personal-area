@@ -313,7 +313,9 @@ def get_rating_data(award_data: AwardData, username: str) -> Rating:
                 award_data.cashiers_list):
         bar_rating = get_categories_from_list(award_data.cashiers_list)
         cashiers_revenue = sorted(
-            award_data.cashiers_list, key=lambda x: x.average_revenue
+            award_data.cashiers_list,
+            key=lambda x: x.average_revenue,
+            reverse=True
         )
         cashiers_rating = get_categories_from_list(cashiers_revenue)
         return Rating(
@@ -324,7 +326,9 @@ def get_rating_data(award_data: AwardData, username: str) -> Rating:
                 award_data.hall_admins_list):
         hookah_rating = get_categories_from_list(award_data.hall_admin_list)
         hall_admins_revenue = sorted(
-            award_data.hall_admin_list, key=lambda x: x.average_revenue
+            award_data.hall_admin_list,
+            key=lambda x: x.average_revenue,
+            reverse=True
         )
         hall_admins_rating = get_categories_from_list(hall_admins_revenue)
         return Rating(
