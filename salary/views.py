@@ -730,7 +730,11 @@ class IndexEmployeeView(ProfileStatusRedirectMixin, TitleMixin, ListView):
         )
 
         employee = self.request.user
+        is_bar_leader = False
+        is_hookah_leader = False
+        is_avg_leader = False
         is_leader = False
+        is_absolute_leader = False
         award_data = get_awards_data(
             month=datetime.date.today().month,
             year=datetime.date.today().year
@@ -738,18 +742,23 @@ class IndexEmployeeView(ProfileStatusRedirectMixin, TitleMixin, ListView):
 
         if (award_data.bar_leader
                 and award_data.bar_leader.leader.employee == employee):
-            is_leader = True
+            is_bar_leader = True
         elif (award_data.hookah_leader
                 and award_data.hookah_leader.leader.employee == employee):
-            is_leader = True
+            is_hookah_leader = True
 
         if (award_data.cashiers_leader
                 and award_data.cashiers_leader.leader.employee == employee):
-            is_leader = True
+            is_avg_leader = True
         elif (award_data.hall_admins_leader
                 and award_data.hall_admins_leader.leader.employee == employee):
+            is_avg_leader = True
+        
+        if is_bar_leader or is_hookah_leader or is_avg_leader:
             is_leader = True
-        rating = get_rating_data(award_data, self.request.user.username)
+        elif is_bar_leader or is_hookah_leader and is_avg_leader:
+            is_absolute_leader = True
+        rating = get_rating_data(award_data, self.request.user.id)
 
         context.update({
             'summary_earnings': self.get_summary_earnings(),
@@ -760,6 +769,7 @@ class IndexEmployeeView(ProfileStatusRedirectMixin, TitleMixin, ListView):
             'shortage_sum': shortage_sum,
             'permission_to_close': permission_to_close,
             'notification_about_shift': notification_about_shift,
+            'is_absolute_leader': is_absolute_leader,
             'is_leader': is_leader,
             'rating': rating,
         })

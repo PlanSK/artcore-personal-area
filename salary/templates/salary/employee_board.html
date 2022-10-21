@@ -7,16 +7,21 @@
     <div class="container">
       <div class="row m-2">
         <div class="col text-end">
-          {% if is_leader %}
-            <a class="btn btn-outline-success verysmall" data-bs-toggle="collapse" href="#expandRating" role="button" aria-expanded="false" aria-controls="expandRating">
-              <i class="fa-solid fa-crown fa-xl fa-beat-fade"></i>
-              <b>Вы - лидер рейтинга!</b>
-            </a>
+          {% if is_absolute_leader %}
+          <a class="btn btn-outline-success verysmall" data-bs-toggle="collapse" href="#expandRating" role="button" aria-expanded="false" aria-controls="expandRating">
+            <i class="fa-solid fa-crown fa-xl fa-beat-fade"></i>
+            <b>Вы - абсолютный лидер!</b>
+          </a>
+          {% elif is_leader %}
+          <a class="btn btn-outline-success verysmall" data-bs-toggle="collapse" href="#expandRating" role="button" aria-expanded="false" aria-controls="expandRating">
+            <i class="fa-solid fa-trophy fa-xl fa-beat-fade"></i>
+            <b>Вы - лидер рейтинга!</b>
+          </a>
           {% else %}
-            <a class="btn btn-outline-warning verysmall" data-bs-toggle="collapse" href="#expandRating" role="button" aria-expanded="false" aria-controls="expandRating">
-              <i class="fa-solid fa-chart-column fa-xl"></i>
-              <b>Текущий рейтинг</b>
-            </a>
+          <a class="btn btn-outline-warning verysmall" data-bs-toggle="collapse" href="#expandRating" role="button" aria-expanded="false" aria-controls="expandRating">
+            <i class="fa-solid fa-chart-column fa-xl"></i>
+            <b>Текущий рейтинг</b>
+          </a>
           {% endif %}
         </div>
         <div class="collapse" id="expandRating">
@@ -24,17 +29,57 @@
             <div class="col-md-2 col-sm-auto text-center border rounded pb-2 m-1 border-secondary">
               <span class="verysmall">Рейтинг<br> по категории</span><hr>
               <ol class="list-group list-group-numbered verysmall text-start">
-                <li class="list-group-item list-group-item-primary"><b>{{ rating.special_rating.first.employee.get_full_name }}</b></li>
-                <li class="list-group-item list-group-item-success">{{ rating.special_rating.second.employee.get_full_name }}</li>
-                <li class="list-group-item list-group-item-dark">{{ rating.special_rating.third.employee.get_full_name }}</li>
+                <!-- first item -->
+                {% if rating.special_rating.first.employee.id == user.id %}
+                <li class="list-group-item list-group-item-primary" style="font-weight: bold;">
+                {% else %}
+                <li class="list-group-item list-group-item-primary">
+                {% endif %}
+                  {{ rating.special_rating.first.employee.get_full_name }}</li>
+
+                <!-- second item -->
+                {% if rating.special_rating.second.employee.id == user.id %}
+                <li class="list-group-item list-group-item-success" style="font-weight: bold;">
+                {% else %}
+                <li class="list-group-item list-group-item-success">
+                {% endif %}
+                  {{ rating.special_rating.second.employee.get_full_name }}</li>
+
+                <!-- third item -->
+                {% if rating.special_rating.third.employee.id == user.id %}
+                <li class="list-group-item list-group-item-dark" style="font-weight: bold;">
+                {% else %}
+                <li class="list-group-item list-group-item-dark">
+                {% endif %}
+                  {{ rating.special_rating.third.employee.get_full_name }}</li>
               </ol>
             </div>
             <div class="col-md-2 col-sm-auto text-center border rounded pb-2 m-1 border-secondary">
               <span class="verysmall">Рейтинг<br> по средней выручке</span><hr>
               <ol class="list-group list-group-numbered verysmall text-start">
-                <li class="list-group-item list-group-item-primary"><b>{{ rating.common_rating.first.employee.get_full_name }}</b></li>
-                <li class="list-group-item list-group-item-success">{{ rating.common_rating.second.employee.get_full_name }}</li>
-                <li class="list-group-item list-group-item-dark">{{ rating.common_rating.third.employee.get_full_name }}</li>
+                <!-- first item -->
+                {% if rating.common_rating.first.employee.id == user.id %}
+                <li class="list-group-item list-group-item-primary" style="font-weight: bold;">
+                {% else %}
+                <li class="list-group-item list-group-item-primary">
+                {% endif %}
+                  {{ rating.common_rating.first.employee.get_full_name }}</li>
+
+                <!-- second item -->
+                {% if rating.common_rating.second.employee.id == user.id %}
+                <li class="list-group-item list-group-item-success" style="font-weight: bold;">
+                {% else %}
+                <li class="list-group-item list-group-item-success">
+                {% endif %}
+                  {{ rating.common_rating.second.employee.get_full_name }}</li>
+
+                <!-- third item -->
+                {% if rating.common_rating.third.employee.id == user.id %}
+                <li class="list-group-item list-group-item-dark" style="font-weight: bold;">
+                {% else %}
+                <li class="list-group-item list-group-item-dark">
+                {% endif %}
+                  {{ rating.common_rating.third.employee.get_full_name }}</li>
               </ol>
             </div>
           </div>

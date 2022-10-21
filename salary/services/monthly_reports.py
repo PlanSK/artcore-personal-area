@@ -284,32 +284,25 @@ def get_awards_data(month: int, year: int) -> AwardData:
 
 
 def get_categories_from_list(employee_list: list) -> Category:
-    other = []
     match employee_list:
-        case (first, second, third):
+        case (first, second, third, *other):
             return Category(first=first, second=second,
                             third=third, other=other)
-        case (first, second):
+        case (first, second, *other):
             return Category(first=first, second=second,
                             third=None, other=other)
-        case (first,):
+        case (first, *other):
             return Category(first=first, second=None,
                             third=None, other=other)
         case ():
             return Category(first=None, second=None,
-                            third=None, other=other)
+                            third=None, other=[])
         case _:
-            if len(employee_list) > 3:
-                first, second, third = employee_list[:3]
-                other = employee_list[3:]
-                return Category(first=first, second=second,
-                                third=second, other=other)
-            else:
-                raise ValueError(f'Unknown data error in {employee_list}')
+            raise ValueError(f'Unknown data error in {employee_list}')
 
 
-def get_rating_data(award_data: AwardData, username: str) -> Rating:
-    if filter(lambda x: x.employee.username == username,
+def get_rating_data(award_data: AwardData, user_id: int) -> Rating:
+    if filter(lambda x: x.employee.id == user_id,
                 award_data.cashiers_list):
         bar_rating = get_categories_from_list(award_data.cashiers_list)
         cashiers_revenue = sorted(
@@ -322,7 +315,7 @@ def get_rating_data(award_data: AwardData, username: str) -> Rating:
             special_rating=bar_rating,
             common_rating=cashiers_rating
         )
-    elif filter(lambda x: x.employee.username == username,
+    elif filter(lambda x: x.employee.id == user_id,
                 award_data.hall_admins_list):
         hookah_rating = get_categories_from_list(award_data.hall_admin_list)
         hall_admins_revenue = sorted(
