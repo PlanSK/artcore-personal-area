@@ -334,8 +334,8 @@ def get_position_type(
 
 
 def get_rating_data(award_data: AwardData, employee_id: int) -> Rating:
-    if filter(lambda x: x.employee.id == employee_id,
-                award_data.cashiers_list):
+    if tuple(filter(lambda x: x.employee.id == employee_id,
+                award_data.cashiers_list)):
         bar_rating = get_categories_from_list(award_data.cashiers_list)
         cashiers_revenue = sorted(
             award_data.cashiers_list,
@@ -354,8 +354,8 @@ def get_rating_data(award_data: AwardData, employee_id: int) -> Rating:
             common_rating=cashiers_rating,
             position=position
         )
-    elif filter(lambda x: x.employee.id == employee_id,
-                award_data.hall_admins_list):
+    elif tuple(filter(lambda x: x.employee.id == employee_id,
+                award_data.hall_admin_list)):
         hookah_rating = get_categories_from_list(award_data.hall_admin_list)
         hall_admins_revenue = sorted(
             award_data.hall_admin_list,
