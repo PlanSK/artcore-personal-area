@@ -21,13 +21,13 @@
         <tr>
           <td>{{employee.employee.get_full_name}}</td>
           <td>{{employee.shift_counter}}</td>
-          {% if employee.summary_bar_revenue == award_data.max_bar_revenue_sum %}
+          {% if award_data.bar_leader and employee.employee == award_data.bar_leader.leader.employee %}
           <td class="bg-warning text-dark"><i class="fa-solid fa-award"></i>
           {% else %}
           <td>
           {% endif %}
           {{employee.summary_bar_revenue}}</td>
-          {% if employee.average_revenue == award_data.max_cashier_avg_revenue %}
+          {% if award_data.cashiers_leader and employee.employee == award_data.cashiers_leader.leader.employee %}
           <td class="bg-warning text-dark"><i class="fa-solid fa-award"></i>
           {% else %}
           <td>
@@ -49,13 +49,13 @@
         <tr>
           <td>{{employee.employee.get_full_name}}</td>
           <td>{{employee.shift_counter}}</td>
-          {% if employee.summary_hookah_revenue and employee.summary_hookah_revenue == award_data.max_hookah_revenue_sum %}
+          {% if award_data.hookah_leader and employee.employee == award_data.hookah_leader.leader.employee %}
           <td class="bg-warning text-dark"><i class="fa-solid fa-award"></i>
           {% else %}
           <td>
           {% endif %}
           {{employee.summary_hookah_revenue|default:"-"}}</td>
-          {% if employee.average_revenue == award_data.max_hall_admin_avg_revenue %}
+          {% if award_data.hall_admins_leader and employee.employee == award_data.hall_admins_leader.leader.employee %}
           <td class="bg-warning text-dark"><i class="fa-solid fa-award"></i>
           {% else %}
           <td>

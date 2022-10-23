@@ -32,7 +32,9 @@ from salary.services.filesystem import (
     get_employee_documents_urls, document_file_handler,
     delete_document_from_storage
 )
-from salary.services.monthly_reports import get_monthly_report, get_awards_data
+from salary.services.monthly_reports import (
+    get_monthly_report, get_awards_data, get_rating_data
+)
 
 logger = logging.getLogger(__name__)
 
@@ -726,6 +728,13 @@ class IndexEmployeeView(ProfileStatusRedirectMixin, TitleMixin, ListView):
             user=self.request.user,
             date=datetime.date.today()
         )
+        verified_shifts_number = self.object_list.filter(
+            is_verified=True).count()
+        award_data = get_awards_data(
+            month=datetime.date.today().month,
+            year=datetime.date.today().year
+        )
+        rating = get_rating_data(award_data, self.request.user.id)
 
         context.update({
             'summary_earnings': self.get_summary_earnings(),
@@ -736,6 +745,8 @@ class IndexEmployeeView(ProfileStatusRedirectMixin, TitleMixin, ListView):
             'shortage_sum': shortage_sum,
             'permission_to_close': permission_to_close,
             'notification_about_shift': notification_about_shift,
+            'rating': rating,
+            'verified_shifts_number': verified_shifts_number,
         })
         return context
 

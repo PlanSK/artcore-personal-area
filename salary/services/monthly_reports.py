@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.db.models import QuerySet
+from enum import Enum
 from typing import NamedTuple
 
 from salary.models import WorkingShift
@@ -19,8 +20,8 @@ class EmployeeData(NamedTuple):
 
 
 class EmployeeCategories(NamedTuple):
-    cashier_list: list
-    hall_admin_list: list
+    cashier_list: list[EmployeeData]
+    hall_admin_list: list[EmployeeData]
 
 
 class MonthlyData(NamedTuple):
@@ -32,13 +33,39 @@ class MonthlyData(NamedTuple):
     summary_all_penalties: float
 
 
+class Leader(NamedTuple):
+    leader: EmployeeData
+    total_sum: float
+
+
 class AwardData(NamedTuple):
-    cashiers_list: list
-    hall_admin_list: list
-    max_bar_revenue_sum: float
-    max_hookah_revenue_sum: float
-    max_cashier_avg_revenue: float
-    max_hall_admin_avg_revenue: float
+    cashiers_list: list[EmployeeData]
+    hall_admin_list: list[EmployeeData]
+    bar_leader: Leader | None
+    hookah_leader: Leader | None
+    cashiers_leader: Leader | None
+    hall_admins_leader: Leader | None
+
+
+class Category(NamedTuple):
+    first: EmployeeData | None
+    second: EmployeeData | None
+    third: EmployeeData | None
+    other: list
+
+
+class LeaderType(Enum):
+    ABSOLUTE = 'абсолютный лидер'
+    HOOKAH = 'лидер по кальянам'
+    BAR = 'лидер по бару'
+    AVERAGE = 'лидер по средней выручке'
+    NOT_LEADER = ''
+
+
+class Rating(NamedTuple):
+    special_rating: Category
+    common_rating: Category
+    position: LeaderType
 
 
 def get_employee_data(employee: User,
@@ -209,34 +236,140 @@ def get_monthly_report(month: int, year: int) -> MonthlyData:
 def get_awards_data(month: int, year: int) -> AwardData:
     workshifts = get_queryset_data(month=month, year=year)
     categories_list = get_employee_workshift_data_list(workshifts)
+
+    bar_current_leader = None
     bar_max_revenue = 0.0
+    cashier_current_leader = None
     cash_admin_max_avg_revenue = 0.0
+
     for employee in filter(lambda x: x.shift_counter >= 4,
                            categories_list.cashier_list):
         if bar_max_revenue < employee.summary_bar_revenue:
             bar_max_revenue = employee.summary_bar_revenue
+            bar_current_leader = Leader(
+                leader=employee,
+                total_sum=employee.summary_bar_revenue
+            )
         if cash_admin_max_avg_revenue < employee.average_revenue:
             cash_admin_max_avg_revenue = employee.average_revenue
+            cashier_current_leader = Leader(
+                leader=employee,
+                total_sum=employee.average_revenue
+            )
 
+    hookah_current_leader = None
     hookah_max_revenue = 0.0
+    hall_admins_current_leader = None
     hall_admin_max_avg_revenue = 0.0
     for employee in filter(lambda x: x.shift_counter >= 4,
                            categories_list.hall_admin_list):
         if hookah_max_revenue < employee.summary_hookah_revenue:
             hookah_max_revenue = employee.summary_hookah_revenue
+            hookah_current_leader = Leader(
+                leader=employee,
+                total_sum=employee.summary_hookah_revenue
+            )
         if hall_admin_max_avg_revenue < employee.average_revenue:
             hall_admin_max_avg_revenue = employee.average_revenue
+            hall_admins_current_leader = Leader(
+                leader=employee,
+                total_sum=employee.average_revenue
+            )
 
-    categories_list.cashier_list.sort(key=lambda x: x.summary_bar_revenue,
-                                      reverse=True)
+    categories_list.cashier_list.sort(
+        key=lambda x: x.summary_bar_revenue, reverse=True
+    )
     categories_list.hall_admin_list.sort(
         key=lambda x: x.summary_hookah_revenue, reverse=True
     )
+
     return AwardData(
         cashiers_list=categories_list.cashier_list,
         hall_admin_list=categories_list.hall_admin_list,
-        max_bar_revenue_sum=bar_max_revenue,
-        max_hookah_revenue_sum=hookah_max_revenue,
-        max_cashier_avg_revenue=cash_admin_max_avg_revenue,
-        max_hall_admin_avg_revenue=hall_admin_max_avg_revenue,
+        bar_leader=bar_current_leader,
+        hookah_leader=hookah_current_leader,
+        cashiers_leader=cashier_current_leader,
+        hall_admins_leader=hall_admins_current_leader
     )
+
+
+def get_categories_from_list(employee_list: list) -> Category:
+    match employee_list:
+        case (first, second, third, *other):
+            return Category(first=first, second=second,
+                            third=third, other=other)
+        case (first, second, *other):
+            return Category(first=first, second=second,
+                            third=None, other=other)
+        case (first, *other):
+            return Category(first=first, second=None,
+                            third=None, other=other)
+        case ():
+            return Category(first=None, second=None,
+                            third=None, other=[])
+        case _:
+            raise ValueError(f'Unknown data error in {employee_list}')
+
+
+def get_position_type(
+    special: EmployeeData | None, common: Category | None, employee_id: int,
+        is_cashier: bool = False) -> LeaderType:
+
+    special_category_leader = False
+    common_category_leader = False
+
+    if special and special.employee.id == employee_id:
+        special_category_leader = True
+    if common and common.employee.id == employee_id:
+        common_category_leader = True
+
+    if special_category_leader and common_category_leader:
+        return LeaderType.ABSOLUTE
+    elif special_category_leader:
+        return LeaderType.BAR if is_cashier else LeaderType.HOOKAH
+    elif common_category_leader:
+        return LeaderType.AVERAGE
+    else:
+        return LeaderType.NOT_LEADER
+
+
+def get_rating_data(award_data: AwardData, employee_id: int) -> Rating:
+    if filter(lambda x: x.employee.id == employee_id,
+                award_data.cashiers_list):
+        bar_rating = get_categories_from_list(award_data.cashiers_list)
+        cashiers_revenue = sorted(
+            award_data.cashiers_list,
+            key=lambda x: x.average_revenue,
+            reverse=True
+        )
+        cashiers_rating = get_categories_from_list(cashiers_revenue)
+        position = get_position_type(
+            special=bar_rating.first,
+            common=cashiers_rating.first,
+            employee_id=employee_id,
+            is_cashier=True
+        )
+        return Rating(
+            special_rating=bar_rating,
+            common_rating=cashiers_rating,
+            position=position
+        )
+    elif filter(lambda x: x.employee.id == employee_id,
+                award_data.hall_admins_list):
+        hookah_rating = get_categories_from_list(award_data.hall_admin_list)
+        hall_admins_revenue = sorted(
+            award_data.hall_admin_list,
+            key=lambda x: x.average_revenue,
+            reverse=True
+        )
+        hall_admins_rating = get_categories_from_list(hall_admins_revenue)
+        position = get_position_type(
+            special=hookah_rating.first,
+            common=hall_admins_rating.first,
+            employee_id=employee_id
+        )
+        return Rating(
+            special_rating=hookah_rating,
+            common_rating=hall_admins_rating,
+            position=position
+        )
