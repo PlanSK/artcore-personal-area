@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.db.models import QuerySet
+from enum import Enum
 from typing import NamedTuple
 
 from salary.models import WorkingShift
@@ -53,9 +54,18 @@ class Category(NamedTuple):
     other: list
 
 
+class LeaderType(Enum):
+    ABSOLUTE = 'абсолютный лидер'
+    HOOKAH = 'лидер по кальянам'
+    BAR = 'лидер по бару'
+    AVERAGE = 'лидер по средней выручке'
+    NOT_LEADER = ''
+
+
 class Rating(NamedTuple):
     special_rating: Category
     common_rating: Category
+    position: LeaderType
 
 
 def get_employee_data(employee: User,
@@ -301,8 +311,30 @@ def get_categories_from_list(employee_list: list) -> Category:
             raise ValueError(f'Unknown data error in {employee_list}')
 
 
-def get_rating_data(award_data: AwardData, user_id: int) -> Rating:
-    if filter(lambda x: x.employee.id == user_id,
+def get_position_type(
+    special: EmployeeData | None, common: Category | None, employee_id: int,
+        is_cashier: bool = False) -> LeaderType:
+
+    special_category_leader = False
+    common_category_leader = False
+
+    if special and special.employee.id == employee_id:
+        special_category_leader = True
+    if common and common.employee.id == employee_id:
+        common_category_leader = True
+
+    if special_category_leader and common_category_leader:
+        return LeaderType.ABSOLUTE
+    elif special_category_leader:
+        return LeaderType.BAR if is_cashier else LeaderType.HOOKAH
+    elif common_category_leader:
+        return LeaderType.AVERAGE
+    else:
+        return LeaderType.NOT_LEADER
+
+
+def get_rating_data(award_data: AwardData, employee_id: int) -> Rating:
+    if filter(lambda x: x.employee.id == employee_id,
                 award_data.cashiers_list):
         bar_rating = get_categories_from_list(award_data.cashiers_list)
         cashiers_revenue = sorted(
@@ -311,11 +343,18 @@ def get_rating_data(award_data: AwardData, user_id: int) -> Rating:
             reverse=True
         )
         cashiers_rating = get_categories_from_list(cashiers_revenue)
+        position = get_position_type(
+            special=bar_rating.first,
+            common=cashiers_rating.first,
+            employee_id=employee_id,
+            is_cashier=True
+        )
         return Rating(
             special_rating=bar_rating,
-            common_rating=cashiers_rating
+            common_rating=cashiers_rating,
+            position=position
         )
-    elif filter(lambda x: x.employee.id == user_id,
+    elif filter(lambda x: x.employee.id == employee_id,
                 award_data.hall_admins_list):
         hookah_rating = get_categories_from_list(award_data.hall_admin_list)
         hall_admins_revenue = sorted(
@@ -324,7 +363,13 @@ def get_rating_data(award_data: AwardData, user_id: int) -> Rating:
             reverse=True
         )
         hall_admins_rating = get_categories_from_list(hall_admins_revenue)
+        position = get_position_type(
+            special=hookah_rating.first,
+            common=hall_admins_rating.first,
+            employee_id=employee_id
+        )
         return Rating(
             special_rating=hookah_rating,
-            common_rating=hall_admins_rating
+            common_rating=hall_admins_rating,
+            position=position
         )

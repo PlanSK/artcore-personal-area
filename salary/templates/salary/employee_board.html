@@ -6,16 +6,18 @@
   <main>
     <div class="container">
       <div class="row m-2">
+        {% if verified_shifts_number >= 4 %}
+        <!-- Button -->
         <div class="col text-end">
-          {% if is_absolute_leader %}
+          {% if rating.position == rating.position.ABSOLUTE %}
           <a class="btn btn-outline-success verysmall" data-bs-toggle="collapse" href="#expandRating" role="button" aria-expanded="false" aria-controls="expandRating">
             <i class="fa-solid fa-crown fa-xl fa-beat-fade"></i>
-            <b>Вы - абсолютный лидер!</b>
+            <b>Вы - {{ rating.position.value }}!</b>
           </a>
-          {% elif is_leader %}
+          {% elif rating.position != rating.position.NOT_LEADER %}
           <a class="btn btn-outline-success verysmall" data-bs-toggle="collapse" href="#expandRating" role="button" aria-expanded="false" aria-controls="expandRating">
             <i class="fa-solid fa-trophy fa-xl fa-beat-fade"></i>
-            <b>Вы - лидер рейтинга!</b>
+            <b>Вы - {{ rating.position.value }}!</b>
           </a>
           {% else %}
           <a class="btn btn-outline-warning verysmall" data-bs-toggle="collapse" href="#expandRating" role="button" aria-expanded="false" aria-controls="expandRating">
@@ -24,8 +26,10 @@
           </a>
           {% endif %}
         </div>
+        <!-- Table -->
         <div class="collapse" id="expandRating">
           <div class="row justify-content-end mt-2">
+            {% if rating.special_rating.first %}
             <div class="col-md-2 col-sm-auto text-center border rounded pb-2 m-1 border-secondary">
               <span class="verysmall">Рейтинг<br> по категории</span><hr>
               <ol class="list-group list-group-numbered verysmall text-start">
@@ -54,6 +58,8 @@
                   {{ rating.special_rating.third.employee.get_full_name }}</li>
               </ol>
             </div>
+            {% endif %}
+            {% if rating.common_rating.first %}
             <div class="col-md-2 col-sm-auto text-center border rounded pb-2 m-1 border-secondary">
               <span class="verysmall">Рейтинг<br> по средней выручке</span><hr>
               <ol class="list-group list-group-numbered verysmall text-start">
@@ -82,8 +88,17 @@
                   {{ rating.common_rating.third.employee.get_full_name }}</li>
               </ol>
             </div>
+            {% endif %}
           </div>
         </div>
+        {% else %}
+        <div class="col text-end">
+          <button type="button" class="btn btn-secondary btn-sm verysmall" disabled>
+            <i class="fa-solid fa-chart-column fa-xl"></i>
+            Текущий рейтинг
+          </button><br>
+          <span style="font-size: 0.5rem;">*Для участия в рейтинге необходимо 4 и более проверенных смен</span>
+        {% endif %}
       </div>
       {% if permission_to_close %}
       <div class="row mt-2">

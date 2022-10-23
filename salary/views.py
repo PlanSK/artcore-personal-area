@@ -728,36 +728,12 @@ class IndexEmployeeView(ProfileStatusRedirectMixin, TitleMixin, ListView):
             user=self.request.user,
             date=datetime.date.today()
         )
-
-        employee = self.request.user
-        is_bar_leader = False
-        is_hookah_leader = False
-        is_avg_leader = False
-        is_leader = False
-        is_absolute_leader = False
+        verified_shifts_number = self.object_list.filter(
+            is_verified=True).count()
         award_data = get_awards_data(
             month=datetime.date.today().month,
             year=datetime.date.today().year
         )
-
-        if (award_data.bar_leader
-                and award_data.bar_leader.leader.employee == employee):
-            is_bar_leader = True
-        elif (award_data.hookah_leader
-                and award_data.hookah_leader.leader.employee == employee):
-            is_hookah_leader = True
-
-        if (award_data.cashiers_leader
-                and award_data.cashiers_leader.leader.employee == employee):
-            is_avg_leader = True
-        elif (award_data.hall_admins_leader
-                and award_data.hall_admins_leader.leader.employee == employee):
-            is_avg_leader = True
-        
-        if is_bar_leader or is_hookah_leader or is_avg_leader:
-            is_leader = True
-        elif is_bar_leader or is_hookah_leader and is_avg_leader:
-            is_absolute_leader = True
         rating = get_rating_data(award_data, self.request.user.id)
 
         context.update({
@@ -769,9 +745,8 @@ class IndexEmployeeView(ProfileStatusRedirectMixin, TitleMixin, ListView):
             'shortage_sum': shortage_sum,
             'permission_to_close': permission_to_close,
             'notification_about_shift': notification_about_shift,
-            'is_absolute_leader': is_absolute_leader,
-            'is_leader': is_leader,
             'rating': rating,
+            'verified_shifts_number': verified_shifts_number,
         })
         return context
 
