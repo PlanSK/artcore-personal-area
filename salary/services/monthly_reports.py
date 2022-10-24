@@ -1,10 +1,14 @@
 from django.contrib.auth.models import User
 from django.db.models import QuerySet
 from enum import Enum
+import logging
 from typing import NamedTuple
 
 from salary.models import WorkingShift
 from salary.services.earnings import Earnings
+
+
+logger = logging.getLogger(__name__)
 
 
 class EmployeeData(NamedTuple):
@@ -308,6 +312,7 @@ def get_categories_from_list(employee_list: list) -> Category:
             return Category(first=None, second=None,
                             third=None, other=[])
         case _:
+            logging.error('Unknown incoming data for get_categiries_from_list')
             raise ValueError(f'Unknown data error in {employee_list}')
 
 
