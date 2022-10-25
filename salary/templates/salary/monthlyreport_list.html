@@ -29,7 +29,7 @@
               <td>{{ employee.penalty|default:"-" | intcomma }}</td>
               <td>{{ employee.shortage|default:"-" | intcomma }}</td>
               <td>
-                <a href="{% url 'staff_employee_month_view' year=current_date.year month=current_date.month employee=employee.employee.username %}?next={{ request.path }}" class="link-primary verysmall">
+                <a href="{% url 'staff_employee_month_view' year=current_date.year month=current_date.month employee=employee.id %}?next={{ request.path }}" class="link-primary verysmall">
                   Детально
                 </a>
               </td>

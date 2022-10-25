@@ -798,7 +798,7 @@ class StaffEmployeeMonthView(WorkingshiftPermissonsMixin, TitleMixin, ListView):
     title = 'Просмотр смен'
 
     def dispatch(self, request, *args: Any, **kwargs: Any):
-        self.employee = get_object_or_404(User, username=self.kwargs.get('employee'))
+        self.employee = get_object_or_404(User, pk=self.kwargs.get('employee'))
         return super().dispatch(request, *args, **kwargs)
 
     def get_queryset(self) -> QuerySet:

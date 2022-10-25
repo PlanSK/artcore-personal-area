@@ -110,74 +110,53 @@ def get_employee_data_list(employee_list: list[dict]) -> list[EmployeeData]:
     """
     Returns list of EmployeeData Model from employee_list
     """
+
     employee_append_dict = {}
     employee_data_list = []
+    keywords_dict = (
+        ('summary_revenues', 'revenue'),
+        ('basic_revenues', 'basic_part'),
+        ('bonus_revenues', 'bonus_part'),
+        ('shortage', 'shortage'),
+        ('penalty', 'penalty'),
+        ('summary_revenue', 'revenue'),
+        ('summary_bar_revenue', 'bar_revenue'),
+        ('summary_hookah_revenue', 'hookah_revenue')
+    )
+
     for employee_data in employee_list:
-        current_employee: dict = employee_append_dict.get(employee_data['id'])
-        if current_employee:
-            current_employee['shift_counter'] += 1
-            current_employee['summary_revenues'].append(
-                employee_data.get('revenue', 0.0))
-            current_employee['basic_revenues'].append(
-                employee_data.get('basic_part', 0.0))
-            current_employee['bonus_revenues'].append(
-                employee_data.get('bonus_part', 0.0)
+        id = employee_data.get('id')
+        current_employee: dict | None = employee_append_dict.get(id)
+        if not current_employee:
+            current_employee = employee_append_dict.setdefault(
+                id, {'name': employee_data.get('name'), 'shift_counter': 0,}
             )
-            current_employee['shortage'].append(
-                employee_data.get('shortage', 0.0))
-            current_employee['penalty'].append(
-                employee_data.get('penalty', 0.0))
-            current_employee['average_revenue'].append(
-                employee_data.get('revenue', 0.0))
-            current_employee['summary_bar_revenue'].append(
-                employee_data.get('bar_revenue', 0.0))
-            current_employee['summary_hookah_revenue'].append(
-                employee_data.get('hookah_revenue', 0.0)
+            current_employee.update(
+                {key: [] for key, _ in keywords_dict}
             )
-        else:
-            employee_append_dict.update(
-                {
-                    employee_data['id']: {
-                        'name': employee_data.get('name'),
-                        'shift_counter': 1,
-                        'summary_revenues': [
-                            employee_data.get('revenue', 0.0)
-                        ],
-                        'basic_revenues': [
-                            employee_data.get('basic_part', 0.0)
-                        ],
-                        'bonus_revenues': [
-                            employee_data.get('bonus_part', 0.0)
-                        ],
-                        'shortage': [employee_data.get('shortage', 0.0)],
-                        'penalty': [employee_data.get('penalty', 0.0)],
-                        'average_revenue': [employee_data.get('revenue', 0.0)],
-                        'summary_bar_revenue': [
-                            employee_data.get('bar_revenue', 0.0)
-                        ],
-                        'summary_hookah_revenue': [
-                            employee_data.get('hookah_revenue', 0.0)
-                        ],
-                    }
-                }
+        current_employee['shift_counter'] += 1
+        for where_key, from_key in keywords_dict:
+            current_employee[where_key].append(
+                employee_data.get(from_key, 0.0)
             )
+
     for id, id_data in employee_append_dict.items():
-        summary_revenue = sum(id_data['average_revenue'])
-        average_revenue = summary_revenue / id_data['shift_counter']
+        summary_revenue = sum(id_data.get('summary_revenue'))
+        average_revenue = summary_revenue / id_data.get('shift_counter', 1)
         employee_data_list.append(
             EmployeeData(
                 id=id,
-                full_name=id_data['name'],
-                shift_counter=id_data['shift_counter'],
-                basic_revenues=round(sum(id_data['basic_revenues']), 2),
-                bonus_revenues=round(sum(id_data['bonus_revenues']), 2),
-                shortage=round(sum(id_data['shortage']), 2),
-                penalty=round(sum(id_data['penalty']), 2),
+                full_name=id_data.get('name'),
+                shift_counter=id_data.get('shift_counter', 0),
+                basic_revenues=round(sum(id_data.get('basic_revenues')), 2),
+                bonus_revenues=round(sum(id_data.get('bonus_revenues')), 2),
+                shortage=round(sum(id_data.get('shortage')), 2),
+                penalty=round(sum(id_data.get('penalty')), 2),
                 average_revenue=round(average_revenue, 2),
                 summary_bar_revenue=round(
-                    sum(id_data['summary_bar_revenue']), 2),
+                    sum(id_data.get('summary_bar_revenue')), 2),
                 summary_hookah_revenue=round(
-                    sum(id_data['summary_hookah_revenue']), 2)
+                    sum(id_data.get('summary_hookah_revenue')), 2)
             )
         )
 
@@ -186,11 +165,15 @@ def get_employee_data_list(employee_list: list[dict]) -> list[EmployeeData]:
 
 def get_employee_workshift_data_list(
         workshifts: QuerySet) -> EmployeeCategories:
+    """
+    Returns EmployeeCategories
+    """
+    cashiers_data_list = []
+    hall_admins_data_list = []
 
-    workshifts_data_map = map(get_workshift_data, workshifts)
-
-    cashiers_data_list = [data.cashier for data in workshifts_data_map]
-    hall_admins_data_list = [data.cashier for data in workshifts_data_map]
+    for data in map(get_workshift_data, workshifts):
+        cashiers_data_list.append(data.cashier)
+        hall_admins_data_list.append(data.hall_admin)
 
     cashiers_list = get_employee_data_list(cashiers_data_list)
     hall_admins_list = get_employee_data_list(hall_admins_data_list)
