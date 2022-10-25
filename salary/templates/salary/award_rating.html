@@ -19,7 +19,7 @@
       {% for employee in award_data.cashiers_list %}
         {% if employee.shift_counter >= 4 %}
         <tr>
-          <td>{{employee.employee.get_full_name}}</td>
+          <td>{{employee.full_name}}</td>
           <td>{{employee.shift_counter}}</td>
           {% if award_data.bar_leader and employee.employee == award_data.bar_leader.leader.employee %}
           <td class="bg-warning text-dark"><i class="fa-solid fa-award"></i>
@@ -36,7 +36,7 @@
         </tr>
         {% else %}
         <tr class="text-muted">
-          <td>{{employee.employee.get_full_name}}</td>
+          <td>{{employee.full_name}}</td>
           <td>{{employee.shift_counter}}</td>
           <td>{{employee.summary_bar_revenue}}</td>
           <td>{{employee.average_revenue}}</td>
@@ -47,7 +47,7 @@
       {% for employee in award_data.hall_admin_list %}
         {% if employee.shift_counter >= 4 %}
         <tr>
-          <td>{{employee.employee.get_full_name}}</td>
+          <td>{{employee.full_name}}</td>
           <td>{{employee.shift_counter}}</td>
           {% if award_data.hookah_leader and employee.employee == award_data.hookah_leader.leader.employee %}
           <td class="bg-warning text-dark"><i class="fa-solid fa-award"></i>
@@ -64,7 +64,7 @@
         </tr>
         {% else %}
         <tr class="text-muted">
-          <td>{{employee.employee.get_full_name}}</td>
+          <td>{{employee.full_name}}</td>
           <td>{{employee.shift_counter}}</td>
           <td>{{employee.summary_hookah_revenue}}</td>
           <td>{{employee.average_revenue}}</td>

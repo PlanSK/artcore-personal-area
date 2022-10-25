@@ -22,7 +22,7 @@
           <tbody class="text-center verysmall">
             {% for employee in report_data.employees %}
             <tr>
-              <td>{{ employee.employee.get_full_name }}</td>
+              <td>{{ employee.full_name }}</td>
               <td>{{ employee.shift_counter|default:"-"  }}</td>
               <td>{{ employee.basic_revenues|default:"-" | intcomma }}</td>
               <td>{{ employee.bonus_revenues|default:"-" | intcomma }}</td>
