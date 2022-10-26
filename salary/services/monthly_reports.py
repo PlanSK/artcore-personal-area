@@ -163,10 +163,10 @@ def get_employee_data_list(employee_list: list[dict]) -> list[EmployeeData]:
     return employee_data_list
 
 
-def get_employee_workshift_data_list(
+def get_employee_lists_by_categories(
         workshifts: QuerySet) -> EmployeeCategories:
     """
-    Returns EmployeeCategories
+    Returns EmployeeCategories model from workshifts QuerySet
     """
     cashiers_data_list = []
     hall_admins_data_list = []
@@ -184,9 +184,12 @@ def get_employee_workshift_data_list(
     )
 
 
-def analyze_workshift_data(workshifts: WorkingShift) -> MonthlyData:
-
-    categories_list = get_employee_workshift_data_list(workshifts)
+def get_monthly_data_from_workshifts(workshifts: WorkingShift) -> MonthlyData:
+    """
+    Returns MonthlyData from workshifts with summary basic and bonus parts
+    revenue and summary shortages, penalties.
+    """
+    categories_list = get_employee_lists_by_categories(workshifts)
     employee_data_list: list = (
         categories_list.cashier_list + categories_list.hall_admin_list
     )
@@ -212,7 +215,10 @@ def analyze_workshift_data(workshifts: WorkingShift) -> MonthlyData:
     )
 
 
-def get_queryset_data(month: int, year: int) -> QuerySet:
+def get_monthly_workingshifts_queryset(month: int, year: int) -> QuerySet:
+    """
+    Returns a verified WorkingShift's QuerySet for the month and year
+    """
     workshifts = WorkingShift.objects.select_related(
         'cash_admin__profile__position',
         'hall_admin__profile__position',
@@ -225,13 +231,20 @@ def get_queryset_data(month: int, year: int) -> QuerySet:
 
 
 def get_monthly_report(month: int, year: int) -> MonthlyData:
-    workshifts = get_queryset_data(month=month, year=year)
-    return analyze_workshift_data(workshifts)
+    """
+    Returns MonthlyData report for the month
+    """
+    workshifts = get_monthly_workingshifts_queryset(month=month, year=year)
+    monthly_report = get_monthly_data_from_workshifts(workshifts)
+    return monthly_report
 
 
 def get_awards_data(month: int, year: int) -> AwardData:
-    workshifts = get_queryset_data(month=month, year=year)
-    categories_list = get_employee_workshift_data_list(workshifts)
+    """
+    Returns awards data for the month
+    """
+    workshifts = get_monthly_workingshifts_queryset(month=month, year=year)
+    categories_list = get_employee_lists_by_categories(workshifts)
 
     bar_current_leader = None
     bar_max_revenue = 0.0
@@ -290,6 +303,9 @@ def get_awards_data(month: int, year: int) -> AwardData:
 
 
 def get_categories_from_list(employee_list: list) -> Category:
+    """
+    Returns Category model with EmployeeData by place
+    """
     match employee_list:
         case (first, second, third, *other):
             return Category(first=first, second=second,
@@ -308,9 +324,12 @@ def get_categories_from_list(employee_list: list) -> Category:
             raise ValueError(f'Unknown data error in {employee_list}')
 
 
-def get_position_type(
-    special: EmployeeData | None, common: Category | None, employee_id: int,
-        is_cashier: bool = False) -> LeaderType:
+def get_leader_type(
+    special: EmployeeData | None, common: Category | None,
+        employee_id: int, is_cashier: bool = False) -> LeaderType:
+    """
+    Returns Leader type for the employee
+    """
 
     special_category_leader = False
     common_category_leader = False
@@ -331,6 +350,9 @@ def get_position_type(
 
 
 def get_rating_data(award_data: AwardData, employee_id: int) -> Rating:
+    """
+    Returns Rating data for the employee by id
+    """
     if tuple(filter(lambda x: x.employee.id == employee_id,
                 award_data.cashiers_list)):
         bar_rating = get_categories_from_list(award_data.cashiers_list)
@@ -340,7 +362,7 @@ def get_rating_data(award_data: AwardData, employee_id: int) -> Rating:
             reverse=True
         )
         cashiers_rating = get_categories_from_list(cashiers_revenue)
-        position = get_position_type(
+        position = get_leader_type(
             special=bar_rating.first,
             common=cashiers_rating.first,
             employee_id=employee_id,
@@ -360,7 +382,7 @@ def get_rating_data(award_data: AwardData, employee_id: int) -> Rating:
             reverse=True
         )
         hall_admins_rating = get_categories_from_list(hall_admins_revenue)
-        position = get_position_type(
+        position = get_leader_type(
             special=hookah_rating.first,
             common=hall_admins_rating.first,
             employee_id=employee_id
