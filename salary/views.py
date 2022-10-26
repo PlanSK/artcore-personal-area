@@ -735,9 +735,18 @@ class IndexEmployeeView(ProfileStatusRedirectMixin, TitleMixin, ListView):
             year=datetime.date.today().year
         )
         rating = get_rating_data(award_data, self.request.user.id)
+        # bonus move to rating model (from settings)
+        summary_earnings = self.get_summary_earnings()
+        if rating.position == rating.position.ABSOLUTE:
+            summary_earnings += 5000
+        elif (rating.position == rating.position.HOOKAH
+                or rating.position == rating.position.BAR):
+            summary_earnings += 3000
+        elif rating.position == rating.position.AVERAGE:
+            summary_earnings += 2000
 
         context.update({
-            'summary_earnings': self.get_summary_earnings(),
+            'summary_earnings': round(summary_earnings, 2),
             'penalty_count': misconducts.count(),
             'today_date': datetime.date.today(),
             'wait_explanation': wait_explanation.count(),

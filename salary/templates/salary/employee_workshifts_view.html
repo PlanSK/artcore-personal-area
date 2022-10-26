@@ -10,7 +10,7 @@
         <p class="text-warning text-center">Смен пока нет.</p><hr>
         {% else %}
         <p class="text-warning text-center">Смены за {{ object_list.0.shift_date|date:"F Y г."|lower }}</p><hr>
-        <table class="table table-dark table-hover">
+        <table class="table table-dark">
           <thead class="text-warning text-center verysmall">
             <tr>
               <th>Статус</th>
@@ -55,12 +55,20 @@
               </td>
             </tr>
             {% endfor %}
+            {% if rating.position != rating.position.NOT_LEADER %}
+            <tr>
+              <td colspan="2">
+              Бонус<br>({{ rating.position.value }})
+              </td>
+              <td><span class="text-warning">$bonus</span></td>
+              <td></td>
+            </tr>
+            {% endif %}
           </tbody>
           <tfoot class="text-center verysmall">
             <tr>
               <td colspan="3">Суммарно за месяц:</td>
               <td>{{ summary_earnings|default:"-" | intcomma }}</td>
-              <td></td>
             </tr>
           </tfoot>
         </table>
