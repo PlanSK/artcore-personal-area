@@ -325,7 +325,7 @@ def get_categories_from_list(employee_list: list) -> Category:
 
 
 def get_leader_type(
-    special: EmployeeData | None, common: Category | None,
+    special: EmployeeData | None, common: EmployeeData | None,
         employee_id: int, is_cashier: bool = False) -> LeaderType:
     """
     Returns Leader type for the employee
@@ -334,9 +334,9 @@ def get_leader_type(
     special_category_leader = False
     common_category_leader = False
 
-    if special and special.employee.id == employee_id:
+    if special and special.id == employee_id:
         special_category_leader = True
-    if common and common.employee.id == employee_id:
+    if common and common.id == employee_id:
         common_category_leader = True
 
     if special_category_leader and common_category_leader:
@@ -353,7 +353,7 @@ def get_rating_data(award_data: AwardData, employee_id: int) -> Rating:
     """
     Returns Rating data for the employee by id
     """
-    if tuple(filter(lambda x: x.employee.id == employee_id,
+    if tuple(filter(lambda x: x.id == employee_id,
                 award_data.cashiers_list)):
         bar_rating = get_categories_from_list(award_data.cashiers_list)
         cashiers_revenue = sorted(
@@ -373,7 +373,7 @@ def get_rating_data(award_data: AwardData, employee_id: int) -> Rating:
             common_rating=cashiers_rating,
             position=position
         )
-    elif tuple(filter(lambda x: x.employee.id == employee_id,
+    elif tuple(filter(lambda x: x.id == employee_id,
                 award_data.hall_admin_list)):
         hookah_rating = get_categories_from_list(award_data.hall_admin_list)
         hall_admins_revenue = sorted(

@@ -34,7 +34,7 @@
               <span class="verysmall">Рейтинг<br> по категории</span><hr>
               <ol class="list-group list-group-numbered verysmall text-start">
                 <!-- first item -->
-                {% if rating.special_rating.first.employee.id == user.id %}
+                {% if rating.special_rating.first.id == user.id %}
                 <li class="list-group-item list-group-item-primary" style="font-weight: bold;">
                 {% else %}
                 <li class="list-group-item list-group-item-primary">
@@ -42,7 +42,7 @@
                   {{ rating.special_rating.first.full_name }}</li>
 
                 <!-- second item -->
-                {% if rating.special_rating.second.employee.id == user.id %}
+                {% if rating.special_rating.second.id == user.id %}
                 <li class="list-group-item list-group-item-success" style="font-weight: bold;">
                 {% else %}
                 <li class="list-group-item list-group-item-success">
@@ -50,7 +50,7 @@
                   {{ rating.special_rating.second.full_name }}</li>
 
                 <!-- third item -->
-                {% if rating.special_rating.third.employee.id == user.id %}
+                {% if rating.special_rating.third.id == user.id %}
                 <li class="list-group-item list-group-item-dark" style="font-weight: bold;">
                 {% else %}
                 <li class="list-group-item list-group-item-dark">
@@ -64,7 +64,7 @@
               <span class="verysmall">Рейтинг<br> по средней выручке</span><hr>
               <ol class="list-group list-group-numbered verysmall text-start">
                 <!-- first item -->
-                {% if rating.common_rating.first.employee.id == user.id %}
+                {% if rating.common_rating.first.id == user.id %}
                 <li class="list-group-item list-group-item-primary" style="font-weight: bold;">
                 {% else %}
                 <li class="list-group-item list-group-item-primary">
@@ -72,7 +72,7 @@
                   {{ rating.common_rating.first.full_name }}</li>
 
                 <!-- second item -->
-                {% if rating.common_rating.second.employee.id == user.id %}
+                {% if rating.common_rating.second.id == user.id %}
                 <li class="list-group-item list-group-item-success" style="font-weight: bold;">
                 {% else %}
                 <li class="list-group-item list-group-item-success">
@@ -80,7 +80,7 @@
                   {{ rating.common_rating.second.full_name }}</li>
 
                 <!-- third item -->
-                {% if rating.common_rating.third.employee.id == user.id %}
+                {% if rating.common_rating.third.id == user.id %}
                 <li class="list-group-item list-group-item-dark" style="font-weight: bold;">
                 {% else %}
                 <li class="list-group-item list-group-item-dark">
