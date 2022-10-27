@@ -22,14 +22,14 @@
           <tbody class="text-center verysmall">
             {% for employee in report_data.employees %}
             <tr>
-              <td>{{ employee.employee.get_full_name }}</td>
+              <td>{{ employee.full_name }}</td>
               <td>{{ employee.shift_counter|default:"-"  }}</td>
               <td>{{ employee.basic_revenues|default:"-" | intcomma }}</td>
               <td>{{ employee.bonus_revenues|default:"-" | intcomma }}</td>
               <td>{{ employee.penalty|default:"-" | intcomma }}</td>
               <td>{{ employee.shortage|default:"-" | intcomma }}</td>
               <td>
-                <a href="{% url 'staff_employee_month_view' year=current_date.year month=current_date.month employee=employee.employee.username %}?next={{ request.path }}" class="link-primary verysmall">
+                <a href="{% url 'staff_employee_month_view' year=current_date.year month=current_date.month employee=employee.id %}?next={{ request.path }}" class="link-primary verysmall">
                   Детально
                 </a>
               </td>

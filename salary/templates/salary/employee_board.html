@@ -9,7 +9,7 @@
         {% if verified_shifts_number >= 4 %}
         <!-- Button -->
         <div class="col text-end">
-          {% if rating.position == rating.position.ABSOLUTE %}
+          {% if rating.position == rating.position.ABSOLUTE_LEADER %}
           <a class="btn btn-outline-success verysmall" data-bs-toggle="collapse" href="#expandRating" role="button" aria-expanded="false" aria-controls="expandRating">
             <i class="fa-solid fa-crown fa-xl fa-beat-fade"></i>
             <b>Вы - {{ rating.position.value }}!</b>
@@ -34,28 +34,28 @@
               <span class="verysmall">Рейтинг<br> по категории</span><hr>
               <ol class="list-group list-group-numbered verysmall text-start">
                 <!-- first item -->
-                {% if rating.special_rating.first.employee.id == user.id %}
+                {% if rating.special_rating.first.id == user.id %}
                 <li class="list-group-item list-group-item-primary" style="font-weight: bold;">
                 {% else %}
                 <li class="list-group-item list-group-item-primary">
                 {% endif %}
-                  {{ rating.special_rating.first.employee.get_full_name }}</li>
+                  {{ rating.special_rating.first.full_name }}</li>
 
                 <!-- second item -->
-                {% if rating.special_rating.second.employee.id == user.id %}
+                {% if rating.special_rating.second.id == user.id %}
                 <li class="list-group-item list-group-item-success" style="font-weight: bold;">
                 {% else %}
                 <li class="list-group-item list-group-item-success">
                 {% endif %}
-                  {{ rating.special_rating.second.employee.get_full_name }}</li>
+                  {{ rating.special_rating.second.full_name }}</li>
 
                 <!-- third item -->
-                {% if rating.special_rating.third.employee.id == user.id %}
+                {% if rating.special_rating.third.id == user.id %}
                 <li class="list-group-item list-group-item-dark" style="font-weight: bold;">
                 {% else %}
                 <li class="list-group-item list-group-item-dark">
                 {% endif %}
-                  {{ rating.special_rating.third.employee.get_full_name }}</li>
+                  {{ rating.special_rating.third.full_name }}</li>
               </ol>
             </div>
             {% endif %}
@@ -64,28 +64,28 @@
               <span class="verysmall">Рейтинг<br> по средней выручке</span><hr>
               <ol class="list-group list-group-numbered verysmall text-start">
                 <!-- first item -->
-                {% if rating.common_rating.first.employee.id == user.id %}
+                {% if rating.common_rating.first.id == user.id %}
                 <li class="list-group-item list-group-item-primary" style="font-weight: bold;">
                 {% else %}
                 <li class="list-group-item list-group-item-primary">
                 {% endif %}
-                  {{ rating.common_rating.first.employee.get_full_name }}</li>
+                  {{ rating.common_rating.first.full_name }}</li>
 
                 <!-- second item -->
-                {% if rating.common_rating.second.employee.id == user.id %}
+                {% if rating.common_rating.second.id == user.id %}
                 <li class="list-group-item list-group-item-success" style="font-weight: bold;">
                 {% else %}
                 <li class="list-group-item list-group-item-success">
                 {% endif %}
-                  {{ rating.common_rating.second.employee.get_full_name }}</li>
+                  {{ rating.common_rating.second.full_name }}</li>
 
                 <!-- third item -->
-                {% if rating.common_rating.third.employee.id == user.id %}
+                {% if rating.common_rating.third.id == user.id %}
                 <li class="list-group-item list-group-item-dark" style="font-weight: bold;">
                 {% else %}
                 <li class="list-group-item list-group-item-dark">
                 {% endif %}
-                  {{ rating.common_rating.third.employee.get_full_name }}</li>
+                  {{ rating.common_rating.third.full_name }}</li>
               </ol>
             </div>
             {% endif %}

@@ -735,9 +735,12 @@ class IndexEmployeeView(ProfileStatusRedirectMixin, TitleMixin, ListView):
             year=datetime.date.today().year
         )
         rating = get_rating_data(award_data, self.request.user.id)
+        summary_earnings = self.get_summary_earnings() # need to moving to services
+        if rating.bonus:
+            summary_earnings += rating.bonus
 
         context.update({
-            'summary_earnings': self.get_summary_earnings(),
+            'summary_earnings': round(summary_earnings, 2),
             'penalty_count': misconducts.count(),
             'today_date': datetime.date.today(),
             'wait_explanation': wait_explanation.count(),
@@ -798,7 +801,7 @@ class StaffEmployeeMonthView(WorkingshiftPermissonsMixin, TitleMixin, ListView):
     title = 'Просмотр смен'
 
     def dispatch(self, request, *args: Any, **kwargs: Any):
-        self.employee = get_object_or_404(User, username=self.kwargs.get('employee'))
+        self.employee = get_object_or_404(User, pk=self.kwargs.get('employee'))
         return super().dispatch(request, *args, **kwargs)
 
     def get_queryset(self) -> QuerySet:
