@@ -60,7 +60,7 @@
               <td colspan="2">
               Бонус<br>({{ rating.position.value }})
               </td>
-              <td><span class="text-warning">{{ rating.bonus }}</span></td>
+              <td><span class="text-success">{{ rating.bonus|intcomma }}</span></td>
               <td></td>
             </tr>
             {% endif %}
