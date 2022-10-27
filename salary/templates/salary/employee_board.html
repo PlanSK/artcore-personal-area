@@ -9,7 +9,7 @@
         {% if verified_shifts_number >= 4 %}
         <!-- Button -->
         <div class="col text-end">
-          {% if rating.position == rating.position.ABSOLUTE %}
+          {% if rating.position == rating.position.ABSOLUTE_LEADER %}
           <a class="btn btn-outline-success verysmall" data-bs-toggle="collapse" href="#expandRating" role="button" aria-expanded="false" aria-controls="expandRating">
             <i class="fa-solid fa-crown fa-xl fa-beat-fade"></i>
             <b>Вы - {{ rating.position.value }}!</b>

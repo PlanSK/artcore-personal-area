@@ -1,4 +1,5 @@
 from django.db.models import QuerySet
+from django.conf import settings
 from enum import Enum
 import logging
 from typing import NamedTuple
@@ -63,18 +64,19 @@ class Category(NamedTuple):
     other: list
 
 
-class LeaderType(Enum):
-    ABSOLUTE = 'абсолютный лидер'
-    HOOKAH = 'лидер по кальянам'
-    BAR = 'лидер по бару'
-    AVERAGE = 'лидер по средней выручке'
+class EmployeeRatingPosition(Enum):
+    ABSOLUTE_LEADER = 'абсолютный лидер'
+    HOOKAH_LEADER = 'лидер по кальянам'
+    BAR_LEADER = 'лидер по бару'
+    AVERAGE_SUM_LEADER = 'лидер по средней выручке'
     NOT_LEADER = ''
 
 
 class Rating(NamedTuple):
     special_rating: Category
     common_rating: Category
-    position: LeaderType
+    position: EmployeeRatingPosition
+    bonus: float
 
 
 def get_workshift_data(workshift: WorkingShift) -> WorkshiftData:
@@ -324,11 +326,11 @@ def get_categories_from_list(employee_list: list) -> Category:
             raise ValueError(f'Unknown data error in {employee_list}')
 
 
-def get_leader_type(
+def get_employee_rating_position(
     special: EmployeeData | None, common: EmployeeData | None,
-        employee_id: int, is_cashier: bool = False) -> LeaderType:
+        employee_id: int, is_cashier: bool = False) -> EmployeeRatingPosition:
     """
-    Returns Leader type for the employee
+    Returns Employee position in the rating
     """
 
     special_category_leader = False
@@ -340,13 +342,33 @@ def get_leader_type(
         common_category_leader = True
 
     if special_category_leader and common_category_leader:
-        return LeaderType.ABSOLUTE
+        return EmployeeRatingPosition.ABSOLUTE_LEADER
     elif special_category_leader:
-        return LeaderType.BAR if is_cashier else LeaderType.HOOKAH
+        if is_cashier:
+            return EmployeeRatingPosition.BAR_LEADER
+        else:
+            return EmployeeRatingPosition.HOOKAH_LEADER
     elif common_category_leader:
-        return LeaderType.AVERAGE
+        return EmployeeRatingPosition.AVERAGE_SUM_LEADER
     else:
-        return LeaderType.NOT_LEADER
+        return EmployeeRatingPosition.NOT_LEADER
+
+
+def get_rating_bonus(leader_type: Leader) -> float:
+    """
+    Returns float bonus for leader position in rating
+    """
+    bonus = 0.0
+    if leader_type == EmployeeRatingPosition.ABSOLUTE_LEADER:
+        bonus = (settings.SPECIAL_CATEGORY_BONUS +
+                 settings.COMMON_CATEGORY_BONUS)
+    elif (leader_type == EmployeeRatingPosition.BAR_LEADER
+            or leader_type == EmployeeRatingPosition.HOOKAH_LEADER):
+        bonus = settings.SPECIAL_CATEGORY_BONUS
+    elif leader_type == EmployeeRatingPosition.AVERAGE_SUM_LEADER:
+        bonus = settings.COMMON_CATEGORY_BONUS
+
+    return bonus
 
 
 def get_rating_data(award_data: AwardData, employee_id: int) -> Rating:
@@ -362,7 +384,7 @@ def get_rating_data(award_data: AwardData, employee_id: int) -> Rating:
             reverse=True
         )
         cashiers_rating = get_categories_from_list(cashiers_revenue)
-        position = get_leader_type(
+        position = get_employee_rating_position(
             special=bar_rating.first,
             common=cashiers_rating.first,
             employee_id=employee_id,
@@ -371,7 +393,8 @@ def get_rating_data(award_data: AwardData, employee_id: int) -> Rating:
         return Rating(
             special_rating=bar_rating,
             common_rating=cashiers_rating,
-            position=position
+            position=position,
+            bonus=get_rating_bonus(position)
         )
     elif tuple(filter(lambda x: x.id == employee_id,
                 award_data.hall_admin_list)):
@@ -382,7 +405,7 @@ def get_rating_data(award_data: AwardData, employee_id: int) -> Rating:
             reverse=True
         )
         hall_admins_rating = get_categories_from_list(hall_admins_revenue)
-        position = get_leader_type(
+        position = get_employee_rating_position(
             special=hookah_rating.first,
             common=hall_admins_rating.first,
             employee_id=employee_id
@@ -390,5 +413,6 @@ def get_rating_data(award_data: AwardData, employee_id: int) -> Rating:
         return Rating(
             special_rating=hookah_rating,
             common_rating=hall_admins_rating,
-            position=position
+            position=position,
+            bonus=get_rating_bonus(position)
         )
