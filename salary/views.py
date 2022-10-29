@@ -730,11 +730,12 @@ class IndexEmployeeView(ProfileStatusRedirectMixin, TitleMixin, ListView):
         )
         verified_shifts_number = self.object_list.filter(
             is_verified=True).count()
-        award_data = get_awards_data(
-            month=datetime.date.today().month,
-            year=datetime.date.today().year
-        )
+
+        month: int = self.kwargs.get('month', datetime.date.today().month)
+        year: int = self.kwargs.get('year', datetime.date.today().year)
+        award_data = get_awards_data(month=month, year=year)
         rating = get_rating_data(award_data, self.request.user.id)
+
         summary_earnings = self.get_summary_earnings() # need to moving to services
         if rating.bonus:
             summary_earnings += rating.bonus
