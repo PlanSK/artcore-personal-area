@@ -33,7 +33,8 @@ from salary.services.filesystem import (
     delete_document_from_storage
 )
 from salary.services.monthly_reports import (
-    get_monthly_report, get_awards_data, get_rating_data
+    get_monthly_report, get_awards_data, get_rating_data,
+    RatingPositionNotDefined
 )
 
 logger = logging.getLogger(__name__)
@@ -730,15 +731,14 @@ class IndexEmployeeView(ProfileStatusRedirectMixin, TitleMixin, ListView):
         )
         verified_shifts_number = self.object_list.filter(
             is_verified=True).count()
-
-        month: int = self.kwargs.get('month', datetime.date.today().month)
-        year: int = self.kwargs.get('year', datetime.date.today().year)
-        award_data = get_awards_data(month=month, year=year)
-        rating = get_rating_data(award_data, self.request.user.id)
-
         summary_earnings = self.get_summary_earnings() # need to moving to services
-        if rating and rating.bonus:
-            summary_earnings += rating.bonus
+        try:
+            rating = get_rating_data(self.request.user.id)
+            if rating.bonus:
+                summary_earnings += rating.bonus
+        except RatingPositionNotDefined:
+            logger.exception('Employee rating position is not defined.')
+            rating = None
 
         context.update({
             'summary_earnings': round(summary_earnings, 2),

@@ -1,3 +1,4 @@
+import datetime
 from django.db.models import QuerySet
 from django.conf import settings
 from enum import Enum
@@ -9,6 +10,10 @@ from salary.services.earnings import Earnings
 
 
 logger = logging.getLogger(__name__)
+
+
+class RatingPositionNotDefined(Exception):
+    pass
 
 
 class EmployeeData(NamedTuple):
@@ -371,10 +376,13 @@ def get_rating_bonus(leader_type: Leader) -> float:
     return bonus
 
 
-def get_rating_data(award_data: AwardData, employee_id: int) -> Rating:
+def get_rating_data(
+    employee_id: int, month: int = datetime.date.today().month,
+        year: int = datetime.date.today().year) -> Rating:
     """
     Returns Rating data for the employee by id
     """
+    award_data = get_awards_data(year=year, month=month)
     if tuple(filter(lambda x: x.id == employee_id,
                 award_data.cashiers_list)):
         bar_rating = get_categories_from_list(award_data.cashiers_list)
@@ -416,3 +424,4 @@ def get_rating_data(award_data: AwardData, employee_id: int) -> Rating:
             position=position,
             bonus=get_rating_bonus(position)
         )
+    raise RatingPositionNotDefined
