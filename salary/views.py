@@ -736,7 +736,7 @@ class IndexEmployeeView(ProfileStatusRedirectMixin, TitleMixin, ListView):
         )
         rating = get_rating_data(award_data, self.request.user.id)
         summary_earnings = self.get_summary_earnings() # need to moving to services
-        if rating.bonus:
+        if rating and rating.bonus:
             summary_earnings += rating.bonus
 
         context.update({
