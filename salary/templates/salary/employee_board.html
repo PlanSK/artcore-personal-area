@@ -6,7 +6,7 @@
   <main>
     <div class="container">
       <div class="row m-2">
-        {% if verified_shifts_number >= 4 %}
+        {% if rating and verified_shifts_number >= 4 %}
         <!-- Button -->
         <div class="col text-end">
           {% if rating.position == rating.position.ABSOLUTE_LEADER %}
