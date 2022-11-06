@@ -19,10 +19,11 @@ from .forms import *
 from .mixins import *
 from salary.services.chat import *
 from salary.services.shift_calendar import get_user_calendar
-from salary.services.misconduct import Intruder, get_misconduct_slug
+from salary.services.misconduct import Intruder
+from salary.services.internal_model_func import get_misconduct_slug
 from salary.services.workshift import (
     check_permission_to_close, notification_of_upcoming_shifts,
-    get_missed_dates_list
+    get_missed_dates_list, get_employee_workshift_indicators
 )
 from salary.services.registration import (
     registration_user, sending_confirmation_link, confirmation_user_email,
@@ -33,8 +34,10 @@ from salary.services.filesystem import (
     delete_document_from_storage
 )
 from salary.services.monthly_reports import (
-    get_monthly_report, get_awards_data, get_rating_data,
+    get_monthly_report, get_awards_data, get_rating_data
 )
+from salary.services.misconduct import get_misconduct_employee_data
+
 
 logger = logging.getLogger(__name__)
 
@@ -670,8 +673,7 @@ class MonthlyAnalyticalReport(WorkingshiftPermissonsMixin, TitleMixin, ListView)
         return context
 
 
-class IndexEmployeeView(ProfileStatusRedirectMixin, TitleMixin, ListView):
-    model = WorkingShift
+class IndexEmployeeView(ProfileStatusRedirectMixin, TitleMixin, TemplateView):
     template_name = 'salary/employee_board.html'
     title = 'Панель пользователя'
     login_url = reverse_lazy('login')
@@ -682,71 +684,22 @@ class IndexEmployeeView(ProfileStatusRedirectMixin, TitleMixin, ListView):
 
         return super().dispatch(request, *args, **kwargs)
 
-    def get_queryset(self) -> QuerySet:
-        queryset = WorkingShift.objects.select_related(
-            'hall_admin__profile__position',
-            'cash_admin__profile__position'
-        ).filter(
-            shift_date__month=datetime.date.today().month,
-            shift_date__year=datetime.date.today().year,
-        ).filter(
-            Q(cash_admin=self.request.user) | Q(hall_admin=self.request.user)
-        ).order_by('shift_date')
-
-        return queryset
-
-    def get_summary_earnings(self):
-        summary_earnings = sum([
-            workshift.hall_admin_earnings.final_earnings
-            if workshift.hall_admin == self.request.user
-            else workshift.cashier_earnings.final_earnings
-            for workshift in self.object_list.filter(is_verified=True)
-        ])
-
-        return round(summary_earnings, 2)
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        misconducts = Misconduct.objects.filter(intruder=self.request.user)
-        permission_to_close = check_permission_to_close(
-            user=self.request.user,
-            date=datetime.date.today()
-        )
-        wait_explanation = misconducts.filter(
-            status=Misconduct.MisconductStatus.ADDED
-        )
-        penalty_sum = misconducts.filter(
-            status=Misconduct.MisconductStatus.CLOSED,
-            workshift_date__month=datetime.date.today().month,
-            workshift_date__year=datetime.date.today().year,
-        ).aggregate(Sum('penalty')).get('penalty__sum')
-        shortage_sum = self.object_list.filter(
-            cash_admin=self.request.user,
-            shortage_paid=False
-        ).aggregate(Sum('shortage')).get('shortage__sum')
+        permission_to_close = check_permission_to_close(user=self.request.user)
         notification_about_shift = notification_of_upcoming_shifts(
-            user=self.request.user,
-            date=datetime.date.today()
-        )
-        verified_shifts_number = self.object_list.filter(
-            is_verified=True).count()
-        summary_earnings = self.get_summary_earnings() # need to moving to services
+            user=self.request.user)
+        misconduct_data = get_misconduct_employee_data(self.request.user.id)
 
-        rating_data = get_rating_data(self.request.user.id)
-        if rating_data:
-            summary_earnings += rating_data.bonus
+        employee_month_indicators = get_employee_workshift_indicators(
+            self.request.user.id)
 
         context.update({
-            'summary_earnings': round(summary_earnings, 2),
-            'penalty_count': misconducts.count(),
+            'employee_indicators': employee_month_indicators,
+            'misconduct_data': misconduct_data,
             'today_date': datetime.date.today(),
-            'wait_explanation': wait_explanation.count(),
-            'penalty_sum': penalty_sum,
-            'shortage_sum': shortage_sum,
             'permission_to_close': permission_to_close,
             'notification_about_shift': notification_about_shift,
-            'rating_data': rating_data,
-            'verified_shifts_number': verified_shifts_number,
         })
         return context
 
