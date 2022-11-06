@@ -6,18 +6,18 @@
   <main>
     <div class="container">
       <div class="row m-2">
-        {% if rating and verified_shifts_number >= 4 %}
+        {% if rating_data and verified_shifts_number >= 4 %}
         <!-- Button -->
         <div class="col text-end">
-          {% if rating.position == rating.position.ABSOLUTE_LEADER %}
+          {% if rating_data.position == rating_data.position.ABSOLUTE_LEADER %}
           <a class="btn btn-outline-success verysmall" data-bs-toggle="collapse" href="#expandRating" role="button" aria-expanded="false" aria-controls="expandRating">
             <i class="fa-solid fa-crown fa-xl fa-beat-fade"></i>
-            <b>Вы - {{ rating.position.value }}!</b>
+            <b>Вы - {{ rating_data.position.value }}!</b>
           </a>
-          {% elif rating.position != rating.position.NOT_LEADER %}
+          {% elif rating_data.position != rating_data.position.NOT_LEADER %}
           <a class="btn btn-outline-success verysmall" data-bs-toggle="collapse" href="#expandRating" role="button" aria-expanded="false" aria-controls="expandRating">
             <i class="fa-solid fa-trophy fa-xl fa-beat-fade"></i>
-            <b>Вы - {{ rating.position.value }}!</b>
+            <b>Вы - {{ rating_data.position.value }}!</b>
           </a>
           {% else %}
           <a class="btn btn-outline-warning verysmall" data-bs-toggle="collapse" href="#expandRating" role="button" aria-expanded="false" aria-controls="expandRating">
@@ -29,10 +29,10 @@
         <!-- Table -->
         <div class="collapse" id="expandRating">
           <div class="row justify-content-end mt-2">
-            {% if rating.special_rating.first %}
+            {% if rating_data.special_rating.first %}
             <div class="col-md-3 col-sm-auto text-center border rounded pb-2 m-1 border-secondary">
               <span class="verysmall">Рейтинг по 
-                {% if rating.special_rating.first.summary_bar_revenue %}
+                {% if rating_data.special_rating.first.summary_bar_revenue %}
                 бару
                 {% else %}
                 кальянам
@@ -41,83 +41,83 @@
               </span><hr>
               <ol class="list-group list-group-numbered verysmall text-start">
                 <!-- first item -->
-                {% if rating.special_rating.first.id == user.id %}
+                {% if rating_data.special_rating.first.id == user.id %}
                 <li class="list-group-item list-group-item-primary" style="font-weight: bold;">
                 {% else %}
                 <li class="list-group-item list-group-item-primary">
                 {% endif %}
-                  {{ rating.special_rating.first.full_name }}
+                  {{ rating_data.special_rating.first.full_name }}
                   <span class="badge bg-primary position-absolute top-50 end-0 translate-middle">
-                    {{ rating.special_rating.first.summary_bar_revenue|default:"" }}
-                    {{ rating.special_rating.first.summary_hookah_revenue|default:"" }}
+                    {{ rating_data.special_rating.first.summary_bar_revenue|default:"" }}
+                    {{ rating_data.special_rating.first.summary_hookah_revenue|default:"" }}
                   </span>
                 </li>
 
                 <!-- second item -->
-                {% if rating.special_rating.second.id == user.id %}
+                {% if rating_data.special_rating.second.id == user.id %}
                 <li class="list-group-item list-group-item-success" style="font-weight: bold;">
                 {% else %}
                 <li class="list-group-item list-group-item-success">
                 {% endif %}
-                  {{ rating.special_rating.second.full_name }}
+                  {{ rating_data.special_rating.second.full_name }}
                   <span class="badge bg-success position-absolute top-50 end-0 translate-middle">
-                    {{ rating.special_rating.second.summary_bar_revenue|default:"" }}
-                    {{ rating.special_rating.second.summary_hookah_revenue|default:"" }}
+                    {{ rating_data.special_rating.second.summary_bar_revenue|default:"" }}
+                    {{ rating_data.special_rating.second.summary_hookah_revenue|default:"" }}
                   </span>
                 </li>
 
                 <!-- third item -->
-                {% if rating.special_rating.third.id == user.id %}
+                {% if rating_data.special_rating.third.id == user.id %}
                 <li class="list-group-item list-group-item-dark" style="font-weight: bold;">
                 {% else %}
                 <li class="list-group-item list-group-item-dark">
                 {% endif %}
-                  {{ rating.special_rating.third.full_name }}
+                  {{ rating_data.special_rating.third.full_name }}
                   <span class="badge bg-dark position-absolute top-50 end-0 translate-middle">
-                    {{ rating.special_rating.third.summary_bar_revenue|default:"" }}
-                    {{ rating.special_rating.third.summary_hookah_revenue|default:"" }}
+                    {{ rating_data.special_rating.third.summary_bar_revenue|default:"" }}
+                    {{ rating_data.special_rating.third.summary_hookah_revenue|default:"" }}
                   </span>
                 </li>
               </ol>
             </div>
             {% endif %}
-            {% if rating.common_rating.first %}
+            {% if rating_data.common_rating.first %}
             <div class="col-md-3 col-sm-auto text-center border rounded pb-2 m-1 border-secondary">
               <span class="verysmall">Рейтинг по средней выручке</span><hr>
               <ol class="list-group list-group-numbered verysmall text-start">
                 <!-- first item -->
-                {% if rating.common_rating.first.id == user.id %}
+                {% if rating_data.common_rating.first.id == user.id %}
                 <li class="list-group-item list-group-item-primary" style="font-weight: bold;">
                 {% else %}
                 <li class="list-group-item list-group-item-primary">
                 {% endif %}
-                  {{ rating.common_rating.first.full_name }}
+                  {{ rating_data.common_rating.first.full_name }}
                   <span class="badge bg-primary position-absolute top-50 end-0 translate-middle">
-                    {{ rating.common_rating.first.average_revenue|default:"" }}
+                    {{ rating_data.common_rating.first.average_revenue|default:"" }}
                   </span>
                 </li>
 
                 <!-- second item -->
-                {% if rating.common_rating.second.id == user.id %}
+                {% if rating_data.common_rating.second.id == user.id %}
                 <li class="list-group-item list-group-item-success" style="font-weight: bold;">
                 {% else %}
                 <li class="list-group-item list-group-item-success">
                 {% endif %}
-                  {{ rating.common_rating.second.full_name }}
+                  {{ rating_data.common_rating.second.full_name }}
                   <span class="badge bg-success position-absolute top-50 end-0 translate-middle">
-                    {{ rating.common_rating.second.average_revenue|default:"" }}
+                    {{ rating_data.common_rating.second.average_revenue|default:"" }}
                   </span>
                 </li>
 
                 <!-- third item -->
-                {% if rating.common_rating.third.id == user.id %}
+                {% if rating_data.common_rating.third.id == user.id %}
                 <li class="list-group-item list-group-item-dark" style="font-weight: bold;">
                 {% else %}
                 <li class="list-group-item list-group-item-dark">
                 {% endif %}
-                  {{ rating.common_rating.third.full_name }}
+                  {{ rating_data.common_rating.third.full_name }}
                   <span class="badge bg-dark position-absolute top-50 end-0 translate-middle">
-                    {{ rating.common_rating.third.average_revenue|default:"" }}
+                    {{ rating_data.common_rating.third.average_revenue|default:"" }}
                   </span>
                 </li>
               </ol>
