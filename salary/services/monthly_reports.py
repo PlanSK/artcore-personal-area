@@ -12,7 +12,7 @@ from salary.services.earnings import Earnings
 logger = logging.getLogger(__name__)
 
 
-class RatingPositionNotDefined(Exception):
+class RatingDataNotDefined(ValueError):
     pass
 
 
@@ -376,11 +376,11 @@ def get_rating_bonus(leader_type: Leader) -> float:
     return bonus
 
 
-def get_rating_data(
+def _get_employee_rating_data(
     employee_id: int, month: int = datetime.date.today().month,
         year: int = datetime.date.today().year) -> Rating:
     """
-    Returns Rating data for the employee by id
+    Define and returns Rating data from awards data.
     """
     award_data = get_awards_data(year=year, month=month)
     if tuple(filter(lambda x: x.id == employee_id,
@@ -424,4 +424,21 @@ def get_rating_data(
             position=position,
             bonus=get_rating_bonus(position)
         )
-    raise RatingPositionNotDefined
+    raise RatingDataNotDefined
+
+
+def get_rating_data(
+    employee_id: int, month: int = datetime.date.today().month,
+        year: int = datetime.date.today().year) -> Rating | None:
+    """
+    Returns Rating data for the employee by id or None if employee rating
+    status not defined.
+    """
+    rating_data = None
+    try:
+        rating_data = _get_employee_rating_data(employee_id, month, year)
+    except RatingDataNotDefined:
+        logger.exception(
+            f'Employee id {employee_id} rating position is not found.')
+
+    return rating_data
