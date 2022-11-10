@@ -341,9 +341,9 @@ def get_employee_rating_position(
     special_category_leader = False
     common_category_leader = False
 
-    if special and special.id == employee_id:
+    if special and special.id == employee_id and special.shift_counter >= 4:
         special_category_leader = True
-    if common and common.id == employee_id:
+    if common and common.id == employee_id and special.shift_counter >= 4:
         common_category_leader = True
 
     if special_category_leader and common_category_leader:

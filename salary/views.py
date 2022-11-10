@@ -23,7 +23,8 @@ from salary.services.misconduct import Intruder
 from salary.services.internal_model_func import get_misconduct_slug
 from salary.services.workshift import (
     check_permission_to_close, notification_of_upcoming_shifts,
-    get_missed_dates_list, get_employee_workshift_indicators
+    get_missed_dates_list, get_employee_workshift_indicators,
+    get_employee_month_workshifts
 )
 from salary.services.registration import (
     registration_user, sending_confirmation_link, confirmation_user_email,
@@ -222,7 +223,8 @@ class AnalyticalView(ReportsView):
     template_name = 'salary/analytical_reports_list.html'
 
 
-class StaffWorkshiftsView(WorkingshiftPermissonsMixin, TitleMixin, ListView):
+class StaffWorkshiftsView(WorkingshiftPermissonsMixin, MonthYearExtractMixin,
+                          TitleMixin, ListView):
     template_name = 'salary/staff_workshifts_view.html'
     model = WorkingShift
     title = 'Смены'
@@ -234,11 +236,9 @@ class StaffWorkshiftsView(WorkingshiftPermissonsMixin, TitleMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        year = datetime.date.today().year
-        month = datetime.date.today().month
         current_month_workshifts_dates = self.object_list.filter(
-            shift_date__month=month,
-            shift_date__year=year).dates('shift_date', 'day')
+            shift_date__month=self.month,
+            shift_date__year=self.year).dates('shift_date', 'day')
         context.update({
             'workshift_list': self.object_list.filter(is_verified=False),
             'missed_workshifts_dates': get_missed_dates_list(
@@ -248,7 +248,8 @@ class StaffWorkshiftsView(WorkingshiftPermissonsMixin, TitleMixin, ListView):
         return context
 
 
-class StaffArchiveWorkshiftsView(WorkingshiftPermissonsMixin, TitleMixin, ListView):
+class StaffArchiveWorkshiftsView(WorkingshiftPermissonsMixin,
+                                 MonthYearExtractMixin, TitleMixin, ListView):
     template_name = 'salary/staff_workshifts_view.html'
     model = WorkingShift
     title = 'Смены'
@@ -257,8 +258,8 @@ class StaffArchiveWorkshiftsView(WorkingshiftPermissonsMixin, TitleMixin, ListVi
     def get_queryset(self):
         if self.kwargs.get('year') and self.kwargs.get('month'):
             queryset = WorkingShift.objects.filter(
-                shift_date__month = self.kwargs.get('month'),
-                shift_date__year = self.kwargs.get('year')
+                shift_date__month = self.month,
+                shift_date__year = self.year
             ).select_related('cash_admin', 'hall_admin').order_by('shift_date')
         else:
             HttpResponseNotFound('No all data found.')
@@ -272,7 +273,7 @@ class StaffArchiveWorkshiftsView(WorkingshiftPermissonsMixin, TitleMixin, ListVi
                 for workshift in self.object_list
             ]),
             'workshift_dates': datetime.date(
-                self.kwargs.get('year'), self.kwargs.get('month'), 1
+                self.year, self.month, 1
             ),
             'missed_workshifts_dates': get_missed_dates_list(
                 self.object_list.dates('shift_date', 'day')
@@ -299,15 +300,10 @@ class DeleteWorkshift(WorkingshiftPermissonsMixin, TitleMixin, SuccessUrlMixin,
     title = 'Удаление смены'
 
 
-class MonthlyReportListView(WorkingshiftPermissonsMixin, TitleMixin,
-                            TemplateView):
+class MonthlyReportListView(WorkingshiftPermissonsMixin, MonthYearExtractMixin,
+                            TitleMixin, TemplateView):
     template_name = 'salary/monthlyreport_list.html'
     title = 'Сводный отчёт'
-
-    def dispatch(self, request, *args, **kwargs):
-        self.year = self.kwargs.get('year')
-        self.month = self.kwargs.get('month')
-        return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -544,10 +540,12 @@ class MisconductDetailView(ProfileStatusRedirectMixin, PermissionRequiredMixin,
     title = 'Протокол нарушения'
     permission_required = 'salary.view_misconduct'
     context_object_name = 'misconduct'
-    queryset = Misconduct.objects.select_related('intruder', 'moderator', 'regulations_article')
+    queryset = Misconduct.objects.select_related('intruder', 'moderator',
+                                                 'regulations_article')
 
 
-class MonthlyAnalyticalReport(WorkingshiftPermissonsMixin, TitleMixin, ListView):
+class MonthlyAnalyticalReport(WorkingshiftPermissonsMixin, 
+                              MonthYearExtractMixin, TitleMixin, ListView):
     model = WorkingShift
     title = 'Аналитический отчёт'
     template_name = 'salary/monthly_analytical_report.html'
@@ -566,16 +564,14 @@ class MonthlyAnalyticalReport(WorkingshiftPermissonsMixin, TitleMixin, ListView)
             'summary_revenue__avg',
         )
         self.current_month_queryset = self.object_list.filter(
-            shift_date__month=self.kwargs.get('month'),
-            shift_date__year=self.kwargs.get('year'),
+            shift_date__month=self.month,
+            shift_date__year=self.year,
         )
 
         if not self.current_month_queryset:
             raise Http404
 
-        self.current_date = datetime.date(
-            self.kwargs.get('year'),
-            self.kwargs.get('month'), 1)
+        self.current_date = datetime.date(self.year, self.month, 1)
 
         self.previous_month_date = self.current_date - relativedelta(months=1)
         self.previous_month_queryset = self.object_list.filter(
@@ -704,10 +700,25 @@ class IndexEmployeeView(ProfileStatusRedirectMixin, TitleMixin, TemplateView):
         return context
 
 
-class EmployeeWorkshiftsView(PermissionRequiredMixin, IndexEmployeeView):
+class EmployeeWorkshiftsView(PermissionRequiredMixin, MonthYearExtractMixin, TitleMixin,
+                             TemplateView):
     template_name = 'salary/employee_workshifts_view.html'
     title = 'Смены'
     permission_required = 'salary.view_workingshift'
+
+    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+        workshifts_list = get_employee_month_workshifts(
+            self.request.user.id, self.month, self.year)
+        employee_month_indicators = get_employee_workshift_indicators(
+            self.request.user.id, self.month, self.year)
+        context = super().get_context_data(**kwargs)
+        context.update(
+            {
+                'employee_indicators': employee_month_indicators,
+                'workshifts_list': workshifts_list
+            }
+        )
+        return context
 
 
 class EmployeeMonthlyListView(ProfileStatusRedirectMixin, 
@@ -727,26 +738,8 @@ class EmployeeMonthlyListView(ProfileStatusRedirectMixin,
         return queryset
 
 
-class EmployeeArchiveView(PermissionRequiredMixin, IndexEmployeeView):
-    template_name = 'salary/employee_workshifts_view.html'
-    title = 'Просмотр смен'
-    permission_required = 'salary.view_workingshift'
-
-    def get_queryset(self) -> QuerySet:
-        queryset = WorkingShift.objects.select_related(
-            'hall_admin__profile__position',
-            'cash_admin__profile__position'
-        ).filter(
-            shift_date__month=self.kwargs.get('month'),
-            shift_date__year=self.kwargs.get('year'),
-        ).filter(
-            Q(cash_admin=self.request.user) | Q(hall_admin=self.request.user)
-        ).order_by('shift_date')
-
-        return queryset
-
-
-class StaffEmployeeMonthView(WorkingshiftPermissonsMixin, TitleMixin, ListView):
+class StaffEmployeeMonthView(WorkingshiftPermissonsMixin,
+                             MonthYearExtractMixin, TitleMixin, ListView):
     template_name = 'salary/staff_employee_month_view.html'
     title = 'Просмотр смен'
 
@@ -759,8 +752,8 @@ class StaffEmployeeMonthView(WorkingshiftPermissonsMixin, TitleMixin, ListView):
             'hall_admin__profile__position',
             'cash_admin__profile__position'
         ).filter(
-            shift_date__month=self.kwargs.get('month'),
-            shift_date__year=self.kwargs.get('year'),
+            shift_date__month=self.month,
+            shift_date__year=self.year,
         ).filter(
             Q(cash_admin=self.employee) | Q(hall_admin=self.employee)
         ).order_by('shift_date')
@@ -1039,7 +1032,8 @@ class MessengerNewChatView(MessengerMainView):
         return context
 
 
-class CalendarView(LoginRequiredMixin, TitleMixin, TemplateView):
+class CalendarView(LoginRequiredMixin, MonthYearExtractMixin,
+                   TitleMixin, TemplateView):
     template_name: str = 'salary/calendar/calendar.html'
     title: str = 'График смен'
     
@@ -1056,13 +1050,12 @@ class CalendarView(LoginRequiredMixin, TitleMixin, TemplateView):
 
     def get_context_data(self, **kwargs: Any) -> dict:
         context: dict = super().get_context_data(**kwargs)
-        month: int = kwargs.get('month')
-        year: int = kwargs.get('year')
-        user_calendar = get_user_calendar(self.requested_user, year, month)
+        user_calendar = get_user_calendar(self.requested_user, self.year,
+                                          self.month)
 
         context.update({
             'month_calendar': user_calendar,
-            'requested_date': datetime.date(year, month, 1),
+            'requested_date': datetime.date(self.year, self.month, 1),
             'requested_user': self.requested_user,
         })
         return context

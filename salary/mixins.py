@@ -1,4 +1,8 @@
+import datetime
+from typing import Any
+
 from django.contrib.auth.mixins import PermissionRequiredMixin, UserPassesTestMixin
+from django.http import HttpRequest, HttpResponse
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.contrib.auth.mixins import AccessMixin
@@ -79,4 +83,13 @@ class ProfileStatusRedirectMixin(AccessMixin):
         else:
             return self.handle_no_permission()
 
+        return super().dispatch(request, *args, **kwargs)
+
+
+class MonthYearExtractMixin:
+    def dispatch(self, request: HttpRequest, *args: Any,
+                 **kwargs: Any) -> HttpResponse:
+        month, year = datetime.date.today().month, datetime.date.today().year
+        self.month = kwargs.get('month') if kwargs.get('month') else month
+        self.year = kwargs.get('year') if kwargs.get('year') else year
         return super().dispatch(request, *args, **kwargs)

@@ -80,7 +80,7 @@ def get_missed_dates_list(
     return missed_dates_list
 
 
-def _get_employee_month_workshifts(employee_id: int, month: int, year: int,
+def get_employee_month_workshifts(employee_id: int, month: int, year: int,
                                    only_verified: bool = False) -> QuerySet:
     """
     Returns Queryset with workshifts which has employee_id
@@ -90,7 +90,8 @@ def _get_employee_month_workshifts(employee_id: int, month: int, year: int,
         'hall_admin__profile__position',
         'cash_admin__profile__position').filter(
             shift_date__month=month, shift_date__year=year).filter(
-                Q(cash_admin__id=employee_id) | Q(hall_admin__id=employee_id))
+                Q(cash_admin__id=employee_id) | Q(hall_admin__id=employee_id)
+            ).order_by('shift_date')
 
     if only_verified:
         return employee_month_workshifts.filter(is_verified=True)
@@ -103,7 +104,7 @@ def _get_summary_earnings(employee_id: int, month: int, year: int,
     """
     Reutrns summary earnings for the month.
     """
-    employee_month_workshifts = _get_employee_month_workshifts(
+    employee_month_workshifts = get_employee_month_workshifts(
         employee_id, month, year, only_verified=True)
     summary_earnings = sum([
         workshift.hall_admin_earnings.final_earnings
@@ -123,16 +124,16 @@ def get_employee_workshift_indicators(
     """
     Returns EmployeeWorkshiftsIndicators for employee
     """
-    number_of_total_workshifts = _get_employee_month_workshifts(
+    number_of_total_workshifts = get_employee_month_workshifts(
         employee_id, month, year).count()
-    shortage_sum = _get_employee_month_workshifts(
+    shortage_sum = get_employee_month_workshifts(
         employee_id, month, year).filter(
             cash_admin__id=employee_id, shortage_paid=False).aggregate(
                 Sum('shortage')).get('shortage__sum', 0.0)
-    rating_data=get_rating_data(employee_id)
+    rating_data=get_rating_data(employee_id, month, year)
     summary_earnings = _get_summary_earnings(employee_id, month, year,
                                              rating_data)
-    number_of_verified_workshifts=_get_employee_month_workshifts(
+    number_of_verified_workshifts=get_employee_month_workshifts(
         employee_id, month, year, True).count()
 
     return EmployeeMonthIndicators(
