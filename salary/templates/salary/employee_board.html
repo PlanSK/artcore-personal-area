@@ -6,18 +6,18 @@
   <main>
     <div class="container">
       <div class="row m-2">
-        {% if rating_data and verified_shifts_number >= 4 %}
+        {% if employee_indicators.number_of_verified_workshifts >= 4 and employee_indicators.rating_data %}
         <!-- Button -->
         <div class="col text-end">
-          {% if rating_data.position == rating_data.position.ABSOLUTE_LEADER %}
+          {% if employee_indicators.rating_data.position == employee_indicators.rating_data.position.ABSOLUTE_LEADER %}
           <a class="btn btn-outline-success verysmall" data-bs-toggle="collapse" href="#expandRating" role="button" aria-expanded="false" aria-controls="expandRating">
             <i class="fa-solid fa-crown fa-xl fa-beat-fade"></i>
-            <b>Вы - {{ rating_data.position.value }}!</b>
+            <b>Вы - {{ employee_indicators.rating_data.position.value }}!</b>
           </a>
-          {% elif rating_data.position != rating_data.position.NOT_LEADER %}
+          {% elif employee_indicators.rating_data.position != employee_indicators.rating_data.position.NOT_LEADER %}
           <a class="btn btn-outline-success verysmall" data-bs-toggle="collapse" href="#expandRating" role="button" aria-expanded="false" aria-controls="expandRating">
             <i class="fa-solid fa-trophy fa-xl fa-beat-fade"></i>
-            <b>Вы - {{ rating_data.position.value }}!</b>
+            <b>Вы - {{ employee_indicators.rating_data.position.value }}!</b>
           </a>
           {% else %}
           <a class="btn btn-outline-warning verysmall" data-bs-toggle="collapse" href="#expandRating" role="button" aria-expanded="false" aria-controls="expandRating">
@@ -29,10 +29,10 @@
         <!-- Table -->
         <div class="collapse" id="expandRating">
           <div class="row justify-content-end mt-2">
-            {% if rating_data.special_rating.first %}
+            {% if employee_indicators.rating_data.special_rating.first %}
             <div class="col-md-3 col-sm-auto text-center border rounded pb-2 m-1 border-secondary">
               <span class="verysmall">Рейтинг по 
-                {% if rating_data.special_rating.first.summary_bar_revenue %}
+                {% if employee_indicators.rating_data.special_rating.first.summary_bar_revenue %}
                 бару
                 {% else %}
                 кальянам
@@ -41,83 +41,83 @@
               </span><hr>
               <ol class="list-group list-group-numbered verysmall text-start">
                 <!-- first item -->
-                {% if rating_data.special_rating.first.id == user.id %}
+                {% if employee_indicators.rating_data.special_rating.first.id == user.id %}
                 <li class="list-group-item list-group-item-primary" style="font-weight: bold;">
                 {% else %}
                 <li class="list-group-item list-group-item-primary">
                 {% endif %}
-                  {{ rating_data.special_rating.first.full_name }}
+                  {{ employee_indicators.rating_data.special_rating.first.full_name }}
                   <span class="badge bg-primary position-absolute top-50 end-0 translate-middle">
-                    {{ rating_data.special_rating.first.summary_bar_revenue|default:"" }}
-                    {{ rating_data.special_rating.first.summary_hookah_revenue|default:"" }}
+                    {{ employee_indicators.rating_data.special_rating.first.summary_bar_revenue|default:"" }}
+                    {{ employee_indicators.rating_data.special_rating.first.summary_hookah_revenue|default:"" }}
                   </span>
                 </li>
 
                 <!-- second item -->
-                {% if rating_data.special_rating.second.id == user.id %}
+                {% if employee_indicators.rating_data.special_rating.second.id == user.id %}
                 <li class="list-group-item list-group-item-success" style="font-weight: bold;">
                 {% else %}
                 <li class="list-group-item list-group-item-success">
                 {% endif %}
-                  {{ rating_data.special_rating.second.full_name }}
+                  {{ employee_indicators.rating_data.special_rating.second.full_name }}
                   <span class="badge bg-success position-absolute top-50 end-0 translate-middle">
-                    {{ rating_data.special_rating.second.summary_bar_revenue|default:"" }}
-                    {{ rating_data.special_rating.second.summary_hookah_revenue|default:"" }}
+                    {{ employee_indicators.rating_data.special_rating.second.summary_bar_revenue|default:"" }}
+                    {{ employee_indicators.rating_data.special_rating.second.summary_hookah_revenue|default:"" }}
                   </span>
                 </li>
 
                 <!-- third item -->
-                {% if rating_data.special_rating.third.id == user.id %}
+                {% if employee_indicators.rating_data.special_rating.third.id == user.id %}
                 <li class="list-group-item list-group-item-dark" style="font-weight: bold;">
                 {% else %}
                 <li class="list-group-item list-group-item-dark">
                 {% endif %}
-                  {{ rating_data.special_rating.third.full_name }}
+                  {{ employee_indicators.rating_data.special_rating.third.full_name }}
                   <span class="badge bg-dark position-absolute top-50 end-0 translate-middle">
-                    {{ rating_data.special_rating.third.summary_bar_revenue|default:"" }}
-                    {{ rating_data.special_rating.third.summary_hookah_revenue|default:"" }}
+                    {{ employee_indicators.rating_data.special_rating.third.summary_bar_revenue|default:"" }}
+                    {{ employee_indicators.rating_data.special_rating.third.summary_hookah_revenue|default:"" }}
                   </span>
                 </li>
               </ol>
             </div>
             {% endif %}
-            {% if rating_data.common_rating.first %}
+            {% if employee_indicators.rating_data.common_rating.first %}
             <div class="col-md-3 col-sm-auto text-center border rounded pb-2 m-1 border-secondary">
               <span class="verysmall">Рейтинг по средней выручке</span><hr>
               <ol class="list-group list-group-numbered verysmall text-start">
                 <!-- first item -->
-                {% if rating_data.common_rating.first.id == user.id %}
+                {% if employee_indicators.rating_data.common_rating.first.id == user.id %}
                 <li class="list-group-item list-group-item-primary" style="font-weight: bold;">
                 {% else %}
                 <li class="list-group-item list-group-item-primary">
                 {% endif %}
-                  {{ rating_data.common_rating.first.full_name }}
+                  {{ employee_indicators.rating_data.common_rating.first.full_name }}
                   <span class="badge bg-primary position-absolute top-50 end-0 translate-middle">
-                    {{ rating_data.common_rating.first.average_revenue|default:"" }}
+                    {{ employee_indicators.rating_data.common_rating.first.average_revenue|default:"" }}
                   </span>
                 </li>
 
                 <!-- second item -->
-                {% if rating_data.common_rating.second.id == user.id %}
+                {% if employee_indicators.rating_data.common_rating.second.id == user.id %}
                 <li class="list-group-item list-group-item-success" style="font-weight: bold;">
                 {% else %}
                 <li class="list-group-item list-group-item-success">
                 {% endif %}
-                  {{ rating_data.common_rating.second.full_name }}
+                  {{ employee_indicators.rating_data.common_rating.second.full_name }}
                   <span class="badge bg-success position-absolute top-50 end-0 translate-middle">
-                    {{ rating_data.common_rating.second.average_revenue|default:"" }}
+                    {{ employee_indicators.rating_data.common_rating.second.average_revenue|default:"" }}
                   </span>
                 </li>
 
                 <!-- third item -->
-                {% if rating_data.common_rating.third.id == user.id %}
+                {% if employee_indicators.rating_data.common_rating.third.id == user.id %}
                 <li class="list-group-item list-group-item-dark" style="font-weight: bold;">
                 {% else %}
                 <li class="list-group-item list-group-item-dark">
                 {% endif %}
-                  {{ rating_data.common_rating.third.full_name }}
+                  {{ employee_indicators.rating_data.common_rating.third.full_name }}
                   <span class="badge bg-dark position-absolute top-50 end-0 translate-middle">
-                    {{ rating_data.common_rating.third.average_revenue|default:"" }}
+                    {{ employee_indicators.rating_data.common_rating.third.average_revenue|default:"" }}
                   </span>
                 </li>
               </ol>
@@ -162,7 +162,7 @@
       </div>
       {% endif %}
 
-      {% if wait_explanation %}
+      {% if misconduct_data.wait_explanation %}
       <div class="row justify-content-center">
         <div class="col-md-6 col-sm-auto">
           <div class="alert alert-danger d-flex align-items-center mt-2" role="alert">
@@ -184,7 +184,7 @@
                     <div class="text-center">
                       <p class="card-text fst-italic">Мои смены</p>
                       <hr class="m-1">
-                      <span class="fw-bold">{{ object_list.count|default:"-" }}</span>
+                      <span class="fw-bold">{{ employee_indicators.number_of_total_workshifts|default:"-" }}</span>
                       <a href="{% url 'employee_workshifts' %}" class="stretched-link"></a>
                     </div>
                   </div>
@@ -203,14 +203,14 @@
                     <div class="text-center">
                       <p class="card-text fst-italic">Мой заработок</p>
                       <hr class="m-1">
-                      <span class="fw-bold">{{ summary_earnings|default:"-" | intcomma }}</span>
+                      <span class="fw-bold">{{ employee_indicators.summary_earnings|default:"-" | intcomma }}</span>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
             <div class="col-sm-12 col-md-3 mb-1">
-                {% if penalty_sum %}
+                {% if misconduct_data.penalty_sum %}
               <div class="card text-light red-snippet h-100">
                 <div class="row g-0">
                   <div class="col-md-2 red-snippet d-flex align-items-center justify-content-center rounded">
@@ -225,14 +225,14 @@
                     <div class="text-center">
                       <p class="card-text fst-italic">Штрафы</p>
                       <hr class="m-1">
-                      <span class="fw-bold">{{ penalty_sum|default:"-" | intcomma }}</span>
+                      <span class="fw-bold">{{ misconduct_data.penalty_sum|default:"-" | intcomma }}</span>
                       <a href="{% url 'misconducts_user_view' username=request.user %}?next={{ request.path }}" class="stretched-link"></a>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-              {% if shortage_sum %}
+              {% if employee_indicators.summary_shortage %}
             <div class="col-sm-12 col-md-3 mb-1">
               <div class="card text-light red-snippet h-100">
                 <div class="row g-0">
@@ -243,7 +243,7 @@
                     <div class="text-center">
                       <p class="card-text fst-italic">Недостачи</p>
                       <hr class="m-1">
-                      <span class="fw-bold">{{ shortage_sum|default:"-" | intcomma }}</span>
+                      <span class="fw-bold">{{ employee_indicators.summary_shortage|default:"-" | intcomma }}</span>
                     </div>
                   </div>
                 </div>
@@ -261,11 +261,14 @@
                     Нарушения
                   </span>
                   <a href="{% url 'misconducts_user_view' username=request.user %}?next={{ request.path }}" class="stretched-link"></a>
-                  {% if penalty_count %}<span class="badge bg-secondary text-dark">{{ penalty_count }}</span>{% endif %}
+                  {% if misconduct_data.penalty_count %}
+                  <span class="badge bg-secondary text-dark">{{ misconduct_data.penalty_count }}</span>
+                  {% endif %}
                 </div>
-                {% if wait_explanation %}
+                {% if misconduct_data.wait_explanation %}
                 <div class="card-footer d-flex justify-content-between align-items-center">
-                  <span class="card-text text-light verysmall"><b><i>Ожидает объяснение:</i></b></span><span class="badge bg-warning text-dark">{{ wait_explanation }}</span>
+                  <span class="card-text text-light verysmall"><b><i>Ожидает объяснение:</i></b></span>
+                  <span class="badge bg-warning text-dark">{{ misconduct_data.wait_explanation }}</span>
                 </div>
                 {% endif %}
               </div>

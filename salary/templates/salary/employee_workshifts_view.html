@@ -6,12 +6,12 @@
   <div class="container">
     <div class="row justify-content-center">
       <div class="col-md-4 col-sm-auto m-3">
-        {% if not object_list %}
+        {% if not workshifts_list %}
         <p class="text-warning text-center">Смен пока нет.</p><hr>
         {% else %}
-        <p class="text-warning text-center">Смены за {{ object_list.0.shift_date|date:"F Y г."|lower }}</p><hr>
+        <p class="text-warning text-center">Смены за {{ workshifts_list.0.shift_date|date:"F Y г."|lower }}</p><hr>
         <ul class="list-group">
-          {% for workshift in object_list %}
+          {% for workshift in workshifts_list %}
           {% if workshift.is_verified %}
           <li class="list-group-item list-group-item-action list-group-item-success m-1 rounded">
           {% else %}
@@ -54,14 +54,14 @@
             </div>
             <hr class="m-1">
             {% if workshift.comment_for_cash_admin and request.user == workshift.cash_admin %}
-            <div class="accordion" id="accordionExample">
+            <div class="accordion" id="accordion{{ workshift.shift_date.day }}">
               <div class="accordion-item">
                 <h2 class="accordion-header" id="headingTwo">
-                  <button class="accordion-button collapsed verysmall bg-secondary pt-0 pb-0" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                  <button class="accordion-button collapsed verysmall bg-secondary pt-0 pb-0" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ workshift.shift_date.day }}" aria-expanded="false" aria-controls="collapse{{ workshift.shift_date.day }}">
                     Имеется комментарий к смене.
                   </button>
                 </h2>
-                <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
+                <div id="collapse{{ workshift.shift_date.day }}" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordion{{ workshift.shift_date.day }}">
                   <div class="accordion-body verysmall bg-secondary">
                     {{ workshift.comment_for_cash_admin|linebreaks }}
                   </div>
@@ -69,14 +69,14 @@
               </div>
             </div>
             {% elif workshift.comment_for_hall_admin and request.user == workshift.hall_admin %}
-            <div class="accordion" id="accordionExample">
+            <div class="accordion" id="accordion{{ workshift.shift_date.day }}">
               <div class="accordion-item">
                 <h2 class="accordion-header" id="headingTwo">
-                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ workshift.shift_date.day }}" aria-expanded="false" aria-controls="collapse{{ workshift.shift_date.day }}">
                     Имеется комментарий к смене.
                   </button>
                 </h2>
-                <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
+                <div id="collapse{{ workshift.shift_date.day }}" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordion{{ workshift.shift_date.day }}">
                   <div class="accordion-body">
                     {{ workshift.comment_for_hall_admin|linebreaks }}
                   </div>
@@ -89,14 +89,14 @@
         </ul>
         <hr>
         <ul class="list-group">
-          {% if rating.position != rating.position.NOT_LEADER %}
+          {% if employee_indicators.rating_data and employee_indicators.rating_data.position != employee_indicators.rating_data.position.NOT_LEADER %}
           <li class="list-group-item list-group-item-action list-group-item-success m-1 rounded">
             <div class="d-flex w-100 justify-content-between verysmall">
               <span class="mb-1">
-                <b>Бонус ({{ rating.position.value }})</b>
+                <b>Бонус ({{ employee_indicators.rating_data.position.value }})</b>
               </span>
               <span><i class="fa-solid fa-coins"></i>
-                <i><b>{{ rating.bonus|intcomma }}</b></i>
+                <i><b>{{ employee_indicators.rating_data.bonus|intcomma }}</b></i>
               </span>
             </div>
           </li>
@@ -107,7 +107,7 @@
                 <b>Суммарно за месяц:</b>
               </span>
               <span><i class="fa-solid fa-coins"></i>
-                <i><b>{{ summary_earnings|default:"-" | intcomma }}</b></i>
+                <i><b>{{ employee_indicators.summary_earnings|default:"-" | intcomma }}</b></i>
               </span>
             </div>
           </li>

@@ -1,13 +1,26 @@
 import calendar
 import datetime
 
+from typing import NamedTuple
+
 from django.contrib.auth.models import User
-from django.db.models import QuerySet
+from django.db.models import QuerySet, Q, Sum
 
 from salary.services.shift_calendar import get_planed_workshifts_list
+from salary.services.monthly_reports import Rating, get_rating_data
+from salary.models import WorkingShift
 
 
-def check_permission_to_close(user: User, date: datetime.date) -> bool:
+class EmployeeMonthIndicators(NamedTuple):
+    summary_earnings: float
+    summary_shortage: float
+    number_of_verified_workshifts: int
+    number_of_total_workshifts: int
+    rating_data: Rating | None
+
+
+def check_permission_to_close(
+        user: User, date: datetime.date = datetime.date.today()) -> bool:
     """
     Check permissions and requesting days list from schedule and returning
     True if yesterday date in this list.
@@ -25,7 +38,8 @@ def check_permission_to_close(user: User, date: datetime.date) -> bool:
     return False
 
 
-def notification_of_upcoming_shifts(user: User, date: datetime.date) -> bool:
+def notification_of_upcoming_shifts(
+        user: User, date: datetime.date = datetime.date.today()) -> bool:
     """
     Returning True if tomorrow in days list from schedule.
     """
@@ -64,3 +78,69 @@ def get_missed_dates_list(
                     missed_dates_list.append(current_date)
 
     return missed_dates_list
+
+
+def get_employee_month_workshifts(employee_id: int, month: int, year: int,
+                                   only_verified: bool = False) -> QuerySet:
+    """
+    Returns Queryset with workshifts which has employee_id
+    for the month of year.
+    """
+    employee_month_workshifts = WorkingShift.objects.select_related(
+        'hall_admin__profile__position',
+        'cash_admin__profile__position').filter(
+            shift_date__month=month, shift_date__year=year).filter(
+                Q(cash_admin__id=employee_id) | Q(hall_admin__id=employee_id)
+            ).order_by('shift_date')
+
+    if only_verified:
+        return employee_month_workshifts.filter(is_verified=True)
+
+    return employee_month_workshifts
+
+
+def _get_summary_earnings(employee_id: int, month: int, year: int,
+                          rating_data: Rating | None) -> float:
+    """
+    Reutrns summary earnings for the month.
+    """
+    employee_month_workshifts = get_employee_month_workshifts(
+        employee_id, month, year, only_verified=True)
+    summary_earnings = sum([
+        workshift.hall_admin_earnings.final_earnings
+        if workshift.hall_admin.id == employee_id
+        else workshift.cashier_earnings.final_earnings
+        for workshift in employee_month_workshifts
+    ])
+    if rating_data:
+        summary_earnings += rating_data.bonus
+
+    return round(summary_earnings, 2)
+
+
+def get_employee_workshift_indicators(
+    employee_id: int, month: int = datetime.date.today().month,
+        year: int = datetime.date.today().year) -> EmployeeMonthIndicators:
+    """
+    Returns EmployeeWorkshiftsIndicators for employee
+    """
+    number_of_total_workshifts = get_employee_month_workshifts(
+        employee_id, month, year).count()
+    shortage_sum = get_employee_month_workshifts(
+        employee_id, month, year).filter(
+            cash_admin__id=employee_id, shortage_paid=False).aggregate(
+                Sum('shortage')).get('shortage__sum', 0.0)
+    rating_data=get_rating_data(employee_id, month, year)
+    summary_earnings = _get_summary_earnings(employee_id, month, year,
+                                             rating_data)
+    number_of_verified_workshifts=get_employee_month_workshifts(
+        employee_id, month, year, True).count()
+
+    return EmployeeMonthIndicators(
+        summary_earnings=summary_earnings,
+        summary_shortage=shortage_sum,
+        number_of_verified_workshifts=number_of_verified_workshifts,
+        number_of_total_workshifts=number_of_total_workshifts,
+        rating_data=rating_data
+    )
+
