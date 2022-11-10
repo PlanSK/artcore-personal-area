@@ -87,6 +87,17 @@ def registration_user(request: HttpRequest,
     return user
 
 
+def add_user_to_groups(user: User) -> None:
+    """
+    Adds a user to groups based on their position
+    """
+    user.groups.clear()
+    user.groups.add(Group.objects.get(name='employee'))
+    if user.profile.position.name == 'cash_admin':
+        user.groups.add(Group.objects.get(name='cashiers'))
+    user.save()
+
+
 def authentification_user(request: HttpRequest, user: User) -> None:
     """
     Authentication user account, add user to groups, and sending email.
@@ -96,9 +107,7 @@ def authentification_user(request: HttpRequest, user: User) -> None:
     activation_message.send()
     user.profile.email_status = Profile.EmailStatus.SENT
 
-    user.groups.add(Group.objects.get(name='employee'))
-    if user.profile.position.name == 'cash_admin':
-        user.groups.add(Group.objects.get(name='cashiers'))
+    add_user_to_groups(user)
 
     user.profile.profile_status = Profile.ProfileStatus.AUTHENTICATED
     user.save()

@@ -28,7 +28,7 @@ from salary.services.workshift import (
 )
 from salary.services.registration import (
     registration_user, sending_confirmation_link, confirmation_user_email,
-    get_user_instance_from_uidb64, authentification_user
+    get_user_instance_from_uidb64, authentification_user, add_user_to_groups
 )
 from salary.services.filesystem import (
     get_employee_documents_urls, document_file_handler,
@@ -487,6 +487,7 @@ class EditUser(ProfileStatusRedirectMixin, TitleMixin, SuccessUrlMixin,
             profile = profile_form_class.save(commit=False)
             user.save()
             profile.save()
+            add_user_to_groups(user)
             return redirect(self.get_success_url())
         else:
             user_form_class = self.userform
