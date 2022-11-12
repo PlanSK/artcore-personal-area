@@ -122,7 +122,8 @@ class ConfirmMailStatus(EmployeePermissionsMixin, TitleMixin, ListView):
     def get_queryset(self):
         queryset = User.objects.select_related('profile').filter(
             profile__dismiss_date=None
-        )
+        ).exclude(profile__position=4)
+
         return queryset
 
 
@@ -1085,14 +1086,14 @@ class StaffCalendarView(StaffOnlyMixin, CalendarView):
     pass
 
 
-class StaffCalendarListView(ListView):
+class StaffCalendarListView(TitleMixin, ListView):
     model = User
-    queryset = User.objects.filter(
-        is_active=True).exclude(is_staff=True).select_related(
-            'profile',
-            'profile__position').order_by('-profile__position')
+    queryset = User.objects.filter(is_active=True).exclude(
+        is_staff=True).exclude(profile__position=4).select_related(
+                'profile', 'profile__position').order_by('-profile__position')
 
     template_name: str = 'salary/calendar/calendar_users_list.html'
+    title = 'Графики пользователей'
 
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
         context = super().get_context_data(**kwargs)
