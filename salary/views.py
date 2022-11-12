@@ -8,7 +8,9 @@ from django.http import Http404, HttpRequest, JsonResponse, HttpResponseNotFound
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import TemplateView, ListView, DetailView
 from django.contrib.auth.views import LoginView, PasswordChangeView, PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView
-from django.contrib.auth import logout
+from django.contrib.auth import logout, login
+from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
 from django.contrib.auth.models import Permission
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
@@ -1106,3 +1108,15 @@ def page_forbidden(request, exception):
     response = render(request, 'salary/403.html', {'title': 'Access forbidden'})
     response.status_code = 403
     return response
+
+
+@login_required
+def user_session_set(request, user_id):
+    """
+    Set user session for superuser.
+    """
+    if request.user.is_superuser:
+        requested_user = get_object_or_404(User, pk=user_id)
+        login(request, requested_user)
+        return redirect(reverse_lazy('index'))
+    raise PermissionDenied
