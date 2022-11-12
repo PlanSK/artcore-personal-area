@@ -693,13 +693,13 @@ class IndexEmployeeView(LoginRequiredMixin, ProfileStatusRedirectMixin,
 
     def get_context_data(self, **kwargs):
         logger.debug(
-            f'Get user {self.request.user,id} context data.'
+            f'Get user {self.request.user.username} context data.'
         )
         context = super().get_context_data(**kwargs)
 
         logger.debug('Check permission to close.')
         permission_to_close = check_permission_to_close(user=self.request.user)
-        logger.debug('Check permission to show notification show.')
+        logger.debug('Check permission to notification show.')
         notification_about_shift = notification_of_upcoming_shifts(
             user=self.request.user)
         logger.debug('Get user misconduct data.')
