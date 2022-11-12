@@ -1,5 +1,6 @@
 import calendar
 import datetime
+import logging
 
 from typing import NamedTuple
 
@@ -9,6 +10,9 @@ from django.db.models import QuerySet, Q, Sum
 from salary.services.shift_calendar import get_planed_workshifts_list
 from salary.services.monthly_reports import Rating, get_rating_data
 from salary.models import WorkingShift
+
+
+logger = logging.getLogger(__name__)
 
 
 class EmployeeMonthIndicators(NamedTuple):
@@ -25,16 +29,23 @@ def check_permission_to_close(
     Check permissions and requesting days list from schedule and returning
     True if yesterday date in this list.
     """
+    logger.info(f'Start check permission for user {user.id} with {date}.')
     if user.has_perm('salary.add_workingshift'):
+        logger.debug(f'User has permissions <add_workingshift>.')
         yesterday = date - datetime.timedelta(days=1)
+        logger.debug(f'Yesterday date is {yesterday}. Get planed workshifts.')
         planed_shifts = get_planed_workshifts_list(
             user=user,
             year=yesterday.year,
             month=yesterday.month
         )
+        logger.debug(f'Planed days: {planed_shifts}.')
         if yesterday.day in planed_shifts:
+            logger.info(
+                f'User {user.id} has permissions for close current workshift.')
             return True
-
+    logger.info(
+        f'User {user.id} has no permissions for close current workshift.')
     return False
 
 
@@ -43,15 +54,20 @@ def notification_of_upcoming_shifts(
     """
     Returning True if tomorrow in days list from schedule.
     """
+    logger.debug(f'Prepare notofication for user {user.id} with {date}.')
     tomorrow = date + datetime.timedelta(days=1)
+    logger.debug(f'Tomorrow date is {tomorrow}.')
     planed_shifts = get_planed_workshifts_list(
             user=user,
             year=tomorrow.year,
             month=tomorrow.month
     )
+    logger.debug(f'Planed days: {planed_shifts}.')
     if tomorrow.day in planed_shifts:
+        logger.debug(f'User {user.id} can see notification.')
         return True
 
+    logger.debug(f'Notification for user {user.id} do not show.')
     return False
 
 

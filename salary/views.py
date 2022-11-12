@@ -8,7 +8,9 @@ from django.http import Http404, HttpRequest, JsonResponse, HttpResponseNotFound
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import TemplateView, ListView, DetailView
 from django.contrib.auth.views import LoginView, PasswordChangeView, PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView
-from django.contrib.auth import logout
+from django.contrib.auth import logout, login
+from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
 from django.contrib.auth.models import Permission
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
@@ -670,27 +672,43 @@ class MonthlyAnalyticalReport(WorkingshiftPermissonsMixin,
         return context
 
 
-class IndexEmployeeView(ProfileStatusRedirectMixin, TitleMixin, TemplateView):
+class IndexEmployeeView(LoginRequiredMixin, ProfileStatusRedirectMixin,
+                        TitleMixin, TemplateView):
+    """
+    Class based view Index page for any employee.
+    Redirect user with staff status to staff index page.
+    """
+
     template_name = 'salary/employee_board.html'
     title = 'Панель пользователя'
     login_url = reverse_lazy('login')
 
     def dispatch(self, request, *args, **kwargs):
+        logger.debug('Check user staff status.')
         if request.user.is_authenticated and request.user.is_staff:
+            logger.debug('Redirect to staff page.')
             return redirect('workshifts_view')
 
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
+        logger.debug(
+            f'Get user {self.request.user,id} context data.'
+        )
         context = super().get_context_data(**kwargs)
+
+        logger.debug('Check permission to close.')
         permission_to_close = check_permission_to_close(user=self.request.user)
+        logger.debug('Check permission to show notification show.')
         notification_about_shift = notification_of_upcoming_shifts(
             user=self.request.user)
+        logger.debug('Get user misconduct data.')
         misconduct_data = get_misconduct_employee_data(self.request.user.id)
-
+        logger.debug('Get user month indicators.')
         employee_month_indicators = get_employee_workshift_indicators(
             self.request.user.id)
 
+        logger.debug('Updating context data.')
         context.update({
             'employee_indicators': employee_month_indicators,
             'misconduct_data': misconduct_data,
@@ -698,11 +716,12 @@ class IndexEmployeeView(ProfileStatusRedirectMixin, TitleMixin, TemplateView):
             'permission_to_close': permission_to_close,
             'notification_about_shift': notification_about_shift,
         })
+        logger.debug('Context data is updated. Return context.')
         return context
 
 
-class EmployeeWorkshiftsView(PermissionRequiredMixin, MonthYearExtractMixin, TitleMixin,
-                             TemplateView):
+class EmployeeWorkshiftsView(PermissionRequiredMixin, MonthYearExtractMixin,
+                             TitleMixin, TemplateView):
     template_name = 'salary/employee_workshifts_view.html'
     title = 'Смены'
     permission_required = 'salary.view_workingshift'
@@ -1106,3 +1125,15 @@ def page_forbidden(request, exception):
     response = render(request, 'salary/403.html', {'title': 'Access forbidden'})
     response.status_code = 403
     return response
+
+
+@login_required
+def user_session_set(request, user_id):
+    """
+    Set user session for superuser.
+    """
+    if request.user.is_superuser:
+        requested_user = get_object_or_404(User, pk=user_id)
+        login(request, requested_user)
+        return redirect(reverse_lazy('index'))
+    raise PermissionDenied
