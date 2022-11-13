@@ -698,18 +698,17 @@ class IndexEmployeeView(LoginRequiredMixin, ProfileStatusRedirectMixin,
         )
         context = super().get_context_data(**kwargs)
 
-        logger.debug('Check permission to close.')
         permission_to_close = check_permission_to_close(user=self.request.user)
-        logger.debug('Check permission to notification show.')
         notification_about_shift = notification_of_upcoming_shifts(
             user=self.request.user)
-        logger.debug('Get user misconduct data.')
         misconduct_data = get_misconduct_employee_data(self.request.user.id)
-        logger.debug('Get user month indicators.')
         employee_month_indicators = get_employee_workshift_indicators(
             self.request.user.id)
 
-        logger.debug('Updating context data.')
+        logger.debug(
+            f'Updating context data. Perm to close: {permission_to_close}. '
+            f'Notofication: {notification_about_shift}.'
+        )
         context.update({
             'employee_indicators': employee_month_indicators,
             'misconduct_data': misconduct_data,
