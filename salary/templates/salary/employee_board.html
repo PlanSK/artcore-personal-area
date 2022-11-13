@@ -6,6 +6,7 @@
   <main>
     <div class="container">
       <div class="row m-2">
+        <!-- award rating block -->
         {% if employee_indicators.number_of_verified_workshifts >= 4 and employee_indicators.rating_data %}
         <!-- Button -->
         <div class="col text-end">
@@ -135,9 +136,12 @@
         </div>
         {% endif %}
       </div>
+
+      {% if perms.salary.add_workingshift %}
+      <!-- close workshifts block -->
       <div class="row mt-2">
         <div class="col text-center verysmall text-secondary">
-      {% if unclosed_shifts_dates %}
+        {% if unclosed_shifts_dates %}
           Для закрытия текущей смены воспользуйтесь кнопкой
           {% for day in unclosed_shifts_dates %}
           <br>
@@ -146,31 +150,16 @@
             Закрыть смену за {{ day|date:"j E" }}
           </a>
           {% endfor %}
-      {% else %}
+        {% else %}
           Все смены успешно закрыты.<br>
-      {% endif %}
-          <hr>
-        </div>
-      </div>
-      {% if not permission_to_close %}
-      <div class="row mt-2">
-        <div class="col text-center verysmall text-secondary">
-          {% today_workshift_exists_check as today_workshift_is_exists %}
-          {% if today_workshift_is_exists %}
-          Текущая смена закрыта.<br>
-          {% else %}
-          Для закрытия текущей смены воспользуйтесь кнопкой<br>
-          <a href="{% url 'add_workshift' %}?next={{ request.path }}" class="btn btn-outline-secondary verysmall mt-1">
-            <i class="fa-solid fa-calendar-plus fa-beat me-2"></i>
-            Закрыть смену
-          </a>
-          {% endif %}
+        {% endif %}
           <hr>
         </div>
       </div>
       {% endif %}
 
       {% if notification_about_shift %}
+      <!-- notification about workshift block -->
       <div class="row justify-content-center">
         <div class="col-md-6 col-sm-auto">
           <div class="alert alert-success mt-2 verysmall text-center" role="alert">
@@ -181,6 +170,7 @@
       {% endif %}
 
       {% if misconduct_data.wait_explanation %}
+      <!-- misconduct notification block -->
       <div class="row justify-content-center">
         <div class="col-md-6 col-sm-auto">
           <div class="alert alert-danger d-flex align-items-center mt-2" role="alert">
