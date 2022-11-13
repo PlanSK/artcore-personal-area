@@ -132,9 +132,27 @@
             Текущий рейтинг
           </button><br>
           <span style="font-size: 0.5rem;">*Для участия в рейтинге необходимо 4 и более проверенных смен</span>
+        </div>
         {% endif %}
       </div>
-      {% if permission_to_close %}
+      <div class="row mt-2">
+        <div class="col text-center verysmall text-secondary">
+      {% if unclosed_shifts_dates %}
+          Для закрытия текущей смены воспользуйтесь кнопкой
+          {% for day in unclosed_shifts_dates %}
+          <br>
+          <a href="{% url 'add_workshift' %}?next={{ request.path }}" class="btn btn-outline-secondary verysmall mt-1">
+            <i class="fa-solid fa-calendar-plus fa-beat me-2"></i>
+            Закрыть смену за {{ day|date:"j E" }}
+          </a>
+          {% endfor %}
+      {% else %}
+          Все смены успешно закрыты.<br>
+      {% endif %}
+          <hr>
+        </div>
+      </div>
+      {% if not permission_to_close %}
       <div class="row mt-2">
         <div class="col text-center verysmall text-secondary">
           {% today_workshift_exists_check as today_workshift_is_exists %}
@@ -171,7 +189,7 @@
         </div>
       </div>
       {% endif %}
-      <div class="row m-3">
+      <div class="row mt-3">
         <div class="col">
           <div class="row row-cols-md-4 row-cols-sm-1 justify-content-center">
             <div class="col-sm-12 col-md-3 mb-1">

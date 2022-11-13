@@ -130,6 +130,47 @@ def get_missed_dates_list(
     return missed_dates_list
 
 
+def get_missed_dates(month: int, year: int,
+                      full_name: str) -> tuple[datetime.date]:
+    """
+    Return tuple with missed dates of unclosed workshifts.
+    """
+    today_date = timezone.localdate(timezone.now())
+    planed_days_numbers = get_planed_workshifts_days_list(
+        full_name, month, year)
+    exists_workshifts_dates = WorkingShift.objects.filter(
+        shift_date__month=month, shift_date__year=year,
+        shift_date__day__lte=today_date.day).dates('shift_date', 'day')
+
+    month_dates = [
+        datetime.date(year, month, day) for day in range(1, today_date.day + 1)
+    ]
+    missed_dates = [
+        date for date in month_dates
+        if date not in exists_workshifts_dates
+    ]
+    planed_shift_closed_dates = [
+        _get_date_with_offset(1, datetime.date(year, month, day))
+        for day in planed_days_numbers
+    ]
+    employee_missed_dates = [
+        date for date in missed_dates
+        if date in planed_shift_closed_dates
+    ]
+    first_month_day = datetime.date(year, month, 1)
+    if today_date.day == first_month_day or first_month_day in missed_dates:
+        yesterday = _get_date_with_offset(-1, first_month_day)
+        last_month_planed_days = get_planed_workshifts_days_list(
+        full_name, yesterday.month, yesterday.year)
+        last_month_shift_date = datetime.date(
+            yesterday.year, yesterday.month, last_month_planed_days[-1])
+        if (not WorkingShift.objects.filter(shift_date=yesterday).exists()
+                and last_month_shift_date == yesterday):
+            employee_missed_dates.append(today_date)
+
+    return tuple(employee_missed_dates)
+
+
 def get_employee_month_workshifts(employee_id: int, month: int, year: int,
                                    only_verified: bool = False) -> QuerySet:
     """

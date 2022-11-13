@@ -26,7 +26,7 @@ from salary.services.internal_model_func import get_misconduct_slug
 from salary.services.workshift import (
     check_permission_to_close, notification_of_upcoming_shifts,
     get_missed_dates_list, get_employee_workshift_indicators,
-    get_employee_month_workshifts
+    get_employee_month_workshifts, get_missed_dates
 )
 from salary.services.registration import (
     registration_user, sending_confirmation_link, confirmation_user_email,
@@ -704,6 +704,8 @@ class IndexEmployeeView(LoginRequiredMixin, ProfileStatusRedirectMixin,
         misconduct_data = get_misconduct_employee_data(self.request.user.id)
         employee_month_indicators = get_employee_workshift_indicators(
             self.request.user.id)
+        missed_shifts_dates = get_missed_dates(
+            11, 2022, self.request.user.get_full_name())
 
         logger.debug(
             f'Updating context data. Perm to close: {permission_to_close}. '
@@ -714,6 +716,7 @@ class IndexEmployeeView(LoginRequiredMixin, ProfileStatusRedirectMixin,
             'misconduct_data': misconduct_data,
             'today_date': datetime.date.today(),
             'permission_to_close': permission_to_close,
+            'unclosed_shifts_dates': missed_shifts_dates,
             'notification_about_shift': notification_about_shift,
         })
         logger.debug('Context data is updated. Return context.')
