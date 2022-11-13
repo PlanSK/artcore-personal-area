@@ -6,7 +6,7 @@ import logging
 
 from django.contrib.auth.models import User
 from django.db.models import QuerySet, Q
-from gspread.exceptions import GSpreadException
+from gspread.exceptions import GSpreadException, UnSupportedExportFormat
 
 from salary.models import WorkingShift
 from salary.services.google_sheets import get_employees_schedule_dict
@@ -164,31 +164,29 @@ def get_worksheet_name(year: int, month: int) -> str:
     return f'{month}-{year}'
 
 
-def get_planed_workshifts_list(user: User, year: int, month: int) -> List[int]:
+def get_planed_workshifts_days_list(user_full_name: str,
+                                    month: int, year: int) -> tuple[int]:
     """
     Returns list of day numbers planed shifts.
     """
-
-    planed_workshifts_list: list = []
     worksheet_name = get_worksheet_name(year=year, month=month)
     try:
         google_sheets_data = get_employees_schedule_dict(worksheet_name).get(
-            user.get_full_name()
-        )
-        if google_sheets_data:
-            planed_workshifts_list = google_sheets_data
+            user_full_name)
     except GSpreadException as error:
         logger.error((
             f'Error to open worksheet "{worksheet_name}". '
             f'GSpreadException: {error.__class__.__name__}.'
         ))
-    except Exception as error:
+    except UnSupportedExportFormat as error:
         logger.error((
             f'Unknown exception detected in GSpread (Google Sheets). '
             f'Exception: {error.__class__.__name__}.'
         ))
+    else:
+        planed_workshifts_tuple = tuple(google_sheets_data)
 
-    return planed_workshifts_list
+    return planed_workshifts_tuple if planed_workshifts_tuple else tuple()
 
 
 def get_user_calendar(user: User, year: int, month: int) -> UserCalendar:
@@ -200,8 +198,8 @@ def get_user_calendar(user: User, year: int, month: int) -> UserCalendar:
         sum_of_earnings: float - Amount of earnings in closed shifts.
     """
 
-    planed_workshifts_list: list = get_planed_workshifts_list(
-        user=user,
+    planed_workshifts_tuple = get_planed_workshifts_days_list(
+        user=user.get_full_name(),
         year=year,
         month=month
     )
@@ -222,7 +220,7 @@ def get_user_calendar(user: User, year: int, month: int) -> UserCalendar:
         year=year,
         month=month,
         workshift_tuples_list=workshift_tuples_list,
-        planed_workshifts_list=planed_workshifts_list
+        planed_workshifts_list=planed_workshifts_tuple
     )
 
     complited_shifts_count: int = 0
@@ -239,7 +237,7 @@ def get_user_calendar(user: User, year: int, month: int) -> UserCalendar:
                 elif day.is_planed:
                     planed_shifts_count += 1
 
-    if not planed_workshifts_list:
+    if not planed_workshifts_tuple:
         planed_shifts_count = -1
 
     user_calendar = UserCalendar(

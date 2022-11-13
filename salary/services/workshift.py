@@ -6,8 +6,9 @@ from typing import NamedTuple
 
 from django.contrib.auth.models import User
 from django.db.models import QuerySet, Q, Sum
+from django.utils import timezone
 
-from salary.services.shift_calendar import get_planed_workshifts_list
+from salary.services.shift_calendar import get_planed_workshifts_days_list
 from salary.services.monthly_reports import Rating, get_rating_data
 from salary.models import WorkingShift
 
@@ -23,51 +24,84 @@ class EmployeeMonthIndicators(NamedTuple):
     rating_data: Rating | None
 
 
+def _is_date_day_exists_in_plan(full_name: str,
+                           check_date: datetime.datetime) -> bool:
+    """
+    Returns True if day from check_date exists in the plan else returns False.
+    """
+    planed_shifts_days_tuple = get_planed_workshifts_days_list(
+        user_full_name=full_name, month=check_date.month, year=check_date.year)
+    logger.debug(f'Planed days: {planed_shifts_days_tuple}.')
+    if check_date.day in planed_shifts_days_tuple:
+        logger.debug(f'{check_date.day} exists in {planed_shifts_days_tuple}.')
+        return True
+
+    logger.debug(f'{check_date.day} is not exists in the plan.')
+    return False
+
+
+def _get_date_with_offset(
+        offset: int,
+        current_date: datetime.datetime| None = None) -> datetime.datetime:
+    """
+    Returns data with offset
+    """
+    if not current_date:
+        date = timezone.now()
+        logger.debug(f'Set default value of current_date: {date}.')
+    else:
+        date = current_date
+
+    if offset > 0:
+        return date + datetime.timedelta(offset)
+    elif offset < 0:
+        return date - datetime.timedelta(abs(offset))
+    else:
+        return date
+
+
 def check_permission_to_close(
-        user: User, date: datetime.date = datetime.date.today()) -> bool:
+        user: User, date_to_close: datetime.datetime | None = None) -> bool:
     """
     Check permissions and requesting days list from schedule and returning
     True if yesterday date in this list.
     """
-    logger.info(f'Start check permission for user {user.id} with {date}.')
-    if user.has_perm('salary.add_workingshift'):
-        logger.debug(f'User has permissions <add_workingshift>.')
-        yesterday = date - datetime.timedelta(days=1)
-        logger.debug(f'Yesterday date is {yesterday}. Get planed workshifts.')
-        planed_shifts = get_planed_workshifts_list(
-            user=user,
-            year=yesterday.year,
-            month=yesterday.month
-        )
-        logger.debug(f'Planed days: {planed_shifts}.')
-        if yesterday.day in planed_shifts:
-            logger.info(
-                f'User {user.id} has permissions for close current workshift.')
-            return True
+    global_permission = user.has_perm('salary.add_workingshift')
+    yesterday = _get_date_with_offset(-1, date_to_close)
     logger.info(
-        f'User {user.id} has no permissions for close current workshift.')
+        f'Start checking for permissions. User: {user.username}. '
+        f'Global permission: {global_permission}. Yesterday value: {yesterday}'
+    )
+
+    if global_permission:
+        is_planed = _is_date_day_exists_in_plan(user.get_full_name(),
+                                                yesterday)
+        if is_planed:
+            logger.info(
+                f'User {user.username} has permissions to close workshift.')
+            return True
+
+    logger.info(
+        f'User {user.username} has no permissions to close workshift.')
     return False
 
 
 def notification_of_upcoming_shifts(
-        user: User, date: datetime.date = datetime.date.today()) -> bool:
+        user: User, date_before: datetime.datetime | None = None) -> bool:
     """
     Returning True if tomorrow in days list from schedule.
     """
-    logger.debug(f'Prepare notofication for user {user.id} with {date}.')
-    tomorrow = date + datetime.timedelta(days=1)
-    logger.debug(f'Tomorrow date is {tomorrow}.')
-    planed_shifts = get_planed_workshifts_list(
-            user=user,
-            year=tomorrow.year,
-            month=tomorrow.month
+    tomorrow = _get_date_with_offset(1, date_before)
+    logger.info(
+        f'Start checking for permissions to show notification. '
+        f'User: {user.username}. Tomorrow value: {tomorrow}.'
     )
-    logger.debug(f'Planed days: {planed_shifts}.')
-    if tomorrow.day in planed_shifts:
-        logger.debug(f'User {user.id} can see notification.')
+
+    if _is_date_day_exists_in_plan(user.get_full_name(), tomorrow):
+        logger.info(f'User {user.username} can see notification.')
         return True
 
-    logger.debug(f'Notification for user {user.id} do not show.')
+    logger.info(f'Notification for user {user.username} do not show.')
     return False
 
 
@@ -135,11 +169,13 @@ def _get_summary_earnings(employee_id: int, month: int, year: int,
 
 
 def get_employee_workshift_indicators(
-    employee_id: int, month: int = datetime.date.today().month,
-        year: int = datetime.date.today().year) -> EmployeeMonthIndicators:
+    employee_id: int, month: int = 0,
+        year: int = 0) -> EmployeeMonthIndicators:
     """
     Returns EmployeeWorkshiftsIndicators for employee
     """
+    if not month or not year:
+        month, year = timezone.now().month, timezone.now().year
     number_of_total_workshifts = get_employee_month_workshifts(
         employee_id, month, year).count()
     shortage_sum = get_employee_month_workshifts(
@@ -152,6 +188,7 @@ def get_employee_workshift_indicators(
     number_of_verified_workshifts=get_employee_month_workshifts(
         employee_id, month, year, True).count()
 
+    logger.info(f'Return employee indicators at {month}-{year}.')
     return EmployeeMonthIndicators(
         summary_earnings=summary_earnings,
         summary_shortage=shortage_sum,
