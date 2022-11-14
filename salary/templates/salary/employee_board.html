@@ -142,10 +142,10 @@
       <div class="row mt-2">
         <div class="col text-center verysmall text-secondary">
         {% if unclosed_shifts_dates %}
-          Для закрытия текущей смены воспользуйтесь кнопкой
+          Для закрытия смены воспользуйтесь кнопкой
           {% for day in unclosed_shifts_dates %}
           <br>
-          <a href="{% url 'add_workshift' %}?next={{ request.path }}" class="btn btn-outline-secondary verysmall mt-1">
+          <a href="{% url 'add_workshift_for_date' date=day %}?next={{ request.path }}" class="btn btn-outline-secondary verysmall mt-1">
             <i class="fa-solid fa-calendar-plus fa-beat me-2"></i>
             Закрыть смену за {{ day|date:"j E" }}
           </a>

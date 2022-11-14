@@ -24,9 +24,9 @@ from salary.services.shift_calendar import get_user_calendar
 from salary.services.misconduct import Intruder
 from salary.services.internal_model_func import get_misconduct_slug
 from salary.services.workshift import (
-    check_permission_to_close, notification_of_upcoming_shifts,
+    notification_of_upcoming_shifts, get_missed_dates_tuple,
     get_missed_dates_list, get_employee_workshift_indicators,
-    get_employee_month_workshifts, get_missed_dates
+    get_employee_month_workshifts, get_employee_unclosed_workshifts_dates
 )
 from salary.services.registration import (
     registration_user, sending_confirmation_link, confirmation_user_email,
@@ -244,9 +244,7 @@ class StaffWorkshiftsView(WorkingshiftPermissonsMixin, MonthYearExtractMixin,
             shift_date__year=self.year).dates('shift_date', 'day')
         context.update({
             'workshift_list': self.object_list.filter(is_verified=False),
-            'missed_workshifts_dates': get_missed_dates_list(
-                current_month_workshifts_dates
-            ),
+            'missed_workshifts_dates': get_missed_dates_tuple(),
         })
         return context
 
@@ -698,25 +696,23 @@ class IndexEmployeeView(LoginRequiredMixin, ProfileStatusRedirectMixin,
         )
         context = super().get_context_data(**kwargs)
 
-        permission_to_close = check_permission_to_close(user=self.request.user)
         notification_about_shift = notification_of_upcoming_shifts(
             user=self.request.user)
         misconduct_data = get_misconduct_employee_data(self.request.user.id)
         employee_month_indicators = get_employee_workshift_indicators(
             self.request.user.id)
-        missed_shifts_dates = get_missed_dates(
-            11, 2022, self.request.user.get_full_name())
+        unclosed_shifts_dates = get_employee_unclosed_workshifts_dates(
+            self.request.user.id)
 
         logger.debug(
-            f'Updating context data. Perm to close: {permission_to_close}. '
+            f'Updating context data. Shifts to close: {unclosed_shifts_dates}. '
             f'Notofication: {notification_about_shift}.'
         )
         context.update({
             'employee_indicators': employee_month_indicators,
             'misconduct_data': misconduct_data,
-            'today_date': datetime.date.today(),
-            'permission_to_close': permission_to_close,
-            'unclosed_shifts_dates': missed_shifts_dates,
+            'today_date': timezone.localdate(timezone.now()),
+            'unclosed_shifts_dates': unclosed_shifts_dates,
             'notification_about_shift': notification_about_shift,
         })
         logger.debug('Context data is updated. Return context.')
@@ -829,11 +825,21 @@ class AddWorkshiftData(PermissionRequiredMixin, TitleMixin, SuccessUrlMixin,
     template_name = 'salary/add_workshift.html'
     title = 'Добавление смен'
 
+    def dispatch(self, request: HttpRequest, *args: Any,
+                 **kwargs: Any) -> HttpResponse:
+        if kwargs.get('date'):
+            year, month, day = (map(int, kwargs.get('date').split('-')))
+            self.closed_date = datetime.date(year, month, day)
+        else:
+            self.closed_date = timezone.localdate(timezone.now())
+
+        return super().dispatch(request, *args, **kwargs)
+
     def get_initial(self):
         initional = super().get_initial()
         initional.update({
             'cash_admin': self.request.user,
-            'shift_date': datetime.date.today().strftime('%Y-%m-%d'),
+            'shift_date': self.closed_date.strftime('%Y-%m-%d'),
         })
         logging.debug(f'[1/3] Function get_initial update fields values.')
         return initional

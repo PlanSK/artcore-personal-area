@@ -6,6 +6,7 @@ from typing import NamedTuple
 
 from django.contrib.auth.models import User
 from django.db.models import QuerySet, Q, Sum
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
 from salary.services.shift_calendar import get_planed_workshifts_days_list
@@ -42,12 +43,12 @@ def _is_date_day_exists_in_plan(full_name: str,
 
 def _get_date_with_offset(
         offset: int,
-        current_date: datetime.datetime| None = None) -> datetime.datetime:
+        current_date: datetime.date | None = None) -> datetime.date:
     """
     Returns data with offset
     """
     if not current_date:
-        date = timezone.now()
+        date = timezone.localdate(timezone.now())
         logger.debug(f'Set default value of current_date: {date}.')
     else:
         date = current_date
@@ -60,34 +61,8 @@ def _get_date_with_offset(
         return date
 
 
-def check_permission_to_close(
-        user: User, date_to_close: datetime.datetime | None = None) -> bool:
-    """
-    Check permissions and requesting days list from schedule and returning
-    True if yesterday date in this list.
-    """
-    global_permission = user.has_perm('salary.add_workingshift')
-    yesterday = _get_date_with_offset(-1, date_to_close)
-    logger.info(
-        f'Start checking for permissions. User: {user.username}. '
-        f'Global permission: {global_permission}. Yesterday value: {yesterday}'
-    )
-
-    if global_permission:
-        is_planed = _is_date_day_exists_in_plan(user.get_full_name(),
-                                                yesterday)
-        if is_planed:
-            logger.info(
-                f'User {user.username} has permissions to close workshift.')
-            return True
-
-    logger.info(
-        f'User {user.username} has no permissions to close workshift.')
-    return False
-
-
 def notification_of_upcoming_shifts(
-        user: User, date_before: datetime.datetime | None = None) -> bool:
+        user: User, date_before: datetime.date | None = None) -> bool:
     """
     Returning True if tomorrow in days list from schedule.
     """
@@ -105,7 +80,7 @@ def notification_of_upcoming_shifts(
     return False
 
 
-def get_missed_dates_list(
+def get_missed_dates_list( # Убираем, старая версия
         dates_list: QuerySet[datetime.date]) -> list[datetime.date]:
     today = datetime.date.today()
     missed_dates_list = []
@@ -130,45 +105,65 @@ def get_missed_dates_list(
     return missed_dates_list
 
 
-def get_missed_dates(month: int, year: int,
-                      full_name: str) -> tuple[datetime.date]:
+def get_missed_dates_tuple() -> tuple[datetime.date]:
     """
-    Return tuple with missed dates of unclosed workshifts.
+    Returns tuple with missed dates of unclosed workshifts.
     """
-    today_date = timezone.localdate(timezone.now())
-    planed_days_numbers = get_planed_workshifts_days_list(
-        full_name, month, year)
+    current_date = timezone.localdate(timezone.now())
+    year, month = current_date.year, current_date.month
+    last_day_of_month = current_date.day
+
     exists_workshifts_dates = WorkingShift.objects.filter(
         shift_date__month=month, shift_date__year=year,
-        shift_date__day__lte=today_date.day).dates('shift_date', 'day')
-
+        shift_date__day__lte=last_day_of_month).dates('shift_date', 'day')
     month_dates = [
-        datetime.date(year, month, day) for day in range(1, today_date.day + 1)
+        datetime.date(year, month, day)
+        for day in range(1, last_day_of_month + 1)
     ]
     missed_dates = [
         date for date in month_dates
         if date not in exists_workshifts_dates
     ]
+
+    return tuple(missed_dates)
+
+
+def get_employee_unclosed_workshifts_dates(
+        user_id: int) -> tuple[datetime.date]:
+    """
+    Returns tuple with missed dates of employee unclosed workshifts.
+    """
+    requested_user = get_object_or_404(User, id=user_id)
+    full_name = requested_user.get_full_name()
+    if not requested_user.has_perm('salary.add_workingshift'):
+        return tuple()
+
+    current_date = timezone.localdate(timezone.now())
+    year, month = current_date.year, current_date.month
+
+    missed_dates = get_missed_dates_tuple()
     planed_shift_closed_dates = [
         _get_date_with_offset(1, datetime.date(year, month, day))
-        for day in planed_days_numbers
+        for day in get_planed_workshifts_days_list(full_name, month, year)
     ]
-    employee_missed_dates = [
+    employee_unclosed_workshifts_dates = [
         date for date in missed_dates
         if date in planed_shift_closed_dates
     ]
-    first_month_day = datetime.date(year, month, 1)
-    if today_date.day == first_month_day or first_month_day in missed_dates:
-        yesterday = _get_date_with_offset(-1, first_month_day)
+    first_month_date = datetime.date(year, month, 1)
+    if first_month_date in missed_dates:
+        last_day_of_last_month = _get_date_with_offset(-1, first_month_date)
         last_month_planed_days = get_planed_workshifts_days_list(
-        full_name, yesterday.month, yesterday.year)
-        last_month_shift_date = datetime.date(
-            yesterday.year, yesterday.month, last_month_planed_days[-1])
-        if (not WorkingShift.objects.filter(shift_date=yesterday).exists()
-                and last_month_shift_date == yesterday):
-            employee_missed_dates.append(today_date)
+            full_name, last_day_of_last_month.month,
+            last_day_of_last_month.year)
+        if last_month_planed_days:
+            last_shift_date_of_last_month = datetime.date(
+                last_day_of_last_month.year, last_day_of_last_month.month,
+                last_month_planed_days[-1])
+            if last_shift_date_of_last_month == last_day_of_last_month:
+                employee_unclosed_workshifts_dates.append(first_month_date)
 
-    return tuple(employee_missed_dates)
+    return tuple(employee_unclosed_workshifts_dates)
 
 
 def get_employee_month_workshifts(employee_id: int, month: int, year: int,
