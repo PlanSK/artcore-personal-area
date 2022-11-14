@@ -949,11 +949,10 @@ class UnverifiedEmployeeView(LoginRequiredMixin, TitleMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        permission_to_close = check_permission_to_close(
-            user=self.request.user,
-            date=datetime.date.today()
+        unclosed_shifts_dates = get_employee_unclosed_workshifts_dates(
+            user_id=self.request.user.id
         )
-        context.update({ 'permission_to_close': permission_to_close })
+        context.update({ 'unclosed_shifts_dates': unclosed_shifts_dates })
         return context
 
 

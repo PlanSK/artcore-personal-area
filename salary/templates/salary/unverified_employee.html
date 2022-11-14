@@ -17,20 +17,23 @@
           </div>
         </div>
       </div>
-      {% if permission_to_close %}
-      {% today_workshift_exists_check as today_workshift_is_exists %}
+      {% if perms.salary.add_workingshift %}
+      <!-- close workshifts block -->
       <div class="row mt-2 justify-content-center">
         <div class="col-md-6 col-sm-auto text-center verysmall text-secondary pt-1 border-top">
-          {% if today_workshift_is_exists %}
-          Текущая смена закрыта.<br>
-          Вы можете добавить смену за другую дату <a href="{% url 'add_workshift' %}?next={{ request.path }}" class="link-secondary verysmall">здесь.</a>
-          {% else %}
-          Для закрытия текущей смены воспользуйтесь кнопкой<br>
-          <a href="{% url 'add_workshift' %}?next={{ request.path }}" class="btn btn-outline-secondary verysmall mt-1">
+        {% if unclosed_shifts_dates %}
+          Для закрытия смены воспользуйтесь кнопкой
+          {% for day in unclosed_shifts_dates %}
+          <br>
+          <a href="{% url 'add_workshift_for_date' date=day %}?next={{ request.path }}" class="btn btn-outline-secondary verysmall mt-1">
             <i class="fa-solid fa-calendar-plus fa-beat me-2"></i>
-            Закрыть смену
+            Закрыть смену за {{ day|date:"j E" }}
           </a>
-          {% endif %}
+          {% endfor %}
+        {% else %}
+          Все смены успешно закрыты.<br>
+        {% endif %}
+          <hr>
         </div>
       </div>
       {% endif %}
