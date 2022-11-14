@@ -199,7 +199,7 @@ def get_user_calendar(user: User, year: int, month: int) -> UserCalendar:
     """
 
     planed_workshifts_tuple = get_planed_workshifts_days_list(
-        user=user.get_full_name(),
+        user_full_name=user.get_full_name(),
         year=year,
         month=month
     )
