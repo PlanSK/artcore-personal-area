@@ -80,31 +80,6 @@ def notification_of_upcoming_shifts(
     return False
 
 
-def get_missed_dates_list( # Убираем, старая версия
-        dates_list: QuerySet[datetime.date]) -> list[datetime.date]:
-    today = datetime.date.today()
-    missed_dates_list = []
-    max_day = today.day
-    if dates_list:
-        date_from_checked_dates = dates_list.last()
-        if (date_from_checked_dates.month != today.month
-                or date_from_checked_dates.year != today.year):
-            max_day = calendar.monthrange(date_from_checked_dates.year,
-                                          date_from_checked_dates.month)[1]
-
-        days_range = range(1, max_day + 1)
-        for day in days_range:
-                current_date = datetime.date(
-                    date_from_checked_dates.year,
-                    date_from_checked_dates.month,
-                    day
-                )
-                if not current_date in dates_list:
-                    missed_dates_list.append(current_date)
-
-    return missed_dates_list
-
-
 def get_missed_dates_tuple() -> tuple[datetime.date]:
     """
     Returns tuple with missed dates of unclosed workshifts.
@@ -112,20 +87,23 @@ def get_missed_dates_tuple() -> tuple[datetime.date]:
     current_date = timezone.localdate(timezone.now())
     year, month = current_date.year, current_date.month
     last_day_of_month = current_date.day
+    logger.debug(f'"missed dates" current date: {current_date}')
 
     exists_workshifts_dates = WorkingShift.objects.filter(
         shift_date__month=month, shift_date__year=year,
         shift_date__day__lte=last_day_of_month).dates('shift_date', 'day')
+    logger.debug(f'Exists workshifts dates: {exists_workshifts_dates}')
     month_dates = [
         datetime.date(year, month, day)
         for day in range(1, last_day_of_month + 1)
     ]
-    missed_dates = [
+    missed_dates_tuple = tuple([
         date for date in month_dates
         if date not in exists_workshifts_dates
-    ]
+    ])
+    logger.info(f'Missed dates tuple: {missed_dates_tuple}')
 
-    return tuple(missed_dates)
+    return missed_dates_tuple
 
 
 def get_employee_unclosed_workshifts_dates(
@@ -136,9 +114,15 @@ def get_employee_unclosed_workshifts_dates(
     requested_user = get_object_or_404(User, id=user_id)
     full_name = requested_user.get_full_name()
     if not requested_user.has_perm('salary.add_workingshift'):
+        logger.info(
+            f'User {requested_user.username} has no permissions '
+            f'to close workshifts.'
+        )
         return tuple()
 
     current_date = timezone.localdate(timezone.now())
+    logger.debug(
+        f'"employee_unclosed_workshifts" current date: {current_date}')
     year, month = current_date.year, current_date.month
 
     missed_dates = get_missed_dates_tuple()
@@ -146,12 +130,17 @@ def get_employee_unclosed_workshifts_dates(
         _get_date_with_offset(1, datetime.date(year, month, day))
         for day in get_planed_workshifts_days_list(full_name, month, year)
     ]
+    logger.debug(f'User allowed to close dates: {planed_shift_closed_dates}')
+
     employee_unclosed_workshifts_dates = [
         date for date in missed_dates
         if date in planed_shift_closed_dates
     ]
+
     first_month_date = datetime.date(year, month, 1)
     if first_month_date in missed_dates:
+        logger.debug(
+            f'Check permissoins to close first day {first_month_date}.')
         last_day_of_last_month = _get_date_with_offset(-1, first_month_date)
         last_month_planed_days = get_planed_workshifts_days_list(
             full_name, last_day_of_last_month.month,
@@ -162,7 +151,8 @@ def get_employee_unclosed_workshifts_dates(
                 last_month_planed_days[-1])
             if last_shift_date_of_last_month == last_day_of_last_month:
                 employee_unclosed_workshifts_dates.append(first_month_date)
-
+    logger.info(
+        f'User unclosed workshift dates: {employee_unclosed_workshifts_dates}')
     return tuple(employee_unclosed_workshifts_dates)
 
 

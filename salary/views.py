@@ -25,8 +25,8 @@ from salary.services.misconduct import Intruder
 from salary.services.internal_model_func import get_misconduct_slug
 from salary.services.workshift import (
     notification_of_upcoming_shifts, get_missed_dates_tuple,
-    get_missed_dates_list, get_employee_workshift_indicators,
-    get_employee_month_workshifts, get_employee_unclosed_workshifts_dates
+    get_employee_workshift_indicators, get_employee_month_workshifts,
+    get_employee_unclosed_workshifts_dates
 )
 from salary.services.registration import (
     registration_user, sending_confirmation_link, confirmation_user_email,
@@ -276,9 +276,7 @@ class StaffArchiveWorkshiftsView(WorkingshiftPermissonsMixin,
             'workshift_dates': datetime.date(
                 self.year, self.month, 1
             ),
-            'missed_workshifts_dates': get_missed_dates_list(
-                self.object_list.dates('shift_date', 'day')
-            ),
+            'missed_workshifts_dates': get_missed_dates_tuple(),
         })
 
         return context
@@ -705,7 +703,7 @@ class IndexEmployeeView(LoginRequiredMixin, ProfileStatusRedirectMixin,
             self.request.user.id)
 
         logger.debug(
-            f'Updating context data. Shifts to close: {unclosed_shifts_dates}. '
+            f'Shifts to close number: {len(unclosed_shifts_dates)}. '
             f'Notofication: {notification_about_shift}.'
         )
         context.update({
