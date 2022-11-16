@@ -80,6 +80,7 @@ def get_employees_schedule_dict(worksheet_name: str) -> dict:
             days_numbers_list.clear()
 
         logger.info(f'Caching worksheet {worksheet_name}.')
-        cache.set(worksheet_name, employees_schedule_dict, 600)
+        cache.set(worksheet_name, employees_schedule_dict,
+                  settings.DEFAULT_CACHE_LIFETIME)
 
     return employees_schedule_dict
