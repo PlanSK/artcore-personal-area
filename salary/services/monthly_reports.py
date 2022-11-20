@@ -26,7 +26,9 @@ class EmployeeData(NamedTuple):
     penalty: float
     average_revenue: float
     summary_bar_revenue: float
+    average_bar_revenue: float
     summary_hookah_revenue: float
+    average_hookah_revenue: float
 
 
 class WorkshiftData(NamedTuple):
@@ -149,21 +151,27 @@ def get_employee_data_list(employee_list: list[dict]) -> list[EmployeeData]:
 
     for id, id_data in employee_append_dict.items():
         summary_revenue = sum(id_data.get('summary_revenue'))
+        shift_counter = id_data.get('shift_counter', 0)
         average_revenue = summary_revenue / id_data.get('shift_counter', 1)
+        summary_bar_revenue = round(sum(id_data.get('summary_bar_revenue')), 2)
+        summary_hookah_revenue = round(
+            sum(id_data.get('summary_hookah_revenue')), 2)
         employee_data_list.append(
             EmployeeData(
                 id=id,
                 full_name=id_data.get('name'),
-                shift_counter=id_data.get('shift_counter', 0),
+                shift_counter=shift_counter,
                 basic_revenues=round(sum(id_data.get('basic_revenues')), 2),
                 bonus_revenues=round(sum(id_data.get('bonus_revenues')), 2),
                 shortage=round(sum(id_data.get('shortage')), 2),
                 penalty=round(sum(id_data.get('penalty')), 2),
                 average_revenue=round(average_revenue, 2),
-                summary_bar_revenue=round(
-                    sum(id_data.get('summary_bar_revenue')), 2),
-                summary_hookah_revenue=round(
-                    sum(id_data.get('summary_hookah_revenue')), 2)
+                summary_bar_revenue=summary_bar_revenue,
+                average_bar_revenue=round(
+                    summary_bar_revenue / shift_counter, 2),
+                summary_hookah_revenue=summary_hookah_revenue,
+                average_hookah_revenue=round(
+                    summary_hookah_revenue / shift_counter, 2)
             )
         )
 
@@ -257,10 +265,14 @@ def get_awards_data(month: int, year: int) -> AwardData:
     bar_max_revenue = 0.0
     cashier_current_leader = None
     cash_admin_max_avg_revenue = 0.0
+    default_shifts_number = settings.MINIMAL_WORKSHIFTS_NUMBER
+    avg_bar_limit = settings.AVERAGE_BAR_REVENUE_CRITERIA
+    avg_hookah_limit = settings.AVERAGE_HOOKAH_REVENUE_CRITERIA
 
-    for employee in filter(lambda x: x.shift_counter >= 4,
+    for employee in filter(lambda x: x.shift_counter >= default_shifts_number,
                            categories_list.cashier_list):
-        if bar_max_revenue < employee.summary_bar_revenue:
+        if (bar_max_revenue < employee.summary_bar_revenue
+                and employee.average_bar_revenue >= avg_bar_limit):
             bar_max_revenue = employee.summary_bar_revenue
             bar_current_leader = Leader(
                 leader=employee,
@@ -277,9 +289,10 @@ def get_awards_data(month: int, year: int) -> AwardData:
     hookah_max_revenue = 0.0
     hall_admins_current_leader = None
     hall_admin_max_avg_revenue = 0.0
-    for employee in filter(lambda x: x.shift_counter >= 4,
+    for employee in filter(lambda x: x.shift_counter >= default_shifts_number,
                            categories_list.hall_admin_list):
-        if hookah_max_revenue < employee.summary_hookah_revenue:
+        if (hookah_max_revenue < employee.summary_hookah_revenue
+                and employee.average_hookah_revenue >= avg_hookah_limit):
             hookah_max_revenue = employee.summary_hookah_revenue
             hookah_current_leader = Leader(
                 leader=employee,
@@ -340,10 +353,13 @@ def get_employee_rating_position(
 
     special_category_leader = False
     common_category_leader = False
+    default_shifts_number = settings.MINIMAL_WORKSHIFTS_NUMBER
 
-    if special and special.id == employee_id and special.shift_counter >= 4:
+    if (special and special.id == employee_id
+            and special.shift_counter >= default_shifts_number):
         special_category_leader = True
-    if common and common.id == employee_id and special.shift_counter >= 4:
+    if (common and common.id == employee_id 
+            and common.shift_counter >= default_shifts_number):
         common_category_leader = True
 
     if special_category_leader and common_category_leader:
@@ -385,7 +401,12 @@ def _get_employee_rating_data(
     award_data = get_awards_data(year=year, month=month)
     if tuple(filter(lambda x: x.id == employee_id,
                 award_data.cashiers_list)):
-        bar_rating = get_categories_from_list(award_data.cashiers_list)
+        avg_bar_limit = settings.AVERAGE_BAR_REVENUE_CRITERIA
+        avg_bar_revenue_filtered_list = [
+            employee for employee in award_data.cashiers_list
+            if employee.average_bar_revenue >= avg_bar_limit
+        ]
+        bar_rating = get_categories_from_list(avg_bar_revenue_filtered_list)
         cashiers_revenue = sorted(
             award_data.cashiers_list,
             key=lambda x: x.average_revenue,
@@ -406,7 +427,13 @@ def _get_employee_rating_data(
         )
     elif tuple(filter(lambda x: x.id == employee_id,
                 award_data.hall_admin_list)):
-        hookah_rating = get_categories_from_list(award_data.hall_admin_list)
+        avg_hookah_limit = settings.AVERAGE_HOOKAH_REVENUE_CRITERIA
+        avg_hookah_revenue_filtered_list = [
+            employee for employee in award_data.hall_admin_list
+            if employee.average_hookah_revenue >= avg_hookah_limit
+        ]
+        hookah_rating = get_categories_from_list(
+            avg_hookah_revenue_filtered_list)
         hall_admins_revenue = sorted(
             award_data.hall_admin_list,
             key=lambda x: x.average_revenue,

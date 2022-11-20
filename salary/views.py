@@ -712,6 +712,7 @@ class IndexEmployeeView(LoginRequiredMixin, ProfileStatusRedirectMixin,
             'today_date': timezone.localdate(timezone.now()),
             'unclosed_shifts_dates': unclosed_shifts_dates,
             'notification_about_shift': notification_about_shift,
+            'minimal_workshifts_number': settings.MINIMAL_WORKSHIFTS_NUMBER
         })
         logger.debug('Context data is updated. Return context.')
         return context
@@ -1117,6 +1118,7 @@ class AwardRatingView(MonthlyReportListView):
         context.update({
             'award_data': get_awards_data(month=self.month, year=self.year),
             'current_date': datetime.date(self.year, self.month, 1),
+            'minimal_workshifts_number': settings.MINIMAL_WORKSHIFTS_NUMBER
         })
         return context
 
