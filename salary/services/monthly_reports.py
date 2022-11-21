@@ -156,6 +156,11 @@ def get_employee_data_list(employee_list: list[dict]) -> list[EmployeeData]:
         summary_bar_revenue = round(sum(id_data.get('summary_bar_revenue')), 2)
         summary_hookah_revenue = round(
             sum(id_data.get('summary_hookah_revenue')), 2)
+        average_bar_revenue = average_hookah_revenue = 0.0
+        if shift_counter:
+            average_bar_revenue = summary_bar_revenue / shift_counter
+            average_hookah_revenue = summary_hookah_revenue / shift_counter
+
         employee_data_list.append(
             EmployeeData(
                 id=id,
@@ -167,11 +172,9 @@ def get_employee_data_list(employee_list: list[dict]) -> list[EmployeeData]:
                 penalty=round(sum(id_data.get('penalty')), 2),
                 average_revenue=round(average_revenue, 2),
                 summary_bar_revenue=summary_bar_revenue,
-                average_bar_revenue=round(
-                    summary_bar_revenue / shift_counter, 2),
+                average_bar_revenue=round(average_bar_revenue, 2),
                 summary_hookah_revenue=summary_hookah_revenue,
-                average_hookah_revenue=round(
-                    summary_hookah_revenue / shift_counter, 2)
+                average_hookah_revenue=round(average_hookah_revenue, 2)
             )
         )
 
