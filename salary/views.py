@@ -1118,7 +1118,9 @@ class AwardRatingView(MonthlyReportListView):
         context.update({
             'award_data': get_awards_data(month=self.month, year=self.year),
             'current_date': datetime.date(self.year, self.month, 1),
-            'minimal_workshifts_number': settings.MINIMAL_WORKSHIFTS_NUMBER
+            'minimal_workshifts_number': settings.MINIMAL_WORKSHIFTS_NUMBER,
+            'avg_bar_criteria': settings.AVERAGE_BAR_REVENUE_CRITERIA,
+            'avg_hookah_criteria': settings.AVERAGE_HOOKAH_REVENUE_CRITERIA
         })
         return context
 

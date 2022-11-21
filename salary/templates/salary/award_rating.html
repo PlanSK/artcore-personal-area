@@ -18,7 +18,7 @@
       <tbody class="text-center verysmall">
         <tr><td colspan="5" class="bg-dark bg-gradient">Кассиры</td></tr>
       {% for employee in award_data.cashiers_list %}
-        {% if employee.shift_counter >= minimal_workshifts_number %}
+        {% if employee.shift_counter >= minimal_workshifts_number and employee.average_bar_revenue >= avg_bar_criteria %}
         <tr>
           <td>{{employee.full_name}}</td>
           <td>{{employee.shift_counter}}</td>
@@ -48,7 +48,7 @@
       {% endfor %}
         <tr><td colspan="5" class="bg-dark bg-gradient">Админы</td></tr>
       {% for employee in award_data.hall_admin_list %}
-        {% if employee.shift_counter >= minimal_workshifts_number %}
+        {% if employee.shift_counter >= minimal_workshifts_number and employee.average_hookah_revenue >= avg_hookah_criteria %}
         <tr>
           <td>{{employee.full_name}}</td>
           <td>{{employee.shift_counter}}</td>
