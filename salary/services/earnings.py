@@ -9,7 +9,7 @@ class WorkshiftData(NamedTuple):
     shift_date: datetime.date
     bar_revenue: float
     game_zone_revenue: float
-    vr_revenue: float
+    additional_services_revenue: float
     hookah_revenue: float
     hall_cleaning: bool
     shortage: float
@@ -34,7 +34,7 @@ class PercentValue(NamedTuple):
 class Revenues(NamedTuple):
     bar: PercentValue
     game_zone: PercentValue
-    vr: PercentValue
+    additional_services: PercentValue
     summary: float
 
 
@@ -145,16 +145,16 @@ def get_calculated_revenues(workshift_data: WorkshiftData,
         workshift_data.game_zone_revenue,
         criteria.game_zone
     )
-    vr = get_percent_of_revenue(
-        workshift_data.vr_revenue,
-        criteria.vr
+    additional_services = get_percent_of_revenue(
+        workshift_data.additional_services_revenue,
+        criteria.additional_services
     )
-    summary = sum((bar.value, game_zone.value, vr.value))
+    summary = sum((bar.value, game_zone.value, additional_services.value))
 
     return Revenues(
         bar=bar,
         game_zone=game_zone,
-        vr=vr,
+        additional_services=additional_services,
         summary=round(summary, 2)
     )
 

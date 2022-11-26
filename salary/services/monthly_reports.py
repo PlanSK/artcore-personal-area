@@ -100,7 +100,8 @@ def get_workshift_data(workshift: WorkingShift) -> WorkshiftData:
         'bonus_part': cashier_earnings_data.bonus_part.summary,
         'shortage': cashier_earnings_data.shortage,
         'penalty': cashier_earnings_data.penalty,
-        'revenue': workshift.game_zone_subtotal + workshift.vr_revenue,
+        'revenue': workshift.game_zone_subtotal + \
+            workshift.additional_services_revenue,
         'bar_revenue': workshift.bar_revenue,
     }
     hall_admin_dict = {
@@ -109,7 +110,8 @@ def get_workshift_data(workshift: WorkingShift) -> WorkshiftData:
         'basic_part': hall_admin_earnings_data.basic_part.summary,
         'bonus_part': hall_admin_earnings_data.bonus_part.summary,
         'penalty': hall_admin_earnings_data.penalty,
-        'revenue': workshift.game_zone_subtotal + workshift.vr_revenue,
+        'revenue': workshift.game_zone_subtotal + \
+            workshift.additional_services_revenue,
         'hookah_revenue': workshift.hookah_revenue,
     }
     return WorkshiftData(cashier=cashier_dict, hall_admin=hall_admin_dict)

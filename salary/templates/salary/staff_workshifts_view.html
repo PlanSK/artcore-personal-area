@@ -80,7 +80,7 @@
             <span class="badge rounded-pill bg-secondary"><i class="fa-solid fa-utensils"></i> {{ workshift.bar_revenue | intcomma }}</span>
             <span class="badge rounded-pill bg-secondary"><i class="fa-brands fa-playstation"></i> {{ workshift.game_zone_revenue | intcomma }}</span>
             <span class="badge rounded-pill bg-secondary"><i class="fa-solid fa-circle-xmark"></i> {{ workshift.game_zone_error | intcomma }}</span>
-            <span class="badge rounded-pill bg-secondary"><i class="fa-solid fa-vr-cardboard"></i> {{ workshift.vr_revenue | intcomma }}</span>
+            <span class="badge rounded-pill bg-secondary"><i class="fa-solid fa-hand-holding-dollar"></i> {{ workshift.additional_services_revenue | intcomma }}</span>
             <span class="badge rounded-pill bg-secondary"><i class="fa-solid fa-bong"></i> {{ workshift.hookah_revenue | intcomma }}</span>
             {% if workshift.shortage and workshift.shortage_paid %}
             <span class="badge rounded-pill bg-secondary"><i class="fa-solid fa-sack-xmark"></i> <s>{{ workshift.shortage | intcomma }}</s></span>

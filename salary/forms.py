@@ -136,7 +136,7 @@ class EditWorkshiftDataForm(forms.ModelForm):
             'bar_revenue',
             'game_zone_revenue',
             'game_zone_error',
-            'vr_revenue',
+            'additional_services_revenue',
             'hookah_revenue',
             'publication_link',
         )
@@ -153,7 +153,7 @@ class AddWorkshiftDataForm(EditWorkshiftDataForm):
             'bar_revenue',
             'game_zone_revenue',
             'game_zone_error',
-            'vr_revenue',
+            'additional_services_revenue',
             'hookah_revenue',
             'publication_link',
         )
@@ -199,7 +199,7 @@ class StaffEditWorkshiftForm(EditWorkshiftDataForm):
             'bar_revenue',
             'game_zone_revenue',
             'game_zone_error',
-            'vr_revenue',
+            'additional_services_revenue',
             'hookah_revenue',
             'publication_is_verified',
             'publication_link',

@@ -560,8 +560,8 @@ class MonthlyAnalyticalReport(WorkingshiftPermissonsMixin,
     def get_fields_dict(self) -> dict:
         fields = (
             'summary_revenue', 'bar_revenue', 'game_zone_subtotal',
-            'game_zone_error', 'vr_revenue', 'hookah_revenue', 'shortage',
-            'summary_revenue__avg',
+            'game_zone_error', 'additional_services_revenue', 'hookah_revenue',
+            'shortage', 'summary_revenue__avg',
         )
         self.current_month_queryset = self.object_list.filter(
             shift_date__month=self.month,
@@ -638,7 +638,7 @@ class MonthlyAnalyticalReport(WorkingshiftPermissonsMixin,
         categories = {
             'bar_revenue': 'Бар',
             'game_zone_subtotal': 'Game zone',
-            'vr_revenue': 'Доп. услуги и VR',
+            'additional_services_revenue': 'Доп. услуги',
             'hookah_revenue': 'Кальян',
         }
 

@@ -181,8 +181,8 @@ class WorkingShift(models.Model):
     game_zone_subtotal = models.FloatField(
         verbose_name='Подытог по игоровой зоне', default=0.0
     )
-    vr_revenue = models.FloatField(
-        verbose_name='Выручка доп. услуги и VR', default=0.0
+    additional_services_revenue = models.FloatField(
+        verbose_name='Выручка доп. услуги', default=0.0
     )
     hookah_revenue = models.FloatField(
         verbose_name='Выручка по кальянам', default=0.0
@@ -247,7 +247,7 @@ class WorkingShift(models.Model):
             shift_date=self.shift_date,
             bar_revenue=self.bar_revenue,
             game_zone_revenue=self.game_zone_subtotal,
-            vr_revenue=self.vr_revenue,
+            additional_services_revenue=self.additional_services_revenue,
             hookah_revenue=self.hookah_revenue,
             hall_cleaning=self.hall_cleaning,
             shortage=self.shortage,
@@ -288,7 +288,7 @@ class WorkingShift(models.Model):
         total_revenue = sum((
             self.bar_revenue,
             self.game_zone_subtotal,
-            self.vr_revenue,
+            self.additional_services_revenue,
             self.hookah_revenue,
         ))
         if total_revenue > 0.0:

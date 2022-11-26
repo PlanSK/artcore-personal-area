@@ -52,8 +52,8 @@
         <tr>
           <td>% от выручки от доп. услуг.</td>
           <td>
-            {{ work_shift.cashier_earnings.bonus_part.revenues.vr.value|default:"-" | intcomma }}&emsp;
-            ({{ work_shift.cashier_earnings.bonus_part.revenues.vr.percent }}%)
+            {{ work_shift.cashier_earnings.bonus_part.revenues.additional_services.value|default:"-" | intcomma }}&emsp;
+            ({{ work_shift.cashier_earnings.bonus_part.revenues.additional_services.percent }}%)
           </td>
         </tr>
         <tr class="text-warning table-active">

@@ -219,13 +219,13 @@
             </tr>
             <tr>
               <td class="text-warning">Доп. услуги</td>
-              <td>{{ analytic.vr_revenue__sum.0 | intcomma }}</td>
-              <td>{{ analytic.vr_revenue__sum.1 | intcomma }}</td>
+              <td>{{ analytic.additional_services_revenue__sum.0 | intcomma }}</td>
+              <td>{{ analytic.additional_services_revenue__sum.1 | intcomma }}</td>
               <td>
-                {% if analytic.vr_revenue__sum.0 < analytic.vr_revenue__sum.1 %}
-                <span class="text-acid"><i class="fa-solid fa-arrow-trend-up"></i> рост на {{ analytic.vr_revenue__sum.2 }}%</span>
-                {% elif analytic.vr_revenue__sum.0 > analytic.vr_revenue__sum.1 %}
-                <span class="text-danger"><i class="fa-solid fa-arrow-trend-down"></i> снижение на {{ analytic.vr_revenue__sum.2 }}%</span>
+                {% if analytic.additional_services_revenue__sum.0 < analytic.additional_services_revenue__sum.1 %}
+                <span class="text-acid"><i class="fa-solid fa-arrow-trend-up"></i> рост на {{ analytic.additional_services_revenue__sum.2 }}%</span>
+                {% elif analytic.additional_services_revenue__sum.0 > analytic.additional_services_revenue__sum.1 %}
+                <span class="text-danger"><i class="fa-solid fa-arrow-trend-down"></i> снижение на {{ analytic.additional_services_revenue__sum.2 }}%</span>
                 {% else %}
                 -
                 {% endif %}
