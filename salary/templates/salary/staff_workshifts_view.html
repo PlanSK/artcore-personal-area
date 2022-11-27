@@ -34,6 +34,8 @@
         {% for workshift in workshift_list %}
         {% if workshift.status == 'VFD' %}
         <li class="list-group-item list-group-item-action list-group-item-success m-1 rounded">
+        {% elif workshift.status == 'WTC' %}
+        <li class="list-group-item list-group-item-action list-group-item-info m-1 rounded">
         {% else %}
         <li class="list-group-item list-group-item-action list-group-item-warning m-1 rounded">
         {% endif %}
