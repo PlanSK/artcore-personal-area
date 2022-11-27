@@ -245,7 +245,7 @@ def get_monthly_workingshifts_queryset(month: int, year: int) -> QuerySet:
     ).filter(
         shift_date__month=month,
         shift_date__year=year,
-        is_verified=True
+        status=WorkingShift.WorkshiftStatus.VERIFIED
     )
     return workshifts
 

@@ -208,7 +208,7 @@ class StaffEditWorkshiftForm(EditWorkshiftDataForm):
             'shortage_paid',
             'comment_for_cash_admin',
             'comment_for_hall_admin',
-            'is_verified',
+            'status',
         )
 
 

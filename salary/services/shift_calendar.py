@@ -89,12 +89,13 @@ def get_workshift_tuples_list(user: User,
         displayed_date = workshift.shift_date - datetime.timedelta(days=1)
         if workshift.shift_date == datetime.date(year, month, 1):
             displayed_date = workshift.shift_date
+        is_verified = True if WorkingShift.WorkshiftStatus.VERIFIED else False
         workshift_tuples_list.append(
             CalendarDay(
                 date=displayed_date,
                 earnings=current_earnings,
                 is_planed=False,
-                is_verified=workshift.is_verified,
+                is_verified=is_verified,
                 link=workshift.get_absolute_url()
             )
         )

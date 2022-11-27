@@ -26,10 +26,12 @@
             {% for workshift in object_list %}
             <tr>
               <td>
-                {% if workshift.is_verified %}
+                {% if workshift.status == 'VFD' %}
                   <i class="fa-solid fa-calendar-check" style="color: green;"></i>
+                {% elif workshift.status == 'WTC' %}
+                  <i class="fa-solid fa-pen-to-square fa-fade" style="color: orange;"></i>
                 {% else %}
-                    <i class="fa-solid fa-hourglass-end" style="color:yellow;"></i>
+                  <i class="fa-solid fa-hourglass-end" style="color:yellow;"></i>
                 {% endif %}
               </td>
               <td>{{ workshift.shift_date|date:"d.m.Y" }}</td>

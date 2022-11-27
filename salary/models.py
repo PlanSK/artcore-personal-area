@@ -160,6 +160,11 @@ class Misconduct(models.Model):
 
 
 class WorkingShift(models.Model):
+    class WorkshiftStatus(models.TextChoices):
+        UNVERIFIED = 'UVD', 'Не проверена'
+        WAIT_CORRECTION = 'WTC', 'Ожидает исправления'
+        VERIFIED = 'VFD', 'Проверена'
+    
     hall_admin = models.ForeignKey(
         User, on_delete=models.PROTECT, related_name='hall_admin'
     )
@@ -200,8 +205,12 @@ class WorkingShift(models.Model):
     slug = models.SlugField(
         max_length=60, unique=True, verbose_name='URL', null=True, blank=True
     )
-    is_verified = models.BooleanField(
-        verbose_name='Проверено', default=False, db_index=True
+    status = models.CharField(
+        max_length=20,
+        choices=WorkshiftStatus.choices,
+        default=WorkshiftStatus.UNVERIFIED,
+        verbose_name='Статус смены',
+        db_column='shift_status'
     )
     comment_for_cash_admin = models.TextField(
         verbose_name='Примечание для кассира', blank=True

@@ -12,7 +12,8 @@ register = template.Library()
 
 @register.simple_tag()
 def unverified_shift():
-    return WorkingShift.objects.exclude(is_verified=True).count()
+    return WorkingShift.objects.exclude(
+        status=WorkingShift.WorkshiftStatus.VERIFIED).count()
 
 
 @register.simple_tag()
@@ -39,16 +40,12 @@ def today_workshift_exists_check():
 
 
 @register.simple_tag()
-def get_verbose_status(status: str) -> str:
-    return Profile.ProfileStatus(status).label
-
-
-@register.simple_tag()
 def get_unread_messages(user: User) -> int:
     return Message.objects.select_related('chat').filter(
         chat__members__in=[user],
         is_read=False
     ).exclude(author=user).count()
+
 
 @register.simple_tag()
 def get_birthday_person_list() -> QuerySet:
@@ -59,6 +56,7 @@ def get_birthday_person_list() -> QuerySet:
     ).exclude(profile__profile_status='DSM')
     
     return birthday_person_list
+
 
 @register.simple_tag()
 def check_image_file_exists(profile: Profile):

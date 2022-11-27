@@ -32,20 +32,24 @@
       {% if workshift_list %}
       <ul class="list-group">
         {% for workshift in workshift_list %}
-        {% if workshift.is_verified %}
+        {% if workshift.status == 'VFD' %}
         <li class="list-group-item list-group-item-action list-group-item-success m-1 rounded">
         {% else %}
         <li class="list-group-item list-group-item-action list-group-item-warning m-1 rounded">
         {% endif %}
           <div class="d-flex w-100 justify-content-between verysmall">
             <span class="mb-1">
-              {% if workshift.is_verified %}
-              <a class="btn btn-success verysmall pt-0 pb-0" href="{{ workshift.get_absolute_url }}"><i class="fa-solid fa-calendar-check"></i> {{ workshift.shift_date }}</a>
+              {% if workshift.status == 'VFD' %}
+              <a class="btn btn-success verysmall pt-0 pb-0" href="{{ workshift.get_absolute_url }}"><i class="fa-solid fa-calendar-check"></i>
+              {% elif workshift.status == 'WTC' %}
+              <a class="btn btn-warning verysmall pt-0 pb-0" href="{{ workshift.get_absolute_url }}"><i class="fa-solid fa-pen-to-square fa-fade"></i>
               {% else %}
-              <a class="btn btn-warning verysmall verysmall pt-0 pb-0" href="{{ workshift.get_absolute_url }}"><i class="fa-regular fa-clock fa-fade"></i> {{ workshift.shift_date }}</a>
+              <a class="btn btn-warning verysmall verysmall pt-0 pb-0" href="{{ workshift.get_absolute_url }}"><i class="fa-regular fa-clock fa-fade"></i> 
               {% endif %}
-              
+                {{ workshift.shift_date|date:"j E" }}
+              </a>
             </span>
+              <span class="text-wrap">{{ workshift.get_status_display }}</span>
             <div class="dropdown">
               <button class="btn btn-outline-secondary btn-sm dropdown-toggle clear-after-toggle pb-0 pt-0 mb-1" type="button" id="dropdownMenuActions" data-bs-toggle="dropdown" aria-expanded="false">
                 <i class="fa-solid fa-ellipsis"></i>
@@ -79,9 +83,15 @@
           <div class="d-flex w-100 justify-content-between verysmall text-dark">
             <span class="badge rounded-pill bg-secondary"><i class="fa-solid fa-utensils"></i> {{ workshift.bar_revenue | intcomma }}</span>
             <span class="badge rounded-pill bg-secondary"><i class="fa-brands fa-playstation"></i> {{ workshift.game_zone_revenue | intcomma }}</span>
+            {% if workshift.game_zone_error %}
             <span class="badge rounded-pill bg-secondary"><i class="fa-solid fa-circle-xmark"></i> {{ workshift.game_zone_error | intcomma }}</span>
+            {% endif %}
+            {% if workshift.additional_services_revenue %}
             <span class="badge rounded-pill bg-secondary"><i class="fa-solid fa-hand-holding-dollar"></i> {{ workshift.additional_services_revenue | intcomma }}</span>
+            {% endif %}
+            {% if workshift.hookah_revenue %}
             <span class="badge rounded-pill bg-secondary"><i class="fa-solid fa-bong"></i> {{ workshift.hookah_revenue | intcomma }}</span>
+            {% endif %}
             {% if workshift.shortage and workshift.shortage_paid %}
             <span class="badge rounded-pill bg-secondary"><i class="fa-solid fa-sack-xmark"></i> <s>{{ workshift.shortage | intcomma }}</s></span>
             {% elif workshift.shortage %}
