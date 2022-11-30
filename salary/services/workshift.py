@@ -33,7 +33,7 @@ def _is_date_day_exists_in_plan(full_name: str,
     planed_shifts_days_tuple = get_planed_workshifts_days_list(
         user_full_name=full_name, month=check_date.month, year=check_date.year)
     logger.debug(f'Planed days: {planed_shifts_days_tuple}.')
-    if check_date.day in planed_shifts_days_tuple:
+    if planed_shifts_days_tuple and check_date.day in planed_shifts_days_tuple:
         logger.debug(f'{check_date.day} exists in {planed_shifts_days_tuple}.')
         return True
 

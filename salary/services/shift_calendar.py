@@ -178,6 +178,7 @@ def get_planed_workshifts_days_list(user_full_name: str,
             f'Error to open worksheet "{worksheet_name}". '
             f'GSpreadException: {error.__class__.__name__}.'
         ))
+        return tuple()
     except UnSupportedExportFormat as error:
         logger.error((
             f'Unknown exception detected in GSpread (Google Sheets). '
