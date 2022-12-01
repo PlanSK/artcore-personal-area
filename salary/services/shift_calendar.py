@@ -165,30 +165,47 @@ def get_worksheet_name(year: int, month: int) -> str:
     return f'{month}-{year}'
 
 
-def get_planed_workshifts_days_list(user_full_name: str,
-                                    month: int, year: int) -> tuple[int]:
+def _get_days_tuple_from_planed_dict(employee_dict: dict,
+                                    user_full_name: str) -> tuple[int] | tuple:
+    """
+    Returns tuple of days numbers list for employee from employee_dict
+    """
+    employee_days_list = employee_dict.get(user_full_name)
+    if employee_days_list:
+        try:
+            employee_days_tuple = tuple(employee_days_list)
+        except TypeError:
+            logger.error(f'Days list employee_days_list is not iterable.')
+        else:
+            return employee_days_tuple
+
+    return tuple()
+
+
+def get_planed_workshifts_days_list(user_full_name: str, month: int,
+                                    year: int) -> tuple[int] | tuple:
     """
     Returns list of day numbers planed shifts.
     """
     worksheet_name = get_worksheet_name(year=year, month=month)
+    employee_days_tuple = tuple()
     try:
-        google_sheets_data = get_employees_schedule_dict(worksheet_name).get(
-            user_full_name)
+        google_sheets_data_dict = get_employees_schedule_dict(worksheet_name)
     except GSpreadException as error:
         logger.error((
             f'Error to open worksheet "{worksheet_name}". '
             f'GSpreadException: {error.__class__.__name__}.'
         ))
-        return tuple()
     except UnSupportedExportFormat as error:
         logger.error((
             f'Unknown exception detected in GSpread (Google Sheets). '
             f'Exception: {error.__class__.__name__}.'
         ))
     else:
-        planed_workshifts_tuple = tuple(google_sheets_data)
+        employee_days_tuple = _get_days_tuple_from_planed_dict(
+            google_sheets_data_dict, user_full_name)
 
-    return planed_workshifts_tuple if planed_workshifts_tuple else tuple()
+    return employee_days_tuple
 
 
 def get_user_calendar(user: User, year: int, month: int) -> UserCalendar:
