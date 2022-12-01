@@ -7,7 +7,7 @@
     <div class="row mt-1">
       <div class="col">
         <p class="text-center">Смена<br>
-        <b>{{ yesterday|date:"d.m.Y" }} - {{ work_shift.shift_date|date:"d.m.Y" }}</b>
+        <b>{{ yesterday|date:"d.m.Y" }} - {{ workshift.shift_date|date:"d.m.Y" }}</b>
         </p>
       </div>
     </div>
@@ -28,19 +28,22 @@
             <tr>
               <td>Состояние</td>
               <td>
-                {% if work_shift.is_verified %}
-                <i class="fa-solid fa-calendar-check" style="color: green;"></i> Проверено 
+                {% if workshift.status == 'VFD' %}
+                  <i class="fa-solid fa-calendar-check" style="color: green;"></i>
+                {% elif workshift.status == 'WTC' %}
+                  <i class="fa-solid fa-pen-to-square fa-fade" style="color: orange;"></i>
                 {% else %}
-                <i class="fa-solid fa-clock fa-fade" style="color: yellow;"></i> Ожидает проверки
+                  <i class="fa-solid fa-clock fa-fade" style="color: yellow;"></i>
                 {% endif %}
+                {{ workshift.get_status_display }}
               </td>
             </tr>
-            {% if work_shift.change_date and work_shift.editor %}
+            {% if workshift.change_date and workshift.editor %}
             <tr>
               <td>Изменен:</td>
               <td>
-                {{ work_shift.change_date }}<br>
-                ({{ work_shift.editor }})
+                {{ workshift.change_date }}<br>
+                ({{ workshift.editor }})
               </td>
             </tr>
             {% endif %}
@@ -48,7 +51,7 @@
         </table>
       </div>
       <div class="col-md-7 col-sm-auto m-2 table-responsive rounded border border-light">
-        {% if request.user == work_shift.cash_admin or request.user.is_staff %}
+        {% if request.user == workshift.cash_admin or request.user.is_staff %}
         <table class="table table-dark">
           <thead class="text-warning text-center verysmall">
             <tr>
@@ -57,9 +60,9 @@
           </thead>
           <tbody class="verysmall">
             <tr>
-              {% if work_shift.comment_for_cash_admin %}
+              {% if workshift.comment_for_cash_admin %}
               <td class="text-justify">
-                {{ work_shift.comment_for_cash_admin|linebreaks }}
+                {{ workshift.comment_for_cash_admin|linebreaks }}
               {% else %}
               <td class="text-center">-
               {% endif %}
@@ -68,7 +71,7 @@
           </tbody>
         </table>
         {% endif %}
-        {% if request.user == work_shift.hall_admin or request.user.is_staff %}
+        {% if request.user == workshift.hall_admin or request.user.is_staff %}
         <table class="table table-dark">
           <thead class="text-warning text-center verysmall">
             <tr>
@@ -77,9 +80,9 @@
           </thead>
           <tbody class="verysmall">
             <tr>
-              {% if work_shift.comment_for_hall_admin %}
+              {% if workshift.comment_for_hall_admin %}
               <td class="text-justify">
-                {{ work_shift.comment_for_hall_admin|linebreaks }}
+                {{ workshift.comment_for_hall_admin|linebreaks }}
               {% else %}
               <td class="text-center">-
               {% endif %}
@@ -99,12 +102,12 @@
             </tr>
           </thead>
           <tbody class="text-center verysmall">
-            <tr><td class="text-warning">Бар</td><td>{{work_shift.bar_revenue | intcomma}}</td></tr>
-            <tr><td class="text-warning">Game Zone (КНА)</td><td>{{work_shift.game_zone_revenue | intcomma }}</td></tr>
-            <tr><td class="text-warning">Ошибки</td><td>{{work_shift.game_zone_error}}</td></tr>
-            <tr><td class="text-warning">Доп. услуги</td><td>{{work_shift.vr_revenue | intcomma}}</td></tr>
-            <tr><td class="text-warning">Кальян</td><td>{{work_shift.hookah_revenue | intcomma}}</td></tr>
-            <tr><td class="text-warning">Общая выручка</td><td>{{work_shift.summary_revenue | intcomma}}</td></tr>
+            <tr><td class="text-warning">Бар</td><td>{{workshift.bar_revenue | intcomma}}</td></tr>
+            <tr><td class="text-warning">Game Zone (КНА)</td><td>{{workshift.game_zone_revenue | intcomma }}</td></tr>
+            <tr><td class="text-warning">Ошибки</td><td>{{workshift.game_zone_error}}</td></tr>
+            <tr><td class="text-warning">Доп. услуги</td><td>{{workshift.additional_services_revenue | intcomma}}</td></tr>
+            <tr><td class="text-warning">Кальян</td><td>{{workshift.hookah_revenue | intcomma}}</td></tr>
+            <tr><td class="text-warning">Общая выручка</td><td>{{workshift.summary_revenue | intcomma}}</td></tr>
           </tbody>
         </table>
       </div>
@@ -120,18 +123,18 @@
           <tbody class="text-center verysmall">
             <tr>
               <td>Сотрудник</td>
-              <td>{{ work_shift.hall_admin.get_full_name }}</td>
-              <td>{{ work_shift.cash_admin.get_full_name }}</td>
+              <td>{{ workshift.hall_admin.get_full_name }}</td>
+              <td>{{ workshift.cash_admin.get_full_name }}</td>
             </tr>
             <tr>
               <td>Нарушения регламента</td>
-              <td>{{ work_shift.hall_admin_penalty|default:"-" | intcomma }}</td>
-              <td>{{ work_shift.cash_admin_penalty|default:"-" | intcomma }}</td>
+              <td>{{ workshift.hall_admin_penalty|default:"-" | intcomma }}</td>
+              <td>{{ workshift.cash_admin_penalty|default:"-" | intcomma }}</td>
             </tr>
             <tr>
               <td>Поддержание чистоты</td>
               <td colspan="2">
-              {% if work_shift.hall_cleaning %}
+              {% if workshift.hall_cleaning %}
               <i class="fa-solid fa-circle-check text-success"></i>
               {% else %}
               <i class="fa-solid fa-circle-xmark text-danger"></i>
@@ -140,14 +143,14 @@
             </tr>
             <tr>
               <td>Недостача</td>
-              <td colspan="2">{{ work_shift.shortage|default:"-" | intcomma }}</td>
+              <td colspan="2">{{ workshift.shortage|default:"-" | intcomma }}</td>
             </tr>
             <tr>
               <td>Публикация</td>
               <td colspan="2">
-                {% if  work_shift.publication_link %}
-                  <a href="{{ work_shift.publication_link }}" class="link-info">Ссылка указана</a>
-                  {% if work_shift.publication_is_verified %}
+                {% if  workshift.publication_link %}
+                  <a href="{{ workshift.publication_link }}" class="link-info">Ссылка указана</a>
+                  {% if workshift.publication_is_verified %}
                     <span class="text-success">(одобрена)</span>
                   {% else %}
                     <span class="text-warning">(не одобрена)</span>
@@ -162,30 +165,30 @@
       </div>
     </div>
     <div class="row mt-2">
-      {% if request.user == work_shift.hall_admin or request.user.is_staff %}
+      {% if request.user == workshift.hall_admin or request.user.is_staff %}
         {% include 'salary/workshift_detail_admin.html' %}
       {% endif %}
-      {% if request.user == work_shift.cash_admin or request.user.is_staff %}
+      {% if request.user == workshift.cash_admin or request.user.is_staff %}
         {% include 'salary/workshift_detail_cashier.html' %}
       {% endif %}
     </div>
     <div class="row text-center">
       {% if perms.salary.advanced_change_workshift and perms.salary.delete_workingshift %}
       <div class="col">
-        <a title="Внести изменения" class="btn btn-warning verysmall text-dark" href="{% url 'staff_edit_workshift' work_shift.slug %}?next={{ request.path }}">
+        <a title="Внести изменения" class="btn btn-warning verysmall text-dark" href="{% url 'staff_edit_workshift' workshift.slug %}?next={{ request.path }}">
           <i class="fa-solid fa-square-pen"></i>
           Внести изменения
         </a>
       </div>
       <div class="col">
-        <a title="Удалить смену" class="btn btn-danger verysmall text-light" href="{% url 'delete_workshift' work_shift.slug %}">
+        <a title="Удалить смену" class="btn btn-danger verysmall text-light" href="{% url 'delete_workshift' workshift.slug %}">
           <i class="fa-solid fa-square-xmark"></i>
           Удалить смену
         </a>
       </div>
-      {% elif not work_shift.is_verified and perms.salary.change_workingshift %}
+      {% elif not workshift.status == 'VFD' and perms.salary.change_workingshift %}
       <div class="col">
-        <a title="Внести изменения" class="btn btn-warning verysmall text-dark" href="{% url 'edit_workshift' work_shift.slug %}?next={{ request.path }}">
+        <a title="Внести изменения" class="btn btn-warning verysmall text-dark" href="{% url 'edit_workshift' workshift.slug %}?next={{ request.path }}">
           <i class="fa-solid fa-square-pen"></i>
           Внести изменения
         </a>

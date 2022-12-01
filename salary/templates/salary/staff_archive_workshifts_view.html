@@ -16,7 +16,7 @@
     </thead>
     <tbody class="text-center verysmall">
       {% for workshift in object_list %}
-      {% if workshift.is_verified %}
+      {% if workshift.status == 'VFD' %}
       <tr class>
         <td>
           <i class="fa-solid fa-calendar-check" style="color: green;"></i>

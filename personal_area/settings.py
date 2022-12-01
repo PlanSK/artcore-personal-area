@@ -19,10 +19,14 @@ from typing import NamedTuple
 
 
 def options_parse(options: str) -> dict:
-    options_dict = dict()
-    for parameter in options.split(','):
-        attr, value = parameter.split('=')
-        options_dict.update({attr: value})
+    try:
+        options_dict = dict()
+        parameters = options.split(',')
+        for parameter in parameters:
+            attr, value = parameter.split('=')
+            options_dict.update({attr: value})
+    except ValueError:
+        return dict()
 
     return options_dict
 
@@ -256,7 +260,7 @@ COMMON_CATEGORY_BONUS = 2000.0
 class Criteria(NamedTuple):
     bar: tuple[tuple[int, float], ...]
     game_zone: tuple[tuple[int, float], ...]
-    vr: tuple[tuple[int, float], ...]
+    additional_services: tuple[tuple[int, float], ...]
 
 
 ADMIN_BONUS_CRITERIA = Criteria(
@@ -274,7 +278,7 @@ ADMIN_BONUS_CRITERIA = Criteria(
         (27500, 0.015), 
         (30000, 0.0175)
     ),
-    vr=(
+    additional_services=(
         (0, 0.1),
         (1000, 0.12),
         (2000, 0.13),
@@ -298,7 +302,7 @@ CASHIER_BONUS_CRITERIA = Criteria(
         (27500, 0.015),
         (30000, 0.0175)
     ),
-    vr=(
+    additional_services=(
         (0, 0.05),
         (1000, 0.06),
         (2000, 0.065),
@@ -309,3 +313,7 @@ CASHIER_BONUS_CRITERIA = Criteria(
 
 DEFAULT_MISCONDUCT_ARTICLE_NUMBER = 1
 DEFAULT_CACHE_LIFETIME=3600
+
+AVERAGE_BAR_REVENUE_CRITERIA = 5000
+AVERAGE_HOOKAH_REVENUE_CRITERIA = 700
+MINIMAL_WORKSHIFTS_NUMBER = 4

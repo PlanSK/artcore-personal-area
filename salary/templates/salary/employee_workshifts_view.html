@@ -12,26 +12,25 @@
         <p class="text-warning text-center">Смены за {{ workshifts_list.0.shift_date|date:"F Y г."|lower }}</p><hr>
         <ul class="list-group">
           {% for workshift in workshifts_list %}
-          {% if workshift.is_verified %}
+          {% if workshift.status == 'VFD' %}
           <li class="list-group-item list-group-item-action list-group-item-success m-1 rounded">
-          {% else %}
+          {% elif workshift.status == 'WTC' %}
           <li class="list-group-item list-group-item-action list-group-item-warning m-1 rounded">
+          {% else %}
+          <li class="list-group-item list-group-item-action list-group-item-info m-1 rounded">
           {% endif %}
             <div class="d-flex w-100 justify-content-between">
               <span class="mb-1 verysmall">
-                {% if workshift.is_verified %}
-                <a class="btn btn-outline-success verysmall pt-0 pb-0" href="{{ workshift.get_absolute_url }}"><i class="fa-solid fa-calendar-check"></i> {{ workshift.shift_date }}</a>
+                {% if workshift.status == 'VFD' %}
+                <a class="btn btn-success verysmall pt-0 pb-0" href="{{ workshift.get_absolute_url }}"><i class="fa-solid fa-calendar-check"></i>
+                {% elif workshift.status == 'WTC' %}
+                <a class="btn btn-warning verysmall pt-0 pb-0" href="{{ workshift.get_absolute_url }}"><i class="fa-solid fa-pen-to-square fa-fade"></i>
                 {% else %}
-                <a class="btn btn-warning verysmall pt-0 pb-0" href="{{ workshift.get_absolute_url }}"><i class="fa-regular fa-clock fa-fade"></i> {{ workshift.shift_date }}</a>
+                <a class="btn btn-warning verysmall verysmall pt-0 pb-0" href="{{ workshift.get_absolute_url }}"><i class="fa-regular fa-clock fa-fade"></i> 
                 {% endif %}
+                  {{ workshift.shift_date|date:"j E" }}
+                </a>
               </span>
-              {% if request.user == workshift.cash_admin %}
-              {% if workshift.shortage and workshift.shortage_paid %}
-              <span class="text-secondary verysmall"><i class="fa-solid fa-sack-xmark"></i> <s>{{ workshift.shortage | intcomma }}</s></span>
-              {% elif workshift.shortage %}
-              <span class="text-danger"><b><i class="fa-solid fa-sack-xmark"></i> <i>{{ workshift.shortage | intcomma }}</i></b> </span>
-              {% endif %}
-            {% endif %}
               <span><i class="fa-solid fa-coins"></i>
                 <i><b>
                 {% if request.user == workshift.hall_admin %}
@@ -43,16 +42,33 @@
               </span>
             </div>
             <hr class="m-1">
-            <div class="row row-cols-3 text-center">
+            <div class="row row-cols-4 text-center verysmall">
               {% if request.user == workshift.hall_admin %}
               <div class="col"><span class="badge bg-secondary"><i class="fa-solid fa-bong"></i> {{ workshift.hookah_revenue | intcomma }}</span></div>
               {% elif request.user == workshift.cash_admin %}
               <div class="col"><span class="badge bg-secondary"><i class="fa-solid fa-utensils"></i> {{ workshift.bar_revenue | intcomma }}</span></div>
+                {% if workshift.shortage and workshift.shortage_paid %}
+                <div class="col"><span class="badge bg-secondary"><i class="fa-solid fa-sack-xmark"></i> <s>{{ workshift.shortage | intcomma }}</s></span></div>
+                {% elif workshift.shortage %}
+                <div class="col"><span class="badge bg-secondary bg-danger"><b><i class="fa-solid fa-sack-xmark"></i> <i>{{ workshift.shortage | intcomma }}</i></b> </span></div>
+                {% endif %}
               {% endif %}
               <div class="col"><span class="badge bg-secondary"><i class="fa-brands fa-playstation"></i> {{ workshift.game_zone_subtotal | intcomma }}</span></div>
               <div class="col"><span class="badge bg-secondary"><i class="fa-solid fa-cash-register"></i> {{ workshift.summary_revenue | intcomma }}</span></div>
             </div>
             <hr class="m-1">
+            {% if request.user == workshift.cash_admin %}
+              {% if workshift.status == 'WTC' %}
+              <div class="text-center">
+                <span class="verysmall fa-fade text-danger"><b>{{ workshift.get_status_display }}</b></span>
+              </div>
+              {% endif %}
+            {% endif %}
+            {% if workshift.status == 'UVD' %}
+            <div class="text-center">
+              <span class="verysmall"><b>{{ workshift.get_status_display }}</b></span>
+            </div>
+            {% endif %}
             {% if workshift.comment_for_cash_admin and request.user == workshift.cash_admin %}
             <div class="accordion" id="accordion{{ workshift.shift_date.day }}">
               <div class="accordion-item">

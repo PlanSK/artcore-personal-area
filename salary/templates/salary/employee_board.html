@@ -7,7 +7,7 @@
     <div class="container">
       <div class="row m-2">
         <!-- award rating block -->
-        {% if employee_indicators.number_of_verified_workshifts >= 4 and employee_indicators.rating_data %}
+        {% if employee_indicators.number_of_verified_workshifts >= minimal_workshifts_number and employee_indicators.rating_data %}
         <!-- Button -->
         <div class="col text-end">
           {% if employee_indicators.rating_data.position == employee_indicators.rating_data.position.ABSOLUTE_LEADER %}
@@ -55,31 +55,43 @@
                 </li>
 
                 <!-- second item -->
-                {% if employee_indicators.rating_data.special_rating.second.id == user.id %}
-                <li class="list-group-item list-group-item-success" style="font-weight: bold;">
+                {% if employee_indicators.rating_data.special_rating.second %}
+                  {% if employee_indicators.rating_data.special_rating.second.id == user.id %}
+                  <li class="list-group-item list-group-item-success" style="font-weight: bold;">
+                  {% else %}
+                  <li class="list-group-item list-group-item-success">
+                  {% endif %}
+                    {{ employee_indicators.rating_data.special_rating.second.full_name }}
+                    <span class="badge bg-success position-absolute top-50 end-0 translate-middle">
+                      {{ employee_indicators.rating_data.special_rating.second.summary_bar_revenue|default:"" }}
+                      {{ employee_indicators.rating_data.special_rating.second.summary_hookah_revenue|default:"" }}
+                    </span>
+                  </li>
                 {% else %}
-                <li class="list-group-item list-group-item-success">
+                  <li class="list-group-item list-group-item-success">-</li>
                 {% endif %}
-                  {{ employee_indicators.rating_data.special_rating.second.full_name }}
-                  <span class="badge bg-success position-absolute top-50 end-0 translate-middle">
-                    {{ employee_indicators.rating_data.special_rating.second.summary_bar_revenue|default:"" }}
-                    {{ employee_indicators.rating_data.special_rating.second.summary_hookah_revenue|default:"" }}
-                  </span>
-                </li>
 
                 <!-- third item -->
-                {% if employee_indicators.rating_data.special_rating.third.id == user.id %}
-                <li class="list-group-item list-group-item-dark" style="font-weight: bold;">
+                {% if employee_indicators.rating_data.special_rating.third %}
+                  {% if employee_indicators.rating_data.special_rating.third.id == user.id %}
+                  <li class="list-group-item list-group-item-dark" style="font-weight: bold;">
+                  {% else %}
+                  <li class="list-group-item list-group-item-dark">
+                  {% endif %}
+                    {{ employee_indicators.rating_data.special_rating.third.full_name }}
+                    <span class="badge bg-dark position-absolute top-50 end-0 translate-middle">
+                      {{ employee_indicators.rating_data.special_rating.third.summary_bar_revenue|default:"" }}
+                      {{ employee_indicators.rating_data.special_rating.third.summary_hookah_revenue|default:"" }}
+                    </span>
+                  </li>
                 {% else %}
-                <li class="list-group-item list-group-item-dark">
+                  <li class="list-group-item list-group-item-dark">-</li>
                 {% endif %}
-                  {{ employee_indicators.rating_data.special_rating.third.full_name }}
-                  <span class="badge bg-dark position-absolute top-50 end-0 translate-middle">
-                    {{ employee_indicators.rating_data.special_rating.third.summary_bar_revenue|default:"" }}
-                    {{ employee_indicators.rating_data.special_rating.third.summary_hookah_revenue|default:"" }}
-                  </span>
-                </li>
               </ol>
+            </div>
+            {% else %}
+            <div class="col-md-3 col-sm-auto text-center border rounded pb-2 m-1 border-secondary">
+              <span style="font-size: 0.5rem;">*Не соблюдены критерии для участия</span>
             </div>
             {% endif %}
             {% if employee_indicators.rating_data.common_rating.first %}
@@ -132,7 +144,7 @@
             <i class="fa-solid fa-chart-column fa-xl"></i>
             Текущий рейтинг
           </button><br>
-          <span style="font-size: 0.5rem;">*Для участия в рейтинге необходимо 4 и более проверенных смен</span>
+          <span style="font-size: 0.5rem;">*Для участия в рейтинге необходимо {{minimal_workshifts_number}} и более проверенных смен</span>
         </div>
         {% endif %}
       </div>

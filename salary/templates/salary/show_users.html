@@ -22,7 +22,6 @@
           {{ current_user.get_full_name }}<br>
           <span class="text-muted verysmall" style="font-size: x-small;">Авторизация: {{ current_user.last_login|default:"нет данных" }}</span>
           <div class="text-center verysmall">
-            {% get_verbose_status status=current_user.profile.profile_status as profile_status %}
             {% if current_user.profile.profile_status == 'VD' %}
             <span class="badge rounded-pill bg-success">
             {% elif current_user.profile.profile_status == 'RG' or current_user.profile.profile_status == 'WT' %}
@@ -32,7 +31,7 @@
             {% else %}
             <span class="text-danger">
             {% endif %}
-            {{ profile_status }}
+            {{ current_user.profile.get_profile_status_display }}
             </span>
           </div>
         </div>

@@ -4,100 +4,100 @@
     <table class="table table-dark">
       <thead class="text-warning text-center verysmall">
         <tr>
-          <th colspan="2">{{work_shift.hall_admin.get_full_name}}</th>
+          <th colspan="2">{{workshift.hall_admin.get_full_name}}</th>
         </tr>
       </thead>
-      {% if work_shift.hall_admin.profile.position.name != 'trainee' %}
+      {% if workshift.hall_admin.profile.position.name != 'trainee' %}
       <tbody class="verysmall">
         <tr><td colspan="2" class="text-info text-center">Базовая часть</td></tr>
         <tr>
           <td>Оклад за смену</td>
-          <td>{{ work_shift.hall_admin_earnings.basic_part.salary | intcomma }}</td>
+          <td>{{ workshift.hall_admin_earnings.basic_part.salary | intcomma }}</td>
         </tr>
         <tr>
           <td>Надбавка за стаж (более 3 мес.)</td>
-          <td>{{ work_shift.hall_admin_earnings.basic_part.experience|default:"-" | intcomma }}</td>
+          <td>{{ workshift.hall_admin_earnings.basic_part.experience|default:"-" | intcomma }}</td>
         </tr>
         <tr>
           <td>Надбавка за прохождение аттестации</td>
-          <td>{{ work_shift.hall_admin_earnings.basic_part.attestation|default:"-" | intcomma }}</td>
+          <td>{{ workshift.hall_admin_earnings.basic_part.attestation|default:"-" | intcomma }}</td>
         </tr>
         <tr class="text-warning table-active">
           <td>Суммарный оклад</td>
-          <td>{{ work_shift.hall_admin_earnings.basic_part.summary|default:"-" | intcomma }}</td>
+          <td>{{ workshift.hall_admin_earnings.basic_part.summary|default:"-" | intcomma }}</td>
         </tr>
         <tr><td colspan="2" class="text-info text-center">Премиальная часть</td></tr>
         <tr>
           <td>Премия за дисциплину</td>
-          <td>{{ work_shift.hall_admin_earnings.bonus_part.award|default:"-" | intcomma }}</td>
+          <td>{{ workshift.hall_admin_earnings.bonus_part.award|default:"-" | intcomma }}</td>
         </tr>
         <tr>
           <td>Премия за поддержание чистоты</td>
-          <td>{{ work_shift.hall_admin_earnings.bonus_part.cleaning|default:"-" }}</td>
+          <td>{{ workshift.hall_admin_earnings.bonus_part.cleaning|default:"-" }}</td>
         </tr>
         <tr>
           <td>Премия за СММ (1 публикация)</td>
-          <td>{{ work_shift.hall_admin_earnings.bonus_part.publication|default:"-" | intcomma }}</td>
+          <td>{{ workshift.hall_admin_earnings.bonus_part.publication|default:"-" | intcomma }}</td>
         </tr>
         <tr>
           <td>% от выручки по бару</td>
           <td>
-            {{ work_shift.hall_admin_earnings.bonus_part.revenues.bar.value|default:"-" | intcomma }}&emsp;
-            ({{ work_shift.hall_admin_earnings.bonus_part.revenues.bar.percent }}%)</td>
+            {{ workshift.hall_admin_earnings.bonus_part.revenues.bar.value|default:"-" | intcomma }}&emsp;
+            ({{ workshift.hall_admin_earnings.bonus_part.revenues.bar.percent }}%)</td>
         </tr>
         <tr>
           <td>% от выручки от игровой зоны (КНА)</td>
           <td>
-            {{ work_shift.hall_admin_earnings.bonus_part.revenues.game_zone.value|default:"-" | intcomma }}&emsp;
-            ({{ work_shift.hall_admin_earnings.bonus_part.revenues.game_zone.percent }}%)
+            {{ workshift.hall_admin_earnings.bonus_part.revenues.game_zone.value|default:"-" | intcomma }}&emsp;
+            ({{ workshift.hall_admin_earnings.bonus_part.revenues.game_zone.percent }}%)
           </td>
         </tr>
         <tr>
           <td>% от выручки от доп. услуг.</td>
           <td>
-            {{ work_shift.hall_admin_earnings.bonus_part.revenues.vr.value|default:"-" | intcomma }}&emsp;
-            ({{ work_shift.hall_admin_earnings.bonus_part.revenues.vr.percent }}%)
+            {{ workshift.hall_admin_earnings.bonus_part.revenues.additional_services.value|default:"-" | intcomma }}&emsp;
+            ({{ workshift.hall_admin_earnings.bonus_part.revenues.additional_services.percent }}%)
           </td>
         </tr>
         <tr>
           <td>% от выручки от продажи кальяна</td>
           <td>
-            {{ work_shift.hall_admin_earnings.bonus_part.hookah.value|default:"-" }}&emsp;
-            ({{ work_shift.hall_admin_earnings.bonus_part.hookah.percent }}%)
+            {{ workshift.hall_admin_earnings.bonus_part.hookah.value|default:"-" }}&emsp;
+            ({{ workshift.hall_admin_earnings.bonus_part.hookah.percent }}%)
           </td>
         </tr>
         <tr class="text-warning table-active">
           <td>Сумма премиальной части</td>
-          <td>{{ work_shift.hall_admin_earnings.bonus_part.summary|default:"-" | intcomma }}</td>
+          <td>{{ workshift.hall_admin_earnings.bonus_part.summary|default:"-" | intcomma }}</td>
         </tr>
         </tbody>
         <tfoot class="verysmall">
-        {% if work_shift.hall_admin_penalty %}
+        {% if workshift.hall_admin_penalty %}
         <tr>
           <td>Предполагаемый заработок</td>
-          <td>{{ work_shift.hall_admin_earnings.estimated_earnings|default:"-" | intcomma }}</td>
+          <td>{{ workshift.hall_admin_earnings.estimated_earnings|default:"-" | intcomma }}</td>
         </tr>
         <tr>
           <td>Штраф за нарушение дисциплинарного регламента</td>
-          <td class="text-danger">{{ work_shift.hall_admin_earnings.penalty|default:"-" | intcomma }}</td>
+          <td class="text-danger">{{ workshift.hall_admin_earnings.penalty|default:"-" | intcomma }}</td>
         </tr>
         <tr>
           <td>Удержано за нарушение дицциплины</td>
-          <td class="text-danger">{{ work_shift.hall_admin_earnings.retention|default:"-" | intcomma }}</td>
+          <td class="text-danger">{{ workshift.hall_admin_earnings.retention|default:"-" | intcomma }}</td>
         </tr>
         {% endif %}
         <tr class="table-active">
           <td>Итоговый заработок</td>
-          {% if not work_shift.is_verified %}
-          <td class="text-secondary">{{ work_shift.hall_admin_earnings.final_earnings|default:"-" | intcomma }}*</td>
+          {% if not workshift.status == 'VFD' %}
+          <td class="text-secondary">{{ workshift.hall_admin_earnings.final_earnings|default:"-" | intcomma }}*</td>
           {% else %}
-          <td>{{ work_shift.hall_admin_earnings.final_earnings|default:"-" | intcomma }}</td>
+          <td>{{ workshift.hall_admin_earnings.final_earnings|default:"-" | intcomma }}</td>
           {% endif %}
         </tr>
       </tfoot>
       {% endif %}
     </table>
-    {% if not work_shift.is_verified %}
+    {% if not workshift.status == 'VFD' %}
     <p class="text-secondary verysmall">*Смена не проверена, данные могут измениться.</p>
     {% endif %}
   </div>

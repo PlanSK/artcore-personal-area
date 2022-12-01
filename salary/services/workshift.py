@@ -170,7 +170,8 @@ def get_employee_month_workshifts(employee_id: int, month: int, year: int,
             ).order_by('shift_date')
 
     if only_verified:
-        return employee_month_workshifts.filter(is_verified=True)
+        return employee_month_workshifts.filter(
+            status=WorkingShift.WorkshiftStatus.VERIFIED)
 
     return employee_month_workshifts
 

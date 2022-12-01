@@ -217,7 +217,7 @@ class ReportsView(WorkingshiftPermissonsMixin, TitleMixin, ListView):
 
     def get_queryset(self):
         query = WorkingShift.objects.filter(
-            is_verified=True
+            status=WorkingShift.WorkshiftStatus.VERIFIED
         ).dates('shift_date','month')
         return query
 
@@ -243,7 +243,8 @@ class StaffWorkshiftsView(WorkingshiftPermissonsMixin, MonthYearExtractMixin,
             shift_date__month=self.month,
             shift_date__year=self.year).dates('shift_date', 'day')
         context.update({
-            'workshift_list': self.object_list.filter(is_verified=False),
+            'workshift_list': self.object_list.exclude(
+                status=WorkingShift.WorkshiftStatus.VERIFIED),
             'missed_workshifts_dates': get_missed_dates_tuple(),
         })
         return context
@@ -526,7 +527,7 @@ class WorkshiftDetailView(ProfileStatusRedirectMixin, PermissionRequiredMixin,
             'cash_admin__profile__position',
             'hall_admin__profile__position',
     )
-    context_object_name = 'work_shift'
+    context_object_name = 'workshift'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -560,8 +561,8 @@ class MonthlyAnalyticalReport(WorkingshiftPermissonsMixin,
     def get_fields_dict(self) -> dict:
         fields = (
             'summary_revenue', 'bar_revenue', 'game_zone_subtotal',
-            'game_zone_error', 'vr_revenue', 'hookah_revenue', 'shortage',
-            'summary_revenue__avg',
+            'game_zone_error', 'additional_services_revenue', 'hookah_revenue',
+            'shortage', 'summary_revenue__avg',
         )
         self.current_month_queryset = self.object_list.filter(
             shift_date__month=self.month,
@@ -638,7 +639,7 @@ class MonthlyAnalyticalReport(WorkingshiftPermissonsMixin,
         categories = {
             'bar_revenue': 'Бар',
             'game_zone_subtotal': 'Game zone',
-            'vr_revenue': 'Доп. услуги и VR',
+            'additional_services_revenue': 'Доп. услуги',
             'hookah_revenue': 'Кальян',
         }
 
@@ -712,6 +713,7 @@ class IndexEmployeeView(LoginRequiredMixin, ProfileStatusRedirectMixin,
             'today_date': timezone.localdate(timezone.now()),
             'unclosed_shifts_dates': unclosed_shifts_dates,
             'notification_about_shift': notification_about_shift,
+            'minimal_workshifts_number': settings.MINIMAL_WORKSHIFTS_NUMBER
         })
         logger.debug('Context data is updated. Return context.')
         return context
@@ -1117,6 +1119,9 @@ class AwardRatingView(MonthlyReportListView):
         context.update({
             'award_data': get_awards_data(month=self.month, year=self.year),
             'current_date': datetime.date(self.year, self.month, 1),
+            'minimal_workshifts_number': settings.MINIMAL_WORKSHIFTS_NUMBER,
+            'avg_bar_criteria': settings.AVERAGE_BAR_REVENUE_CRITERIA,
+            'avg_hookah_criteria': settings.AVERAGE_HOOKAH_REVENUE_CRITERIA
         })
         return context
 
