@@ -71,10 +71,10 @@
         {% endif %}
         <div class="text-center mb-1 verysmall">
         {% if employee.profile.profile_status != 'VD' %}
-          <p>В настоящее время профиль сотрудника имеет стутус <b class="text-warning">"{{ employee.profile.get_profile_status_diplay }}"</b>.<br>Вы можете одобрить его регистрацию нажав кнопку ниже.<br>
+          <p>В настоящее время профиль сотрудника имеет стутус <b class="text-warning">"{{ employee.profile.get_profile_status_display }}"</b>.<br>Вы можете одобрить его регистрацию нажав кнопку ниже.<br>
           <a href="{% url 'profile_approval' pk=employee.id %}?next={{ request.path }}" class="btn btn-outline-success verysmall mt-1" onclick="return confirm('Вы действительно хотите одобрить регистрицию сотрудника?');">Одобрить регистрацию</a></p>
         {% else %}
-          <p>В настоящее время профиль сотрудника имеет стутус <b class="text-success">"{{ status }}"</b>
+          <p>В настоящее время профиль сотрудника имеет стутус <b class="text-success">"{{ employee.profile.get_profile_status_display }}"</b>
         {% endif %}
         </div>
         <div class="mb-2"><a href="{% url 'user_view' %}" class="btn btn-outline-primary verysmall"><i class="fa-solid fa-users"></i>&nbsp;Управление персоналом</a></div>
