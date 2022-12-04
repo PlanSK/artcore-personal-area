@@ -18,10 +18,12 @@
           <td>Надбавка за стаж (более 3 мес.)</td>
           <td>{{ workshift.hall_admin_earnings.basic_part.experience|default:"-" | intcomma }}</td>
         </tr>
+        {% if attestation_enabled %}
         <tr>
           <td>Надбавка за прохождение аттестации</td>
           <td>{{ workshift.hall_admin_earnings.basic_part.attestation|default:"-" | intcomma }}</td>
         </tr>
+        {% endif %}
         <tr class="text-warning table-active">
           <td>Суммарный оклад</td>
           <td>{{ workshift.hall_admin_earnings.basic_part.summary|default:"-" | intcomma }}</td>
@@ -35,10 +37,12 @@
           <td>Премия за поддержание чистоты</td>
           <td>{{ workshift.hall_admin_earnings.bonus_part.cleaning|default:"-" }}</td>
         </tr>
+        {% if publication_enabled %}
         <tr>
           <td>Премия за СММ (1 публикация)</td>
           <td>{{ workshift.hall_admin_earnings.bonus_part.publication|default:"-" | intcomma }}</td>
         </tr>
+        {% endif %}
         <tr>
           <td>% от выручки по бару</td>
           <td>

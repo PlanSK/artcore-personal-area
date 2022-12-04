@@ -52,7 +52,7 @@
             Дата рождения: {{ user.profile.birth_date }} <br>
             Дата трудоустройства: {{ user.profile.employment_date|date:"d.m.Y" }} <br>
             Стаж работы: {{ user.profile.get_experience_text }} <br>
-            {% if not user.is_staff %}
+            {% if not user.is_staff and attestation_enabled %}
               Аттестация: 
               {% if user.profile.attestation_date %} 
               <span class="text-success">{{ user.profile.attestation_date }}</span> 

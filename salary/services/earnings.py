@@ -76,7 +76,8 @@ def get_attestation_bonus(attestation_date: datetime.date,
     Return ATTESTATION_BONUS if attestation date is defined
     and older than shift date
     """
-    if attestation_date and attestation_date <= shift_date:
+    if (attestation_date and attestation_date <= shift_date
+            and settings.ATTESTATION_ENABLED):
         return settings.ATTESTATION_BONUS
 
     return 0.0
@@ -181,7 +182,7 @@ def get_bonus_part(workshift_data: WorkshiftData,
     cleaning = 0.0
     hookah = PercentValue(percent=0.0, value=0.0)
     summary = 0.0
-    if workshift_data.publication:
+    if workshift_data.publication and settings.PUBLICATION_ENABLED:
         publication = settings.PUBLICATION_BONUS
     if not is_cashier:
         hookah = get_hookah_earnings(workshift_data)

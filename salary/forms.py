@@ -1,4 +1,5 @@
 from django import forms
+from django.conf import settings
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 
 import datetime
@@ -18,7 +19,8 @@ class DateInput(forms.DateInput):
 class UserRegistrationForm(UserCreationForm):
     class Meta:
         model = User
-        fields = ['username', 'first_name', 'last_name', 'email', 'password1', 'password2']
+        fields = ['username', 'first_name', 'last_name',
+                  'email', 'password1', 'password2']
 
     def clean_email(self):
         entered_email = self.cleaned_data['email']
@@ -69,11 +71,13 @@ class StaffEditProfileForm(forms.ModelForm):
 
     class Meta:
         model = Profile
-        fields = (
+        fields = [
             'birth_date', 'employment_date', 'position',
-            'photo', 'attestation_date', 'dismiss_date',
+            'photo', 'dismiss_date',
             'profile_status',
-        )
+        ]
+        if settings.ATTESTATION_ENABLED:
+            fields.append('attestation_date')
         widgets_injection = {
             field: forms.DateInput(attrs={'type': 'date',}, format='%Y-%m-%d')
             for field in fields if 'date' in field
@@ -130,7 +134,7 @@ class EditWorkshiftDataForm(forms.ModelForm):
 
     class Meta:
         model = WorkingShift
-        fields = (
+        fields = [
             'hall_admin',
             'cash_admin',
             'bar_revenue',
@@ -138,15 +142,16 @@ class EditWorkshiftDataForm(forms.ModelForm):
             'game_zone_error',
             'additional_services_revenue',
             'hookah_revenue',
-            'publication_link',
-        )
+        ]
+        if settings.PUBLICATION_ENABLED:
+            fields.append('publication_link')
 
 
 class AddWorkshiftDataForm(EditWorkshiftDataForm):
 
     class Meta:
         model = WorkingShift
-        fields = (
+        fields = [
             'hall_admin',
             'cash_admin',
             'shift_date',
@@ -155,8 +160,9 @@ class AddWorkshiftDataForm(EditWorkshiftDataForm):
             'game_zone_error',
             'additional_services_revenue',
             'hookah_revenue',
-            'publication_link',
-        )
+        ]
+        if settings.PUBLICATION_ENABLED:
+            fields.append('publication_link')
         widgets = {
             'shift_date': forms.DateInput(attrs={'type': 'date'}),
         }
@@ -193,7 +199,7 @@ class StaffEditWorkshiftForm(EditWorkshiftDataForm):
     )
     class Meta:
         model = WorkingShift
-        fields = (
+        fields = [
             'hall_admin',
             'cash_admin',
             'bar_revenue',
@@ -201,15 +207,15 @@ class StaffEditWorkshiftForm(EditWorkshiftDataForm):
             'game_zone_error',
             'additional_services_revenue',
             'hookah_revenue',
-            'publication_is_verified',
-            'publication_link',
             'hall_cleaning',
             'shortage',
             'shortage_paid',
             'comment_for_cash_admin',
             'comment_for_hall_admin',
             'status',
-        )
+        ]
+        if settings.PUBLICATION_ENABLED:
+            fields.extend(['publication_link', 'publication_is_verified'])
 
 
 class AddMisconductForm(forms.ModelForm):
