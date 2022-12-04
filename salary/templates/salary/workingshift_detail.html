@@ -145,6 +145,7 @@
               <td>Недостача</td>
               <td colspan="2">{{ workshift.shortage|default:"-" | intcomma }}</td>
             </tr>
+            {% if publication_enabled %}
             <tr>
               <td>Публикация</td>
               <td colspan="2">
@@ -160,6 +161,7 @@
                 {% endif %}
               </td>
             </tr>
+            {% endif %}
           </tbody>
         </table>
       </div>

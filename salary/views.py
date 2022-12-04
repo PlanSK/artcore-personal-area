@@ -205,8 +205,11 @@ class AdminUserView(EmployeePermissionsMixin, TitleMixin, ListView):
         return queryset
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['only_actived'] = True if not self.kwargs.get('all') else False
+        context: dict = super().get_context_data(**kwargs)
+        context.update({
+            'attestation_enabled': settings.ATTESTATION_ENABLED,
+            'only_actived': True if not self.kwargs.get('all') else False
+        })
         return context
 
 
@@ -516,6 +519,15 @@ class ShowUserProfile(LoginRequiredMixin, TitleMixin, DetailView):
             queryset if queryset else self.get_queryset(),
             pk=self.request.user.pk
         )
+    
+    def get_context_data(self, **kwargs):
+        context : dict = super().get_context_data(**kwargs)
+        context.update(
+            {
+                'attestation_enabled': settings.ATTESTATION_ENABLED
+            }
+        )
+        return context
 
 
 class WorkshiftDetailView(ProfileStatusRedirectMixin, PermissionRequiredMixin,
@@ -530,8 +542,13 @@ class WorkshiftDetailView(ProfileStatusRedirectMixin, PermissionRequiredMixin,
     context_object_name = 'workshift'
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['yesterday'] = context['object'].shift_date - datetime.timedelta(days=1)
+        context: dict = super().get_context_data(**kwargs)
+        yesterday = context['object'].shift_date - datetime.timedelta(days=1)
+        context.update({
+            'yesterday': yesterday,
+            'attestation_enabled': settings.ATTESTATION_ENABLED,
+            'publication_enabled': settings.SMM_PUBLICATION_ENABLED
+        })
 
         return context
 

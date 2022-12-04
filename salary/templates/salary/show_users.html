@@ -59,11 +59,13 @@
           Дата рождения: {{ current_user.profile.birth_date }} <br>
           Дата трудоустройства: {{ current_user.profile.employment_date|date:"d.m.Y" }} <br>
           Стаж работы: {{ current_user.profile.get_experience_text }} <br>
-          Аттестация: 
-          {% if current_user.profile.attestation_date %} 
-          <span class="text-success">{{ current_user.profile.attestation_date }}</span> 
-          {% else %}
-          <span class="text-warning">Не пройдена</span> 
+          {% if not current_user.is_staff and attestation_enabled %}
+            Аттестация:
+            {% if current_user.profile.attestation_date %}
+            <span class="text-success">{{ current_user.profile.attestation_date }}</span> 
+            {% else %}
+            <span class="text-warning">Не пройдена</span> 
+            {% endif %}
           {% endif %}
           </p>
         </div>
