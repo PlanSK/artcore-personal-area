@@ -143,7 +143,7 @@ class EditWorkshiftDataForm(forms.ModelForm):
             'additional_services_revenue',
             'hookah_revenue',
         ]
-        if settings.SMM_PUBLICATION_ENABLED:
+        if settings.PUBLICATION_ENABLED:
             fields.append('publication_link')
 
 
@@ -161,7 +161,7 @@ class AddWorkshiftDataForm(EditWorkshiftDataForm):
             'additional_services_revenue',
             'hookah_revenue',
         ]
-        if settings.SMM_PUBLICATION_ENABLED:
+        if settings.PUBLICATION_ENABLED:
             fields.append('publication_link')
         widgets = {
             'shift_date': forms.DateInput(attrs={'type': 'date'}),
@@ -214,7 +214,7 @@ class StaffEditWorkshiftForm(EditWorkshiftDataForm):
             'comment_for_hall_admin',
             'status',
         ]
-        if settings.SMM_PUBLICATION_ENABLED:
+        if settings.PUBLICATION_ENABLED:
             fields.extend(['publication_link', 'publication_is_verified'])
 
 

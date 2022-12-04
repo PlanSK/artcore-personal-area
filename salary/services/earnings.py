@@ -182,7 +182,7 @@ def get_bonus_part(workshift_data: WorkshiftData,
     cleaning = 0.0
     hookah = PercentValue(percent=0.0, value=0.0)
     summary = 0.0
-    if workshift_data.publication and settings.SMM_PUBLICATION_ENABLED:
+    if workshift_data.publication and settings.PUBLICATION_ENABLED:
         publication = settings.PUBLICATION_BONUS
     if not is_cashier:
         hookah = get_hookah_earnings(workshift_data)

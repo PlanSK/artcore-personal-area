@@ -547,7 +547,7 @@ class WorkshiftDetailView(ProfileStatusRedirectMixin, PermissionRequiredMixin,
         context.update({
             'yesterday': yesterday,
             'attestation_enabled': settings.ATTESTATION_ENABLED,
-            'publication_enabled': settings.SMM_PUBLICATION_ENABLED
+            'publication_enabled': settings.PUBLICATION_ENABLED
         })
 
         return context
