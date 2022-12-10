@@ -32,13 +32,15 @@
       {% if workshift_list %}
       <ul class="list-group">
         {% for workshift in workshift_list %}
+        <li  id="{{ workshift.slug }}"
         {% if workshift.status == 'VFD' %}
-        <li class="list-group-item list-group-item-action list-group-item-success m-1 rounded">
+          class="list-group-item list-group-item-action list-group-item-success m-1 rounded"
         {% elif workshift.status == 'WTC' %}
-        <li class="list-group-item list-group-item-action list-group-item-info m-1 rounded">
+          class="list-group-item list-group-item-action list-group-item-info m-1 rounded"
         {% else %}
-        <li class="list-group-item list-group-item-action list-group-item-warning m-1 rounded">
+          class="list-group-item list-group-item-action list-group-item-warning m-1 rounded"
         {% endif %}
+        >
           <div class="d-flex w-100 justify-content-between verysmall">
             <span class="mb-1">
               {% if workshift.status == 'VFD' %}
@@ -97,7 +99,7 @@
             {% if workshift.shortage and workshift.shortage_paid %}
             <span class="badge rounded-pill bg-secondary"><i class="fa-solid fa-sack-xmark"></i> <s>{{ workshift.shortage | intcomma }}</s></span>
             {% elif workshift.shortage %}
-            <a class="badge rounded-pill bg-danger link-light not-underlined" href="{% url 'shortage_payment' slug=workshift.slug %}?next={{ request.path }}" onclick="return confirm('Вы уверены, что хотите погасить недостачу?');">
+            <a class="badge rounded-pill bg-danger link-light not-underlined" href="{% url 'shortage_payment' slug=workshift.slug %}?next={{ request.path }}#{{ workshift.slug }}" onclick="return confirm('Вы уверены, что хотите погасить недостачу?');">
               <i class="fa-solid fa-sack-xmark"></i> <i><b>{{ workshift.shortage | intcomma }}</b></i>
             </a>
             {% endif %}
