@@ -253,6 +253,12 @@ class StaffWorkshiftsView(WorkingshiftPermissonsMixin, MonthYearExtractMixin,
         return context
 
 
+class StaffIndexView(WorkingshiftPermissonsMixin, TitleMixin,
+                          TemplateView):
+    template_name = 'salary/staff/staff_index.html'
+    title = 'Staff Index Page'
+
+
 class StaffArchiveWorkshiftsView(WorkingshiftPermissonsMixin,
                                  MonthYearExtractMixin, TitleMixin, ListView):
     template_name = 'salary/staff_workshifts_view.html'
