@@ -17,86 +17,115 @@
         <b>{{ user.get_full_name }}</b>
         <hr>
       </div>
-      <div class="col verysmall">
+      <div class="col verysmall mb-1">
         Авторизация: {{ user.last_login|default:"нет данных" }}<br>
         Email: <span class="text-success">{{ user.email }}</span><br>
         Стаж работы: {{ user.profile.get_experience_text }} <br>
-        <hr>
-        <p class="text-center">«Успех — это путь от неудачи к неудаче без потери энтузиазма»</p>
-        <p class="text-end"><i>Уинстон Черчилль</i></p>
+      </div>
+      <div class="col text-center mb-1">
+        <hr class="m-1">
+        <i><b class="text-primary">20 марта 2022 г., среда</b><br>
+        <span class="verysmall">Сегодня на смене:</span></i><br>
+        <span class="badge bg-primary"><i class="fa-solid fa-cash-register"></i> Петров Петр</span>
+        <span class="badge bg-success"><i class="fa-solid fa-user-gear"></i> Иван Иванов</span>
       </div>
     </div>
   </div>
-  <div class="col-md-6 m-1">
-    <div class="row row-cols-1">
-        <div class="col text-center bg-secondary bg-gradient rounded">
-          <h5><i>20 марта 2022 г., среда </i></h5>
+  <div class="col-md-8 m-1">
+    <div class="row justify-content-evenly">
+      <div class="col-md-4 rounded border pb-1 text-center">
+        <p class="text-success"><i class="fa-solid fa-chart-column"></i> Рейтинги</p>
+        <div class="accordion verysmall" id="accordionRating">
+          <div class="accordion-item">
+            <h6 class="accordion-header verysmall" id="headingOne">
+              <button class="accordion-button p-2 ps-4 list-group-item-secondary verysmall collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                Рейтинг по бару
+              </button>
+            </h6>
+            <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionRating">
+              <div class="accordion-body bg-dark">
+                <ul class="list-group">
+                  <li class="list-group-item list-group-item-primary">A simple primary list group item</li>
+                  <li class="list-group-item list-group-item-success">A simple success list group item</li>
+                  <li class="list-group-item list-group-item-secondary">A simple secondary list group item</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingTwo">
+              <button class="accordion-button p-2 ps-4 list-group-item-dark verysmall collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                Рейтинг по кальянам
+              </button>
+            </h2>
+            <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionRating">
+              <div class="accordion-body bg-dark">
+                <ul class="list-group">
+                  <li class="list-group-item list-group-item-primary">A simple primary list group item</li>
+                  <li class="list-group-item list-group-item-success">A simple success list group item</li>
+                  <li class="list-group-item list-group-item-secondary">A simple secondary list group item</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingThree">
+              <button class="accordion-button p-2 ps-4 list-group-item-secondary verysmall collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                Рейтинг по КНА (кассиры)
+              </button>
+            </h2>
+            <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionRating">
+              <div class="accordion-body bg-dark">
+                <ul class="list-group">
+                  <li class="list-group-item list-group-item-primary">A simple primary list group item</li>
+                  <li class="list-group-item list-group-item-success">A simple success list group item</li>
+                  <li class="list-group-item list-group-item-secondary">A simple secondary list group item</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingFour">
+              <button class="accordion-button p-2 ps-4 list-group-item-dark verysmall collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                Рейтинг по КНА (админы)
+              </button>
+            </h2>
+            <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour" data-bs-parent="#accordionRating">
+              <div class="accordion-body bg-dark">
+                <ul class="list-group">
+                  <li class="list-group-item list-group-item-primary">A simple primary list group item</li>
+                  <li class="list-group-item list-group-item-success">A simple success list group item</li>
+                  <li class="list-group-item list-group-item-secondary">A simple secondary list group item</li>
+                </ul>
+              </div>
+            </div>
+          </div>
         </div>
-          <div class="col border rounded">
-            <h6 class="text-center text-primary mt-1"><i class="fa-solid fa-calendar-check"></i> Смены</h6>
-            <ul>
-              <li>
-                <a href="" class="link-light not-underlined">
-                  <span class="badge bg-secondary">1</span> хотят чтобы их проверили.
-                </a>
-              </li>
-              <li>
-                <a href="" class="link-light not-underlined">
-                  <span class="badge bg-secondary">1</span> в ожидании что ее (их) исправят.
-                </a>
-              </li>
-            </ul>
+      </div>
+      <div class="col-md-4 rounded border text-center">
+        <p class="text-primary"><i class="fa-solid fa-calendar-days"></i> Смены</p>
+        <div class="alert alert-warning text-center verysmall" role="alert">
+          <i class="fa-solid fa-triangle-exclamation fa-fade"></i> Пропущенные смены:<br> 2 октябя, 10 октября
+        </div>
+        <a href="#" class="btn btn-outline-warning m-1 btn-sm">Непроверенные смены <span class="badge bg-secondary">1</span></a><br>
+        <a href="#" class="btn btn-outline-info m-1 btn-sm">Ожидает исправления <span class="badge bg-secondary">1</span></a><br>
+        <hr>
+        <a class="btn btn-outline-primary verysmall pt-0 pb-0 mb-1" href="{% url 'add_workshift' %}?next={{ request.path }}">
+          <i class="fa-solid fa-calendar-plus"></i>&nbsp;Добавить смену
+        </a>
+      </div>
+      <div class="col-md-3 verysmall">
+        <div class="row row-cols-1 justify-content-center align-items-center">
+          <div class="col rounded border mb-1">
+            <p class="text-center"><i class="fa-solid fa-cake-candles"></i> Дни рождения</p>
+            <p class="text-center">Сегодня дней рождения нет</p>
           </div>
-          <div class="col border rounded">
-            <h6 class="text-center text-success mt-1"><i class="fa-solid fa-users"></i> Сотрудники</h6>
-            <ul>
-              <li>
-                <a href="" class="link-light not-underlined">
-                  <span class="badge bg-secondary">1</span> желает зарегистрироваться.
-                </a>
-              </li>
-              <li>
-                <a href="" class="link-light not-underlined">
-                  <span class="badge bg-secondary">1</span> что-то пошло не так.
-                </a>
-              </li>
-            </ul>
+          <div class="col rounded border">
+            <p class="text-center"><i class="fa-solid fa-comment"></i> Сообщения</p>
+            <p class="text-center">У вас нет новых сообщений</p>
           </div>
-          <div class="col border rounded">
-            <h6 class="text-center text-danger mt-1"><i class="fa-solid fa-graduation-cap"></i> Нарушения</h6>
-            <ul>
-              <li>
-                <a href="" class="link-light not-underlined">
-                  <span class="badge bg-secondary">3</span> никак не принесут объяснения.
-                </a>
-              </li>
-              <li>
-                <a href="" class="link-light not-underlined">
-                  <span class="badge bg-secondary">1</span> с этим тоже разобраться желательно.
-                </a>
-              </li>
-            </ul>
-          </div>
-          <div class="col border rounded">
-            <h6 class="text-center text-danger mt-1"><i class="fa-solid fa-sack-xmark"></i> Недостачи</h6>
-            <ul>
-              <li>
-                <a href="" class="link-light not-underlined">
-                   <span class="badge bg-secondary">1</span> недостачу подвезли, надо бы разобраться.
-                </a>
-              </li>
-            </ul>
-          </div>
-          <div class="col border rounded">
-            <h6 class="text-center text-info mt-1"><i class="fa-regular fa-envelope"></i> Сообщения</h6>
-            <ul>
-              <li>
-                <a href="" class="link-light not-underlined">
-                  <span class="badge bg-secondary">1</span> еще кто-то прислал сообщения и хотел бы, чтобы Вы прочли.
-                </a>
-              </li>
-            </ul>
-          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
