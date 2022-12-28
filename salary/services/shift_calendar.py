@@ -1,6 +1,6 @@
 import calendar
 import datetime
-from typing import List
+from typing import List, NamedTuple
 from collections import namedtuple
 import logging
 
@@ -21,6 +21,12 @@ UserCalendar = namedtuple(
     ['weeks_list', 'complited_shifts_count',
      'planed_shifts_count', 'sum_of_earnings']
 )
+
+class EmployeeOnWork(NamedTuple):
+    cashier: str
+    hall_admin: str
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -148,23 +154,6 @@ def get_calendar_weeks_list(
     return calendar_weeks_list
 
 
-def get_worksheet_name(year: int, month: int) -> str:
-    """
-    Returns str with google worksheet name
-
-    Args:
-        year (int): requested year
-        month (int): requested month
-
-    Returns:
-        str: worksheet name, 'mm-yyyy'
-    """
-    if month < 10:
-        return f'0{month}-{year}'
-    
-    return f'{month}-{year}'
-
-
 def _get_days_tuple_from_planed_dict(employee_dict: dict,
                                     user_full_name: str) -> tuple[int] | tuple:
     """
@@ -187,13 +176,14 @@ def get_planed_workshifts_days_list(user_full_name: str, month: int,
     """
     Returns list of day numbers planed shifts.
     """
-    worksheet_name = get_worksheet_name(year=year, month=month)
+
     employee_days_tuple = tuple()
     try:
-        google_sheets_data_dict = get_employees_schedule_dict(worksheet_name)
+        google_sheets_data_dict = get_employees_schedule_dict(year=year,
+                                                              month=month)
     except GSpreadException as error:
         logger.error((
-            f'Error to open worksheet "{worksheet_name}". '
+            f'Error to open worksheet for {month}.{year}. '
             f'GSpreadException: {error.__class__.__name__}.'
         ))
     except UnSupportedExportFormat as error:
@@ -267,3 +257,36 @@ def get_user_calendar(user: User, year: int, month: int) -> UserCalendar:
     )
 
     return user_calendar
+
+
+def _is_cashier_position(employee_full_name: str) -> bool:
+    last_name, first_name = employee_full_name.split()
+    current_employee = User.objects.get(last_name=last_name,
+                                        first_name=first_name)
+    return current_employee.has_perm('salary.add_workingshift')
+
+
+def get_employee_on_work() -> EmployeeOnWork:
+    today = datetime.date.today()
+    year, month, day = today.year, today.month, today.day
+    current_month_employee_planed_shifts = get_employees_schedule_dict(
+        year=year, month=month)
+    employee_list = [ 
+        name
+        for name, dates in current_month_employee_planed_shifts.items()
+        if day in dates
+    ]
+
+    # TODO: Need check number of values in the list
+
+    cashier_filter = filter(_is_cashier_position, employee_list)
+    if cashier_filter:
+        cashier = list(cashier_filter)[-1]
+        employee_list.pop(employee_list.index(cashier))
+
+    # TODO: Raise exception if cashier value is not defined
+
+    return EmployeeOnWork(
+        cashier=cashier,
+        hall_admin=employee_list[-1]
+    )

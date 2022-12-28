@@ -47,7 +47,24 @@ def get_full_names_tuple(worksheet_data: List[List[str]],
     return full_names_tuple
 
 
-def get_employees_schedule_dict(worksheet_name: str) -> dict:
+def get_worksheet_name(year: int, month: int) -> str:
+    """
+    Returns str with google worksheet name
+
+    Args:
+        year (int): requested year
+        month (int): requested month
+
+    Returns:
+        str: worksheet name, 'mm-yyyy'
+    """
+    if month < 10:
+        return f'0{month}-{year}'
+    
+    return f'{month}-{year}'
+
+
+def get_employees_schedule_dict(year: int, month: int) -> dict:
     """
     Returns dict with full names keys of employees, and List[int] as values.
     List[int] contains number of day with planed shifts.
@@ -56,6 +73,7 @@ def get_employees_schedule_dict(worksheet_name: str) -> dict:
         dict: { 'FullName': List[int] }
     """
 
+    worksheet_name = get_worksheet_name(year, month)
     employees_schedule_dict = cache.get(worksheet_name)
 
     if not employees_schedule_dict:

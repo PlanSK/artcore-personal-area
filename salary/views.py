@@ -20,7 +20,8 @@ from django.db.models import Q, QuerySet, Sum, Avg
 from .forms import *
 from .mixins import *
 from salary.services.chat import *
-from salary.services.shift_calendar import get_user_calendar
+from salary.services.shift_calendar import (get_user_calendar,
+                                            get_employee_on_work)
 from salary.services.misconduct import Intruder
 from salary.services.internal_model_func import get_misconduct_slug
 from salary.services.workshift import (
@@ -257,6 +258,14 @@ class StaffIndexView(WorkingshiftPermissonsMixin, TitleMixin,
                           TemplateView):
     template_name = 'salary/staff/staff_index.html'
     title = 'Staff Index Page'
+    
+    def get_context_data(self, **kwargs):
+        context : dict = super().get_context_data(**kwargs)
+        names_list = get_employee_on_work()
+        context.update(
+            {'employee_on_work': names_list}
+        )
+        return context
 
 
 class StaffArchiveWorkshiftsView(WorkingshiftPermissonsMixin,
