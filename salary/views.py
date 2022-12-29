@@ -262,9 +262,11 @@ class StaffIndexView(WorkingshiftPermissonsMixin, TitleMixin,
     def get_context_data(self, **kwargs):
         context : dict = super().get_context_data(**kwargs)
         names_list = get_employee_on_work()
-        context.update(
-            {'employee_on_work': names_list}
-        )
+        context.update({
+            'employee_on_work': names_list,
+            'today_date': timezone.localdate(timezone.now()),
+            'missed_workshifts_dates': get_missed_dates_tuple(),
+        })
         return context
 
 

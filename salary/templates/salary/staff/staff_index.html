@@ -24,7 +24,7 @@
       </div>
       <div class="col text-center mb-1">
         <hr class="m-1">
-        <i><b class="text-primary">20 марта 2022 г., среда</b><br>
+        <i><b class="text-primary">{{ today_date|date:"j E Y г., l" }}</b><br>
         <span class="verysmall">Сегодня на смене:</span></i><br>
         <span class="badge bg-primary"><i class="fa-solid fa-cash-register"></i> {{ employee_on_work.cashier }}</span>
         <span class="badge bg-success"><i class="fa-solid fa-user-gear"></i> {{ employee_on_work.hall_admin }}</span>
@@ -104,9 +104,14 @@
       </div>
       <div class="col-md-4 rounded border text-center">
         <p class="text-primary"><i class="fa-solid fa-calendar-days"></i> Смены</p>
+        {% if missed_workshifts_dates %}
         <div class="alert alert-warning text-center verysmall" role="alert">
-          <i class="fa-solid fa-triangle-exclamation fa-fade"></i> Пропущенные смены:<br> 2 октябя, 10 октября
+          <i class="fa-solid fa-triangle-exclamation fa-fade"></i> Пропущенные смены:<br>
+          {% for day in missed_workshifts_dates %}
+            {{ day|date:"j E" }}&nbsp;
+          {% endfor %}
         </div>
+        {% endif %}
         <a href="#" class="btn btn-outline-warning m-1 btn-sm">Непроверенные смены <span class="badge bg-secondary">1</span></a><br>
         <a href="#" class="btn btn-outline-info m-1 btn-sm">Ожидает исправления <span class="badge bg-secondary">1</span></a><br>
         <hr>
