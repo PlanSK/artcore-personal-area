@@ -41,6 +41,7 @@ from salary.services.monthly_reports import (
     get_monthly_report, get_awards_data, get_rating_data
 )
 from salary.services.misconduct import get_misconduct_employee_data
+from salary.services.profile_services import get_birthday_person_list
 
 
 logger = logging.getLogger(__name__)
@@ -261,11 +262,15 @@ class StaffIndexView(WorkingshiftPermissonsMixin, TitleMixin,
     
     def get_context_data(self, **kwargs):
         context : dict = super().get_context_data(**kwargs)
-        names_list = get_employee_on_work()
+        employees_on_work = get_employee_on_work()
+        today_date = timezone.localdate(timezone.now())
+        birthday_person_list = get_birthday_person_list(day=today_date.day,
+                                                        month=today_date.month)
         context.update({
-            'employee_on_work': names_list,
-            'today_date': timezone.localdate(timezone.now()),
+            'employee_on_work': employees_on_work,
+            'today_date': today_date,
             'missed_workshifts_dates': get_missed_dates_tuple(),
+            'birthday_person_list': birthday_person_list,
         })
         return context
 

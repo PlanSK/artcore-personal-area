@@ -122,8 +122,17 @@
       <div class="col-md-3 verysmall">
         <div class="row row-cols-1 justify-content-center align-items-center">
           <div class="col rounded border mb-1">
-            <p class="text-center"><i class="fa-solid fa-cake-candles"></i> Дни рождения</p>
+            <p class="text-center"><i class="fa-solid fa-cake-candles"></i> Дни рождения<br>
+            <span class="text-primary"><b>({{today_date|date:"j E"}})</span></b></p>
+            {% if birthday_person_list %}
+              <p class="text-center text-info">
+              {% for person in birthday_person_list %}
+                <b><i class="fa-solid fa-cake-candles fa-fade"></i> {{ person.get_full_name }}</b><br>
+              {% endfor %}
+              </p>
+            {% else %}
             <p class="text-center">Сегодня дней рождения нет</p>
+            {% endif %}
           </div>
           <div class="col rounded border">
             <p class="text-center"><i class="fa-solid fa-comment"></i> Сообщения</p>

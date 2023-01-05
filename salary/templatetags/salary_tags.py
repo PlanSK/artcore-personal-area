@@ -48,16 +48,5 @@ def get_unread_messages(user: User) -> int:
 
 
 @register.simple_tag()
-def get_birthday_person_list() -> QuerySet:
-    today = datetime.date.today()
-    birthday_person_list = User.objects.select_related('profile').filter(
-        profile__birth_date__day=today.day,
-        profile__birth_date__month=today.month,
-    ).exclude(profile__profile_status='DSM')
-    
-    return birthday_person_list
-
-
-@register.simple_tag()
 def check_image_file_exists(profile: Profile):
     return profile_photo_is_exists(profile)

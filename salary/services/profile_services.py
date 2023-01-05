@@ -6,6 +6,9 @@ import datetime
 from dateutil.relativedelta import relativedelta
 from typing import Union, TYPE_CHECKING
 
+from django.contrib.auth.models import User
+from django.db.models import QuerySet
+
 if TYPE_CHECKING:
     from salary.models import Profile
 
@@ -75,3 +78,12 @@ def get_expirience_string(
     ]
     experience_text = ' '.join(experience_params_list)
     return experience_text if experience_text else 'менее 1 дня'
+
+
+def get_birthday_person_list(day: int, month: int) -> QuerySet:
+    birthday_person_list = User.objects.select_related('profile').filter(
+        profile__birth_date__day=day,
+        profile__birth_date__month=month,
+    ).exclude(profile__profile_status='DSM')
+    
+    return birthday_person_list
