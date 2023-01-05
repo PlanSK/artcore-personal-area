@@ -23,8 +23,8 @@ UserCalendar = namedtuple(
 )
 
 class EmployeeOnWork(NamedTuple):
-    cashier: str
-    hall_admin: str
+    cashier: str | None
+    hall_admin: str | None
 
 
 logger = logging.getLogger(__name__)
@@ -269,6 +269,8 @@ def _is_cashier_position(employee_full_name: str) -> bool:
 def get_employee_on_work() -> EmployeeOnWork:
     today = datetime.date.today()
     year, month, day = today.year, today.month, today.day
+    cashier = None
+    hall_admin = None
     current_month_employee_planed_shifts = get_employees_schedule_dict(
         year=year, month=month)
     employee_list = [ 
@@ -277,16 +279,14 @@ def get_employee_on_work() -> EmployeeOnWork:
         if day in dates
     ]
 
-    # TODO: Need check number of values in the list
-
-    cashier_filter = filter(_is_cashier_position, employee_list)
-    if cashier_filter:
-        cashier = list(cashier_filter)[-1]
-        employee_list.pop(employee_list.index(cashier))
-
-    # TODO: Raise exception if cashier value is not defined
+    if len(employee_list) == 2:
+        cashier_filter = filter(_is_cashier_position, employee_list)
+        if cashier_filter:
+            cashier = list(cashier_filter)[-1]
+            employee_list.pop(employee_list.index(cashier))
+            hall_admin = employee_list[-1]
 
     return EmployeeOnWork(
         cashier=cashier,
-        hall_admin=employee_list[-1]
+        hall_admin=hall_admin
     )
