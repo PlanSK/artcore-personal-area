@@ -726,7 +726,7 @@ class IndexEmployeeView(LoginRequiredMixin, ProfileStatusRedirectMixin,
         logger.debug('Check user staff status.')
         if request.user.is_authenticated and request.user.is_staff:
             logger.debug('Redirect to staff page.')
-            return redirect('workshifts_view')
+            return redirect('staff_index')
 
         return super().dispatch(request, *args, **kwargs)
 
