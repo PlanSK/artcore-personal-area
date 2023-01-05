@@ -44,11 +44,41 @@
             </h6>
             <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionRating">
               <div class="accordion-body bg-dark">
-                <ul class="list-group">
-                  <li class="list-group-item list-group-item-primary">A simple primary list group item</li>
-                  <li class="list-group-item list-group-item-success">A simple success list group item</li>
-                  <li class="list-group-item list-group-item-secondary">A simple secondary list group item</li>
-                </ul>
+                <ol class="list-group list-group-numbered verysmall text-start">
+                  <!-- first item -->
+                  {% if total_rating_data.bar_rating.second %}
+                    <li class="list-group-item list-group-item-primary">
+                      {{ total_rating_data.bar_rating.first.full_name }}
+                      <span class="badge bg-primary position-absolute top-50 end-0 translate-middle">
+                        {{ total_rating_data.bar_rating.first.summary_bar_revenue|default:"" }}
+                      </span>
+                    </li>
+                  {% else %}
+                    <li class="list-group-item list-group-item-primary">-</li>
+                  {% endif %}  
+                  <!-- second item -->
+                  {% if total_rating_data.bar_rating.second %}
+                    <li class="list-group-item list-group-item-success">
+                      {{ total_rating_data.bar_rating.second.full_name }}
+                      <span class="badge bg-success position-absolute top-50 end-0 translate-middle">
+                        {{ total_rating_data.bar_rating.second.summary_bar_revenue|default:"" }}
+                      </span>
+                    </li>
+                  {% else %}
+                    <li class="list-group-item list-group-item-success">-</li>
+                  {% endif %}
+                  <!-- third item -->
+                  {% if total_rating_data.bar_rating.third %}
+                    <li class="list-group-item list-group-item-dark">
+                      {{ total_rating_data.bar_rating.third.full_name }}
+                      <span class="badge bg-dark position-absolute top-50 end-0 translate-middle">
+                        {{ total_rating_data.bar_rating.third.summary_bar_revenue|default:"" }}
+                      </span>
+                    </li>
+                  {% else %}
+                    <li class="list-group-item list-group-item-dark">-</li>
+                  {% endif %}
+                </ol>
               </div>
             </div>
           </div>
@@ -60,11 +90,41 @@
             </h2>
             <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionRating">
               <div class="accordion-body bg-dark">
-                <ul class="list-group">
-                  <li class="list-group-item list-group-item-primary">A simple primary list group item</li>
-                  <li class="list-group-item list-group-item-success">A simple success list group item</li>
-                  <li class="list-group-item list-group-item-secondary">A simple secondary list group item</li>
-                </ul>
+                <ol class="list-group list-group-numbered verysmall text-start">
+                  <!-- first item -->
+                  {% if total_rating_data.hookah_rating.first %}
+                    <li class="list-group-item list-group-item-primary">
+                      {{ total_rating_data.hookah_rating.first.full_name }}
+                      <span class="badge bg-primary position-absolute top-50 end-0 translate-middle">
+                        {{ total_rating_data.hookah_rating.first.summary_hookah_revenue|default:"" }}
+                      </span>
+                    </li>
+                  {% else %}
+                    <li class="list-group-item list-group-item-primary">-</li>
+                  {% endif %}  
+                  <!-- second item -->
+                  {% if total_rating_data.hookah_rating.second %}
+                    <li class="list-group-item list-group-item-success">
+                      {{ total_rating_data.hookah_rating.second.full_name }}
+                      <span class="badge bg-success position-absolute top-50 end-0 translate-middle">
+                        {{ total_rating_data.hookah_rating.second.summary_hookah_revenue|default:"" }}
+                      </span>
+                    </li>
+                  {% else %}
+                    <li class="list-group-item list-group-item-success">-</li>
+                  {% endif %}
+                  <!-- third item -->
+                  {% if total_rating_data.hookah_rating.third %}
+                    <li class="list-group-item list-group-item-dark">
+                      {{ total_rating_data.hookah_rating.third.full_name }}
+                      <span class="badge bg-dark position-absolute top-50 end-0 translate-middle">
+                        {{ total_rating_data.hookah_rating.third.summary_hookah_revenue|default:"" }}
+                      </span>
+                    </li>
+                  {% else %}
+                    <li class="list-group-item list-group-item-dark">-</li>
+                  {% endif %}
+                </ol>
               </div>
             </div>
           </div>
@@ -76,11 +136,42 @@
             </h2>
             <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionRating">
               <div class="accordion-body bg-dark">
-                <ul class="list-group">
-                  <li class="list-group-item list-group-item-primary">A simple primary list group item</li>
-                  <li class="list-group-item list-group-item-success">A simple success list group item</li>
-                  <li class="list-group-item list-group-item-secondary">A simple secondary list group item</li>
-                </ul>
+                <ol class="list-group list-group-numbered verysmall text-start">
+                  <!-- first item -->
+                  {% if total_rating_data.cashier_common_rating.first %}
+                    <li class="list-group-item list-group-item-primary">
+                      {{ total_rating_data.cashier_common_rating.first.full_name }}
+                      <span class="badge bg-primary position-absolute top-50 end-0 translate-middle">
+                        {{ total_rating_data.cashier_common_rating.first.average_revenue|default:"" }}
+                      </span>
+                    </li>
+                  {% else %}
+                    <li class="list-group-item list-group-item-primary">-</li>
+                  {% endif %}  
+                  <!-- second item -->
+                  {% if total_rating_data.cashier_common_rating.second %}
+                    <li class="list-group-item list-group-item-success">
+                      {{ total_rating_data.cashier_common_rating.second.full_name }}
+                      <span class="badge bg-success position-absolute top-50 end-0 translate-middle">
+                        {{ total_rating_data.cashier_common_rating.second.average_revenue|default:"" }}
+                      </span>
+                    </li>
+                  {% else %}
+                    <li class="list-group-item list-group-item-success">-</li>
+                  {% endif %}
+  
+                  <!-- third item -->
+                  {% if total_rating_data.cashier_common_rating.third %}
+                    <li class="list-group-item list-group-item-dark">
+                      {{ total_rating_data.cashier_common_rating.third.full_name }}
+                      <span class="badge bg-dark position-absolute top-50 end-0 translate-middle">
+                        {{ total_rating_data.cashier_common_rating.third.average_revenue|default:"" }}
+                      </span>
+                    </li>
+                  {% else %}
+                    <li class="list-group-item list-group-item-dark">-</li>
+                  {% endif %}
+                </ol>
               </div>
             </div>
           </div>
@@ -92,11 +183,41 @@
             </h2>
             <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour" data-bs-parent="#accordionRating">
               <div class="accordion-body bg-dark">
-                <ul class="list-group">
-                  <li class="list-group-item list-group-item-primary">A simple primary list group item</li>
-                  <li class="list-group-item list-group-item-success">A simple success list group item</li>
-                  <li class="list-group-item list-group-item-secondary">A simple secondary list group item</li>
-                </ul>
+                <ol class="list-group list-group-numbered verysmall text-start">
+                  <!-- first item -->
+                  {% if total_rating_data.hall_admin_common_rating.first %}
+                    <li class="list-group-item list-group-item-primary">
+                      {{ total_rating_data.hall_admin_common_rating.first.full_name }}
+                      <span class="badge bg-primary position-absolute top-50 end-0 translate-middle">
+                        {{ total_rating_data.hall_admin_common_rating.first.average_revenue|default:"" }}
+                      </span>
+                    </li>
+                  {% else %}
+                    <li class="list-group-item list-group-item-primary">-</li>
+                  {% endif %}  
+                  <!-- second item -->
+                  {% if total_rating_data.hall_admin_common_rating.second %}
+                    <li class="list-group-item list-group-item-success">
+                      {{ total_rating_data.hall_admin_common_rating.second.full_name }}
+                      <span class="badge bg-success position-absolute top-50 end-0 translate-middle">
+                        {{ total_rating_data.hall_admin_common_rating.second.average_revenue|default:"" }}
+                      </span>
+                    </li>
+                  {% else %}
+                    <li class="list-group-item list-group-item-success">-</li>
+                  {% endif %}
+                  <!-- third item -->
+                  {% if total_rating_data.hall_admin_common_rating.third %}
+                    <li class="list-group-item list-group-item-dark">
+                      {{ total_rating_data.hall_admin_common_rating.third.full_name }}
+                      <span class="badge bg-dark position-absolute top-50 end-0 translate-middle">
+                        {{ total_rating_data.hall_admin_common_rating.third.average_revenue|default:"" }}
+                      </span>
+                    </li>
+                  {% else %}
+                    <li class="list-group-item list-group-item-dark">-</li>
+                  {% endif %}
+                </ol>
               </div>
             </div>
           </div>

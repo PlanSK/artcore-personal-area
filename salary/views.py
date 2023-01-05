@@ -38,7 +38,7 @@ from salary.services.filesystem import (
     delete_document_from_storage
 )
 from salary.services.monthly_reports import (
-    get_monthly_report, get_awards_data, get_rating_data
+    get_monthly_report, get_awards_data, get_filtered_rating_data
 )
 from salary.services.misconduct import get_misconduct_employee_data
 from salary.services.profile_services import get_birthday_person_list
@@ -255,7 +255,7 @@ class StaffWorkshiftsView(WorkingshiftPermissonsMixin, MonthYearExtractMixin,
 class StaffIndexView(WorkingshiftPermissonsMixin, TitleMixin,
                           TemplateView):
     template_name = 'salary/staff/staff_index.html'
-    title = 'Staff Index Page'
+    title = 'Главная'
     
     def get_context_data(self, **kwargs):
         context : dict = super().get_context_data(**kwargs)
@@ -271,6 +271,8 @@ class StaffIndexView(WorkingshiftPermissonsMixin, TitleMixin,
             'unread_messages_number': get_unread_messages_number(
                 self.request.user),
             'unclosed_workshifts': get_unclosed_workshift_number(),
+            'total_rating_data': get_filtered_rating_data(today_date.month,
+                                                          today_date.year)
         })
         return context
 

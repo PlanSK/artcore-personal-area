@@ -86,6 +86,15 @@ class Rating(NamedTuple):
     bonus: float
 
 
+class FilteredRating(NamedTuple):
+    bar_rating: Category
+    hookah_rating: Category
+    hall_admin_common_rating: Category
+    cashier_common_rating: Category
+    full_cashier_list: list
+    full_hall_admin_list: list
+
+
 def get_workshift_data(workshift: WorkingShift) -> WorkshiftData:
     """
     Returns WorkshiftData model with cashier and hall_admin dict's
@@ -397,66 +406,82 @@ def get_rating_bonus(leader_type: Leader) -> float:
     return bonus
 
 
+def _sort_list_by_average_revenue(employee_list: list) -> None:
+    """
+    Sort list by average_revenue
+    """
+    employee_list.sort(key=lambda x: x.average_revenue, reverse=True)
+
+
+def get_filtered_rating_data(month: int, year: int) -> FilteredRating:
+    """
+    Returns filtered Rating data from awards data
+    """
+    award_data = get_awards_data(year=year, month=month)
+    avg_bar_limit = settings.AVERAGE_BAR_REVENUE_CRITERIA
+    avg_hookah_limit = settings.AVERAGE_HOOKAH_REVENUE_CRITERIA
+    avg_bar_revenue_filtered_list = [
+        employee for employee in award_data.cashiers_list
+        if employee.average_bar_revenue >= avg_bar_limit
+    ]
+    avg_hookah_revenue_filtered_list = [
+        employee for employee in award_data.hall_admin_list
+        if employee.average_hookah_revenue >= avg_hookah_limit
+    ]
+    bar_rating = get_categories_from_list(avg_bar_revenue_filtered_list)
+    _sort_list_by_average_revenue(award_data.cashiers_list)
+    cashiers_rating = get_categories_from_list(award_data.cashiers_list)
+    avg_hookah_revenue_filtered_list = [
+        employee for employee in award_data.hall_admin_list
+        if employee.average_hookah_revenue >= avg_hookah_limit
+    ]
+    hookah_rating = get_categories_from_list(avg_hookah_revenue_filtered_list)
+    _sort_list_by_average_revenue(award_data.hall_admin_list)
+    hall_admins_rating = get_categories_from_list(award_data.hall_admin_list)
+
+    return FilteredRating(
+        bar_rating=bar_rating,
+        hookah_rating=hookah_rating,
+        hall_admin_common_rating=hall_admins_rating,
+        cashier_common_rating=cashiers_rating,
+        full_cashier_list=award_data.cashiers_list,
+        full_hall_admin_list=award_data.hall_admin_list
+    )
+
+
 def _get_employee_rating_data(
     employee_id: int, month: int = datetime.date.today().month,
         year: int = datetime.date.today().year) -> Rating:
     """
     Define and returns Rating data from awards data.
     """
-    award_data = get_awards_data(year=year, month=month)
+    all_filtered_categories = get_filtered_rating_data(month=month, year=year)
+    is_cashier = False
+
     if tuple(filter(lambda x: x.id == employee_id,
-                award_data.cashiers_list)):
-        avg_bar_limit = settings.AVERAGE_BAR_REVENUE_CRITERIA
-        avg_bar_revenue_filtered_list = [
-            employee for employee in award_data.cashiers_list
-            if employee.average_bar_revenue >= avg_bar_limit
-        ]
-        bar_rating = get_categories_from_list(avg_bar_revenue_filtered_list)
-        cashiers_revenue = sorted(
-            award_data.cashiers_list,
-            key=lambda x: x.average_revenue,
-            reverse=True
-        )
-        cashiers_rating = get_categories_from_list(cashiers_revenue)
-        position = get_employee_rating_position(
-            special=bar_rating.first,
-            common=cashiers_rating.first,
-            employee_id=employee_id,
-            is_cashier=True
-        )
-        return Rating(
-            special_rating=bar_rating,
-            common_rating=cashiers_rating,
-            position=position,
-            bonus=get_rating_bonus(position)
-        )
+                all_filtered_categories.full_cashier_list)):
+        special_rating=all_filtered_categories.bar_rating
+        common_rating=all_filtered_categories.cashier_common_rating
+        is_cashier = True
     elif tuple(filter(lambda x: x.id == employee_id,
-                award_data.hall_admin_list)):
-        avg_hookah_limit = settings.AVERAGE_HOOKAH_REVENUE_CRITERIA
-        avg_hookah_revenue_filtered_list = [
-            employee for employee in award_data.hall_admin_list
-            if employee.average_hookah_revenue >= avg_hookah_limit
-        ]
-        hookah_rating = get_categories_from_list(
-            avg_hookah_revenue_filtered_list)
-        hall_admins_revenue = sorted(
-            award_data.hall_admin_list,
-            key=lambda x: x.average_revenue,
-            reverse=True
-        )
-        hall_admins_rating = get_categories_from_list(hall_admins_revenue)
-        position = get_employee_rating_position(
-            special=hookah_rating.first,
-            common=hall_admins_rating.first,
-            employee_id=employee_id
-        )
-        return Rating(
-            special_rating=hookah_rating,
-            common_rating=hall_admins_rating,
-            position=position,
-            bonus=get_rating_bonus(position)
-        )
-    raise RatingDataNotDefined
+                all_filtered_categories.full_hall_admin_list)):
+        special_rating=all_filtered_categories.hookah_rating
+        common_rating=all_filtered_categories.hall_admin_common_rating
+    else:
+        raise RatingDataNotDefined
+
+    position = get_employee_rating_position(
+        special=special_rating.first,
+        common=common_rating.first,
+        employee_id=employee_id,
+        is_cashier=is_cashier
+    )
+    return Rating(
+        special_rating=special_rating,
+        common_rating=common_rating,
+        position=position,
+        bonus=get_rating_bonus(position)
+    )
 
 
 def get_rating_data(
