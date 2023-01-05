@@ -20,13 +20,14 @@ from django.db.models import Q, QuerySet, Sum, Avg
 from .forms import *
 from .mixins import *
 from salary.services.chat import *
-from salary.services.shift_calendar import get_user_calendar
+from salary.services.shift_calendar import (get_user_calendar,
+                                            get_employee_on_work)
 from salary.services.misconduct import Intruder
 from salary.services.internal_model_func import get_misconduct_slug
 from salary.services.workshift import (
     notification_of_upcoming_shifts, get_missed_dates_tuple,
     get_employee_workshift_indicators, get_employee_month_workshifts,
-    get_employee_unclosed_workshifts_dates
+    get_employee_unclosed_workshifts_dates, get_unclosed_workshift_number
 )
 from salary.services.registration import (
     registration_user, sending_confirmation_link, confirmation_user_email,
@@ -37,9 +38,10 @@ from salary.services.filesystem import (
     delete_document_from_storage
 )
 from salary.services.monthly_reports import (
-    get_monthly_report, get_awards_data, get_rating_data
+    get_monthly_report, get_awards_data, get_filtered_rating_data
 )
 from salary.services.misconduct import get_misconduct_employee_data
+from salary.services.profile_services import get_birthday_person_list
 
 
 logger = logging.getLogger(__name__)
@@ -242,13 +244,35 @@ class StaffWorkshiftsView(WorkingshiftPermissonsMixin, MonthYearExtractMixin,
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        current_month_workshifts_dates = self.object_list.filter(
-            shift_date__month=self.month,
-            shift_date__year=self.year).dates('shift_date', 'day')
         context.update({
             'workshift_list': self.object_list.exclude(
                 status=WorkingShift.WorkshiftStatus.VERIFIED),
             'missed_workshifts_dates': get_missed_dates_tuple(),
+        })
+        return context
+
+
+class StaffIndexView(WorkingshiftPermissonsMixin, TitleMixin,
+                          TemplateView):
+    template_name = 'salary/staff/staff_index.html'
+    title = 'Главная'
+    
+    def get_context_data(self, **kwargs):
+        context : dict = super().get_context_data(**kwargs)
+        employees_on_work = get_employee_on_work()
+        today_date = timezone.localdate(timezone.now())
+        birthday_person_list = get_birthday_person_list(day=today_date.day,
+                                                        month=today_date.month)
+        context.update({
+            'employee_on_work': employees_on_work,
+            'today_date': today_date,
+            'missed_workshifts_dates': get_missed_dates_tuple(),
+            'birthday_person_list': birthday_person_list,
+            'unread_messages_number': get_unread_messages_number(
+                self.request.user),
+            'unclosed_workshifts': get_unclosed_workshift_number(),
+            'total_rating_data': get_filtered_rating_data(today_date.month,
+                                                          today_date.year)
         })
         return context
 
@@ -702,7 +726,7 @@ class IndexEmployeeView(LoginRequiredMixin, ProfileStatusRedirectMixin,
         logger.debug('Check user staff status.')
         if request.user.is_authenticated and request.user.is_staff:
             logger.debug('Redirect to staff page.')
-            return redirect('workshifts_view')
+            return redirect('staff_index')
 
         return super().dispatch(request, *args, **kwargs)
 

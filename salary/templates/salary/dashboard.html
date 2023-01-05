@@ -18,9 +18,9 @@
                   <a href="{% url 'workshifts_view' %}" class="stretched-link"></a>
                 </div>
                 {% unverified_shift as unverified_shifts %}
-                {% if unverified_shifts %}
+                {% if unverified_shifts.unclosed_number %}
                 <div class="card-footer d-flex justify-content-between align-items-center">
-                  <span class="card-text text-light verysmall"><b><i>Ожидает действие:</i></b></span><span class="badge bg-warning text-dark">{{ unverified_shifts }}</span>
+                  <span class="card-text text-light verysmall"><b><i>Ожидает действие:</i></b></span><span class="badge bg-warning text-dark">{{ unverified_shifts.unclosed_number }}</span>
                 </div>
                 {% endif %}
               </div>
@@ -108,21 +108,6 @@
           </div>
         </div>
       </div>
-      {% get_birthday_person_list as birthday_list %}
-      {% if birthday_list %}
-      <div class="row d-flex justify-content-center">
-        <div class="col-md-4 col-sm-auto">
-          <div class="alert alert-primary d-flex align-items-center justify-content-center mb-1 pt-1 pb-1" role="alert">
-            <i class="fa-solid fa-cake-candles me-2"></i>
-            <div class="verysmall">
-              {% for birthday_person in birthday_list %}
-                {{ birthday_person.get_full_name }}
-              {% endfor %}
-            </div>
-          </div>
-        </div>
-      </div>
-      {% endif %}
       <div class="row justify-content-center">
         {% block data %}
         {% endblock %}

@@ -19,6 +19,7 @@ urlpatterns = [
     path('users_view/', AdminUserView.as_view(), name='user_view'),
     path('users_view/<str:all>/', AdminUserView.as_view(), name='user_view_all'),
     path('user_edit/<int:pk>/', StaffEditUser.as_view(), name='staff_user_edit'),
+    path('staff_index/', StaffIndexView.as_view(), name='staff_index'),
     path('workshifts_view/', StaffWorkshiftsView.as_view(), name='workshifts_view'),
     path('workshifts_archive_view/<int:year>/<int:month>/', StaffArchiveWorkshiftsView.as_view(), name='workshift_archive_view'),
     path('workshifts_months/', StaffWorkshiftsMonthlyList.as_view(), name='workshifts_months'),

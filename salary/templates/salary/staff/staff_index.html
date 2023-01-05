@@ -1,0 +1,279 @@
+{% extends 'salary/dashboard.html' %}
+{% load humanize %}
+
+{% block data %}
+<hr>
+<div class="row justify-content-center">
+  <div class="col-md-3 border rounded m-1">
+    <div class="row justify-content-center row-cols-1">
+      <div class="col text-center m-1">
+        {% if image_file_exists %}
+        <img src="{{ request.user.profile.photo.url }}" alt="" class="rounded-circle" style="width: 6em; height: 6em;">
+        {% else %}
+        <i class="fa-solid fa-circle-user fa-2x"></i>
+        {% endif %}
+      </div>
+      <div class="col text-center">
+        <b>{{ user.get_full_name }}</b>
+        <hr>
+      </div>
+      <div class="col verysmall mb-1">
+        Авторизация: {{ user.last_login|default:"нет данных" }}<br>
+        Email: <span class="text-success">{{ user.email }}</span><br>
+        Стаж работы: {{ user.profile.get_experience_text }} <br>
+      </div>
+      <div class="col text-center mb-1">
+        <hr class="m-1">
+        <i><b class="text-primary">{{ today_date|date:"j E Y г., l" }}</b><br>
+        <span class="verysmall">Сегодня на смене:</span></i><br>
+        <span class="badge bg-primary"><i class="fa-solid fa-cash-register"></i> {{ employee_on_work.cashier }}</span>
+        <span class="badge bg-success"><i class="fa-solid fa-user-gear"></i> {{ employee_on_work.hall_admin }}</span>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-8 m-1">
+    <div class="row justify-content-evenly">
+      <div class="col-md-4 rounded border pb-1 text-center">
+        <p class="text-success"><i class="fa-solid fa-chart-column"></i> Рейтинги</p>
+        <div class="accordion verysmall" id="accordionRating">
+          <div class="accordion-item">
+            <h6 class="accordion-header verysmall" id="headingOne">
+              <button class="accordion-button p-2 ps-4 list-group-item-secondary verysmall collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                Рейтинг по бару
+              </button>
+            </h6>
+            <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionRating">
+              <div class="accordion-body bg-dark">
+                <ol class="list-group list-group-numbered verysmall text-start">
+                  <!-- first item -->
+                  {% if total_rating_data.bar_rating.second %}
+                    <li class="list-group-item list-group-item-primary">
+                      {{ total_rating_data.bar_rating.first.full_name }}
+                      <span class="badge bg-primary position-absolute top-50 end-0 translate-middle">
+                        {{ total_rating_data.bar_rating.first.summary_bar_revenue|default:"" }}
+                      </span>
+                    </li>
+                  {% else %}
+                    <li class="list-group-item list-group-item-primary">-</li>
+                  {% endif %}  
+                  <!-- second item -->
+                  {% if total_rating_data.bar_rating.second %}
+                    <li class="list-group-item list-group-item-success">
+                      {{ total_rating_data.bar_rating.second.full_name }}
+                      <span class="badge bg-success position-absolute top-50 end-0 translate-middle">
+                        {{ total_rating_data.bar_rating.second.summary_bar_revenue|default:"" }}
+                      </span>
+                    </li>
+                  {% else %}
+                    <li class="list-group-item list-group-item-success">-</li>
+                  {% endif %}
+                  <!-- third item -->
+                  {% if total_rating_data.bar_rating.third %}
+                    <li class="list-group-item list-group-item-dark">
+                      {{ total_rating_data.bar_rating.third.full_name }}
+                      <span class="badge bg-dark position-absolute top-50 end-0 translate-middle">
+                        {{ total_rating_data.bar_rating.third.summary_bar_revenue|default:"" }}
+                      </span>
+                    </li>
+                  {% else %}
+                    <li class="list-group-item list-group-item-dark">-</li>
+                  {% endif %}
+                </ol>
+              </div>
+            </div>
+          </div>
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingTwo">
+              <button class="accordion-button p-2 ps-4 list-group-item-dark verysmall collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                Рейтинг по кальянам
+              </button>
+            </h2>
+            <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionRating">
+              <div class="accordion-body bg-dark">
+                <ol class="list-group list-group-numbered verysmall text-start">
+                  <!-- first item -->
+                  {% if total_rating_data.hookah_rating.first %}
+                    <li class="list-group-item list-group-item-primary">
+                      {{ total_rating_data.hookah_rating.first.full_name }}
+                      <span class="badge bg-primary position-absolute top-50 end-0 translate-middle">
+                        {{ total_rating_data.hookah_rating.first.summary_hookah_revenue|default:"" }}
+                      </span>
+                    </li>
+                  {% else %}
+                    <li class="list-group-item list-group-item-primary">-</li>
+                  {% endif %}  
+                  <!-- second item -->
+                  {% if total_rating_data.hookah_rating.second %}
+                    <li class="list-group-item list-group-item-success">
+                      {{ total_rating_data.hookah_rating.second.full_name }}
+                      <span class="badge bg-success position-absolute top-50 end-0 translate-middle">
+                        {{ total_rating_data.hookah_rating.second.summary_hookah_revenue|default:"" }}
+                      </span>
+                    </li>
+                  {% else %}
+                    <li class="list-group-item list-group-item-success">-</li>
+                  {% endif %}
+                  <!-- third item -->
+                  {% if total_rating_data.hookah_rating.third %}
+                    <li class="list-group-item list-group-item-dark">
+                      {{ total_rating_data.hookah_rating.third.full_name }}
+                      <span class="badge bg-dark position-absolute top-50 end-0 translate-middle">
+                        {{ total_rating_data.hookah_rating.third.summary_hookah_revenue|default:"" }}
+                      </span>
+                    </li>
+                  {% else %}
+                    <li class="list-group-item list-group-item-dark">-</li>
+                  {% endif %}
+                </ol>
+              </div>
+            </div>
+          </div>
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingThree">
+              <button class="accordion-button p-2 ps-4 list-group-item-secondary verysmall collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                Рейтинг по КНА (кассиры)
+              </button>
+            </h2>
+            <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionRating">
+              <div class="accordion-body bg-dark">
+                <ol class="list-group list-group-numbered verysmall text-start">
+                  <!-- first item -->
+                  {% if total_rating_data.cashier_common_rating.first %}
+                    <li class="list-group-item list-group-item-primary">
+                      {{ total_rating_data.cashier_common_rating.first.full_name }}
+                      <span class="badge bg-primary position-absolute top-50 end-0 translate-middle">
+                        {{ total_rating_data.cashier_common_rating.first.average_revenue|default:"" }}
+                      </span>
+                    </li>
+                  {% else %}
+                    <li class="list-group-item list-group-item-primary">-</li>
+                  {% endif %}  
+                  <!-- second item -->
+                  {% if total_rating_data.cashier_common_rating.second %}
+                    <li class="list-group-item list-group-item-success">
+                      {{ total_rating_data.cashier_common_rating.second.full_name }}
+                      <span class="badge bg-success position-absolute top-50 end-0 translate-middle">
+                        {{ total_rating_data.cashier_common_rating.second.average_revenue|default:"" }}
+                      </span>
+                    </li>
+                  {% else %}
+                    <li class="list-group-item list-group-item-success">-</li>
+                  {% endif %}
+                  <!-- third item -->
+                  {% if total_rating_data.cashier_common_rating.third %}
+                    <li class="list-group-item list-group-item-dark">
+                      {{ total_rating_data.cashier_common_rating.third.full_name }}
+                      <span class="badge bg-dark position-absolute top-50 end-0 translate-middle">
+                        {{ total_rating_data.cashier_common_rating.third.average_revenue|default:"" }}
+                      </span>
+                    </li>
+                  {% else %}
+                    <li class="list-group-item list-group-item-dark">-</li>
+                  {% endif %}
+                </ol>
+              </div>
+            </div>
+          </div>
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingFour">
+              <button class="accordion-button p-2 ps-4 list-group-item-dark verysmall collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                Рейтинг по КНА (админы)
+              </button>
+            </h2>
+            <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour" data-bs-parent="#accordionRating">
+              <div class="accordion-body bg-dark">
+                <ol class="list-group list-group-numbered verysmall text-start">
+                  <!-- first item -->
+                  {% if total_rating_data.hall_admin_common_rating.first %}
+                    <li class="list-group-item list-group-item-primary">
+                      {{ total_rating_data.hall_admin_common_rating.first.full_name }}
+                      <span class="badge bg-primary position-absolute top-50 end-0 translate-middle">
+                        {{ total_rating_data.hall_admin_common_rating.first.average_revenue|default:"" }}
+                      </span>
+                    </li>
+                  {% else %}
+                    <li class="list-group-item list-group-item-primary">-</li>
+                  {% endif %}  
+                  <!-- second item -->
+                  {% if total_rating_data.hall_admin_common_rating.second %}
+                    <li class="list-group-item list-group-item-success">
+                      {{ total_rating_data.hall_admin_common_rating.second.full_name }}
+                      <span class="badge bg-success position-absolute top-50 end-0 translate-middle">
+                        {{ total_rating_data.hall_admin_common_rating.second.average_revenue|default:"" }}
+                      </span>
+                    </li>
+                  {% else %}
+                    <li class="list-group-item list-group-item-success">-</li>
+                  {% endif %}
+                  <!-- third item -->
+                  {% if total_rating_data.hall_admin_common_rating.third %}
+                    <li class="list-group-item list-group-item-dark">
+                      {{ total_rating_data.hall_admin_common_rating.third.full_name }}
+                      <span class="badge bg-dark position-absolute top-50 end-0 translate-middle">
+                        {{ total_rating_data.hall_admin_common_rating.third.average_revenue|default:"" }}
+                      </span>
+                    </li>
+                  {% else %}
+                    <li class="list-group-item list-group-item-dark">-</li>
+                  {% endif %}
+                </ol>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4 rounded border text-center">
+        <p class="text-primary"><i class="fa-solid fa-calendar-days"></i> Смены</p>
+        {% if missed_workshifts_dates %}
+        <div class="alert alert-warning text-center verysmall" role="alert">
+          <i class="fa-solid fa-triangle-exclamation fa-fade"></i> Пропущенные смены:<br>
+          {% for day in missed_workshifts_dates %}
+            {{ day|date:"j E" }}&nbsp;
+          {% endfor %}
+        </div>
+        {% endif %}
+        {% if unclosed_workshifts.unclosed_number %}
+          {% if unclosed_workshifts.unverified_number %}
+          <a href="{% url 'workshifts_view' %}" class="btn btn-outline-warning m-1 btn-sm">Непроверенные смены <span class="badge bg-secondary">{{unclosed_workshifts.unverified_number}}</span></a><br>
+          {% endif %}
+          {% if unclosed_workshifts.wait_fix_number %}
+          <a href="{% url 'workshifts_view' %}" class="btn btn-outline-info m-1 btn-sm">Ожидает исправления <span class="badge bg-secondary">{{unclosed_workshifts.wait_fix_number}}</span></a><br>
+          {% endif %}
+        {% else %}
+          <span class="text-success"><b>Все смены проверены</b></span>
+        {% endif %}
+        <hr>
+        <a class="btn btn-outline-primary verysmall pt-0 pb-0 mb-1" href="{% url 'add_workshift' %}?next={{ request.path }}">
+          <i class="fa-solid fa-calendar-plus"></i>&nbsp;Добавить смену
+        </a>
+      </div>
+      <div class="col-md-3 verysmall">
+        <div class="row row-cols-1 justify-content-center align-items-center">
+          <div class="col rounded border mb-1">
+            <p class="text-center"><i class="fa-solid fa-cake-candles"></i> Дни рождения</p>
+            {% if birthday_person_list %}
+              <p class="text-center text-info">
+              {% for person in birthday_person_list %}
+                <b><i class="fa-solid fa-cake-candles fa-fade"></i> {{ person.get_full_name }}</b><br>
+              {% endfor %}
+              </p>
+            {% else %}
+            <p class="text-center">Сегодня дней рождения нет</p>
+            {% endif %}
+          </div>
+          <div class="col rounded border">
+            <p class="text-center"><i class="fa-solid fa-comment"></i> Сообщения</p>
+            {% if unread_messages_number %}
+            <p class="text-center fa-fade">
+              <a href="{% url 'messenger' %}" class="link-warning not-underlined">Новых сообщений <span class="badge bg-primary">{{ unread_messages_number }}</span></a>
+            </p>
+            {% else %}
+            <p class="text-center">У вас нет новых сообщений</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
