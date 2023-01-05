@@ -27,7 +27,7 @@ from salary.services.internal_model_func import get_misconduct_slug
 from salary.services.workshift import (
     notification_of_upcoming_shifts, get_missed_dates_tuple,
     get_employee_workshift_indicators, get_employee_month_workshifts,
-    get_employee_unclosed_workshifts_dates
+    get_employee_unclosed_workshifts_dates, get_unclosed_workshift_number
 )
 from salary.services.registration import (
     registration_user, sending_confirmation_link, confirmation_user_email,
@@ -244,9 +244,6 @@ class StaffWorkshiftsView(WorkingshiftPermissonsMixin, MonthYearExtractMixin,
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        current_month_workshifts_dates = self.object_list.filter(
-            shift_date__month=self.month,
-            shift_date__year=self.year).dates('shift_date', 'day')
         context.update({
             'workshift_list': self.object_list.exclude(
                 status=WorkingShift.WorkshiftStatus.VERIFIED),
@@ -271,6 +268,9 @@ class StaffIndexView(WorkingshiftPermissonsMixin, TitleMixin,
             'today_date': today_date,
             'missed_workshifts_dates': get_missed_dates_tuple(),
             'birthday_person_list': birthday_person_list,
+            'unread_messages_number': get_unread_messages_number(
+                self.request.user),
+            'unclosed_workshifts': get_unclosed_workshift_number(),
         })
         return context
 

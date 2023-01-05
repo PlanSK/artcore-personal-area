@@ -25,6 +25,12 @@ class EmployeeMonthIndicators(NamedTuple):
     rating_data: Rating | None
 
 
+class UnclosedWorkshifts(NamedTuple):
+    unverified_number: int
+    wait_fix_number: int
+    unclosed_number: int
+
+
 def _is_date_day_exists_in_plan(full_name: str,
                            check_date: datetime.datetime) -> bool:
     """
@@ -224,3 +230,17 @@ def get_employee_workshift_indicators(
         rating_data=rating_data
     )
 
+
+def get_unclosed_workshift_number() -> UnclosedWorkshifts:
+    """
+    Returns number of unclosed workshifts 
+    """
+    unclosed_workshifts_number = WorkingShift.objects.exclude(
+            status=WorkingShift.WorkshiftStatus.VERIFIED).count()
+    wait_fix_workshifts_number = WorkingShift.objects.filter(
+            status=WorkingShift.WorkshiftStatus.WAIT_CORRECTION).count()
+    unverified_workshifts_number = unclosed_workshifts_number - \
+        wait_fix_workshifts_number
+    return UnclosedWorkshifts(unverified_number=unverified_workshifts_number,
+                              wait_fix_number=wait_fix_workshifts_number,
+                              unclosed_number=unclosed_workshifts_number)

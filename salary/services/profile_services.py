@@ -81,9 +81,12 @@ def get_expirience_string(
 
 
 def get_birthday_person_list(day: int, month: int) -> QuerySet:
+    """
+    Returns list of employees whose birthday is
+    """
     birthday_person_list = User.objects.select_related('profile').filter(
         profile__birth_date__day=day,
         profile__birth_date__month=month,
     ).exclude(profile__profile_status='DSM')
-    
+
     return birthday_person_list

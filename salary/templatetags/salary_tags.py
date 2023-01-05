@@ -4,16 +4,18 @@ from django import template
 from django.db.models import QuerySet
 from django.contrib.auth.models import User
 from django.db.models import Q
-from salary.models import Message, Misconduct, Profile, WorkingShift
+from salary.models import Misconduct, Profile, WorkingShift
 from salary.services.profile_services import profile_photo_is_exists
+from salary.services.chat import get_unread_messages_number
+from salary.services.workshift import get_unclosed_workshift_number
+
 
 register = template.Library()
 
 
 @register.simple_tag()
 def unverified_shift():
-    return WorkingShift.objects.exclude(
-        status=WorkingShift.WorkshiftStatus.VERIFIED).count()
+    return get_unclosed_workshift_number()
 
 
 @register.simple_tag()
@@ -34,17 +36,8 @@ def wait_decision_misconducts():
 
 
 @register.simple_tag()
-def today_workshift_exists_check():
-    return WorkingShift.objects.filter(
-        shift_date=datetime.date.today()).exists()
-
-
-@register.simple_tag()
 def get_unread_messages(user: User) -> int:
-    return Message.objects.select_related('chat').filter(
-        chat__members__in=[user],
-        is_read=False
-    ).exclude(author=user).count()
+    return get_unread_messages_number(user)
 
 
 @register.simple_tag()

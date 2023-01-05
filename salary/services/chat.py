@@ -174,6 +174,7 @@ def add_message_and_return_chat(request: HttpRequest) -> Chat:
 
     return chat
 
+
 def mark_messages_as_read(messages: QuerySet, user: User) -> None:
     """Sets the attribute value to true for messages where the user is not the author
 
@@ -184,3 +185,13 @@ def mark_messages_as_read(messages: QuerySet, user: User) -> None:
     for message in messages.exclude(author=user).filter(is_read=False):
         message.is_read = True
         message.save()
+
+
+def get_unread_messages_number(user: User) -> int:
+    """
+    Returns number of unread messages
+    """
+    return Message.objects.select_related('chat').filter(
+        chat__members__in=[user],
+        is_read=False
+    ).exclude(author=user).count()

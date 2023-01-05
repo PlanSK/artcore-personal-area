@@ -112,8 +112,16 @@
           {% endfor %}
         </div>
         {% endif %}
-        <a href="#" class="btn btn-outline-warning m-1 btn-sm">Непроверенные смены <span class="badge bg-secondary">1</span></a><br>
-        <a href="#" class="btn btn-outline-info m-1 btn-sm">Ожидает исправления <span class="badge bg-secondary">1</span></a><br>
+        {% if unclosed_workshifts.unclosed_number %}
+          {% if unclosed_workshifts.unverified_number %}
+          <a href="{% url 'workshifts_view' %}" class="btn btn-outline-warning m-1 btn-sm">Непроверенные смены <span class="badge bg-secondary">{{unclosed_workshifts.unverified_number}}</span></a><br>
+          {% endif %}
+          {% if unclosed_workshifts.wait_fix_number %}
+          <a href="{% url 'workshifts_view' %}" class="btn btn-outline-info m-1 btn-sm">Ожидает исправления <span class="badge bg-secondary">{{unclosed_workshifts.wait_fix_number}}</span></a><br>
+          {% endif %}
+        {% else %}
+          <span class="text-success"><b>Все смены проверены</b></span>
+        {% endif %}
         <hr>
         <a class="btn btn-outline-primary verysmall pt-0 pb-0 mb-1" href="{% url 'add_workshift' %}?next={{ request.path }}">
           <i class="fa-solid fa-calendar-plus"></i>&nbsp;Добавить смену
@@ -122,8 +130,7 @@
       <div class="col-md-3 verysmall">
         <div class="row row-cols-1 justify-content-center align-items-center">
           <div class="col rounded border mb-1">
-            <p class="text-center"><i class="fa-solid fa-cake-candles"></i> Дни рождения<br>
-            <span class="text-primary"><b>({{today_date|date:"j E"}})</span></b></p>
+            <p class="text-center"><i class="fa-solid fa-cake-candles"></i> Дни рождения</p>
             {% if birthday_person_list %}
               <p class="text-center text-info">
               {% for person in birthday_person_list %}
@@ -136,7 +143,13 @@
           </div>
           <div class="col rounded border">
             <p class="text-center"><i class="fa-solid fa-comment"></i> Сообщения</p>
+            {% if unread_messages_number %}
+            <p class="text-center fa-fade">
+              <a href="{% url 'messenger' %}" class="link-warning not-underlined">Новых сообщений <span class="badge bg-primary">{{ unread_messages_number }}</span></a>
+            </p>
+            {% else %}
             <p class="text-center">У вас нет новых сообщений</p>
+            {% endif %}
           </div>
         </div>
       </div>
