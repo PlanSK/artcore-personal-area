@@ -18,6 +18,7 @@
         </div>
       </div>
       {% endif %}
+      <a href="{% url 'workshifts_months' %}" class="btn btn-outline-success verysmall pt-0 pb-0"><i class="fa-solid fa-calendar-days"></i>&nbsp;Смотреть архив</a>
       <a class="btn btn-outline-primary verysmall pt-0 pb-0" href="{% url 'add_workshift' %}?next={{ request.path }}">
         <i class="fa-solid fa-calendar-plus"></i>&nbsp;Добавить смену
       </a>
@@ -127,12 +128,11 @@
       <button class="btn btn-outline-secondary verysmall" onclick="history.back()">Назад</button>
     </div>
   </div>
-  {% else %}
+  {% endif %}
   <div class="row">
     <div class="col text-center">
-      <a href="{% url 'workshifts_months' %}" class="btn btn-outline-success verysmall pt-0 pb-0"><i class="fa-solid fa-calendar-days"></i>&nbsp;Смотреть архив</a>
+      <a href="{% url 'index' %}" class="btn btn-secondary verysmall mt-2"><i class="fa-solid fa-house"></i>&nbsp;На главную</a>
     </div>
   </div>
-  {% endif %}
 </div>
 {% endblock %}

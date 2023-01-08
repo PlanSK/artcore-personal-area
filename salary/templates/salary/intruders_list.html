@@ -2,6 +2,13 @@
 
 {% block data %}
 <div class="row justify-content-center border-top">
+  <div class="row">
+    <div class="col text-center mt-1">
+      <a href="{% url 'add_misconduct' %}?next={{ request.path }}" class="btn btn-outline-primary verysmall">
+        <i class="fa-solid fa-circle-plus"></i>&nbsp;Добавить нарушение
+      </a>
+    </div>
+  </div>
   <div class="col-md-6 col-sm-auto m-3 mb-0">
     <div class="list-group">
       {% for intruder in object_list %}
@@ -43,11 +50,9 @@
   <div class="col"><a href="{% url 'misconducts_view' %}?show=all" class="link_secondary verysmall">Показать всех</a></div>
 </div>
 {% endif %}
-<div class="row mt-3">
+<div class="row">
   <div class="col text-center">
-    <a href="{% url 'add_misconduct' %}?next={{ request.path }}" class="btn btn-primary verysmall">
-      <i class="fa-solid fa-circle-plus"></i>&nbsp;Добавить нарушение
-    </a>
+    <a href="{% url 'index' %}" class="btn btn-secondary verysmall mt-2"><i class="fa-solid fa-house"></i>&nbsp;На главную</a>
   </div>
 </div>
 {% endblock %}
