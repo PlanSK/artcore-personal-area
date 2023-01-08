@@ -6,6 +6,8 @@ import logging
 
 from django.contrib.auth.models import User
 from django.db.models import QuerySet, Q
+from django.utils import timezone
+from django.conf import settings
 from gspread.exceptions import GSpreadException, UnSupportedExportFormat
 
 from salary.models import WorkingShift
@@ -267,7 +269,11 @@ def _is_cashier_position(employee_full_name: str) -> bool:
 
 
 def get_employee_on_work() -> EmployeeOnWork:
-    today = datetime.date.today()
+    now = timezone.localtime(timezone.now())
+    if now.hour < settings.CHANGE_WORKSHIFT_HOUR:
+        today = timezone.now() - datetime.timedelta(days=1)
+    else:
+        today = now
     year, month, day = today.year, today.month, today.day
     cashier = None
     hall_admin = None
