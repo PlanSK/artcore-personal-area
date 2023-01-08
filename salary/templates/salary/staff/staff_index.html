@@ -36,6 +36,7 @@
       <div class="col-md-4 rounded border pb-1 text-center">
         <p class="text-success"><i class="fa-solid fa-chart-column"></i> Рейтинги</p>
         <div class="accordion verysmall" id="accordionRating">
+          {% if total_rating_data.bar_rating.first %}
           <div class="accordion-item">
             <h6 class="accordion-header verysmall" id="headingOne">
               <button class="accordion-button p-2 ps-4 list-group-item-secondary verysmall collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
@@ -46,16 +47,12 @@
               <div class="accordion-body bg-dark">
                 <ol class="list-group list-group-numbered verysmall text-start">
                   <!-- first item -->
-                  {% if total_rating_data.bar_rating.second %}
                     <li class="list-group-item list-group-item-primary">
                       {{ total_rating_data.bar_rating.first.full_name }}
                       <span class="badge bg-primary position-absolute top-50 end-0 translate-middle">
                         {{ total_rating_data.bar_rating.first.summary_bar_revenue|default:"" }}
                       </span>
                     </li>
-                  {% else %}
-                    <li class="list-group-item list-group-item-primary">-</li>
-                  {% endif %}  
                   <!-- second item -->
                   {% if total_rating_data.bar_rating.second %}
                     <li class="list-group-item list-group-item-success">
@@ -82,6 +79,10 @@
               </div>
             </div>
           </div>
+          {% else %}
+          <p class="verysmall text-light text-start">Рейтинг по бару не сформирован.</p>
+          {% endif %}
+          {% if total_rating_data.hookah_rating.first %}
           <div class="accordion-item">
             <h2 class="accordion-header" id="headingTwo">
               <button class="accordion-button p-2 ps-4 list-group-item-dark verysmall collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
@@ -92,16 +93,12 @@
               <div class="accordion-body bg-dark">
                 <ol class="list-group list-group-numbered verysmall text-start">
                   <!-- first item -->
-                  {% if total_rating_data.hookah_rating.first %}
                     <li class="list-group-item list-group-item-primary">
                       {{ total_rating_data.hookah_rating.first.full_name }}
                       <span class="badge bg-primary position-absolute top-50 end-0 translate-middle">
                         {{ total_rating_data.hookah_rating.first.summary_hookah_revenue|default:"" }}
                       </span>
                     </li>
-                  {% else %}
-                    <li class="list-group-item list-group-item-primary">-</li>
-                  {% endif %}  
                   <!-- second item -->
                   {% if total_rating_data.hookah_rating.second %}
                     <li class="list-group-item list-group-item-success">
@@ -128,6 +125,10 @@
               </div>
             </div>
           </div>
+          {% else %}
+          <p class="verysmall text-light text-start">Рейтинг по кальянам не сформирован.</p>
+          {% endif %}
+          {% if total_rating_data.cashier_common_rating.first %}
           <div class="accordion-item">
             <h2 class="accordion-header" id="headingThree">
               <button class="accordion-button p-2 ps-4 list-group-item-secondary verysmall collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
@@ -138,16 +139,12 @@
               <div class="accordion-body bg-dark">
                 <ol class="list-group list-group-numbered verysmall text-start">
                   <!-- first item -->
-                  {% if total_rating_data.cashier_common_rating.first %}
                     <li class="list-group-item list-group-item-primary">
                       {{ total_rating_data.cashier_common_rating.first.full_name }}
                       <span class="badge bg-primary position-absolute top-50 end-0 translate-middle">
                         {{ total_rating_data.cashier_common_rating.first.average_revenue|default:"" }}
                       </span>
                     </li>
-                  {% else %}
-                    <li class="list-group-item list-group-item-primary">-</li>
-                  {% endif %}  
                   <!-- second item -->
                   {% if total_rating_data.cashier_common_rating.second %}
                     <li class="list-group-item list-group-item-success">
@@ -174,6 +171,10 @@
               </div>
             </div>
           </div>
+          {% else %}
+          <p class="verysmall text-light text-start">Рейтинг по КНА (кассиры) не сформирован.</p>
+          {% endif %}
+          {% if total_rating_data.hall_admin_common_rating.first %}
           <div class="accordion-item">
             <h2 class="accordion-header" id="headingFour">
               <button class="accordion-button p-2 ps-4 list-group-item-dark verysmall collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
@@ -184,16 +185,12 @@
               <div class="accordion-body bg-dark">
                 <ol class="list-group list-group-numbered verysmall text-start">
                   <!-- first item -->
-                  {% if total_rating_data.hall_admin_common_rating.first %}
                     <li class="list-group-item list-group-item-primary">
                       {{ total_rating_data.hall_admin_common_rating.first.full_name }}
                       <span class="badge bg-primary position-absolute top-50 end-0 translate-middle">
                         {{ total_rating_data.hall_admin_common_rating.first.average_revenue|default:"" }}
                       </span>
                     </li>
-                  {% else %}
-                    <li class="list-group-item list-group-item-primary">-</li>
-                  {% endif %}  
                   <!-- second item -->
                   {% if total_rating_data.hall_admin_common_rating.second %}
                     <li class="list-group-item list-group-item-success">
@@ -220,6 +217,9 @@
               </div>
             </div>
           </div>
+          {% else %}
+          <p class="verysmall text-light text-start">Рейтинг по КНА (админы) не сформирован.</p>
+          {% endif %}
         </div>
       </div>
       <div class="col-md-4 rounded border text-center">
