@@ -270,7 +270,7 @@ def _is_cashier_position(employee_full_name: str) -> bool:
 
 def get_employee_on_work() -> EmployeeOnWork:
     now = timezone.localtime(timezone.now())
-    if now.hour < settings.CHANGE_WORKSHIFT_HOUR:
+    if now.hour < settings.EMPLOYEE_CHANGE_HOUR:
         today = timezone.now() - datetime.timedelta(days=1)
     else:
         today = now
