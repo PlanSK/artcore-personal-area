@@ -32,3 +32,4 @@ if settings.DEBUG:
 
 handler404 = 'salary.views.page_not_found'
 handler403 = 'salary.views.page_forbidden'
+handler500 = 'salary.views.page_server_error'

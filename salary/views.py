@@ -252,8 +252,8 @@ class StaffWorkshiftsView(WorkingshiftPermissonsMixin, MonthYearExtractMixin,
         return context
 
 
-class StaffIndexView(WorkingshiftPermissonsMixin, TitleMixin,
-                          TemplateView):
+class StaffIndexView(WorkingshiftPermissonsMixin, TitleMixin, TemplateView,
+                     CatchingExceptionsMixin):
     template_name = 'salary/staff/staff_index.html'
     title = 'Главная'
     
@@ -712,7 +712,7 @@ class MonthlyAnalyticalReport(WorkingshiftPermissonsMixin,
 
 
 class IndexEmployeeView(LoginRequiredMixin, ProfileStatusRedirectMixin,
-                        TitleMixin, TemplateView):
+                        TitleMixin, TemplateView, CatchingExceptionsMixin):
     """
     Class based view Index page for any employee.
     Redirect user with staff status to staff index page.
@@ -1174,8 +1174,18 @@ def page_not_found(request, exception):
 
 
 def page_forbidden(request, exception):
-    response = render(request, 'salary/403.html', {'title': 'Access forbidden'})
+    response = render(
+        request, 'salary/403.html', {'title': 'Access forbidden'}
+    )
     response.status_code = 403
+    return response
+
+
+def page_server_error(request):
+    response = render(
+        request, 'salary/500.html', {'title': 'Internal Server Error'}
+    )
+    response.status_code = 500
     return response
 
 
