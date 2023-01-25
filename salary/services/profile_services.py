@@ -1,4 +1,5 @@
 import datetime
+import logging
 import os
 
 from dateutil.relativedelta import relativedelta
@@ -14,14 +15,24 @@ MONTH_VARIANT = ('месяц','месяца','месяцев')
 YEARS_VARIANT = ('год', 'года', 'лет')
 
 
+logger = logging.getLogger(__name__)
+
+
 def profile_photo_is_exists(profile: Any) -> bool:
     """
     Return True if profile.photo is defined and image file is exists.
     """
-    if profile.photo and os.path.exists(profile.photo.path):
-        return True
-    
-    return False
+    result = False
+
+    try:
+        result = os.path.exists(profile.photo.path)
+    except ValueError:
+        logger.info(f'Profile {profile.pk} has no photo.')
+    except Exception as e:
+        logger.debug(
+            f'Unknown exception {e} in check photo profile {profile.pk}.')
+    finally:
+        return result
 
 
 def get_choice_plural(amount: int, variants: tuple) -> str:
