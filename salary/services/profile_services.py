@@ -1,16 +1,11 @@
-from __future__ import annotations
-
-import os
 import datetime
+import os
 
 from dateutil.relativedelta import relativedelta
-from typing import Union, TYPE_CHECKING
+from typing import Union, Any
 
 from django.contrib.auth.models import User
 from django.db.models import QuerySet
-
-if TYPE_CHECKING:
-    from salary.models import Profile
 
 
 HOURS_VARIANT = ('час', 'часа', 'часов')
@@ -19,7 +14,7 @@ MONTH_VARIANT = ('месяц','месяца','месяцев')
 YEARS_VARIANT = ('год', 'года', 'лет')
 
 
-def profile_photo_is_exists(profile: Profile) -> bool:
+def profile_photo_is_exists(profile: Any) -> bool:
     """
     Return True if profile.photo is defined and image file is exists.
     """

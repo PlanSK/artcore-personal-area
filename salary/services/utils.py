@@ -1,15 +1,14 @@
-import time
 import logging
 import sys
+import time
 import traceback
 
-from typing import Callable, Any
 from functools import wraps
+from typing import Callable, Any
 
 from django.core import mail
-from django.views.debug import ExceptionReporter
 from django.http import HttpRequest
-
+from django.views.debug import ExceptionReporter
 
 
 logger = logging.getLogger(__name__)

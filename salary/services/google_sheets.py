@@ -1,11 +1,13 @@
-from typing import List, Tuple
+import gspread
 import logging
 
-import gspread
+from typing import List, Tuple
+
 from django.conf import settings
 from django.core.cache import cache
 from django.contrib.auth.models import User
 from django.db.models import QuerySet
+
 
 logger = logging.getLogger(__name__)
 

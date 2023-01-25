@@ -1,8 +1,9 @@
 import datetime
 
+from typing import NamedTuple
+
 from django.contrib.auth.models import User
 from django.conf import settings
-from typing import NamedTuple
 
 
 class WorkshiftData(NamedTuple):

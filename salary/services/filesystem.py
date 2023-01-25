@@ -1,4 +1,6 @@
 import os
+
+from typing import Tuple
 from unidecode import unidecode
 
 from django.contrib.auth.models import User
@@ -6,7 +8,6 @@ from django.conf import settings
 from django.core.files.storage import FileSystemStorage
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.utils.text import slugify
-from typing import Tuple
 
 
 def get_user_media_dir_name(employee: User) -> str:

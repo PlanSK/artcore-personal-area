@@ -1,9 +1,11 @@
 import datetime
+import logging
+
+from enum import Enum
+from typing import NamedTuple
+
 from django.db.models import QuerySet
 from django.conf import settings
-from enum import Enum
-import logging
-from typing import NamedTuple
 
 from salary.models import WorkingShift
 from salary.services.earnings import Earnings
