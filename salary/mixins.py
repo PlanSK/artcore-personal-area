@@ -1,4 +1,5 @@
 import datetime
+import logging
 from typing import Any
 
 from django.contrib.auth.mixins import PermissionRequiredMixin, UserPassesTestMixin
@@ -6,9 +7,14 @@ from django.http import HttpRequest, HttpResponse
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.contrib.auth.mixins import AccessMixin
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
+from django.views.generic.base import View
 
 from .models import *
+from salary.services.utils import logging_exception
+
+
+logger = logging.getLogger(__name__)
 
 
 class EmployeePermissionsMixin(PermissionRequiredMixin):
@@ -93,3 +99,16 @@ class MonthYearExtractMixin:
         self.month = kwargs.get('month') if kwargs.get('month') else month
         self.year = kwargs.get('year') if kwargs.get('year') else year
         return super().dispatch(request, *args, **kwargs)
+
+
+class CatchingExceptionsMixin(View):
+    def dispatch(self, request: HttpRequest, *args: Any,
+                 **kwargs: Any) -> HttpResponse:
+        try:
+            response = super().dispatch(request, *args, **kwargs)
+        except Exception as exception_instance:
+            # there might be an error handler here or redirection to correct page
+            logging_exception(request, exception_instance)
+            raise
+        else:
+            return response

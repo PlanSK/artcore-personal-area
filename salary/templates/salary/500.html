@@ -1,0 +1,27 @@
+{% extends 'salary/base.html' %}
+{% load static %}
+
+{% block body %}
+<body class="bg-dark text-light h-100">
+    <div class="container h-100">
+        <div class="row h-100 align-items-center justify-content-md-center">
+            <div class="col-md-12">
+                <div class="text-center">
+                    <img class="mb-5" src="{% static 'salary/img/logo.png' %}" alt="" height="40">
+                    <h1 class="mb-3 text-warning"><i class="fa-solid fa-triangle-exclamation fa-3x"></i></h1>
+                    <h2>500 Internal Server Error</h2>
+                    <div class="mb-5 mt-5">
+                        Возникла внутренняя ошибка сервера, оповещение о ней направлено администраторам сервиса.<br>
+                        Возможно, работа над устранением неисправности уже ведется, попробуйте повторить запрос через некоторое время.<br>
+                        Приносим свои извинения за временные неудобства.
+                    </div>
+                    <div class="">
+                        <a href="{% url 'index' %}" class="btn btn-primary btn-lg verysmall">
+                            <i class="fa-solid fa-house"></i>&nbsp;Take Me Home
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

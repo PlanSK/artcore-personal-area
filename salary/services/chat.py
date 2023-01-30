@@ -1,14 +1,22 @@
 import logging
-from collections import namedtuple
-from typing import List, Optional
+from typing import List, Optional, NamedTuple
 
 from django.db.models import QuerySet
 from django.http import HttpRequest
 from django.shortcuts import get_object_or_404
+from django.contrib.auth.models import User
+
 from salary.models import *
 from salary.services.profile_services import profile_photo_is_exists
 
-Dialog = namedtuple('Dialog', ['member', 'photo', 'unread_messages_count', 'is_selected', 'slug'])
+
+class Dialog(NamedTuple):
+    member: User
+    photo: str | None
+    unread_messages_count: int
+    is_selected: bool
+    slug: str
+
 
 chat_logger = logging.getLogger(__name__)
 

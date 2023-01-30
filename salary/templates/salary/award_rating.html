@@ -18,17 +18,22 @@
       <tbody class="text-center verysmall">
         <tr><td colspan="5" class="bg-dark bg-gradient">Кассиры</td></tr>
       {% for employee in award_data.cashiers_list %}
-        {% if employee.shift_counter >= minimal_workshifts_number and employee.average_bar_revenue >= avg_bar_criteria %}
+        {% if employee.shift_counter >= minimal_workshifts_number %}
         <tr>
           <td>{{employee.full_name}}</td>
           <td>{{employee.shift_counter}}</td>
-          {% if award_data.bar_leader and employee.id == award_data.bar_leader.leader.id %}
-          <td class="bg-warning text-dark"><i class="fa-solid fa-award"></i>
+          {% if employee.average_bar_revenue < avg_bar_criteria  %}
+            <td class="text-muted">{{employee.summary_bar_revenue}}</td>
+            <td class="text-muted">{{employee.average_bar_revenue}}</td>
           {% else %}
-          <td>
+            {% if award_data.bar_leader and employee.id == award_data.bar_leader.leader.id %}
+            <td class="bg-warning text-dark"><i class="fa-solid fa-award"></i>
+            {% else %}
+            <td>
+            {% endif %}
+            {{employee.summary_bar_revenue}}</td>
+            <td>{{employee.average_bar_revenue}}</td>
           {% endif %}
-          {{employee.summary_bar_revenue}}</td>
-          <td>{{employee.average_bar_revenue}}</td>
           {% if award_data.cashiers_leader and employee.id == award_data.cashiers_leader.leader.id %}
           <td class="bg-warning text-dark"><i class="fa-solid fa-award"></i>
           {% else %}
@@ -48,17 +53,22 @@
       {% endfor %}
         <tr><td colspan="5" class="bg-dark bg-gradient">Админы</td></tr>
       {% for employee in award_data.hall_admin_list %}
-        {% if employee.shift_counter >= minimal_workshifts_number and employee.average_hookah_revenue >= avg_hookah_criteria %}
+        {% if employee.shift_counter >= minimal_workshifts_number %}
         <tr>
           <td>{{employee.full_name}}</td>
           <td>{{employee.shift_counter}}</td>
-          {% if award_data.hookah_leader and employee.id == award_data.hookah_leader.leader.id %}
-          <td class="bg-warning text-dark"><i class="fa-solid fa-award"></i>
+          {% if employee.average_hookah_revenue < avg_hookah_criteria %}
+            <td class="text-muted">{{employee.summary_hookah_revenue|default:"-"}}</td>
+            <td class="text-muted">{{employee.average_hookah_revenue}}</td>
           {% else %}
-          <td>
+            {% if award_data.hookah_leader and employee.id == award_data.hookah_leader.leader.id %}
+            <td class="bg-warning text-dark"><i class="fa-solid fa-award"></i>
+            {% else %}
+            <td>
+            {% endif %}
+            {{employee.summary_hookah_revenue|default:"-"}}</td>
+            <td>{{employee.average_hookah_revenue}}</td>
           {% endif %}
-          {{employee.summary_hookah_revenue|default:"-"}}</td>
-          <td>{{employee.average_hookah_revenue}}</td>
           {% if award_data.hall_admins_leader and employee.id == award_data.hall_admins_leader.leader.id %}
           <td class="bg-warning text-dark"><i class="fa-solid fa-award"></i>
           {% else %}
@@ -78,6 +88,11 @@
       {% endfor %}
       </tbody>
     </table>
+  </div>
+  <div class="row">
+    <div class="col text-center">
+      <a href="{% url 'reports_list' %}" class="btn btn-secondary verysmall">Вернуться к списку отчетов</a>
+    </div>
   </div>
 </div>
 {% endblock %}

@@ -1,8 +1,8 @@
 import calendar
 import datetime
-from typing import List, NamedTuple
-from collections import namedtuple
 import logging
+
+from typing import List, NamedTuple
 
 from django.contrib.auth.models import User
 from django.db.models import QuerySet, Q
@@ -14,15 +14,20 @@ from salary.models import WorkingShift
 from salary.services.google_sheets import get_employees_schedule_dict
 
 
-CalendarDay = namedtuple(
-    'CalendarDay',
-    ['date', 'earnings', 'is_planed', 'is_verified', 'link']
-)
-UserCalendar = namedtuple(
-    'UserCalendar',
-    ['weeks_list', 'complited_shifts_count',
-     'planed_shifts_count', 'sum_of_earnings']
-)
+class CalendarDay(NamedTuple):
+    date: datetime.date
+    earnings: float
+    is_planed: bool
+    is_verified: bool
+    link: str
+
+
+class UserCalendar(NamedTuple):
+    weeks_list: list
+    complited_shifts_count: int
+    planed_shifts_count: int
+    sum_of_earnings: float
+
 
 class EmployeeOnWork(NamedTuple):
     cashier: str | None
