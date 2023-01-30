@@ -284,9 +284,11 @@ def get_awards_data(month: int, year: int) -> AwardData:
     default_shifts_number = settings.MINIMAL_WORKSHIFTS_NUMBER
     avg_bar_limit = settings.AVERAGE_BAR_REVENUE_CRITERIA
     avg_hookah_limit = settings.AVERAGE_HOOKAH_REVENUE_CRITERIA
-
-    for employee in filter(lambda x: x.shift_counter >= default_shifts_number,
-                           categories_list.cashier_list):
+    filtered_cashier_list = [
+        employee for employee in categories_list.cashier_list
+        if employee.shift_counter >= default_shifts_number
+    ]
+    for employee in filtered_cashier_list:
         if (bar_max_revenue < employee.summary_bar_revenue
                 and employee.average_bar_revenue >= avg_bar_limit):
             bar_max_revenue = employee.summary_bar_revenue
@@ -305,8 +307,11 @@ def get_awards_data(month: int, year: int) -> AwardData:
     hookah_max_revenue = 0.0
     hall_admins_current_leader = None
     hall_admin_max_avg_revenue = 0.0
-    for employee in filter(lambda x: x.shift_counter >= default_shifts_number,
-                           categories_list.hall_admin_list):
+    filtered_hall_admin_list = [
+        employee for employee in categories_list.hall_admin_list
+        if employee.shift_counter >= default_shifts_number
+    ]
+    for employee in filtered_hall_admin_list:
         if (hookah_max_revenue < employee.summary_hookah_revenue
                 and employee.average_hookah_revenue >= avg_hookah_limit):
             hookah_max_revenue = employee.summary_hookah_revenue
@@ -422,24 +427,35 @@ def get_filtered_rating_data(month: int, year: int) -> FilteredRating:
     award_data = get_awards_data(year=year, month=month)
     avg_bar_limit = settings.AVERAGE_BAR_REVENUE_CRITERIA
     avg_hookah_limit = settings.AVERAGE_HOOKAH_REVENUE_CRITERIA
-    avg_bar_revenue_filtered_list = [
+    minimal_shift_number = settings.MINIMAL_WORKSHIFTS_NUMBER
+
+    minimal_shift_filtered_cashiers_list = [
         employee for employee in award_data.cashiers_list
+        if employee.shift_counter >= minimal_shift_number
+    ]
+    minimal_shift_filtered_hall_admin_list = [
+        employee for employee in award_data.hall_admin_list
+        if employee.shift_counter >= minimal_shift_number
+    ]
+    avg_bar_revenue_filtered_list = [
+        employee for employee in minimal_shift_filtered_cashiers_list
         if employee.average_bar_revenue >= avg_bar_limit
     ]
     avg_hookah_revenue_filtered_list = [
-        employee for employee in award_data.hall_admin_list
+        employee for employee in minimal_shift_filtered_hall_admin_list
         if employee.average_hookah_revenue >= avg_hookah_limit
+            and employee.shift_counter >= minimal_shift_number
     ]
+
     bar_rating = get_categories_from_list(avg_bar_revenue_filtered_list)
-    _sort_list_by_average_revenue(award_data.cashiers_list)
-    cashiers_rating = get_categories_from_list(award_data.cashiers_list)
-    avg_hookah_revenue_filtered_list = [
-        employee for employee in award_data.hall_admin_list
-        if employee.average_hookah_revenue >= avg_hookah_limit
-    ]
     hookah_rating = get_categories_from_list(avg_hookah_revenue_filtered_list)
-    _sort_list_by_average_revenue(award_data.hall_admin_list)
-    hall_admins_rating = get_categories_from_list(award_data.hall_admin_list)
+
+    _sort_list_by_average_revenue(minimal_shift_filtered_cashiers_list)
+    cashiers_rating = get_categories_from_list(
+        minimal_shift_filtered_cashiers_list)
+    _sort_list_by_average_revenue(minimal_shift_filtered_hall_admin_list)
+    hall_admins_rating = get_categories_from_list(
+        minimal_shift_filtered_hall_admin_list)
 
     return FilteredRating(
         bar_rating=bar_rating,
