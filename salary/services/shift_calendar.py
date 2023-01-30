@@ -37,29 +37,26 @@ class EmployeeOnWork(NamedTuple):
 logger = logging.getLogger(__name__)
 
 
-def get_week_days_list(year: int = None, month: int = None) -> List[List]:
+def get_week_days_list(year: int, month: int) -> List[List]:
     """
     Return a matrix representing a month's calendar.
     Each row represents a week; week entries are
     (day number, weekday number) tuples. Day numbers outside this month
-    are zero. If year or month is not defined, use date.today() values.
+    are zero.
     """
-
-    if not year:
-        year = datetime.date.today().year
-    if not month:
-        month = datetime.date.today().month
-
+    calendar_instance = calendar.Calendar(firstweekday=0)
     try:
-        datetime.date(year, month, 1)
-    except (ValueError, TypeError):
-        raise ValueError('Invalid year or month paramethers')
+        month_calender = calendar_instance.monthdayscalendar(year=year,
+                                                             month=month)
+    except calendar.IllegalMonthError:
+        logger.exception(f'Bad month number. {exception}')
+        raise TypeError(
+            'Error in arguments type monthdayscalendar(). Bad month number.')
+    except TypeError as exception:
+        logger.exception(
+            f'Error in arguments type monthdayscalendar(): {exception}')
+        raise
 
-    calender_instance = calendar.Calendar(firstweekday=0)
-    month_calender: list = calender_instance.monthdayscalendar(
-        year=year,
-        month=month,
-    )
     return month_calender
 
 
