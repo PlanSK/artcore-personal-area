@@ -5,7 +5,7 @@ import logging
 from typing import List, NamedTuple
 
 from django.contrib.auth.models import User
-from django.db.models import QuerySet, Q
+from django.db.models import QuerySet, Q, Model
 from django.utils import timezone
 from django.conf import settings
 from gspread.exceptions import GSpreadException, UnSupportedExportFormat
@@ -117,7 +117,7 @@ def get_calendar_weeks_list(
     shift_dates_list: List[datetime.date],
     year: int, month: int,
     workshift_tuples_list: List[CalendarDay],
-    planed_workshifts_list: List[int]
+    planed_workshifts_list: List[datetime.date]
     ) -> List[List[CalendarDay]]:
     """
     Returns List[List[CalendarDay]] - list of lists with CalendarDay
@@ -136,7 +136,7 @@ def get_calendar_weeks_list(
                         day for day in workshift_tuples_list 
                         if day.date == date_of_day
                     ][0]
-                elif date_of_day.day in planed_workshifts_list:
+                elif date_of_day in planed_workshifts_list:
                     day_tuple = CalendarDay(
                         date=date_of_day,
                         earnings=None,
@@ -158,48 +158,13 @@ def get_calendar_weeks_list(
     return calendar_weeks_list
 
 
-def _get_days_tuple_from_planed_dict(employee_dict: dict,
-                                    user_full_name: str) -> tuple[int] | tuple:
-    """
-    Returns tuple of days numbers list for employee from employee_dict
-    """
-    employee_days_list = employee_dict.get(user_full_name)
-    if employee_days_list:
-        try:
-            employee_days_tuple = tuple(employee_days_list)
-        except TypeError:
-            logger.error(f'Days list employee_days_list is not iterable.')
-        else:
-            return employee_days_tuple
-
-    return tuple()
-
-
 def get_planed_workshifts_days_list(user_full_name: str, month: int,
-                                    year: int) -> tuple[int] | tuple:
-    """
-    Returns list of day numbers planed shifts.
-    """
-
-    employee_days_tuple = tuple()
-    try:
-        google_sheets_data_dict = get_employees_schedule_dict(year=year,
-                                                              month=month)
-    except GSpreadException as error:
-        logger.error((
-            f'Error to open worksheet for {month}.{year}. '
-            f'GSpreadException: {error.__class__.__name__}.'
-        ))
-    except UnSupportedExportFormat as error:
-        logger.error((
-            f'Unknown exception detected in GSpread (Google Sheets). '
-            f'Exception: {error.__class__.__name__}.'
-        ))
-    else:
-        employee_days_tuple = _get_days_tuple_from_planed_dict(
-            google_sheets_data_dict, user_full_name)
-
-    return employee_days_tuple
+                                    year: int) -> tuple:
+    """Returns list of day numbers planed shifts."""
+    google_sheets_data_dict = get_employees_schedule_dict(year=year,
+                                                          month=month)
+    employee_days_tuple = google_sheets_data_dict.get(user_full_name, [])
+    return tuple(employee_days_tuple)
 
 
 def get_user_calendar(user: User, year: int, month: int) -> UserCalendar:
@@ -264,37 +229,40 @@ def get_user_calendar(user: User, year: int, month: int) -> UserCalendar:
 
 
 def _is_cashier_position(employee_full_name: str) -> bool:
+    """Returns True if employee is found in datebase
+    and has permissions for add workshift.
+    """
     last_name, first_name = employee_full_name.split()
-    current_employee = User.objects.get(last_name=last_name,
-                                        first_name=first_name)
-    return current_employee.has_perm('salary.add_workingshift')
-
-
-def get_employee_on_work() -> EmployeeOnWork:
-    now = timezone.localtime(timezone.now())
-    if now.hour < settings.EMPLOYEE_CHANGE_HOUR:
-        today = timezone.now() - datetime.timedelta(days=1)
+    try:
+        current_employee = User.objects.get(last_name=last_name,
+                                            first_name=first_name)
+    except Model.DoesNotExist:
+        logger.warning(f'{current_employee} is not found in datebase.')
+        return False
     else:
-        today = now
-    year, month, day = today.year, today.month, today.day
-    cashier = None
-    hall_admin = None
+        return current_employee.has_perm('salary.add_workingshift')
+
+
+def get_employees_at_work() -> EmployeeOnWork:
+    """Returns names of employees at work"""
+    now = timezone.localtime(timezone.now())
+    today = now.date()
+    if now.hour < settings.EMPLOYEE_CHANGE_HOUR:
+        today = now().date() - datetime.timedelta(days=1)
     current_month_employee_planed_shifts = get_employees_schedule_dict(
-        year=year, month=month)
-    employee_list = [ 
+        year=today.year, month=today.month)
+    employee_list = [
         name
         for name, dates in current_month_employee_planed_shifts.items()
-        if day in dates
+        if today in dates
     ]
 
-    if len(employee_list) == 2:
-        cashier_filter = filter(_is_cashier_position, employee_list)
-        if cashier_filter:
-            cashier = list(cashier_filter)[-1]
-            employee_list.pop(employee_list.index(cashier))
-            hall_admin = employee_list[-1]
-
-    return EmployeeOnWork(
-        cashier=cashier,
-        hall_admin=hall_admin
-    )
+    try:
+        hall_admin, cashier = employee_list
+        if not _is_cashier_position(cashier):
+            hall_admin, cashier = cashier, hall_admin
+    except ValueError:
+        logger.warning('Number of employees at work not equal 2.')
+        return EmployeeOnWork(None, None)
+    else:
+        return EmployeeOnWork(cashier=cashier, hall_admin=hall_admin)
