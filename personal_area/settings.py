@@ -323,3 +323,4 @@ AVERAGE_HOOKAH_REVENUE_CRITERIA = 700
 MINIMAL_WORKSHIFTS_NUMBER = 4
 
 EMPLOYEE_CHANGE_HOUR = 8 # Hour when employee changes from shift
+WORKSHIFT_SYMBOL = 'Р' # The symbol that denotes the working day in the chart.
