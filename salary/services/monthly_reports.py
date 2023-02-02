@@ -497,7 +497,7 @@ def get_rating_data(
     try:
         rating_data = _get_employee_rating_data(employee_id, month, year)
     except RatingDataNotDefined:
-        logger.exception(
+        logger.warning(
             f'Employee id {employee_id} rating position is not found.')
     except ValueError as excexption:
         logger.exception(f'Value error: {excexption}.')
