@@ -53,3 +53,13 @@ def has_cashier_permissions(employee_full_name: str) -> bool:
         return False
     else:
         return current_employee.has_perm('salary.add_workingshift')
+
+
+def get_users_full_names_list_from_db() -> list[str]:
+    """Returns list with full names from db."""
+    user_name_tuples_list = User.objects.all().values_list('last_name',
+                                                           'first_name')
+    user_full_names_list = [
+        ' '.join(names_tuple) for names_tuple in user_name_tuples_list
+    ]
+    return user_full_names_list

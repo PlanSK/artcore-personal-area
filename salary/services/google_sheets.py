@@ -4,7 +4,8 @@ import datetime
 
 from django.conf import settings
 from django.core.cache import cache
-from django.contrib.auth.models import User
+
+from salary.services.db_orm_queries import get_users_full_names_list_from_db
 
 
 logger = logging.getLogger(__name__)
@@ -35,16 +36,6 @@ def get_gsheets_worksheet_data(worksheet_name: str) -> list[list[str]]:
             f'Unknown gspread exception: {exception}')
 
     return all_worksheet_data
-
-
-def get_users_full_names_list_from_db() -> list[str]:
-    """Returns list with full names from db."""
-    user_name_tuples_list = User.objects.all().values_list('last_name',
-                                                           'first_name')
-    user_full_names_list = [
-        ' '.join(names_tuple) for names_tuple in user_name_tuples_list
-    ]
-    return user_full_names_list
 
 
 def _get_full_names_tuple(worksheet_data: list[list[str]]) -> tuple[str]:
