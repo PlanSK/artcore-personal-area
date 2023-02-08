@@ -14,10 +14,7 @@ def get_worksheet_name(year: int, month: int) -> str:
     """Returns formatted worksheet name 'mm-yyyy' 
     from year and month values for request.
     """
-    if month < 10:
-        return f'0{month}-{year}'
-    
-    return f'{month}-{year}'
+    return f'0{month}-{year}' if month < 10 else f'{month}-{year}'
 
 
 def get_gsheets_worksheet_data(worksheet_name: str) -> list[list[str]]:
@@ -36,8 +33,8 @@ def get_gsheets_worksheet_data(worksheet_name: str) -> list[list[str]]:
             gspread.exceptions.UnSupportedExportFormat) as exception:
         logger.exception(
             f'Unknown gspread exception: {exception}')
-    finally:
-        return all_worksheet_data
+
+    return all_worksheet_data
 
 
 def get_users_full_names_list_from_db() -> list[str]:

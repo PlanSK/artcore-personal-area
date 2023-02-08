@@ -8,7 +8,6 @@ from django.contrib.auth.models import User
 from django.db.models import QuerySet, Q, Model
 from django.utils import timezone
 from django.conf import settings
-from gspread.exceptions import GSpreadException, UnSupportedExportFormat
 
 from salary.models import WorkingShift
 from salary.services.google_sheets import get_employees_schedule_dict
@@ -159,12 +158,12 @@ def get_calendar_weeks_list(
 
 
 def get_planed_workshifts_days_list(user_full_name: str, month: int,
-                                    year: int) -> tuple:
+                                    year: int) -> list:
     """Returns list of day numbers planed shifts."""
     google_sheets_data_dict = get_employees_schedule_dict(year=year,
                                                           month=month)
-    employee_days_tuple = google_sheets_data_dict.get(user_full_name, [])
-    return tuple(employee_days_tuple)
+    employee_days_list = google_sheets_data_dict.get(user_full_name, [])
+    return employee_days_list
 
 
 def get_user_calendar(user: User, year: int, month: int) -> UserCalendar:
@@ -176,7 +175,7 @@ def get_user_calendar(user: User, year: int, month: int) -> UserCalendar:
         sum_of_earnings: float - Amount of earnings in closed shifts.
     """
 
-    planed_workshifts_tuple = get_planed_workshifts_days_list(
+    planed_workshifts_list = get_planed_workshifts_days_list(
         user_full_name=user.get_full_name(),
         year=year,
         month=month
@@ -198,7 +197,7 @@ def get_user_calendar(user: User, year: int, month: int) -> UserCalendar:
         year=year,
         month=month,
         workshift_tuples_list=workshift_tuples_list,
-        planed_workshifts_list=planed_workshifts_tuple
+        planed_workshifts_list=planed_workshifts_list
     )
 
     complited_shifts_count: int = 0
@@ -215,7 +214,7 @@ def get_user_calendar(user: User, year: int, month: int) -> UserCalendar:
                 elif day.is_planed:
                     planed_shifts_count += 1
 
-    if not planed_workshifts_tuple:
+    if not planed_workshifts_list:
         planed_shifts_count = -1
 
     user_calendar = UserCalendar(
