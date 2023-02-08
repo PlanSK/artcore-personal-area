@@ -4,13 +4,16 @@ import logging
 
 from typing import List, NamedTuple
 
-from django.contrib.auth.models import User
-from django.db.models import QuerySet, Q, Model
+from django.db.models import QuerySet
 from django.utils import timezone
 from django.conf import settings
 
 from salary.models import WorkingShift
 from salary.services.google_sheets import get_employees_schedule_dict
+from salary.services.db_orm_queries import (
+    get_user_full_name_from_db, get_user_month_workshifts,
+    has_cashier_permissions
+)
 
 
 class CalendarDay(NamedTuple):
@@ -59,23 +62,7 @@ def get_week_days_list(year: int, month: int) -> List[List]:
     return month_calender
 
 
-def get_user_month_workshifts(user: User, year: int, month: int) -> QuerySet:
-    """
-    Returns a QuerySet with shifts in the specified month of the year.
-    """
-
-    return WorkingShift.objects.select_related(
-            'hall_admin__profile__position',
-            'cash_admin__profile__position'
-        ).filter(
-            shift_date__month=month,
-            shift_date__year=year,
-        ).filter(
-            Q(cash_admin=user) | Q(hall_admin=user)
-        ).order_by('shift_date')
-
-
-def get_workshift_tuples_list(user: User, 
+def get_workshift_tuples_list(user_id: int,
                               year: int,
                               month: int) -> List[CalendarDay]:
     """
@@ -83,14 +70,14 @@ def get_workshift_tuples_list(user: User,
     """
 
     workshifts: QuerySet = get_user_month_workshifts(
-        user=user,
+        user_id=user_id,
         year=year,
         month=month
     )
 
     workshift_tuples_list = []
     for workshift in workshifts:
-        if workshift.hall_admin == user:
+        if workshift.hall_admin.pk == user_id:
             earnings = workshift.hall_admin_earnings
         else:
             earnings = workshift.cashier_earnings
@@ -157,16 +144,17 @@ def get_calendar_weeks_list(
     return calendar_weeks_list
 
 
-def get_planed_workshifts_days_list(user_full_name: str, month: int,
+def get_planed_workshifts_days_list(user_id: int, month: int,
                                     year: int) -> list:
     """Returns list of day numbers planed shifts."""
+    user_full_name = get_user_full_name_from_db(user_id)
     google_sheets_data_dict = get_employees_schedule_dict(year=year,
                                                           month=month)
     employee_days_list = google_sheets_data_dict.get(user_full_name, [])
     return employee_days_list
 
 
-def get_user_calendar(user: User, year: int, month: int) -> UserCalendar:
+def get_user_calendar(user_id: int, year: int, month: int) -> UserCalendar:
     """
     Return UserCalendar namedtuple.
         weeks_list: List[List[CalendarDay]] - list of lists with CalendarDay
@@ -176,13 +164,13 @@ def get_user_calendar(user: User, year: int, month: int) -> UserCalendar:
     """
 
     planed_workshifts_list = get_planed_workshifts_days_list(
-        user_full_name=user.get_full_name(),
+        user_id=user_id,
         year=year,
         month=month
     )
 
     workshift_tuples_list = get_workshift_tuples_list(
-        user=user,
+        user_id=user_id,
         year=year,
         month=month
     )
@@ -227,21 +215,6 @@ def get_user_calendar(user: User, year: int, month: int) -> UserCalendar:
     return user_calendar
 
 
-def _is_cashier_position(employee_full_name: str) -> bool:
-    """Returns True if employee is found in datebase
-    and has permissions for add workshift.
-    """
-    last_name, first_name = employee_full_name.split()
-    try:
-        current_employee = User.objects.get(last_name=last_name,
-                                            first_name=first_name)
-    except Model.DoesNotExist:
-        logger.warning(f'{current_employee} is not found in datebase.')
-        return False
-    else:
-        return current_employee.has_perm('salary.add_workingshift')
-
-
 def get_employees_at_work() -> EmployeeOnWork:
     """Returns names of employees at work"""
     now = timezone.localtime(timezone.now())
@@ -258,7 +231,7 @@ def get_employees_at_work() -> EmployeeOnWork:
 
     try:
         hall_admin, cashier = employee_list
-        if not _is_cashier_position(cashier):
+        if not has_cashier_permissions(cashier):
             hall_admin, cashier = cashier, hall_admin
     except ValueError:
         logger.warning('Number of employees at work not equal 2.')

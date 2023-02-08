@@ -1119,8 +1119,8 @@ class CalendarView(LoginRequiredMixin, MonthYearExtractMixin,
 
     def get_context_data(self, **kwargs: Any) -> dict:
         context: dict = super().get_context_data(**kwargs)
-        user_calendar = get_user_calendar(self.requested_user, self.year,
-                                          self.month)
+        user_calendar = get_user_calendar(
+            self.requested_user.id, self.year, self.month)
 
         context.update({
             'month_calendar': user_calendar,
