@@ -30,22 +30,22 @@
             {% for week in month_calendar.weeks_list %}
             <tr class="border-top border-secondary">
               {% for day in week %}
-                {% if not day %}
-                <td class="disabled"></td>
-                {% elif day.earnings %}
-                {% if day.is_verified %}
-                <td class="verified">
+                {% if day.status == day.status.FOREIGN %}
+                  <td class="disabled"><span class="text-muted">{{ day.date.day }}</span></td>
+                {% elif day.status == day.status.PLANED %}
+                  <td class="planed">{{ day.date.day }}</td>
+                {% elif day.status == day.status.VERIFIED or day.status == day.status.UNVERIFIED %}
+                  {% if day.status == day.status.VERIFIED %}
+                    <td class="verified">
+                  {% elif day.status == day.status.UNVERIFIED %}
+                    <td class="bg-info text-dark">
+                  {% endif %}
+                      <div style="line-height: 0.9rem;">{{ day.date.day }}<br>
+                      <span class="badge bg-primary" style="font-size: 0.5rem;">{{ day.earnings }}</span>
+                      <a href="{{day.link}}" class="stretched-link"></a></div>
+                    </td>
                 {% else %}
-                <td class="bg-info text-dark">
-                {% endif %}
-                  <div style="line-height: 0.9rem;">{{ day.date.day }}<br>
-                  <span class="badge bg-primary" style="font-size: 0.5rem;">{{ day.earnings }}</span>
-                  <a href="{{day.link}}" class="stretched-link"></a></div>
-                </td>
-                {% elif day.is_planed %}
-                <td class="planed">{{ day.date.day }}</td>
-                {% else %}
-                <td>{{ day.date.day }}</td>
+                  <td>{{ day.date.day }}</td>
                 {% endif %}
               {% endfor %}
             </tr>
