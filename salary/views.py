@@ -21,7 +21,7 @@ from .forms import *
 from .mixins import *
 from salary.services.chat import *
 from salary.services.shift_calendar import (get_user_calendar,
-                                            get_employee_on_work)
+                                            get_employees_at_work)
 from salary.services.misconduct import Intruder
 from salary.services.internal_model_func import get_misconduct_slug
 from salary.services.workshift import (
@@ -259,12 +259,12 @@ class StaffIndexView(WorkingshiftPermissonsMixin, TitleMixin, TemplateView,
     
     def get_context_data(self, **kwargs):
         context : dict = super().get_context_data(**kwargs)
-        employees_on_work = get_employee_on_work()
+        employees_at_work = get_employees_at_work()
         today_date = timezone.localdate(timezone.now())
         birthday_person_list = get_birthday_person_list(day=today_date.day,
                                                         month=today_date.month)
         context.update({
-            'employee_on_work': employees_on_work,
+            'employees_at_work': employees_at_work,
             'today_date': today_date,
             'missed_workshifts_dates': get_missed_dates_tuple(),
             'birthday_person_list': birthday_person_list,
@@ -1119,8 +1119,8 @@ class CalendarView(LoginRequiredMixin, MonthYearExtractMixin,
 
     def get_context_data(self, **kwargs: Any) -> dict:
         context: dict = super().get_context_data(**kwargs)
-        user_calendar = get_user_calendar(self.requested_user, self.year,
-                                          self.month)
+        user_calendar = get_user_calendar(
+            self.requested_user.id, self.year, self.month)
 
         context.update({
             'month_calendar': user_calendar,
