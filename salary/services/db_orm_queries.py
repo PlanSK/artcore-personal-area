@@ -1,3 +1,4 @@
+import datetime
 import logging
 
 from django.db.models import QuerySet, Q
@@ -63,3 +64,8 @@ def get_users_full_names_list_from_db() -> list[str]:
         ' '.join(names_tuple) for names_tuple in user_name_tuples_list
     ]
     return user_full_names_list
+
+
+def is_workshift_exists(day: datetime.date) -> bool:
+    """Returns True if workshift on day is exists"""
+    return WorkingShift.objects.filter(shift_date=day).exists()

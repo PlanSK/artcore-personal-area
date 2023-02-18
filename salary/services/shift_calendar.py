@@ -14,7 +14,7 @@ from salary.models import WorkingShift
 from salary.services.google_sheets import get_employees_schedule_dict
 from salary.services.db_orm_queries import (
     get_user_full_name_from_db, get_user_month_workshifts,
-    has_cashier_permissions
+    has_cashier_permissions, is_workshift_exists
 )
 
 
@@ -114,6 +114,32 @@ def get_planed_workshifts_days_list(user_id: int, month: int,
     return employee_days_list
 
 
+def is_planed_workshift_closed(required_date: datetime.date) -> bool:
+    """Returns True if last day workshifts in month is closed"""
+    required_date += datetime.timedelta(days=1)
+    return is_workshift_exists(required_date)
+
+
+def is_last_day_of_month(check_date: datetime.date) -> bool:
+    """Return True if check date is last day oh moth"""
+    next_day = check_date + datetime.timedelta(days=1)
+    if next_day.month != check_date.month:
+        return True
+
+    return False
+
+
+def is_workshift_on_last_day_planed(
+        planed_workshifts_list: list[datetime.date]) -> bool:
+    """Returns True if workshifts planed on last month day"""
+    try:
+        last_day_date_of_month = planed_workshifts_list[-1]
+    except IndexError:
+        return False
+
+    return is_last_day_of_month(last_day_date_of_month)
+
+
 def get_calendar_week_list(
         week: list[datetime.date], planed_workshifts_list: list[datetime.date],
         workshift_dict: dict, month: int) -> list:
@@ -127,6 +153,9 @@ def get_calendar_week_list(
         if (day_date in planed_workshifts_list 
                 and tomorow not in workshift_dict.keys()):
             current_day.status = DayStatus.PLANED
+        if (is_last_day_of_month(current_day.date)
+                and is_planed_workshift_closed(current_day.date)):
+            current_day.status = DayStatus.REGULAR
         if day_date in workshift_dict.keys():
             current_workshift: Workshift = workshift_dict.get(day_date)
             current_day.earnings = current_workshift.earnings
@@ -161,6 +190,8 @@ def get_user_calendar(user_id: int, year: int, month: int) -> UserCalendar:
 
     complited_shifts_count = len(workshift_dict.keys())
     planed_shifts_count = len(planed_workshifts_list)
+    if is_workshift_on_last_day_planed(planed_workshifts_list):
+        planed_shifts_count -= 1
     sum_of_earnings = sum([
         workshift.earnings
         for workshift in workshift_dict.values()
