@@ -148,21 +148,22 @@ def get_calendar_week_list(
     for day_date in week:
         current_day = CalendarDay(day_date)
         tomorow = day_date + datetime.timedelta(days=1)
-        if day_date.month != month:
+        if day_date.month == month:
+            if (day_date in planed_workshifts_list 
+                    and tomorow not in workshift_dict.keys()):
+                current_day.status = DayStatus.PLANED
+            if (is_last_day_of_month(current_day.date)
+                    and is_planed_workshift_closed(current_day.date)):
+                current_day.status = DayStatus.REGULAR
+            if day_date in workshift_dict.keys():
+                current_workshift: Workshift = workshift_dict.get(day_date)
+                current_day.earnings = current_workshift.earnings
+                current_day.status = DayStatus.UNVERIFIED
+                if current_workshift.is_verified:
+                    current_day.status = DayStatus.VERIFIED
+                current_day.url = current_workshift.url
+        else:
             current_day.status = DayStatus.FOREIGN
-        if (day_date in planed_workshifts_list 
-                and tomorow not in workshift_dict.keys()):
-            current_day.status = DayStatus.PLANED
-        if (is_last_day_of_month(current_day.date)
-                and is_planed_workshift_closed(current_day.date)):
-            current_day.status = DayStatus.REGULAR
-        if day_date in workshift_dict.keys():
-            current_workshift: Workshift = workshift_dict.get(day_date)
-            current_day.earnings = current_workshift.earnings
-            current_day.status = DayStatus.UNVERIFIED
-            if current_workshift.is_verified:
-                current_day.status = DayStatus.VERIFIED
-            current_day.url = current_workshift.url
         calendar_week_list.append(current_day)
     return calendar_week_list
 
