@@ -30,13 +30,13 @@ class UnclosedWorkshifts(NamedTuple):
     unclosed_number: int
 
 
-def _is_date_day_exists_in_plan(full_name: str,
+def _is_date_day_exists_in_plan(user_id: int,
                            check_date: datetime.date) -> bool:
     """Returns True if day from check_date exists
     in the plan else returns False.
     """
     planed_shifts_days_tuple = get_planed_workshifts_days_list(
-        user_full_name=full_name, month=check_date.month, year=check_date.year)
+        user_id=user_id, month=check_date.month, year=check_date.year)
     logger.debug(f'Planed days: {planed_shifts_days_tuple}.')
     if check_date in planed_shifts_days_tuple:
         logger.debug(f'{check_date} exists in {planed_shifts_days_tuple}.')
@@ -65,19 +65,19 @@ def _get_date_with_offset(
 
 
 def notification_of_upcoming_shifts(
-        user: User, date_before: datetime.date | None = None) -> bool:
+        user_id: int, date_before: datetime.date | None = None) -> bool:
     """Returning True if tomorrow in days list from schedule."""
     tomorrow = _get_date_with_offset(1, date_before)
     logger.info(
         f'Start checking for permissions to show notification. '
-        f'User: {user.username}. Tomorrow value: {tomorrow}.'
+        f'User: {user_id}. Tomorrow value: {tomorrow}.'
     )
 
-    if _is_date_day_exists_in_plan(user.get_full_name(), tomorrow):
-        logger.info(f'User {user.username} can see notification.')
+    if _is_date_day_exists_in_plan(user_id, tomorrow):
+        logger.info(f'User {user_id} can see notification.')
         return True
 
-    logger.info(f'Notification for user {user.username} do not show.')
+    logger.info(f'Notification for user {user_id} do not show.')
     return False
 
 
@@ -109,7 +109,6 @@ def get_employee_unclosed_workshifts_dates(
         user_id: int) -> tuple[datetime.date]:
     """Returns tuple with missed dates of employee unclosed workshifts."""
     requested_user = get_object_or_404(User, id=user_id)
-    full_name = requested_user.get_full_name()
     if not requested_user.has_perm('salary.add_workingshift'):
         logger.info(
             f'User {requested_user.username} has no permissions '
@@ -125,8 +124,8 @@ def get_employee_unclosed_workshifts_dates(
     missed_dates = get_missed_dates_tuple()
     planed_shift_closed_dates = [
         _get_date_with_offset(1, planed_date)
-        for planed_date in get_planed_workshifts_days_list(
-            full_name, month, year)
+        for planed_date in get_planed_workshifts_days_list(user_id, month,
+                                                           year)
     ]
     logger.debug(f'User allowed to close dates: {planed_shift_closed_dates}')
 
@@ -141,8 +140,7 @@ def get_employee_unclosed_workshifts_dates(
             f'Check permissoins to close first day {first_month_date}.')
         last_day_of_last_month = _get_date_with_offset(-1, first_month_date)
         last_month_planed_days = get_planed_workshifts_days_list(
-            full_name, last_day_of_last_month.month,
-            last_day_of_last_month.year)
+            user_id, last_day_of_last_month.month, last_day_of_last_month.year)
         if (last_month_planed_days
                 and last_month_planed_days[-1] == last_day_of_last_month):
             employee_unclosed_workshifts_dates.append(first_month_date)
