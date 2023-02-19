@@ -737,7 +737,7 @@ class IndexEmployeeView(LoginRequiredMixin, ProfileStatusRedirectMixin,
         context = super().get_context_data(**kwargs)
 
         notification_about_shift = notification_of_upcoming_shifts(
-            user=self.request.user)
+            user_id=self.request.user.pk)
         misconduct_data = get_misconduct_employee_data(self.request.user.id)
         employee_month_indicators = get_employee_workshift_indicators(
             self.request.user.id)
