@@ -68,6 +68,9 @@
             {% endif %}
           {% endif %}
           </p>
+          {% if current_user.profile.profile_comment %}
+          <p class="card-text verysmall text-start">Примечание: <span class="text-warning">{{ current_user.profile.profile_comment }}</span></p>
+          {% endif %}
         </div>
         {% if not current_user.is_staff %}
         <div class="card-footer text-center">
