@@ -1,0 +1,205 @@
+{% extends 'salary/logined_page.html' %}
+{% load humanize %}
+
+{% block content %}
+<main>
+  <div class="container verysmall">
+    <div class="row mt-1">
+      <div class="col text-center text-secondary">
+        Ежедневный отчет по смене<br>
+        <b>{{ yesterday|date:"d.m.Y"|default:"00.00.0000" }} - {{ workshift.shift_date|date:"d.m.Y"|default:"00.00.0000" }}</b>
+      </div>
+    </div>
+    <div class="row mb-1">
+      <div class="col text-center verysmall">
+        <table class="table table-dark table-report text-secondary table-bordered">
+          <thead>
+            <th>Дата закрытия смены:</th>
+            <th>Смену сдали:</th>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                00.00.0000<br><br>
+                Технический отчет: сдан/не сдан
+              </td>
+              <td>
+                <table class="table table-dark text-secondary verysmall">
+                  <thead>
+                    <th>Администратор кассы</th>
+                    <th>Администратор зала</th>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Иванов Василь</td>
+                      <td>Петров Ивань</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="row mb-1">
+      <div class="col text-center text-secondary">
+        <b>Время прибытия смены</b>
+        <table class="table table-dark text-center verysmall table-report text-secondary table-bordered">
+          <thead>
+            <th>Администратор кассы</th>
+            <th>Администратор зала</th>
+          </thead>
+          <tbody>
+            <tr><td>Сидоров Илья</td><td>Захаров Руслан</td></tr>
+            <tr><td>08:40</td><td>7:50</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="row mb-1">
+      <div class="col text-center verysmall text-secondary">
+        <b>Расходы и суммарные данные</b>
+        <table class="table table-dark table-report text-secondary table-bordered">
+          <thead>
+            <th>Расходы (Наименование, сумма)</th>
+            <th>Суммарные данные</th>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <table class="table table-dark text-secondary">
+                  <tbody>
+                    <tr><td>Пример какого-либо расхода</td><td>000.0</td></tr>
+                    <tr><td>Пример какого-либо расхода</td><td>000.0</td></tr>
+                    <tr><td>Пример какого-либо расхода</td><td>000.0</td></tr>
+                  </tbody>
+                </table>
+              </td>
+              <td>
+                <table class="table table-dark text-secondary verysmall table-report text-start">
+                  <thead>
+                    <th>Наименование</th>
+                    <th>Сумма</th>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Сумма эквайринга</td>
+                      <td>30 000</td>
+                    </tr>
+                    <tr>
+                      <td>Сумма по чеку</td>
+                      <td>30 000</td>
+                    </tr>
+                    <tr>
+                      <td>Сумма расходов</td>
+                      <td>1 360</td>
+                    </tr>
+                    <tr>
+                      <td>Сумма ошибок</td>
+                      <td>3 470</td>
+                    </tr>
+                    <tr>
+                      <td>Сумма наличных</td>
+                      <td>9 850</td>
+                    </tr>
+                    <tr>
+                      <td>Сумма на сдачу</td>
+                      <td>2 000</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="row mb-1">
+      <div class="col text-center verysmall">
+        <table class="table text-secondary table-dark table-report table-bordered">
+          <thead>
+            <th>Ошибки по кабинкам (время, №, причина, ошибочное время)</th>
+            <th>Пожелания/примечания</th>
+          </thead>
+          <tr>
+            <td class="text-secondary"><br><br><br><br></td>
+            <td>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+    <div class="row mb-1">
+      <div class="col text-center text-secondary">
+        <b>Пояснения к ошибкам KNA</b>
+        <table class="table table-dark text-secondary verysmall table-report table-bordered">
+          <thead>
+            <th>Время по КНА</th>
+            <th>Номер компьютера или карты</th>
+            <th>Описание ошибки (подробное описание, была ли устранена)</th>
+            <th>Сумма в рублях</th>
+          </thead>
+          <tbody>
+            <tr>
+              <td>15:07</td>
+              <td>11365</td>
+              <td>Ошибка с Fifa, не запускалась, перекинул время с 5 каб на 6, в 5 настраивали с Антоном</td>
+              <td>350</td>
+            </tr>
+            <tr>
+              <td>15:07</td>
+              <td>11365</td>
+              <td>Ошибка с Fifa, не запускалась, перекинул время с 5 каб на 6, в 5 настраивали с Антоном</td>
+              <td>350</td>
+            </tr>
+            <tr>
+              <td>15:07</td>
+              <td>11365</td>
+              <td>Ошибка с Fifa, не запускалась, перекинул время с 5 каб на 6, в 5 настраивали с Антоном</td>
+              <td>350</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="row mb-1">
+      <div class="col text-center verysmall text-secondary">
+        <b>Данные о бургерах, лото</b>
+        <table class="table table-dark table-report verysmall text-secondary table-bordered">
+          <thead>
+            <th>Бургеры<br>(время, номер карты, сумма)</th>
+            <th>Лото<br>(время, номер карты, сумма)</th>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                13:45 - 11456 - 150 р.; 13:45 - 11456 - 150 р.; 13:45 - 11456 - 150 р.;<br>
+                13:45 - 11456 - 150 р.; 13:45 - 11456 - 150 р.; 13:45 - 11456 - 150 р.;<br>
+                13:45 - 11456 - 150 р.; 13:45 - 11456 - 150 р.; 13:45 - 11456 - 150 р.;<br>
+              </td>
+              <td>
+                13:45 - 1756 - 400 р.
+              </td>
+            </tr>
+            <tr><td>1350 р.</td><td>400 р.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="row mb-1">
+      <div class="col text-center verysmall text-secondary">
+        <b>Данные о приеме/сдаче</b>
+        <table class="table table-dark table-report verysmall text-secondary text-start">
+          <tbody>
+            <tr><td>Смену сдал:</td><td>Иванов Василь</td><td>Подпись: ____________</td></tr>
+            <tr><td>Смену принял:</td><td>Сидоров Илья</td><td>Подпись: ____________</td></tr>
+            <tr><td colspan="3"><br></td></tr>
+            <tr><td>Смену закрыл и проверил:</td><td>Смирнова Екатерина</td><td>Подпись: ____________</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</main>
+{% endblock %}

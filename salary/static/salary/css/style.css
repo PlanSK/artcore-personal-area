@@ -107,6 +107,18 @@
 }
 
 
+.table-report {
+    margin-bottom: 0px;
+}
+.table-report tbody td {
+    padding-top: 0pt;
+    padding-bottom: 0pt;
+}
+.table-report thead th {
+    padding-top: 0pt;
+    padding-bottom: 0pt;
+}
+
 .verified {
     background-color: #370075;
 }

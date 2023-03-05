@@ -1167,6 +1167,11 @@ class AwardRatingView(MonthlyReportListView):
         return context
 
 
+class EverydayReportView(TitleMixin, TemplateView):
+    template_name: str = 'salary/reports/everyday_report_print.html'
+    title = 'Ежедневный отчет'
+
+
 def page_not_found(request, exception):
     response = render(request, 'salary/404.html', {'title': 'Page not found'})
     response.status_code = 404

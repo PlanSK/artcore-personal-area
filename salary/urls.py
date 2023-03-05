@@ -63,4 +63,5 @@ urlpatterns = [
     path('authentication/<int:pk>/', ProfileAuthenticationView.as_view(), name='authentication'),
     path('award_rating/<int:year>/<int:month>/', AwardRatingView.as_view(), name='award_rating'),
     path('user_session_set/<int:user_id>/', user_session_set, name='session_set'),
+    path('everyday_report/', EverydayReportView.as_view(), name='everyday_report')
 ]
