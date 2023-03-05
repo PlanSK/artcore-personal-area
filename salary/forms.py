@@ -73,8 +73,8 @@ class StaffEditProfileForm(forms.ModelForm):
         model = Profile
         fields = [
             'birth_date', 'employment_date', 'position',
-            'photo', 'dismiss_date',
-            'profile_status',
+            'photo', 'dismiss_date', 'profile_status',
+            'profile_comment'
         ]
         if settings.ATTESTATION_ENABLED:
             fields.append('attestation_date')

@@ -61,6 +61,12 @@ class Profile(models.Model):
         default=ProfileStatus.REGISTRED,
         verbose_name='Состояние профиля'
     )
+    profile_comment = models.TextField(
+        verbose_name='Комментарий',
+        max_length=255,
+        blank=True,
+        null=True
+    )
 
     def __str__(self) -> str:
         return f'{self.user.last_name} [{self.user.username}]'
