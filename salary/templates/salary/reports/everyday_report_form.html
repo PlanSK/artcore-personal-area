@@ -1,0 +1,50 @@
+{% extends 'salary/logined_page.html' %}
+{% load humanize %}
+
+{% block content %}
+<main>
+  <div class="container verysmall">
+    <div class="row">
+      <div class="col col-md-6">
+        Расход:<a href="#" class="btn btn-primary btn-sm" onclick="addCostData();">+</a>
+        <form action="#" method="post">
+          <div id="id_costs">
+            <input type="text" name="sum1"><input type="text" name="reason1"><input type="who1">
+          </div>
+          <input type="submit">
+        </form>
+      </div>
+    </div>
+  </div>
+  <script>
+    function setAttributes(el, attrs) {
+      for(var key in attrs) {
+        el.setAttribute(key, attrs[key]);
+      }
+    }
+
+    function addCostData() {
+      var container = document.getElementById('id_costs');
+      br = document.createElement('br');
+      var block = document.createElement("div");
+      var sum = document.createElement("input");
+      var reason = document.createElement("input");
+      var who = document.createElement("input");
+      sum.id = 'sum1';
+      sum.name = 'sum1';
+      sum.type = 'text';
+      reason.id = 'reason1';
+      reason.name = 'reason1';
+      reason.type = 'text';
+      who.id = 'who1';
+      who.name = 'who1';
+      who.type = 'text';
+      block.appendChild(sum);
+      block.appendChild(reason);
+      block.appendChild(who);
+      container.appendChild(block);
+      container.appendChild(br);
+    }
+  </script>
+</main>
+{% endblock %}
