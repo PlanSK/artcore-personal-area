@@ -1,50 +1,75 @@
 {% extends 'salary/logined_page.html' %}
-{% load humanize %}
+{% load crispy_forms_tags %}
 
 {% block content %}
 <main>
   <div class="container verysmall">
-    <div class="row">
-      <div class="col col-md-6">
-        Расход:<a href="#" class="btn btn-primary btn-sm" onclick="addCostData();">+</a>
-        <form action="#" method="post">
-          <div id="id_costs">
-            <input type="text" name="sum1"><input type="text" name="reason1"><input type="who1">
-          </div>
-          <input type="submit">
+    <div class="row justify-content-center">
+      <div class="col col-md-4 border rounded me-2 mt-1 text-center">
+        <h5>Добавление ошибок KNA</h5>
+        <form method="post" action="{% url 'add_kna_error' %}">
+          {% csrf_token %}
+          {{ error_kna_form|crispy }}
+          <input type="hidden" name="next" value="{{ request.path }}">
+          <input type="submit" value="Add error">
+        </form>
+      </div>
+      <div class="col col-md-4 border mt-1 rounded text-center">
+        <h5>Добавление расходов</h5>
+        <form method="post" action="{% url 'add_cost_to_report' %}">
+          {% csrf_token %}
+          {{ cost_form|crispy }}
+          <input type="hidden" name="next" value="{{ request.path }}">
+          <input type="submit" value="Add cost">
         </form>
       </div>
     </div>
+    <div class="row justify-content-center border-top mt-1">
+      <div class="col col-md-auto">
+        {% if costs_list %}
+        <h5>Расходы</h5>
+        <table class="table table-dark table-report text-secondary table-bordered">
+          <thead>
+            <th>Сумма</th>
+            <th>Причина</th>
+            <th>Ответственное лицо</th>
+          </thead>
+          <tbody>
+          {% for cost in costs_list %}
+          <tr>
+            <td>{{cost.cost_sum}}</td>
+            <td>{{cost.cost_reason}}</td>
+            <td>{{cost.cost_person.get_full_name}}</td>
+          </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+        {% endif %}
+        {% if errors_list %}
+        <h5>Ошибки</h5>
+        <table class="table table-dark table-report text-secondary table-bordered">
+          <thead>
+            <th>Тип ошибки</th>
+            <th>Время</th>
+            <th>Номер карты</th>
+            <th>Сумма</th>
+            <th>Описание</th>
+          </thead>
+          <tbody>
+          {% for error in errors_list %}
+          <tr>
+            <td>{{error.error_type}}</td>
+            <td>{{error.error_time}}</td>
+            <td>{{error.card}}</td>
+            <td>{{error.error_sum}}</td>
+            <td>{{error.description}}</td>
+          </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+        {% endif %}
+      </div>
+    </div>
   </div>
-  <script>
-    function setAttributes(el, attrs) {
-      for(var key in attrs) {
-        el.setAttribute(key, attrs[key]);
-      }
-    }
-
-    function addCostData() {
-      var container = document.getElementById('id_costs');
-      br = document.createElement('br');
-      var block = document.createElement("div");
-      var sum = document.createElement("input");
-      var reason = document.createElement("input");
-      var who = document.createElement("input");
-      sum.id = 'sum1';
-      sum.name = 'sum1';
-      sum.type = 'text';
-      reason.id = 'reason1';
-      reason.name = 'reason1';
-      reason.type = 'text';
-      who.id = 'who1';
-      who.name = 'who1';
-      who.type = 'text';
-      block.appendChild(sum);
-      block.appendChild(reason);
-      block.appendChild(who);
-      container.appendChild(block);
-      container.appendChild(br);
-    }
-  </script>
 </main>
 {% endblock %}

@@ -13,7 +13,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.models import Permission
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
-from django.views.generic.edit import CreateView, DeleteView, UpdateView
+from django.views.generic.edit import CreateView, DeleteView, UpdateView, FormView
 from django.views.generic.base import RedirectView
 from django.db.models import Q, QuerySet, Sum, Avg
 
@@ -1174,7 +1174,40 @@ class EverydayReportView(TitleMixin, TemplateView):
 
 class EverydayReportFormView(TitleMixin, TemplateView):
     template_name: str = 'salary/reports/everyday_report_form.html'
+    error_kna_form = ErrorKNAForm
+    cost_form = CostForm
     title = 'Ежедневный отчет'
+
+    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        costs = Cost.objects.all()
+        errors = ErrorKNA.objects.all()
+        context.update({
+            'error_kna_form': self.error_kna_form,
+            'cost_form': self.cost_form,
+            'costs_list': costs,
+            'errors_list': errors
+        })
+        return context
+
+
+class CreateObjectRedirectView(RedirectView):
+    object_form = forms.BaseForm
+    def post(self, request: HttpRequest, *args: Any,
+             **kwargs: Any) -> HttpResponse:
+        object_form = self.object_form(request.POST)
+        next = request.POST.get('next', '/')
+        if object_form.is_valid():
+            object_form.save()
+        return redirect(next)
+
+
+class CreateErrorRedirectView(CreateObjectRedirectView):
+    object_form = ErrorKNAForm
+
+
+class CreateCostRedirectView(CreateObjectRedirectView):
+    object_form = CostForm
 
 
 def page_not_found(request, exception):

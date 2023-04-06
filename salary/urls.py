@@ -64,5 +64,7 @@ urlpatterns = [
     path('award_rating/<int:year>/<int:month>/', AwardRatingView.as_view(), name='award_rating'),
     path('user_session_set/<int:user_id>/', user_session_set, name='session_set'),
     path('everyday_report/', EverydayReportView.as_view(), name='everyday_report'),
-    path('everyday_report_form/', EverydayReportFormView.as_view(), name='everyday_report_form')
+    path('everyday_report_form/', EverydayReportFormView.as_view(), name='everyday_report_form'),
+    path('add_kna_error/', CreateErrorRedirectView.as_view(), name='add_kna_error'),
+    path('add_cost_to_report/', CreateCostRedirectView.as_view(), name='add_cost_to_report'),
 ]

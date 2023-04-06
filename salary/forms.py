@@ -266,3 +266,37 @@ class EditMisconductForm(forms.ModelForm):
             'comment',
             'status',
         )
+
+
+class ErrorKNAForm(forms.ModelForm):
+    class Meta:
+        model = ErrorKNA
+        fields = (
+            'error_type',
+            'error_time',
+            'card',
+            'error_sum',
+            'description',
+            'workshift',
+        )
+        widgets = {
+            'error_time': forms.TimeInput(attrs={
+                'type': 'time',
+            })
+        }
+
+
+class CostForm(forms.ModelForm):
+    cost_person = EmplModelChoiceField(
+        queryset=User.objects.filter(is_active=True, is_staff=False),
+        label='Кто потратил',
+    )
+
+    class Meta:
+        model = Cost
+        fields = (
+            'cost_sum',
+            'cost_reason',
+            'cost_person',
+            'workshift'
+        )
