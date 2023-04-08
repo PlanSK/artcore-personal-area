@@ -1172,11 +1172,13 @@ class EverydayReportView(TitleMixin, TemplateView):
     title = 'Ежедневный отчет'
 
 
-class EverydayReportFormView(TitleMixin, TemplateView):
-    template_name: str = 'salary/reports/everyday_report_form.html'
+class AddCostErrorFormView(PermissionRequiredMixin, TitleMixin,
+                             TemplateView):
+    template_name: str = 'salary/reports/add_costs_and_error_form.html'
     error_kna_form = ErrorKNAForm
     cost_form = CostForm
-    title = 'Ежедневный отчет'
+    permission_required = 'salary.change_workingshift'
+    title = 'Добавление ошибок и расходов'
 
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
         context = super().get_context_data(**kwargs)
@@ -1191,23 +1193,32 @@ class EverydayReportFormView(TitleMixin, TemplateView):
         return context
 
 
-class CreateObjectRedirectView(RedirectView):
-    object_form = forms.BaseForm
-    def post(self, request: HttpRequest, *args: Any,
-             **kwargs: Any) -> HttpResponse:
-        object_form = self.object_form(request.POST)
-        next = request.POST.get('next', '/')
-        if object_form.is_valid():
-            object_form.save()
-        return redirect(next)
-
-
 class CreateErrorRedirectView(CreateObjectRedirectView):
     object_form = ErrorKNAForm
 
 
 class CreateCostRedirectView(CreateObjectRedirectView):
     object_form = CostForm
+
+
+class ErrorDeleteView(SuccessUrlMixin, PermissionRequiredMixin, DeleteView):
+    permission_required = 'salary.change_workingshift'
+    model = ErrorKNA
+
+
+class CostDeleteView(ErrorDeleteView):
+    model = Cost
+
+
+class CostUpdateView(SuccessUrlMixin, PermissionRequiredMixin, UpdateView):
+    model = Cost
+    form_class = CostForm
+    permission_required = 'salary.change_workingshift'
+
+
+class ErrorUpdateView(CostUpdateView):
+    model = ErrorKNA
+    form_class = ErrorKNAForm
 
 
 def page_not_found(request, exception):
