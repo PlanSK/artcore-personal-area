@@ -319,10 +319,32 @@ class WorkingShift(models.Model):
         return reverse_lazy('detail_workshift', kwargs={'slug': self.slug})
 
 
+    def _get_costs_sum(self) -> float:
+        """Returns sum of costs for workshift"""
+        costs_queryset = Cost.objects.filter(workshift__id=self.pk)
+        costs_sum = costs_queryset.aggregate(
+            models.Sum('cost_sum')).get('cost_sum__sum')
+        if isinstance(costs_sum, float):
+            return costs_sum
+        return 0.0
+
+
+    def _get_errors_sum(self) -> float:
+        """Returns sum of costs for workshift"""
+        errors_queryset = ErrorKNA.objects.filter(workshift__id=self.pk)
+        errors_sum = errors_queryset.aggregate(
+            models.Sum('error_sum')).get('error_sum__sum')
+        if isinstance(errors_sum, float):
+            return errors_sum
+        return 0.0
+
+
     def save(self, *args, **kwargs):
         self.game_zone_subtotal = 0.0
         self.summary_revenue = 0.0
-        
+        sum_of_errors = self._get_errors_sum()
+        if sum_of_errors:
+            self.game_zone_error = sum_of_errors
         if self.game_zone_revenue >= self.game_zone_error:
             self.game_zone_subtotal = round(
                 self.game_zone_revenue - self.game_zone_error, 2
