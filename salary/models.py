@@ -201,6 +201,7 @@ class WorkingShift(models.Model):
     acquiring_terminal_sum = models.FloatField(
         verbose_name='Сумма эквайринга (Терминал)', default=0.0
     )
+    cost_sum = models.FloatField(verbose_name='Сумма расходов', default=0.0)
     cash_sum = models.FloatField(verbose_name='Сумма наличных', default=0.0)
     short_change_sum = models.FloatField(
         verbose_name='Сумма на сдачу', default=2000.0
@@ -239,7 +240,7 @@ class WorkingShift(models.Model):
     status = models.CharField(
         max_length=20,
         choices=WorkshiftStatus.choices,
-        default=WorkshiftStatus.UNVERIFIED,
+        default=WorkshiftStatus.NOT_CONFIRMED,
         verbose_name='Статус смены',
         db_column='shift_status'
     )
@@ -345,6 +346,7 @@ class WorkingShift(models.Model):
         sum_of_errors = self._get_errors_sum()
         if sum_of_errors:
             self.game_zone_error = sum_of_errors
+        self.cost_sum = self._get_costs_sum()
         if self.game_zone_revenue >= self.game_zone_error:
             self.game_zone_subtotal = round(
                 self.game_zone_revenue - self.game_zone_error, 2
