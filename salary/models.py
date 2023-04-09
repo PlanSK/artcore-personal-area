@@ -189,10 +189,10 @@ class WorkingShift(models.Model):
         User, on_delete=models.SET_NULL, related_name='next_cashier',
         blank=True, null=True
     )
-    hall_admin_arrival_time = models.DateTimeField(
+    hall_admin_arrival_time = models.TimeField(
         verbose_name='Время прибытия админа', blank=True, null=True
     )
-    cashier_arrival_time = models.DateTimeField(
+    cashier_arrival_time = models.TimeField(
         verbose_name='Время прибытия кассира', blank=True, null=True
     )
     acquiring_evator_sum = models.FloatField(
