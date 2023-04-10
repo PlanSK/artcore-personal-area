@@ -131,7 +131,16 @@ class EditWorkshiftDataForm(forms.ModelForm):
                                      profile__position__in=[2, 4]),
         label='Администратор кассы',
     )
-
+    next_hall_admin = EmplModelChoiceField(
+        queryset=User.objects.filter(is_active=True,
+                                     profile__position__in=[1, 4]),
+        label='Прибывшая смена (Администратор)',
+    )
+    next_cashier = EmplModelChoiceField(
+        queryset=User.objects.filter(is_active=True,
+                                     profile__position__in=[2, 4]),
+        label='Прибывшая смена (Кассир)',
+    )
     class Meta:
         model = WorkingShift
         fields = [
@@ -139,16 +148,31 @@ class EditWorkshiftDataForm(forms.ModelForm):
             'cash_admin',
             'bar_revenue',
             'game_zone_revenue',
-            'game_zone_error',
             'additional_services_revenue',
             'hookah_revenue',
+            'next_hall_admin',
+            'next_cashier',
+            'hall_admin_arrival_time',
+            'cashier_arrival_time',
+            'acquiring_evator_sum',
+            'acquiring_terminal_sum',
+            'cash_sum',
+            'short_change_sum',
+            'technical_report',
         ]
+        widgets = {
+            'hall_admin_arrival_time': forms.TimeInput(
+                attrs={'type': 'time',}),
+            'cashier_arrival_time': forms.TimeInput(
+                attrs={'type': 'time',}),
+        }
         if settings.PUBLICATION_ENABLED:
             fields.append('publication_link')
 
 
 class AddWorkshiftDataForm(EditWorkshiftDataForm):
-
+    technical_report = forms.BooleanField(label='Технический ответ в наличии',
+                                          required=True)
     class Meta:
         model = WorkingShift
         fields = [
@@ -160,11 +184,24 @@ class AddWorkshiftDataForm(EditWorkshiftDataForm):
             'game_zone_error',
             'additional_services_revenue',
             'hookah_revenue',
+            'next_hall_admin',
+            'next_cashier',
+            'hall_admin_arrival_time',
+            'cashier_arrival_time',
+            'acquiring_evator_sum',
+            'acquiring_terminal_sum',
+            'cash_sum',
+            'short_change_sum',
+            'technical_report',
         ]
         if settings.PUBLICATION_ENABLED:
             fields.append('publication_link')
         widgets = {
             'shift_date': forms.DateInput(attrs={'type': 'date'}),
+            'hall_admin_arrival_time': forms.TimeInput(
+                attrs={'type': 'time',}),
+            'cashier_arrival_time': forms.TimeInput(
+                attrs={'type': 'time',}),
         }
 
     def clean(self):
@@ -213,10 +250,24 @@ class StaffEditWorkshiftForm(EditWorkshiftDataForm):
             'comment_for_cash_admin',
             'comment_for_hall_admin',
             'status',
+            'next_hall_admin',
+            'next_cashier',
+            'hall_admin_arrival_time',
+            'cashier_arrival_time',
+            'acquiring_evator_sum',
+            'acquiring_terminal_sum',
+            'cash_sum',
+            'short_change_sum',
+            'technical_report',
         ]
         if settings.PUBLICATION_ENABLED:
             fields.extend(['publication_link', 'publication_is_verified'])
-
+        widgets = {
+            'hall_admin_arrival_time': forms.TimeInput(
+                attrs={'type': 'time',}),
+            'cashier_arrival_time': forms.TimeInput(
+                attrs={'type': 'time',}),
+        }
 
 class AddMisconductForm(forms.ModelForm):
     intruder = EmplModelChoiceField(
@@ -282,7 +333,8 @@ class ErrorKNAForm(forms.ModelForm):
         widgets = {
             'error_time': forms.TimeInput(attrs={
                 'type': 'time',
-            })
+            }),
+            'workshift': forms.HiddenInput(),
         }
 
 
@@ -300,3 +352,6 @@ class CostForm(forms.ModelForm):
             'cost_person',
             'workshift'
         )
+        widgets = {
+            'workshift': forms.HiddenInput(),
+        }

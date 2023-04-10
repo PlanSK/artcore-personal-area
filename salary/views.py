@@ -859,8 +859,7 @@ class DocumentsList(LoginRequiredMixin, TitleMixin, TemplateView):
     title = 'Список документов'
 
 
-class AddWorkshiftData(PermissionRequiredMixin, TitleMixin, SuccessUrlMixin,
-                        CreateView):
+class AddWorkshiftData(PermissionRequiredMixin, TitleMixin, CreateView):
     form_class = AddWorkshiftDataForm
     permission_required = 'salary.add_workingshift'
     template_name = 'salary/add_workshift.html'
@@ -890,6 +889,10 @@ class AddWorkshiftData(PermissionRequiredMixin, TitleMixin, SuccessUrlMixin,
         object.editor = self.request.user.get_full_name()
         object.slug = object.shift_date
         return super().form_valid(form)
+    
+    def get_success_url(self):
+        return reverse_lazy('costs_and_errors_form',
+                            kwargs={'pk': self.object.pk})
 
 
 class EditWorkshiftData(ProfileStatusRedirectMixin, PermissionRequiredMixin,
@@ -1184,9 +1187,14 @@ class AddCostErrorFormView(PermissionRequiredMixin, TitleMixin,
         context = super().get_context_data(**kwargs)
         costs = Cost.objects.all()
         errors = ErrorKNA.objects.all()
+        try:
+            workshift = WorkingShift.objects.get(pk=self.kwargs['pk'])
+        except WorkingShift.DoesNotExist:
+            raise Http404
         context.update({
-            'error_kna_form': self.error_kna_form,
-            'cost_form': self.cost_form,
+            'error_kna_form': self.error_kna_form(
+                initial={'workshift': workshift}),
+            'cost_form': self.cost_form(initial={'workshift': workshift}),
             'costs_list': costs,
             'errors_list': errors
         })
