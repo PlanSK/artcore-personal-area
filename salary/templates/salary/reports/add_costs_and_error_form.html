@@ -70,7 +70,7 @@
             <td>{{error.error_time}}</td>
             <td>{{error.card}}</td>
             <td>{{error.error_sum}}</td>
-            <td>{{error.description}}</td>
+            <td>{{error.description|default:""}}</td>
             <td>
               <a href="{% url 'update_error_in_report' pk=error.pk %}?next={{ request.path }}" class="link-warning">Изменить</a> |
               <a href="{% url 'del_error_from_report' pk=error.pk %}?next={{ request.path }}" class="link-danger">Удалить</a>
@@ -85,7 +85,7 @@
     <div class="row justify-content-center border-top mt-1">
       <div class="col col-md-6 text-center border rounded m-1 p-1">
         Достоверность и корректность, указанных в отчете сведений, подтверждаю. <br>
-        <a href="#" class="btn btn-success btn-sm">Закрыть смену</a>
+        <a href="{% url 'redirect_to_workshift' pk=workshift_pk %}" class="btn btn-success btn-sm">Закрыть смену</a>
       </div>
     </div>
   </div>

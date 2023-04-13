@@ -71,4 +71,5 @@ urlpatterns = [
     path('del_error_from_report/<int:pk>/', ErrorDeleteView.as_view(), name='del_error_from_report'),
     path('update_cost_in_report/<int:pk>/', CostUpdateView.as_view(), name='update_cost_in_report'),
     path('update_error_in_report/<int:pk>/', ErrorUpdateView.as_view(), name='update_error_in_report'),
+    path('redirect_to_workshift/<int:pk>/', save_workshift_and_redirect, name='redirect_to_workshift'),
 ]

@@ -1194,6 +1194,7 @@ class AddCostErrorFormView(PermissionRequiredMixin, TitleMixin,
         context.update({
             'error_kna_form': self.error_kna_form(
                 initial={'workshift': workshift}),
+            'workshift_pk': workshift.pk,
             'cost_form': self.cost_form(initial={'workshift': workshift}),
             'costs_list': costs,
             'errors_list': errors
@@ -1227,6 +1228,14 @@ class CostUpdateView(SuccessUrlMixin, PermissionRequiredMixin, UpdateView):
 class ErrorUpdateView(CostUpdateView):
     model = ErrorKNA
     form_class = ErrorKNAForm
+
+
+@login_required
+def save_workshift_and_redirect(request, pk):
+    workshift = get_object_or_404(WorkingShift, pk=pk)
+    workshift.status = WorkingShift.WorkshiftStatus.UNVERIFIED
+    workshift.save()
+    return redirect(workshift)
 
 
 def page_not_found(request, exception):
