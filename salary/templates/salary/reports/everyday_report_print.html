@@ -7,7 +7,7 @@
     <div class="row mt-1">
       <div class="col text-center text-secondary">
         Ежедневный отчет по смене<br>
-        <b>{{ yesterday|date:"d.m.Y"|default:"00.00.0000" }} - {{ workshift.shift_date|date:"d.m.Y"|default:"00.00.0000" }}</b>
+        <b>{{ workshift.shift_date }}</b>
       </div>
     </div>
     <div class="row mb-1">
@@ -20,8 +20,13 @@
           <tbody>
             <tr>
               <td>
-                00.00.0000<br><br>
-                Технический отчет: сдан/не сдан
+               {{object.shift_date|date:"d.m.Y"}}<br><br>
+                Технический отчет:
+                {% if workshift.technical_report %}
+                сдан
+                {% else %}
+                не сдан
+                {% endif %}
               </td>
               <td>
                 <table class="table table-dark text-secondary verysmall">
@@ -31,8 +36,8 @@
                   </thead>
                   <tbody>
                     <tr>
-                      <td>Иванов Василь</td>
-                      <td>Петров Ивань</td>
+                      <td>{{workshift.cash_admin.get_full_name}}</td>
+                      <td>{{workshift.hall_admin.get_full_name}}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -51,8 +56,14 @@
             <th>Администратор зала</th>
           </thead>
           <tbody>
-            <tr><td>Сидоров Илья</td><td>Захаров Руслан</td></tr>
-            <tr><td>08:40</td><td>7:50</td></tr>
+            <tr>
+              <td>{{workshift.next_cashier.get_full_name|default:"-"}}</td>
+              <td>{{workshift.next_hall_admin.get_full_name|default:"-"}}</td>
+            </tr>
+            <tr>
+              <td>{{workshift.cashier_arrival_time|default:"-"}}</td>
+              <td>{{workshift.hall_admin_arrival_time|default:"-"}}</td>
+            </tr>
           </tbody>
         </table>
       </div>
@@ -70,9 +81,13 @@
               <td>
                 <table class="table table-dark text-secondary">
                   <tbody>
-                    <tr><td>000.0</td><td>Пример какого-либо расхода</td><td>Иванов _______ (подпись)</td></tr>
-                    <tr><td>000.0</td><td>Пример какого-либо расхода</td><td>Иванов _______ (подпись)</td></tr>
-                    <tr><td>000.0</td><td>Пример какого-либо расхода</td><td>Петрова _______ (подпись)</td></tr>
+                    {% for cost in workshift.costs.all %}
+                    <tr>
+                      <td>{{cost.cost_sum}}</td>
+                      <td>{{cost.cost_reason}}</td>
+                      <td>{{cost.cost_person.last_name}} _____________ (подпись)</td>
+                    </tr>
+                    {% endfor %}
                   </tbody>
                 </table>
               </td>
@@ -85,27 +100,27 @@
                   <tbody>
                     <tr>
                       <td>Сумма эквайринга (терминал)</td>
-                      <td>30 000</td>
+                      <td>{{workshift.acquiring_terminal_sum}}</td>
                     </tr>
                     <tr>
                       <td>Сумма по эквайринга (Эватор)</td>
-                      <td>30 000</td>
+                      <td>{{workshift.acquiring_evator_sum}}</td>
                     </tr>
                     <tr>
                       <td>Сумма расходов</td>
-                      <td>1 360</td>
+                      <td>{{workshift.cost_sum}}</td>
                     </tr>
                     <tr>
                       <td>Сумма ошибок</td>
-                      <td>3 470</td>
+                      <td>{{workshift.game_zone_error}}</td>
                     </tr>
                     <tr>
                       <td>Сумма наличных</td>
-                      <td>9 850</td>
+                      <td>{{workshift.cash_sum}}</td>
                     </tr>
                     <tr>
                       <td>Сумма на сдачу</td>
-                      <td>2 000</td>
+                      <td>{{workshift.short_change_sum}}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -141,24 +156,16 @@
             <th>Сумма в рублях</th>
           </thead>
           <tbody>
-            <tr>
-              <td>15:07</td>
-              <td>11365</td>
-              <td>Ошибка с Fifa, не запускалась, перекинул время с 5 каб на 6, в 5 настраивали с Антоном</td>
-              <td>350</td>
-            </tr>
-            <tr>
-              <td>15:07</td>
-              <td>11365</td>
-              <td>Ошибка с Fifa, не запускалась, перекинул время с 5 каб на 6, в 5 настраивали с Антоном</td>
-              <td>350</td>
-            </tr>
-            <tr>
-              <td>15:07</td>
-              <td>11365</td>
-              <td>Ошибка с Fifa, не запускалась, перекинул время с 5 каб на 6, в 5 настраивали с Антоном</td>
-              <td>350</td>
-            </tr>
+            {% for error in workshift.errors.all %}
+              {% if error.error_type == 'KNA' %}
+              <tr>
+                <td>{{ error.error_time }}</td>
+                <td>{{ error.card }}</td>
+                <td>{{ error.description }}</td>
+                <td>{{ error.error_sum }}</td>
+              </tr>
+              {% endif %}
+            {% endfor %}
           </tbody>
         </table>
       </div>
@@ -174,15 +181,21 @@
           <tbody>
             <tr>
               <td>
-                13:45 - 11456 - 150 р.; 13:45 - 11456 - 150 р.; 13:45 - 11456 - 150 р.;<br>
-                13:45 - 11456 - 150 р.; 13:45 - 11456 - 150 р.; 13:45 - 11456 - 150 р.;<br>
-                13:45 - 11456 - 150 р.; 13:45 - 11456 - 150 р.; 13:45 - 11456 - 150 р.;<br>
+                {% for error in workshift.errors.all %}
+                  {% if error.error_type == 'BURGER' %}
+                  {{ error.error_time }} - {{ error.card }} - {{ error.error_sum }};
+                  {% endif %}
+                {% endfor %}
               </td>
               <td>
-                13:45 - 1756 - 400 р.
+                {% for error in workshift.errors.all %}
+                  {% if error.error_type == 'LOTTO' %}
+                  {{ error.error_time }} - {{ error.card }} - {{ error.error_sum }};
+                  {% endif %}
+                {% endfor %}
               </td>
             </tr>
-            <tr><td>1350 р.</td><td>400 р.</td></tr>
+            <tr><td>- р.</td><td>- р.</td></tr>
           </tbody>
         </table>
       </div>
@@ -193,10 +206,10 @@
         <table class="table table-dark table-report verysmall text-secondary text-start">
           <tbody>
             <tr><td colspan="2">Достоверность и корректность, указанных в отчете сведений, подтверждаю.</td></tr>
-            <tr><td>Смену сдал: Иванов Василь</td><td>Подпись: ____________</td></tr>
-            <tr><td>Смену принял: Сидоров Илья</td><td>Подпись: ____________</td></tr>
+            <tr><td>Смену сдал: {{ workshift.cash_admin.get_full_name }}</td><td>Подпись: ____________</td></tr>
+            <tr><td>Смену принял: {{ workshift.next_cashier.get_full_name }}</td><td>Подпись: ____________</td></tr>
             <tr><td colspan="2"><br></td></tr>
-            <tr><td>Смену закрыл и проверил: Смирнова Екатерина</td><td>Подпись: ____________</td></tr>
+            <tr><td>Смену закрыл и проверил: _____________________________________________________________</td><td>Подпись: ____________</td></tr>
           </tbody>
         </table>
       </div>

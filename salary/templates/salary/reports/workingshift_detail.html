@@ -121,6 +121,16 @@
               </td>
             </tr>
             <tr>
+              <td>Технический отчет:</td>
+              <td>
+              {% if workshift.technical_report %}
+              <i class="fa-solid fa-circle-check text-success"></i>
+              {% else %}
+              <i class="fa-solid fa-circle-xmark text-danger"></i>
+              {% endif %}
+              </td>
+            </tr>
+            <tr>
               <td>Недостача:</td>
               <td>{{ workshift.shortage }}</td>
             </tr>
@@ -236,7 +246,7 @@
     <div class="row text-center">
       {% if perms.salary.advanced_change_workshift and perms.salary.delete_workingshift %}
       <div class="col">
-        <a title="Печать" class="btn btn-light verysmall text-dark" href="{% url 'edit_workshift' workshift.slug %}?next={{ request.path }}">
+        <a title="Печать" class="btn btn-light verysmall text-dark" href="{% url 'everyday_report_print' workshift.slug %}?next={{ request.path }}">
           <i class="fa-solid fa-print"></i>
           Печать отчёта
         </a>
@@ -261,7 +271,7 @@
         </a>
       </div>
       <div class="col">
-        <a title="Печать" class="btn btn-light verysmall text-dark" href="{% url 'edit_workshift' workshift.slug %}?next={{ request.path }}">
+        <a title="Печать" class="btn btn-light verysmall text-dark" href="{% url 'everyday_report_print' workshift.slug %}?next={{ request.path }}">
           <i class="fa-solid fa-print"></i>
           Печать отчёта
         </a>

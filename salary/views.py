@@ -1171,10 +1171,12 @@ class AwardRatingView(MonthlyReportListView):
         return context
 
 
-class EverydayReportView(TitleMixin, TemplateView):
+class EverydayReportPrintView(PermissionRequiredMixin, TitleMixin, DetailView):
     template_name: str = 'salary/reports/everyday_report_print.html'
+    permission_required = 'salary.change_workingshift'
     title = 'Ежедневный отчет'
-
+    model = WorkingShift
+    context_object_name = 'workshift'
 
 class AddCostErrorFormView(PermissionRequiredMixin, TitleMixin,
                              TemplateView):
