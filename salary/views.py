@@ -557,6 +557,7 @@ class ShowUserProfile(LoginRequiredMixin, TitleMixin, DetailView):
 class WorkshiftDetailView(ProfileStatusRedirectMixin, PermissionRequiredMixin,
                             TitleMixin, DetailView):
     model = WorkingShift
+    template_name = 'salary/reports/workingshift_detail.html'
     title = 'Детальный просмотр смены'
     permission_required = 'salary.view_workingshift'
     queryset = WorkingShift.objects.select_related(
@@ -1185,12 +1186,13 @@ class AddCostErrorFormView(PermissionRequiredMixin, TitleMixin,
 
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
         context = super().get_context_data(**kwargs)
-        costs = Cost.objects.all()
-        errors = ErrorKNA.objects.all()
         try:
             workshift = WorkingShift.objects.get(pk=self.kwargs['pk'])
         except WorkingShift.DoesNotExist:
             raise Http404
+        costs = Cost.objects.filter(workshift=workshift)
+        errors = ErrorKNA.objects.filter(
+            workshift=workshift).order_by('error_type')
         context.update({
             'error_kna_form': self.error_kna_form(
                 initial={'workshift': workshift}),
