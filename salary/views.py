@@ -1178,6 +1178,22 @@ class EverydayReportPrintView(PermissionRequiredMixin, TitleMixin, DetailView):
     model = WorkingShift
     context_object_name = 'workshift'
 
+    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        burger_sum = self.object.errors.filter(
+            error_type=ErrorKNA.ErrorType.BURGER).aggregate(
+                Sum('error_sum'))
+        lotto_sum = self.object.errors.filter(
+            error_type=ErrorKNA.ErrorType.LOTTO).aggregate(
+                Sum('error_sum'))
+        context.update({
+            'burger_sum': burger_sum.get('error_sum__sum'),
+            'lotto_sum': lotto_sum.get('error_sum__sum'),
+            'yesterday': self.object.shift_date - datetime.timedelta(days=1),
+        })
+        return context
+
+
 class AddCostErrorFormView(PermissionRequiredMixin, TitleMixin,
                              TemplateView):
     template_name: str = 'salary/reports/add_costs_and_error_form.html'

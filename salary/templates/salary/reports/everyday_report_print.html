@@ -7,20 +7,20 @@
     <div class="row mt-1">
       <div class="col text-center text-secondary">
         Ежедневный отчет по смене<br>
-        <b>{{ workshift.shift_date }}</b>
+        <b>{{ yesterday|date:"d.m.Y" }} - {{ workshift.shift_date|date:"d.m.Y" }}</b>
       </div>
     </div>
     <div class="row mb-1">
       <div class="col text-center verysmall">
         <table class="table table-dark table-report text-secondary table-bordered">
           <thead>
-            <th>Дата закрытия смены:</th>
+            <th>Смена закрыта:</th>
             <th>Смену сдали:</th>
           </thead>
           <tbody>
             <tr>
               <td>
-               {{object.shift_date|date:"d.m.Y"}}<br><br>
+               {{workshift.shift_date}}<br><br>
                 Технический отчет:
                 {% if workshift.technical_report %}
                 сдан
@@ -195,7 +195,7 @@
                 {% endfor %}
               </td>
             </tr>
-            <tr><td>- р.</td><td>- р.</td></tr>
+            <tr><td>{{burger_sum|default:"0"}} р.</td><td>{{lotto_sum|default:"0"}} р.</td></tr>
           </tbody>
         </table>
       </div>
@@ -209,7 +209,7 @@
             <tr><td>Смену сдал: {{ workshift.cash_admin.get_full_name }}</td><td>Подпись: ____________</td></tr>
             <tr><td>Смену принял: {{ workshift.next_cashier.get_full_name }}</td><td>Подпись: ____________</td></tr>
             <tr><td colspan="2"><br></td></tr>
-            <tr><td>Смену закрыл и проверил: _____________________________________________________________</td><td>Подпись: ____________</td></tr>
+            <tr><td>Смену закрыл и проверил: </td><td>Подпись: ____________</td></tr>
           </tbody>
         </table>
       </div>
