@@ -444,7 +444,7 @@ class Message(models.Model):
 class ErrorKNA(models.Model):
     class ErrorType(models.TextChoices):
         KNA = 'KNA', 'Ошибка по КНА'
-        BURGER = 'BURGER', 'Бургер'
+        GRILL = 'GRILL', 'Гриль'
         LOTTO = 'LOTTO', 'Лото'
     error_type = models.CharField(
         max_length=20, choices=ErrorType.choices, default=ErrorType.KNA,

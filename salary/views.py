@@ -1180,14 +1180,14 @@ class EverydayReportPrintView(PermissionRequiredMixin, TitleMixin, DetailView):
 
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
         context = super().get_context_data(**kwargs)
-        burger_sum = self.object.errors.filter(
-            error_type=ErrorKNA.ErrorType.BURGER).aggregate(
+        grill_sum = self.object.errors.filter(
+            error_type=ErrorKNA.ErrorType.GRILL).aggregate(
                 Sum('error_sum'))
         lotto_sum = self.object.errors.filter(
             error_type=ErrorKNA.ErrorType.LOTTO).aggregate(
                 Sum('error_sum'))
         context.update({
-            'burger_sum': burger_sum.get('error_sum__sum'),
+            'grill_sum': grill_sum.get('error_sum__sum'),
             'lotto_sum': lotto_sum.get('error_sum__sum'),
             'yesterday': self.object.shift_date - datetime.timedelta(days=1),
         })

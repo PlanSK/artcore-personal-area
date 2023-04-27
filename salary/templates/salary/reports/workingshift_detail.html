@@ -198,7 +198,7 @@
     </div>
     <div class="row row-cols-md-2 row-cols-sm-1 mt-1 justify-content-center rounded border border-light">
       <div class="col col-md-6 col-sm-auto">
-        <h5 class="text-center">Данные по бургерам (включено в ошибки)</h5>
+        <h5 class="text-center">Данные по грилю (включено в ошибки)</h5>
         <table class="table table-dark verysmall">
           <thead class="text-warning text-center">
             <th>Время по КНА</th>
@@ -207,7 +207,7 @@
           </thead>
           <tbody class="text-center">
             {% for error in workshift.errors.all %}
-              {% if error.error_type == 'BURGER' %}
+              {% if error.error_type == 'GRILL' %}
               <tr><td>{{ error.error_time }}</td><td>{{ error.card }}</td><td>{{ error.error_sum }}</td></tr>
               {% endif %}
             {% endfor %}

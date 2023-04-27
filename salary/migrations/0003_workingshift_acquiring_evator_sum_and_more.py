@@ -72,7 +72,7 @@ class Migration(migrations.Migration):
             name='ErrorKNA',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('error_type', models.CharField(choices=[('KNA', 'Ошибка по КНА'), ('BURGER', 'Бургер'), ('LOTTO', 'Лото')], default='KNA', max_length=20, verbose_name='Тип ошибки')),
+                ('error_type', models.CharField(choices=[('KNA', 'Ошибка по КНА'), ('GRILL', 'Гриль'), ('LOTTO', 'Лото')], default='KNA', max_length=20, verbose_name='Тип ошибки')),
                 ('error_time', models.TimeField(verbose_name='Время ошибки')),
                 ('card', models.CharField(max_length=128, verbose_name='Номер компьютера или карты')),
                 ('error_sum', models.FloatField(default=0.0, verbose_name='Сумма ошибки')),

@@ -172,7 +172,7 @@
     </div>
     <div class="row mb-1">
       <div class="col text-center verysmall text-secondary">
-        <b>Данные о бургерах, лото</b>
+        <b>Данные о гриле, лото</b>
         <table class="table table-dark table-report verysmall text-secondary table-bordered">
           <thead>
             <th>Бургеры<br>(время, номер карты, сумма)</th>
@@ -182,7 +182,7 @@
             <tr>
               <td>
                 {% for error in workshift.errors.all %}
-                  {% if error.error_type == 'BURGER' %}
+                  {% if error.error_type == 'GRILL' %}
                   {{ error.error_time }} - {{ error.card }} - {{ error.error_sum }};
                   {% endif %}
                 {% endfor %}
@@ -195,7 +195,7 @@
                 {% endfor %}
               </td>
             </tr>
-            <tr><td>{{burger_sum|default:"0"}} р.</td><td>{{lotto_sum|default:"0"}} р.</td></tr>
+            <tr><td>{{grill_sum|default:"0"}} р.</td><td>{{lotto_sum|default:"0"}} р.</td></tr>
           </tbody>
         </table>
       </div>
