@@ -1199,6 +1199,7 @@ class AddCostErrorFormView(PermissionRequiredMixin, TitleMixin,
     template_name: str = 'salary/reports/add_costs_and_error_form.html'
     error_kna_form = ErrorKNAForm
     cost_form = CostForm
+    cabinerror_form = CabinErrorForm
     permission_required = 'salary.change_workingshift'
     title = 'Добавление ошибок и расходов'
 
@@ -1211,13 +1212,18 @@ class AddCostErrorFormView(PermissionRequiredMixin, TitleMixin,
         costs = Cost.objects.filter(workshift=workshift)
         errors = ErrorKNA.objects.filter(
             workshift=workshift).order_by('error_type')
+        cabin_errors_list = CabinError.objects.filter(workshift=workshift)
         context.update({
             'error_kna_form': self.error_kna_form(
                 initial={'workshift': workshift}),
             'workshift_pk': workshift.pk,
             'cost_form': self.cost_form(initial={'workshift': workshift}),
+            'cabinerror_form': self.cabinerror_form(
+                initial={'workshift': workshift}
+            ),
             'costs_list': costs,
-            'errors_list': errors
+            'errors_list': errors,
+            'cabin_errors_list': cabin_errors_list,
         })
         return context
 
@@ -1230,6 +1236,10 @@ class CreateCostRedirectView(CreateObjectRedirectView):
     object_form = CostForm
 
 
+class CreateCabinErrorRedirectView(CreateObjectRedirectView):
+    object_form = CabinErrorForm
+
+
 class ErrorDeleteView(SuccessUrlMixin, PermissionRequiredMixin, DeleteView):
     permission_required = 'salary.change_workingshift'
     model = ErrorKNA
@@ -1237,6 +1247,10 @@ class ErrorDeleteView(SuccessUrlMixin, PermissionRequiredMixin, DeleteView):
 
 class CostDeleteView(ErrorDeleteView):
     model = Cost
+
+
+class CabinErrorDeleteView(ErrorDeleteView):
+    model = CabinError
 
 
 class CostUpdateView(SuccessUrlMixin, PermissionRequiredMixin, UpdateView):
@@ -1248,6 +1262,11 @@ class CostUpdateView(SuccessUrlMixin, PermissionRequiredMixin, UpdateView):
 class ErrorUpdateView(CostUpdateView):
     model = ErrorKNA
     form_class = ErrorKNAForm
+
+
+class CabinErrorUpdateView(CostUpdateView):
+    model = CabinError
+    form_class = CabinErrorForm
 
 
 @login_required

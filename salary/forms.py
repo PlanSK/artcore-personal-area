@@ -267,18 +267,9 @@ class EditMisconductForm(forms.ModelForm):
 class ErrorKNAForm(forms.ModelForm):
     class Meta:
         model = ErrorKNA
-        fields = (
-            'error_type',
-            'error_time',
-            'card',
-            'error_sum',
-            'description',
-            'workshift',
-        )
+        fields = '__all__'
         widgets = {
-            'error_time': forms.TimeInput(attrs={
-                'type': 'time',
-            }),
+            'error_time': forms.TimeInput(attrs={'type': 'time'}),
             'workshift': forms.HiddenInput(),
         }
 
@@ -291,12 +282,17 @@ class CostForm(forms.ModelForm):
 
     class Meta:
         model = Cost
-        fields = (
-            'cost_sum',
-            'cost_reason',
-            'cost_person',
-            'workshift'
-        )
+        fields = '__all__'
         widgets = {
+            'workshift': forms.HiddenInput(),
+        }
+
+
+class CabinErrorForm(forms.ModelForm):
+    class Meta:
+        model = CabinError
+        fields = '__all__'
+        widgets = {
+            'time': forms.TimeInput(attrs={'type': 'time'}),
             'workshift': forms.HiddenInput(),
         }

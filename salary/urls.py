@@ -67,9 +67,12 @@ urlpatterns = [
     path('costs_and_errors_form/<int:pk>/', AddCostErrorFormView.as_view(), name='costs_and_errors_form'),
     path('add_kna_error/', CreateErrorRedirectView.as_view(), name='add_kna_error'),
     path('add_cost_to_report/', CreateCostRedirectView.as_view(), name='add_cost_to_report'),
+    path('add_cabinerror_to_report/', CreateCabinErrorRedirectView.as_view(), name='add_cabinerror_to_report'),
     path('del_cost_from_report/<int:pk>/', CostDeleteView.as_view(), name='del_cost_from_report'),
     path('del_error_from_report/<int:pk>/', ErrorDeleteView.as_view(), name='del_error_from_report'),
+    path('del_cabinerror_from_report/<int:pk>/', CabinErrorDeleteView.as_view(), name='del_cabinerror_from_report'),
     path('update_cost_in_report/<int:pk>/', CostUpdateView.as_view(), name='update_cost_in_report'),
     path('update_error_in_report/<int:pk>/', ErrorUpdateView.as_view(), name='update_error_in_report'),
+    path('update_cabinerror_in_report/<int:pk>/', CabinErrorUpdateView.as_view(), name='update_cabinerror_in_report'),
     path('redirect_to_workshift/<int:pk>/', save_workshift_and_redirect, name='redirect_to_workshift'),
 ]

@@ -466,3 +466,15 @@ class Cost(models.Model):
                                     verbose_name='Кто потратил')
     workshift = models.ForeignKey(WorkingShift, on_delete=models.CASCADE,
                                   related_name='costs')
+
+
+class CabinError(models.Model):
+    time = models.TimeField(verbose_name='Время ошибки')
+    cabin_number = models.IntegerField(choices=((i, '№ '+ str(i))
+                                                for i in range(1,7)),
+                                       verbose_name='Номер кабинки')
+    description = models.CharField(max_length=255, verbose_name='Причина')
+    error_interval = models.CharField(max_length=255,
+                                      verbose_name='Ошибочное время')
+    workshift = models.ForeignKey(WorkingShift, on_delete=models.CASCADE,
+                                  related_name='cabin_error')

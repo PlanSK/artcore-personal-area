@@ -15,7 +15,7 @@
     </div>
     {% endif %}
     <div class="row justify-content-center">
-      <div class="col col-md-4 border rounded me-2 mt-1 text-center">
+      <div class="col col-md-3 border rounded me-1 mt-1 text-center">
         <h5>Добавление ошибок KNA</h5>
         <form method="post" action="{% url 'add_kna_error' %}">
           {% csrf_token %}
@@ -24,13 +24,22 @@
           <input type="submit" value="Add error">
         </form>
       </div>
-      <div class="col col-md-4 border mt-1 rounded text-center">
+      <div class="col col-md-3 border mt-1 me-1 rounded text-center">
         <h5>Добавление расходов</h5>
         <form method="post" action="{% url 'add_cost_to_report' %}">
           {% csrf_token %}
           {{ cost_form|crispy }}
           <input type="hidden" name="next" value="{{ request.path }}">
           <input type="submit" value="Add cost">
+        </form>
+      </div>
+      <div class="col col-md-3 border mt-1 rounded text-center">
+        <h5>Добавление ошибок по кабинкам</h5>
+        <form method="post" action="{% url 'add_cabinerror_to_report' %}">
+          {% csrf_token %}
+          {{ cabinerror_form|crispy }}
+          <input type="hidden" name="next" value="{{ request.path }}">
+          <input type="submit" value="Add cabin error">
         </form>
       </div>
     </div>
@@ -86,6 +95,36 @@
             <td>
               <a href="{% url 'update_error_in_report' pk=error.pk %}?next={{ request.path }}" class="link-warning">Изменить</a> |
               <a href="{% url 'del_error_from_report' pk=error.pk %}?next={{ request.path }}" class="link-danger">Удалить</a>
+            </td>
+          </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% endif %}
+    {% if cabin_errors_list %}
+    <div class="row justify-content-center border-top mt-1">
+      <div class="col col-md-12 text-center">
+        <h5>Ошибки по кабинкам</h5>
+        <table class="table table-dark table-report text-secondary table-bordered">
+          <thead>
+            <th>Время ошибки</th>
+            <th>№ кабинки</th>
+            <th>Причина</th>
+            <th>Ошибочное время</th>
+            <th></th>
+          </thead>
+          <tbody class="text-light">
+          {% for error in cabin_errors_list %}
+          <tr>
+            <td>{{error.time}}</td>
+            <td>{{error.cabin_number}}</td>
+            <td>{{error.description}}</td>
+            <td>{{error.error_interval}}</td>
+            <td>
+              <a href="{% url 'update_cabinerror_in_report' pk=error.pk %}?next={{ request.path }}" class="link-warning">Изменить</a> |
+              <a href="{% url 'del_cabinerror_from_report' pk=error.pk %}?next={{ request.path }}" class="link-danger">Удалить</a>
             </td>
           </tr>
           {% endfor %}
