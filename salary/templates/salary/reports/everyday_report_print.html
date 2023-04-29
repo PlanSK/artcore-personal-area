@@ -138,8 +138,22 @@
             <th>Пожелания/примечания</th>
           </thead>
           <tr>
-            <td class="text-secondary"><br><br><br><br></td>
             <td>
+              <table class="table table-dark">
+                <tbody class="text-secondary">
+                  {% for cabin_error in workshift.cabin_error.all %}
+                  <tr>
+                    <td>{{cabin_error.time}}</td>
+                    <td>{{cabin_error.get_cabin_number_display}}</td>
+                    <td>{{cabin_error.description}}</td>
+                    <td>{{cabin_error.error_interval}}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </td>
+            <td>
+              <br><br><br><br>
             </td>
           </tr>
         </table>

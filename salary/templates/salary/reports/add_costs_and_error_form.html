@@ -34,7 +34,7 @@
         </form>
       </div>
       <div class="col col-md-3 border mt-1 rounded text-center">
-        <h5>Добавление ошибок по кабинкам</h5>
+        <h5>Добавление <br>ошибок по кабинкам</h5>
         <form method="post" action="{% url 'add_cabinerror_to_report' %}">
           {% csrf_token %}
           {{ cabinerror_form|crispy }}
