@@ -110,21 +110,21 @@
         <table class="table table-dark table-report text-secondary table-bordered">
           <thead>
             <th>Время ошибки</th>
-            <th>№ кабинки</th>
+            <th>Кабинка</th>
             <th>Причина</th>
             <th>Ошибочное время</th>
             <th></th>
           </thead>
           <tbody class="text-light">
-          {% for error in cabin_errors_list %}
+          {% for cabin_error in cabin_errors_list %}
           <tr>
-            <td>{{error.time}}</td>
-            <td>{{error.cabin_number}}</td>
-            <td>{{error.description}}</td>
-            <td>{{error.error_interval}}</td>
+            <td>{{cabin_error.time}}</td>
+            <td>{{cabin_error.get_cabin_number_display}}</td>
+            <td>{{cabin_error.description}}</td>
+            <td>{{cabin_error.error_interval}}</td>
             <td>
-              <a href="{% url 'update_cabinerror_in_report' pk=error.pk %}?next={{ request.path }}" class="link-warning">Изменить</a> |
-              <a href="{% url 'del_cabinerror_from_report' pk=error.pk %}?next={{ request.path }}" class="link-danger">Удалить</a>
+              <a href="{% url 'update_cabinerror_in_report' pk=cabin_error.pk %}?next={{ request.path }}" class="link-warning">Изменить</a> |
+              <a href="{% url 'del_cabinerror_from_report' pk=cabin_error.pk %}?next={{ request.path }}" class="link-danger">Удалить</a>
             </td>
           </tr>
           {% endfor %}

@@ -105,8 +105,8 @@
         </table>
       </div>
     </div>
-    <div class="row row-cols-md-2 row-cols-sm-1 mt-1 justify-content-center rounded border border-light">
-      <div class="col-md-4 col-sm-auto table-responsive">
+    <div class="row row-cols-md-3 row-cols-sm-1 mt-1 justify-content-center rounded border border-light">
+      <div class="col col-md-2 col-sm-auto table-responsive">
         <h5 class="text-center">Прочие данные</h5>
         <table class="table table-dark">
           <tbody class="verysmall">
@@ -154,7 +154,30 @@
           </tbody>
         </table>
       </div>
-      <div class="col col-md-8 col-sm-auto border-start border-secondary">
+      <div class="col col-md-6 col-sm-auto border-start border-secondary">
+        <h5 class="text-center">Ошибки по кабинкам</h5>
+        {% if workshift.cabin_error.all %}
+        <table class="table table-dark">
+          <thead class="verysmall text-warning">
+              <th>Время</th>
+              <th>Кабинка</th>
+              <th>Причина</th>
+              <th>Ошибочное время</th>
+          </thead>
+          <tbody class="verysmall">
+            {% for cabin_error in workshift.cabin_error.all %}
+              <tr>
+                <td>{{cabin_error.time}}</td>
+                <td>{{cabin_error.get_cabin_number_display}}</td>
+                <td>{{cabin_error.description}}</td>
+                <td>{{cabin_error.error_interval}}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% endif %}
+      </div>
+      <div class="col col-md-4 col-sm-auto border-start border-secondary">
         {% if workshift.costs.all %}
         <h5 class="text-center">Данные по расходам</h5>
         <table class="table table-dark verysmall">
