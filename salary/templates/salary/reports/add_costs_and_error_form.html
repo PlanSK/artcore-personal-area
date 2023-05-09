@@ -1,0 +1,144 @@
+{% extends 'salary/logined_page.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<main>
+  <div class="container verysmall">
+    {% if not costs_list and not errors_list %}
+    <div class="row justify-content-center">
+      <div class="col col-md-8 col-sm-auto mt-1">
+        <div class="alert alert-warning text-center" role="alert">
+          Внимание! После добавления сведений по расходам и ошибкам, общие суммы будут пересчитаны автоматически. <br>
+          <b>Данные, указанные вручную, будут безвозвратно утеряны!</b>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+    <div class="row justify-content-center">
+      <div class="col col-md-3 border rounded me-1 mt-1 text-center">
+        <h5>Добавление ошибок KNA</h5>
+        <form method="post" action="{% url 'add_kna_error' %}">
+          {% csrf_token %}
+          {{ error_kna_form|crispy }}
+          <input type="hidden" name="next" value="{{ request.path }}">
+          <input type="submit" value="Add error">
+        </form>
+      </div>
+      <div class="col col-md-3 border mt-1 me-1 rounded text-center">
+        <h5>Добавление расходов</h5>
+        <form method="post" action="{% url 'add_cost_to_report' %}">
+          {% csrf_token %}
+          {{ cost_form|crispy }}
+          <input type="hidden" name="next" value="{{ request.path }}">
+          <input type="submit" value="Add cost">
+        </form>
+      </div>
+      <div class="col col-md-3 border mt-1 rounded text-center">
+        <h5>Добавление <br>ошибок по кабинкам</h5>
+        <form method="post" action="{% url 'add_cabinerror_to_report' %}">
+          {% csrf_token %}
+          {{ cabinerror_form|crispy }}
+          <input type="hidden" name="next" value="{{ request.path }}">
+          <input type="submit" value="Add cabin error">
+        </form>
+      </div>
+    </div>
+    {% if costs_list %}
+    <div class="row justify-content-center border-top mt-1">
+      <div class="col col-md-12 text-center">
+        <h5>Расходы</h5>
+        <table class="table table-dark table-report text-secondary table-bordered">
+          <thead>
+            <th>Сумма</th>
+            <th>Причина</th>
+            <th>Ответственное лицо</th>
+            <th></th>
+          </thead>
+          <tbody class="text-light">
+          {% for cost in costs_list %}
+          <tr>
+            <td>{{cost.cost_sum}}</td>
+            <td>{{cost.cost_reason}}</td>
+            <td>{{cost.cost_person.get_full_name}}</td>
+            <td>
+              <a href="{% url 'update_cost_in_report' pk=cost.pk %}?next={{ request.path }}" class="link-warning">Изменить</a> |
+              <a href="{% url 'del_cost_from_report' pk=cost.pk %}?next={{ request.path }}" class="link-danger">Удалить</a>
+            </td>
+          </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% endif %}
+    {% if errors_list %}
+    <div class="row justify-content-center border-top mt-1">
+      <div class="col col-md-12 text-center">
+        <h5>Ошибки</h5>
+        <table class="table table-dark table-report text-secondary table-bordered">
+          <thead>
+            <th>Тип ошибки</th>
+            <th>Время</th>
+            <th>Номер карты</th>
+            <th>Сумма</th>
+            <th>Описание</th>
+            <th></th>
+          </thead>
+          <tbody class="text-light">
+          {% for error in errors_list %}
+          <tr>
+            <td>{{error.get_error_type_display}}</td>
+            <td>{{error.error_time}}</td>
+            <td>{{error.card}}</td>
+            <td>{{error.error_sum}}</td>
+            <td>{{error.description|default:""}}</td>
+            <td>
+              <a href="{% url 'update_error_in_report' pk=error.pk %}?next={{ request.path }}" class="link-warning">Изменить</a> |
+              <a href="{% url 'del_error_from_report' pk=error.pk %}?next={{ request.path }}" class="link-danger">Удалить</a>
+            </td>
+          </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% endif %}
+    {% if cabin_errors_list %}
+    <div class="row justify-content-center border-top mt-1">
+      <div class="col col-md-12 text-center">
+        <h5>Ошибки по кабинкам</h5>
+        <table class="table table-dark table-report text-secondary table-bordered">
+          <thead>
+            <th>Время ошибки</th>
+            <th>Кабинка</th>
+            <th>Причина</th>
+            <th>Ошибочное время</th>
+            <th></th>
+          </thead>
+          <tbody class="text-light">
+          {% for cabin_error in cabin_errors_list %}
+          <tr>
+            <td>{{cabin_error.time}}</td>
+            <td>{{cabin_error.get_cabin_number_display}}</td>
+            <td>{{cabin_error.description}}</td>
+            <td>{{cabin_error.error_interval}}</td>
+            <td>
+              <a href="{% url 'update_cabinerror_in_report' pk=cabin_error.pk %}?next={{ request.path }}" class="link-warning">Изменить</a> |
+              <a href="{% url 'del_cabinerror_from_report' pk=cabin_error.pk %}?next={{ request.path }}" class="link-danger">Удалить</a>
+            </td>
+          </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% endif %}
+    <div class="row justify-content-center border-top mt-1">
+      <div class="col col-md-6 text-center border rounded m-1 p-1">
+        Достоверность и корректность, указанных в отчете сведений, подтверждаю. <br>
+        <a href="{% url 'redirect_to_workshift' pk=workshift_pk %}" class="btn btn-success btn-sm">Закончить подачу данных</a>
+      </div>
+    </div>
+  </div>
+</main>
+{% endblock %}

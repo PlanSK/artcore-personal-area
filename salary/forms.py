@@ -121,15 +121,25 @@ class EmplModelChoiceField(forms.ModelChoiceField):
 
 
 class EditWorkshiftDataForm(forms.ModelForm):
+    base_queryset = User.objects.filter(is_active=True)
+    hall_admin_queryset = base_queryset.filter(profile__position__in=[1, 4])
+    cashier_queryset = base_queryset.filter(profile__position__in=[2, 4])
+    
     hall_admin = EmplModelChoiceField(
-        queryset=User.objects.filter(is_active=True,
-                                     profile__position__in=[1, 4]),
+        queryset=hall_admin_queryset,
         label='Администратор зала',
     )
     cash_admin = EmplModelChoiceField(
-        queryset=User.objects.filter(is_active=True,
-                                     profile__position__in=[2, 4]),
+        queryset=cashier_queryset,
         label='Администратор кассы',
+    )
+    next_hall_admin = EmplModelChoiceField(
+        queryset=hall_admin_queryset,
+        label='Прибывшая смена (Администратор)',
+    )
+    next_cashier = EmplModelChoiceField(
+        queryset=cashier_queryset,
+        label='Прибывшая смена (Кассир)',
     )
 
     class Meta:
@@ -139,33 +149,35 @@ class EditWorkshiftDataForm(forms.ModelForm):
             'cash_admin',
             'bar_revenue',
             'game_zone_revenue',
-            'game_zone_error',
             'additional_services_revenue',
             'hookah_revenue',
-        ]
-        if settings.PUBLICATION_ENABLED:
-            fields.append('publication_link')
-
-
-class AddWorkshiftDataForm(EditWorkshiftDataForm):
-
-    class Meta:
-        model = WorkingShift
-        fields = [
-            'hall_admin',
-            'cash_admin',
-            'shift_date',
-            'bar_revenue',
-            'game_zone_revenue',
-            'game_zone_error',
-            'additional_services_revenue',
-            'hookah_revenue',
+            'next_hall_admin',
+            'next_cashier',
+            'hall_admin_arrival_time',
+            'cashier_arrival_time',
+            'acquiring_evator_sum',
+            'acquiring_terminal_sum',
+            'cash_sum',
+            'short_change_sum',
+            'technical_report',
         ]
         if settings.PUBLICATION_ENABLED:
             fields.append('publication_link')
         widgets = {
             'shift_date': forms.DateInput(attrs={'type': 'date'}),
+            'hall_admin_arrival_time': forms.TimeInput(
+                attrs={'type': 'time',}),
+            'cashier_arrival_time': forms.TimeInput(
+                attrs={'type': 'time',}),
         }
+
+
+class AddWorkshiftDataForm(EditWorkshiftDataForm):
+    technical_report = forms.BooleanField(label='Технический ответ в наличии',
+                                          required=True)
+    class Meta(EditWorkshiftDataForm.Meta):
+        fields = ['shift_date']
+        fields.extend(EditWorkshiftDataForm.Meta.fields)
 
     def clean(self):
         cleaned_data = super().clean()
@@ -189,34 +201,18 @@ class AddWorkshiftDataForm(EditWorkshiftDataForm):
 
 
 class StaffEditWorkshiftForm(EditWorkshiftDataForm):
-    hall_admin = EmplModelChoiceField(
-        queryset=User.objects.filter(profile__position__in=[1, 4]),
-        label='Администратор зала',
-    )
-    cash_admin = EmplModelChoiceField(
-        queryset=User.objects.filter(profile__position__in=[2, 4]),
-        label='Администратор кассы',
-    )
-    class Meta:
-        model = WorkingShift
-        fields = [
-            'hall_admin',
-            'cash_admin',
-            'bar_revenue',
-            'game_zone_revenue',
-            'game_zone_error',
-            'additional_services_revenue',
-            'hookah_revenue',
-            'hall_cleaning',
+    class Meta(EditWorkshiftDataForm.Meta):
+        fields = EditWorkshiftDataForm.Meta.fields
+        if settings.PUBLICATION_ENABLED:
+            fields.append('publication_is_verified')
+        fields.extend([
             'shortage',
             'shortage_paid',
             'comment_for_cash_admin',
             'comment_for_hall_admin',
+            'hall_cleaning',
             'status',
-        ]
-        if settings.PUBLICATION_ENABLED:
-            fields.extend(['publication_link', 'publication_is_verified'])
-
+        ])
 
 class AddMisconductForm(forms.ModelForm):
     intruder = EmplModelChoiceField(
@@ -266,3 +262,37 @@ class EditMisconductForm(forms.ModelForm):
             'comment',
             'status',
         )
+
+
+class ErrorKNAForm(forms.ModelForm):
+    class Meta:
+        model = ErrorKNA
+        fields = '__all__'
+        widgets = {
+            'error_time': forms.TimeInput(attrs={'type': 'time'}),
+            'workshift': forms.HiddenInput(),
+        }
+
+
+class CostForm(forms.ModelForm):
+    cost_person = EmplModelChoiceField(
+        queryset=User.objects.filter(is_active=True, is_staff=False),
+        label='Кто потратил',
+    )
+
+    class Meta:
+        model = Cost
+        fields = '__all__'
+        widgets = {
+            'workshift': forms.HiddenInput(),
+        }
+
+
+class CabinErrorForm(forms.ModelForm):
+    class Meta:
+        model = CabinError
+        fields = '__all__'
+        widgets = {
+            'time': forms.TimeInput(attrs={'type': 'time'}),
+            'workshift': forms.HiddenInput(),
+        }

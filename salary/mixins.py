@@ -8,7 +8,8 @@ from django.urls import reverse_lazy
 from django.utils import timezone
 from django.contrib.auth.mixins import AccessMixin
 from django.shortcuts import redirect, render
-from django.views.generic.base import View
+from django.views.generic.base import View, RedirectView
+from django.forms import BaseForm
 
 from .models import *
 from salary.services.utils import logging_exception
@@ -112,3 +113,15 @@ class CatchingExceptionsMixin(View):
             raise
         else:
             return response
+
+
+class CreateObjectRedirectView(PermissionRequiredMixin, RedirectView):
+    permission_required = 'salary.change_workingshift'
+    object_form = BaseForm
+    def post(self, request: HttpRequest, *args: Any,
+             **kwargs: Any) -> HttpResponse:
+        object_form = self.object_form(request.POST)
+        next = request.POST.get('next', '/')
+        if object_form.is_valid():
+            object_form.save()
+        return redirect(next)

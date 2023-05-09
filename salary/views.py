@@ -13,7 +13,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.models import Permission
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
-from django.views.generic.edit import CreateView, DeleteView, UpdateView
+from django.views.generic.edit import CreateView, DeleteView, UpdateView, FormView
 from django.views.generic.base import RedirectView
 from django.db.models import Q, QuerySet, Sum, Avg
 
@@ -557,6 +557,7 @@ class ShowUserProfile(LoginRequiredMixin, TitleMixin, DetailView):
 class WorkshiftDetailView(ProfileStatusRedirectMixin, PermissionRequiredMixin,
                             TitleMixin, DetailView):
     model = WorkingShift
+    template_name = 'salary/reports/workingshift_detail.html'
     title = 'Детальный просмотр смены'
     permission_required = 'salary.view_workingshift'
     queryset = WorkingShift.objects.select_related(
@@ -859,8 +860,7 @@ class DocumentsList(LoginRequiredMixin, TitleMixin, TemplateView):
     title = 'Список документов'
 
 
-class AddWorkshiftData(PermissionRequiredMixin, TitleMixin, SuccessUrlMixin,
-                        CreateView):
+class AddWorkshiftData(PermissionRequiredMixin, TitleMixin, CreateView):
     form_class = AddWorkshiftDataForm
     permission_required = 'salary.add_workingshift'
     template_name = 'salary/add_workshift.html'
@@ -890,6 +890,10 @@ class AddWorkshiftData(PermissionRequiredMixin, TitleMixin, SuccessUrlMixin,
         object.editor = self.request.user.get_full_name()
         object.slug = object.shift_date
         return super().form_valid(form)
+    
+    def get_success_url(self):
+        return reverse_lazy('costs_and_errors_form',
+                            kwargs={'pk': self.object.pk})
 
 
 class EditWorkshiftData(ProfileStatusRedirectMixin, PermissionRequiredMixin,
@@ -1165,6 +1169,112 @@ class AwardRatingView(MonthlyReportListView):
             'avg_hookah_criteria': settings.AVERAGE_HOOKAH_REVENUE_CRITERIA
         })
         return context
+
+
+class EverydayReportPrintView(PermissionRequiredMixin, TitleMixin, DetailView):
+    template_name: str = 'salary/reports/everyday_report_print.html'
+    permission_required = 'salary.change_workingshift'
+    title = 'Ежедневный отчет'
+    model = WorkingShift
+    context_object_name = 'workshift'
+
+    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        grill_sum = self.object.errors.filter(
+            error_type=ErrorKNA.ErrorType.GRILL).aggregate(
+                Sum('error_sum'))
+        lotto_sum = self.object.errors.filter(
+            error_type=ErrorKNA.ErrorType.LOTTO).aggregate(
+                Sum('error_sum'))
+        context.update({
+            'grill_sum': grill_sum.get('error_sum__sum'),
+            'lotto_sum': lotto_sum.get('error_sum__sum'),
+            'yesterday': self.object.shift_date - datetime.timedelta(days=1),
+        })
+        return context
+
+
+class AddCostErrorFormView(PermissionRequiredMixin, TitleMixin,
+                             TemplateView):
+    template_name: str = 'salary/reports/add_costs_and_error_form.html'
+    error_kna_form = ErrorKNAForm
+    cost_form = CostForm
+    cabinerror_form = CabinErrorForm
+    permission_required = 'salary.change_workingshift'
+    title = 'Добавление ошибок и расходов'
+
+    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        try:
+            workshift = WorkingShift.objects.get(pk=self.kwargs['pk'])
+        except WorkingShift.DoesNotExist:
+            raise Http404
+        costs = Cost.objects.filter(workshift=workshift)
+        errors = ErrorKNA.objects.filter(
+            workshift=workshift).order_by('error_type')
+        cabin_errors_list = CabinError.objects.filter(workshift=workshift)
+        context.update({
+            'error_kna_form': self.error_kna_form(
+                initial={'workshift': workshift}),
+            'workshift_pk': workshift.pk,
+            'cost_form': self.cost_form(initial={'workshift': workshift}),
+            'cabinerror_form': self.cabinerror_form(
+                initial={'workshift': workshift}
+            ),
+            'costs_list': costs,
+            'errors_list': errors,
+            'cabin_errors_list': cabin_errors_list,
+        })
+        return context
+
+
+class CreateErrorRedirectView(CreateObjectRedirectView):
+    object_form = ErrorKNAForm
+
+
+class CreateCostRedirectView(CreateObjectRedirectView):
+    object_form = CostForm
+
+
+class CreateCabinErrorRedirectView(CreateObjectRedirectView):
+    object_form = CabinErrorForm
+
+
+class ErrorDeleteView(SuccessUrlMixin, PermissionRequiredMixin, DeleteView):
+    permission_required = 'salary.change_workingshift'
+    model = ErrorKNA
+
+
+class CostDeleteView(ErrorDeleteView):
+    model = Cost
+
+
+class CabinErrorDeleteView(ErrorDeleteView):
+    model = CabinError
+
+
+class CostUpdateView(SuccessUrlMixin, PermissionRequiredMixin, UpdateView):
+    model = Cost
+    form_class = CostForm
+    permission_required = 'salary.change_workingshift'
+
+
+class ErrorUpdateView(CostUpdateView):
+    model = ErrorKNA
+    form_class = ErrorKNAForm
+
+
+class CabinErrorUpdateView(CostUpdateView):
+    model = CabinError
+    form_class = CabinErrorForm
+
+
+@login_required
+def save_workshift_and_redirect(request, pk):
+    workshift = get_object_or_404(WorkingShift, pk=pk)
+    workshift.status = WorkingShift.WorkshiftStatus.UNVERIFIED
+    workshift.save()
+    return redirect(workshift)
 
 
 def page_not_found(request, exception):

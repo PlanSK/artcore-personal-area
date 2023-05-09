@@ -4,9 +4,23 @@
     <table class="table table-dark">
       <thead class="text-warning text-center verysmall">
         <tr>
-          <th colspan="2">{{workshift.hall_admin.get_full_name}}</th>
+          <th>Комментарий для админинстратора зала</th>
         </tr>
       </thead>
+      <tbody class="verysmall">
+        <tr>
+          {% if workshift.comment_for_hall_admin %}
+          <td class="text-justify">
+            {{ workshift.comment_for_hall_admin|linebreaks }}
+          {% else %}
+          <td class="text-center">-
+          {% endif %}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <h5 class="text-center">Калькуляция для администратора зала</h5>
+    <table class="table table-dark">
       {% if workshift.hall_admin.profile.position.name != 'trainee' %}
       <tbody class="verysmall">
         <tr><td colspan="2" class="text-info text-center">Базовая часть</td></tr>

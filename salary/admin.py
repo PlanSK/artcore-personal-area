@@ -7,6 +7,7 @@ class WorkshiftAdmin(admin.ModelAdmin):
     list_display = ('shift_date', 'hall_admin', 'cash_admin', 'status')
     list_display_links = ('shift_date',)
     search_fields = ('shift_date',)
+    list_filter = ('status',)
 
 class DisciplinaryRegAdmin(admin.ModelAdmin):
     list_display = ('article', 'title', 'sanction')

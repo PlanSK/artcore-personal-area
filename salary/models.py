@@ -167,6 +167,7 @@ class Misconduct(models.Model):
 
 class WorkingShift(models.Model):
     class WorkshiftStatus(models.TextChoices):
+        NOT_CONFIRMED = 'NOT_CONFIRMED', 'Не подтверждена'
         UNVERIFIED = 'UVD', 'Не проверена'
         WAIT_CORRECTION = 'WTC', 'Ожидает исправления'
         VERIFIED = 'VFD', 'Проверена'
@@ -179,6 +180,31 @@ class WorkingShift(models.Model):
     )
     shift_date = models.DateField(
         verbose_name='Дата смены', unique=True, db_index=True
+    )
+    next_hall_admin = models.ForeignKey(
+        User, on_delete=models.SET_NULL, related_name='next_hall_admin',
+        blank=True, null=True
+    )
+    next_cashier = models.ForeignKey(
+        User, on_delete=models.SET_NULL, related_name='next_cashier',
+        blank=True, null=True
+    )
+    hall_admin_arrival_time = models.TimeField(
+        verbose_name='Время прибытия админа', blank=True, null=True
+    )
+    cashier_arrival_time = models.TimeField(
+        verbose_name='Время прибытия кассира', blank=True, null=True
+    )
+    acquiring_evator_sum = models.FloatField(
+        verbose_name='Сумма эквайринга (Эватор)', default=0.0
+    )
+    acquiring_terminal_sum = models.FloatField(
+        verbose_name='Сумма эквайринга (Терминал)', default=0.0
+    )
+    cost_sum = models.FloatField(verbose_name='Сумма расходов', default=0.0)
+    cash_sum = models.FloatField(verbose_name='Сумма наличных', default=0.0)
+    short_change_sum = models.FloatField(
+        verbose_name='Сумма на сдачу', default=2000.0
     )
     bar_revenue = models.FloatField(
         verbose_name='Выручка по бару', default=0.0
@@ -214,7 +240,7 @@ class WorkingShift(models.Model):
     status = models.CharField(
         max_length=20,
         choices=WorkshiftStatus.choices,
-        default=WorkshiftStatus.UNVERIFIED,
+        default=WorkshiftStatus.NOT_CONFIRMED,
         verbose_name='Статус смены',
         db_column='shift_status'
     )
@@ -241,6 +267,9 @@ class WorkingShift(models.Model):
     )
     cash_admin_penalty = models.FloatField(
         verbose_name='Штраф администратора кассы', default=0.0
+    )
+    technical_report = models.BooleanField(
+        verbose_name='Технический отчёт', default=False
     )
 
     class Meta:
@@ -291,10 +320,33 @@ class WorkingShift(models.Model):
         return reverse_lazy('detail_workshift', kwargs={'slug': self.slug})
 
 
+    def _get_costs_sum(self) -> float:
+        """Returns sum of costs for workshift"""
+        costs_queryset = Cost.objects.filter(workshift__id=self.pk)
+        costs_sum = costs_queryset.aggregate(
+            models.Sum('cost_sum')).get('cost_sum__sum')
+        if isinstance(costs_sum, float):
+            return costs_sum
+        return 0.0
+
+
+    def _get_errors_sum(self) -> float:
+        """Returns sum of costs for workshift"""
+        errors_queryset = ErrorKNA.objects.filter(workshift__id=self.pk)
+        errors_sum = errors_queryset.aggregate(
+            models.Sum('error_sum')).get('error_sum__sum')
+        if isinstance(errors_sum, float):
+            return errors_sum
+        return 0.0
+
+
     def save(self, *args, **kwargs):
         self.game_zone_subtotal = 0.0
         self.summary_revenue = 0.0
-        
+        sum_of_errors = self._get_errors_sum()
+        if sum_of_errors:
+            self.game_zone_error = sum_of_errors
+        self.cost_sum = self._get_costs_sum()
         if self.game_zone_revenue >= self.game_zone_error:
             self.game_zone_subtotal = round(
                 self.game_zone_revenue - self.game_zone_error, 2
@@ -387,3 +439,42 @@ class Message(models.Model):
 
     class Meta:
         verbose_name = 'Message'
+
+
+class ErrorKNA(models.Model):
+    class ErrorType(models.TextChoices):
+        KNA = 'KNA', 'Ошибка по КНА'
+        GRILL = 'GRILL', 'Гриль'
+        LOTTO = 'LOTTO', 'Лото'
+    error_type = models.CharField(
+        max_length=20, choices=ErrorType.choices, default=ErrorType.KNA,
+        verbose_name='Тип ошибки')
+    error_time = models.TimeField(verbose_name='Время ошибки')
+    card = models.CharField(max_length=128,
+                            verbose_name='Номер компьютера или карты')
+    error_sum = models.FloatField(verbose_name='Сумма ошибки', default=0.0)
+    description = models.CharField(max_length=255, verbose_name='Описание',
+                                   blank=True, null=True)
+    workshift = models.ForeignKey(WorkingShift, on_delete=models.CASCADE,
+                                  related_name='errors')
+
+
+class Cost(models.Model):
+    cost_sum = models.FloatField(verbose_name='Сумма расхода', default=0.0)
+    cost_reason = models.CharField(max_length=255, verbose_name='Причина')
+    cost_person = models.ForeignKey(User, on_delete=models.PROTECT,
+                                    verbose_name='Кто потратил')
+    workshift = models.ForeignKey(WorkingShift, on_delete=models.CASCADE,
+                                  related_name='costs')
+
+
+class CabinError(models.Model):
+    time = models.TimeField(verbose_name='Время ошибки')
+    cabin_number = models.IntegerField(choices=((i, '№ '+ str(i))
+                                                for i in range(1,7)),
+                                       verbose_name='Номер кабинки')
+    description = models.CharField(max_length=255, verbose_name='Причина')
+    error_interval = models.CharField(max_length=255,
+                                      verbose_name='Ошибочное время')
+    workshift = models.ForeignKey(WorkingShift, on_delete=models.CASCADE,
+                                  related_name='cabin_error')
