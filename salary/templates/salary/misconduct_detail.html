@@ -11,18 +11,18 @@
     </div>
     <div class="row mb-2">
       <div class="col">
-        <button class="btn btn-outline-secondary verysmall" onclick="history.back()">Назад</button>
+        <button class="btn btn-outline-secondary" onclick="history.back()">Назад</button>
       </div>
     </div>
     <div class="row mb-2">
       <div class="col-md-4 col m-2 rounded border border-light">
         <table class="table table-dark">
-          <thead class="text-warning text-center verysmall">
+          <thead class="text-warning text-center">
             <tr>
               <th colspan="2">Основные данные</th>
             </tr>
           </thead>
-          <tbody class="text-center verysmall">
+          <tbody class="text-center">
             <tr>
               <td class="text-warning">Дата нарушения</td>
               <td>{{ misconduct.misconduct_date }}</td>
@@ -62,12 +62,12 @@
       </div>
       <div class="col m-2 rounded border border-light">
         <table class="table table-dark">
-          <thead class="text-warning text-center verysmall">
+          <thead class="text-warning text-center">
             <tr>
               <th colspan="2">Данные нарушения</th>
             </tr>
           </thead>
-          <tbody class="text-center verysmall">
+          <tbody class="text-center">
             <tr>
               <td class="text-warning">Пункт регламента</td>
               <td>{{ misconduct.regulations_article.article }}</td>
@@ -87,12 +87,12 @@
     <div class="row">
       <div class="col m-2 rounded border border-light">
         <table class="table table-dark">
-          <thead class="text-warning text-center verysmall">
+          <thead class="text-warning text-center">
             <tr>
               <th colspan="2">Принятое решение</th>
             </tr>
           </thead>
-          <tbody class="text-center verysmall">
+          <tbody class="text-center">
             <tr>
               <td class="text-warning">Санкция</td>
               <td>{{ misconduct.penalty|default:"Предупреждение" | intcomma }}</td>

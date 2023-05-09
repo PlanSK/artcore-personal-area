@@ -4,7 +4,7 @@
 <div class="row justify-content-center border-top">
   <div class="row">
     <div class="col text-center mt-1">
-      <a href="{% url 'add_misconduct' %}?next={{ request.path }}" class="btn btn-outline-primary verysmall">
+      <a href="{% url 'add_misconduct' %}?next={{ request.path }}" class="btn btn-outline-primary">
         <i class="fa-solid fa-circle-plus"></i>&nbsp;Добавить нарушение
       </a>
     </div>
@@ -15,28 +15,28 @@
       {% if intruder.explanation_count and intruder.decision_count %}
       <a href="{% url 'misconducts_user_view' username=intruder.employee.username %}?next={{ request.path }}" class="list-group-item list-group-item-action list-group-item-warning" data-bs-toggle="tooltip" data-bs-placement="right" title="Необходимо объяснение и решение">
         <div class="d-flex justify-content-between align-items-center">
-          <div><span class="verysmall"><i class="fa-solid fa-file-circle-exclamation fa-fade"></i> {{ intruder.employee.get_full_name }}</span></div>
+          <div><span><i class="fa-solid fa-file-circle-exclamation fa-fade"></i> {{ intruder.employee.get_full_name }}</span></div>
           <div><span class="badge bg-warning rounded-pill">{{ intruder.decision_count }} / {{ intruder.explanation_count }} / {{ intruder.total_count }}</span></div>
         </div>
       </a>
       {% elif intruder.explanation_count %}
       <a href="{% url 'misconducts_user_view' username=intruder.employee.username %}?next={{ request.path }}" class="list-group-item list-group-item-action list-group-item-warning" data-bs-toggle="tooltip" data-bs-placement="right" title="Ожидает объяснение: {{ intruder.explanation_count }}">
         <div class="d-flex justify-content-between align-items-center">
-          <div><span class="verysmall"><i class="fa-solid fa-file-circle-exclamation fa-fade"></i> {{ intruder.employee.get_full_name }}</span></div>
+          <div><span><i class="fa-solid fa-file-circle-exclamation fa-fade"></i> {{ intruder.employee.get_full_name }}</span></div>
           <div><span class="badge bg-danger rounded-pill">{{ intruder.explanation_count }} / {{ intruder.total_count }}</span></div>
         </div>
       </a>
       {% elif intruder.decision_count %}
       <a href="{% url 'misconducts_user_view' username=intruder.employee.username %}?next={{ request.path }}" class="list-group-item list-group-item-action list-group-item-warning" data-bs-toggle="tooltip" data-bs-placement="right" title="Ожидает решение: {{ intruder.decision_count }}">
         <div class="d-flex justify-content-between align-items-center">
-          <div><span class="verysmall"><i class="fa-regular fa-clock fa-fade"></i> {{ intruder.employee.get_full_name }}</span></div>
+          <div><span><i class="fa-regular fa-clock fa-fade"></i> {{ intruder.employee.get_full_name }}</span></div>
           <div><span class="badge bg-warning rounded-pill">{{ intruder.decision_count }} / {{ intruder.total_count }}</span></div>
         </div>
       </a>
       {% else %}
       <a href="{% url 'misconducts_user_view' username=intruder.employee.username %}?next={{ request.path }}" class="list-group-item list-group-item-action list-group-item-secondary">
         <div class="d-flex justify-content-between align-items-center">
-          <div><span class="verysmall"><i class="fa-solid fa-clipboard-check"></i> {{ intruder.employee.get_full_name }}</span></div>
+          <div><span><i class="fa-solid fa-clipboard-check"></i> {{ intruder.employee.get_full_name }}</span></div>
           <div><span class="badge bg-secondary rounded-pill">{{ intruder.total_count }}</span></div>
         </div>
       </a>
@@ -47,12 +47,12 @@
 </div>
 {% if only_actived %}
 <div class="row text-center">
-  <div class="col"><a href="{% url 'misconducts_view' %}?show=all" class="link_secondary verysmall">Показать всех</a></div>
+  <div class="col"><a href="{% url 'misconducts_view' %}?show=all" class="link_secondary">Показать всех</a></div>
 </div>
 {% endif %}
 <div class="row">
   <div class="col text-center">
-    <a href="{% url 'index' %}" class="btn btn-secondary verysmall mt-2"><i class="fa-solid fa-house"></i>&nbsp;На главную</a>
+    <a href="{% url 'index' %}" class="btn btn-secondary mt-2"><i class="fa-solid fa-house"></i>&nbsp;На главную</a>
   </div>
 </div>
 {% endblock %}

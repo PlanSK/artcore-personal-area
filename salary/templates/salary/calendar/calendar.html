@@ -13,7 +13,7 @@
       </div>
     </div>
     <div class="row justify-content-center">
-      <div class="col-md-6 bshadow p-1 rounded">
+      <div class="col-md-6 bshadow p-1 rounded normalize">
         <table id="calendar">
           <thead>
               <tr class="text-warning">
@@ -31,7 +31,7 @@
             <tr class="border-top border-secondary">
               {% for day in week %}
                 {% if day.status == day.status.FOREIGN %}
-                  <td class="disabled"><span class="text-muted">{{ day.date.day }}</span></td>
+                  <td class="disabled"><span class="text-body-secondary">{{ day.date.day }}</span></td>
                 {% elif day.status == day.status.PLANED %}
                   <td class="planed">{{ day.date.day }}</td>
                 {% elif day.status == day.status.VERIFIED or day.status == day.status.UNVERIFIED %}
@@ -41,7 +41,7 @@
                     <td class="bg-info text-dark">
                   {% endif %}
                       <div style="line-height: 0.9rem;">{{ day.date.day }}<br>
-                      <span class="badge bg-primary" style="font-size: 0.5rem;">{{ day.earnings }}</span>
+                      <span class="badge bg-primary">{{ day.earnings }}</span>
                       <a href="{{day.link}}" class="stretched-link"></a></div>
                     </td>
                 {% else %}
@@ -56,7 +56,7 @@
     </div>
     <div class="row row-cols-3 row-cols-md-3 justify-content-center mt-2">
       <div class="col-md-2 text-center">
-        <span style="font-size: 0.5rem;">запланировано:</span><br>
+        <span>запланировано:</span><br>
         <i class="fa-solid fa-calendar-days" style="color: #5DE100;"></i> 
         {% if month_calendar.planed_shifts_count >= 0 %}
           {{ month_calendar.planed_shifts_count }}
@@ -65,18 +65,18 @@
         {% endif %}
       </div>
       <div class="col-md-2 text-center">
-        <span style="font-size: 0.5rem;">отработано:</span><br>
+        <span>отработано:</span><br>
         <i class="fa-solid fa-calendar-check" style="color: #6600db;"></i> 
         {{ month_calendar.complited_shifts_count }}
       </div>
       <div class="col-md-2 text-center">
-        <span style="font-size: 0.5rem;">заработано:</span><br>
+        <span>заработано:</span><br>
         <i class="fa-solid fa-coins"></i> {{ month_calendar.sum_of_earnings|intcomma }}
       </div>
     </div>
     {% if month_calendar.planed_shifts_count < 0 %}
     <div class="row justify-content-center mt-2">
-      <div class="col-md-6 alert alert-info text-center verysmall" role="alert">
+      <div class="col-md-6 alert alert-info text-center" role="alert">
         <i class="fa-solid fa-circle-info"></i> 
         Данные о запланированных сменах недоступны либо отсутствуют.
       </div>

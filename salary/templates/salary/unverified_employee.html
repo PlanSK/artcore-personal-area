@@ -8,10 +8,10 @@
      <div class="row justify-content-center">
         <div class="col-md-6 col-sm-auto">
           <div class="alert alert-warning d-flex align-items-center mt-2" role="alert">
-            <i class="fa-solid fa-triangle-exclamation fa-2xl fa-fade me-2"></i> <div class="verysmall text-justify">
+            <i class="fa-solid fa-triangle-exclamation fa-2xl fa-fade me-2"></i> <div class="text-justify">
               Функционирование Вашей учетной записи временно ограничено, так как она находится на проверке у руководства. Проверка может занимать до нескольких дней. После проверки, функционал будет доступен в полном объеме.</div>
           </div>
-          <div class="text-justify verysmall">
+          <div class="text-justify">
             Для продолжения процесса регистрации Вам необходимо представить отсканированные образы заполненных документов о трудоустройстве руководству.<br> Для перехода к загрузке документов нажмите 
             <a href="{% url 'employment_documents_upload' %}" class="link-primary">сюда.</a>
           </div>
@@ -20,12 +20,12 @@
       {% if perms.salary.add_workingshift %}
       <!-- close workshifts block -->
       <div class="row mt-2 justify-content-center">
-        <div class="col-md-6 col-sm-auto text-center verysmall text-secondary pt-1 border-top">
+        <div class="col-md-6 col-sm-auto text-center text-secondary pt-1 border-top">
         {% if unclosed_shifts_dates %}
           Для закрытия смены воспользуйтесь кнопкой
           {% for day in unclosed_shifts_dates %}
           <br>
-          <a href="{% url 'add_workshift_for_date' date=day %}?next={{ request.path }}" class="btn btn-outline-secondary verysmall mt-1">
+          <a href="{% url 'add_workshift_for_date' date=day %}?next={{ request.path }}" class="btn btn-outline-secondary mt-1">
             <i class="fa-solid fa-calendar-plus fa-beat me-2"></i>
             Закрыть смену за {{ day|date:"j E" }}
           </a>

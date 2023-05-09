@@ -21,7 +21,7 @@
               {% else %}
                 <i class="fa-solid fa-circle-user fa-2x"></i>
               {% endif %}
-                <span class="ms-2 verysmall">{{ member.member.get_full_name }}</span>
+                <span class="ms-2">{{ member.member.get_full_name }}</span>
               </div>
               <div>
                 {% if member.unread_messages_count %}
@@ -35,7 +35,7 @@
         <hr>
         {% endif %}
         {% if perms.salary.can_create_new_chats %}
-        <a href="{% url 'index' %}" class="btn btn-outline-primary verysmall m-1" data-bs-toggle="modal" data-bs-target="#NewDialogWindow">
+        <a href="{% url 'index' %}" class="btn btn-outline-primary m-1" data-bs-toggle="modal" data-bs-target="#NewDialogWindow">
           <i class="fa-solid fa-plus"></i>&nbsp;New dialog
         </a>
         <div class="modal fade" id="NewDialogWindow" tabindex="-1" aria-labelledby="NewDialogWindowLabel" aria-hidden="true">

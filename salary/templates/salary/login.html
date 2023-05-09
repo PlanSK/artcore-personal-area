@@ -12,13 +12,13 @@
             <form method="post">
               {% csrf_token %}
               {{ form|crispy }}
-              <button class="w-100 btn btn-lg btn-primary btn-sm mb-3" type="submit">Войти</button>
-              <a href="{% url 'registration' %}" class="link-secondary verysmall">Регистрация</a><br>
-              <a href="{% url 'password_reset' %}" class="link-secondary verysmall">Восстановление пароля</a>
+              <button class="w-100 btn btn-lg btn-primary mb-3" type="submit">Войти</button>
+              <a href="{% url 'registration' %}" class="link-secondary">Регистрация</a><br>
+              <a href="{% url 'password_reset' %}" class="link-secondary">Восстановление пароля</a>
             </form>
           </div>
           <div class="col-md-12 fixed-bottom">
-            <p class="mt-5 mb-3 text-muted verysmall">&copy; ARTCORE
+            <p class="mt-5 mb-3 text-body-secondary">&copy; ARTCORE
               <script>document.write(new Date().getFullYear())</script>
             </p>
           </div>

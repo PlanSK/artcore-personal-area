@@ -2,12 +2,12 @@
   <!-- Admin -->
   <div class="col rounded border border-light m-2">
     <table class="table table-dark">
-      <thead class="text-warning text-center verysmall">
+      <thead class="text-warning text-center">
         <tr>
           <th>Комментарий для админинстратора зала</th>
         </tr>
       </thead>
-      <tbody class="verysmall">
+      <tbody>
         <tr>
           {% if workshift.comment_for_hall_admin %}
           <td class="text-justify">
@@ -22,7 +22,7 @@
     <h5 class="text-center">Калькуляция для администратора зала</h5>
     <table class="table table-dark">
       {% if workshift.hall_admin.profile.position.name != 'trainee' %}
-      <tbody class="verysmall">
+      <tbody>
         <tr><td colspan="2" class="text-info text-center">Базовая часть</td></tr>
         <tr>
           <td>Оклад за смену</td>
@@ -89,7 +89,7 @@
           <td>{{ workshift.hall_admin_earnings.bonus_part.summary|default:"-" | intcomma }}</td>
         </tr>
         </tbody>
-        <tfoot class="verysmall">
+        <tfoot>
         {% if workshift.hall_admin_penalty %}
         <tr>
           <td>Предполагаемый заработок</td>
@@ -116,6 +116,6 @@
       {% endif %}
     </table>
     {% if not workshift.status == 'VFD' %}
-    <p class="text-secondary verysmall">*Смена не проверена, данные могут измениться.</p>
+    <p class="text-secondary">*Смена не проверена, данные могут измениться.</p>
     {% endif %}
   </div>

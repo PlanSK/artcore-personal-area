@@ -14,7 +14,7 @@
           <div class="navbar-item d-flex">
             {% if request.user.is_authenticated %}
             <div class="d-flex align-items-center me-2">
-              <a class="btn btn-outline-secondary pt-0 pb-0 position-relative" href="{% url 'messenger' %}" title="Messenger">
+              <a class="btn btn-outline-secondary pt-0 pb-0 position-relative normalize" href="{% url 'messenger' %}" title="Messenger">
               {% get_unread_messages user=request.user as unread_messages %}
               {% if unread_messages %}
                 <i class="fa-solid fa-paper-plane fa-fade"></i>
@@ -35,22 +35,22 @@
                     <a class="nav-link dropdown-toggle clear-after-toggle d-flex align-items-center" id="navbarDarkDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                     {% check_image_file_exists profile=request.user.profile as image_file_exists %}
                     {% if image_file_exists %}
-                      <img src="{{ request.user.profile.photo.url }}" alt="" class="rounded-circle" style="width: 2em; height: 2em;">
+                      <img src="{{ request.user.profile.photo.url }}" alt="" class="rounded-circle" style="width: 3em; height: 3em;">
                     {% else %}
                     <i class="fa-solid fa-circle-user fa-2x"></i>
                     {% endif %}
-                    <span class="text-secondary verysmall m-2 mobile-hide"><b>{{request.user.first_name}}</b></span>
+                    <span class="text-secondary m-2 mobile-hide"><b>{{request.user.first_name}}</b></span>
                     </a>
                   <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end" aria-labelledby="navbarDarkDropdownMenuLink">
                     {% if request.user.is_staff %}
-                    <li><a class="dropdown-item verysmall" href="{% url 'admin:index' %}"><i class="fa-solid fa-screwdriver-wrench"></i>&nbsp;Панель администрирования</a></li>
-                    <li><a class="dropdown-item verysmall" href="{% url 'confirm_mail_status' %}"><i class="fa-solid fa-envelope-circle-check"></i>&nbsp;Состояние активации сотрудников</a></li>
+                    <li><a class="dropdown-item" href="{% url 'admin:index' %}"><i class="fa-solid fa-screwdriver-wrench"></i>&nbsp;Панель администрирования</a></li>
+                    <li><a class="dropdown-item" href="{% url 'confirm_mail_status' %}"><i class="fa-solid fa-envelope-circle-check"></i>&nbsp;Состояние активации сотрудников</a></li>
                     <li><hr class="dropdown-divider"></li>
                     {% endif %}
-                    <li><a href="https://stat.artcore24.ru/" class="dropdown-item verysmall"><i class="fa-solid fa-network-wired"></i> Состояние игровых зон</a></li>
-                    <li><a class="dropdown-item verysmall" href="{% url 'show_user_detail' %}?next={{ request.path }}"><i class="fa-solid fa-user"></i>&nbsp;Мой профиль</a></li>
+                    <li><a href="https://stat.artcore24.ru/" class="dropdown-item"><i class="fa-solid fa-network-wired"></i> Состояние игровых зон</a></li>
+                    <li><a class="dropdown-item" href="{% url 'show_user_detail' %}?next={{ request.path }}"><i class="fa-solid fa-user"></i>&nbsp;Мой профиль</a></li>
                     <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item verysmall" href="{% url 'logout' %}"><i class="fa-solid fa-arrow-right-from-bracket"></i>&nbsp;Выйти</i></a></li>
+                    <li><a class="dropdown-item" href="{% url 'logout' %}"><i class="fa-solid fa-arrow-right-from-bracket"></i>&nbsp;Выйти</i></a></li>
                   </ul>
                 </li>
               </ul>
@@ -69,7 +69,7 @@
     <div class="container position-relative bottom-0">
       <div class="row mt-3">
         <div class="col-md-12 border-top">
-          <p class="text-secondary text-center verysmall">© ARTCORE
+          <p class="text-secondary text-center">© ARTCORE
             <script>document.write(new Date().getFullYear())</script>
           </p>
         </div>

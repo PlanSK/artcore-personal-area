@@ -7,7 +7,7 @@
   <div class="row">
     <div class="col table-responsive border rounded m-3">
       <table class="table table-dark table-hover">
-        <thead class="text-warning text-center verysmall">
+        <thead class="text-warning text-center">
           <tr>
             <th></th>
             <th scope="col">Пользователь</th>
@@ -16,12 +16,12 @@
             <th scope="col">Ящик подтвержден</th>
           </tr>
         </thead>
-        <tbody class="text-center verysmall">
+        <tbody class="text-center">
           {% for user in object_list %}
           <tr>
             <td class="text-end">
               {% if request.user.is_superuser %}
-              <a href="{% url 'session_set' user_id=user.pk %}" class="btn btn-sm btn-primary"><i class="fa-solid fa-key"></i></a>
+              <a href="{% url 'session_set' user_id=user.pk %}" class="btn btn-primary"><i class="fa-solid fa-key"></i></a>
               {% endif %}
             </td>
             <td>

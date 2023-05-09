@@ -14,18 +14,18 @@
         {% endif %}
       </div>
       <div class="col text-center">
-        <b>{{ user.get_full_name }}</b>
+        <h5><b>{{ user.get_full_name }}</b></h5>
         <hr>
       </div>
-      <div class="col verysmall mb-1">
+      <div class="col mb-1">
         Авторизация: {{ user.last_login|default:"нет данных" }}<br>
         Email: <span class="text-success">{{ user.email }}</span><br>
         Стаж работы: {{ user.profile.get_experience_text }} <br>
       </div>
       <div class="col text-center mb-1">
         <hr class="m-1">
-        <i><b class="text-primary">{{ today_date|date:"j E Y г., l" }}</b><br>
-        <span class="verysmall">Сегодня на смене:</span></i><br>
+        <h5><i><b class="text-primary">{{ today_date|date:"j E Y г., l" }}</b><br></h5>
+        <span>Сегодня на смене:</span></i><br>
         <span class="badge bg-primary"><i class="fa-solid fa-cash-register"></i> {{ employees_at_work.cashier | default:"нет данных" }}</span>
         <span class="badge bg-success"><i class="fa-solid fa-user-gear"></i> {{ employees_at_work.hall_admin | default:"нет данных" }}</span>
       </div>
@@ -34,18 +34,18 @@
   <div class="col-md-8 m-1">
     <div class="row justify-content-evenly">
       <div class="col-md-4 rounded border pb-1 text-center">
-        <p class="text-success"><i class="fa-solid fa-chart-column"></i> Рейтинги</p>
-        <div class="accordion verysmall" id="accordionRating">
+        <p class="text-success normalize"><i class="fa-solid fa-chart-column"></i> Рейтинги</p>
+        <div class="accordion" id="accordionRating">
           {% if total_rating_data.bar_rating.first %}
           <div class="accordion-item">
-            <h6 class="accordion-header verysmall" id="headingOne">
-              <button class="accordion-button p-2 ps-4 list-group-item-secondary verysmall collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+            <h6 class="accordion-header" id="headingOne">
+              <button class="accordion-button p-2 ps-4 list-group-item-secondary collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
                 Рейтинг по бару
               </button>
             </h6>
             <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionRating">
               <div class="accordion-body bg-dark">
-                <ol class="list-group list-group-numbered verysmall text-start">
+                <ol class="list-group list-group-numbered text-start">
                   <!-- first item -->
                     <li class="list-group-item list-group-item-primary">
                       {{ total_rating_data.bar_rating.first.full_name }}
@@ -80,18 +80,18 @@
             </div>
           </div>
           {% else %}
-          <p class="verysmall text-light text-start">Рейтинг по бару не сформирован.</p>
+          <p class="text-light text-start">Рейтинг по бару не сформирован.</p>
           {% endif %}
           {% if total_rating_data.hookah_rating.first %}
           <div class="accordion-item">
             <h2 class="accordion-header" id="headingTwo">
-              <button class="accordion-button p-2 ps-4 list-group-item-dark verysmall collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+              <button class="accordion-button p-2 ps-4 list-group-item-dark collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
                 Рейтинг по кальянам
               </button>
             </h2>
             <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionRating">
               <div class="accordion-body bg-dark">
-                <ol class="list-group list-group-numbered verysmall text-start">
+                <ol class="list-group list-group-numbered text-start">
                   <!-- first item -->
                     <li class="list-group-item list-group-item-primary">
                       {{ total_rating_data.hookah_rating.first.full_name }}
@@ -126,18 +126,18 @@
             </div>
           </div>
           {% else %}
-          <p class="verysmall text-light text-start">Рейтинг по кальянам не сформирован.</p>
+          <p class="text-light text-start">Рейтинг по кальянам не сформирован.</p>
           {% endif %}
           {% if total_rating_data.cashier_common_rating.first %}
           <div class="accordion-item">
             <h2 class="accordion-header" id="headingThree">
-              <button class="accordion-button p-2 ps-4 list-group-item-secondary verysmall collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+              <button class="accordion-button p-2 ps-4 list-group-item-secondary collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
                 Рейтинг по КНА (кассиры)
               </button>
             </h2>
             <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionRating">
               <div class="accordion-body bg-dark">
-                <ol class="list-group list-group-numbered verysmall text-start">
+                <ol class="list-group list-group-numbered text-start">
                   <!-- first item -->
                     <li class="list-group-item list-group-item-primary">
                       {{ total_rating_data.cashier_common_rating.first.full_name }}
@@ -172,18 +172,18 @@
             </div>
           </div>
           {% else %}
-          <p class="verysmall text-light text-start">Рейтинг по КНА (кассиры) не сформирован.</p>
+          <p class="text-light text-start">Рейтинг по КНА (кассиры) не сформирован.</p>
           {% endif %}
           {% if total_rating_data.hall_admin_common_rating.first %}
           <div class="accordion-item">
             <h2 class="accordion-header" id="headingFour">
-              <button class="accordion-button p-2 ps-4 list-group-item-dark verysmall collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+              <button class="accordion-button p-2 ps-4 list-group-item-dark collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
                 Рейтинг по КНА (админы)
               </button>
             </h2>
             <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour" data-bs-parent="#accordionRating">
               <div class="accordion-body bg-dark">
-                <ol class="list-group list-group-numbered verysmall text-start">
+                <ol class="list-group list-group-numbered text-start">
                   <!-- first item -->
                     <li class="list-group-item list-group-item-primary">
                       {{ total_rating_data.hall_admin_common_rating.first.full_name }}
@@ -218,14 +218,14 @@
             </div>
           </div>
           {% else %}
-          <p class="verysmall text-light text-start">Рейтинг по КНА (админы) не сформирован.</p>
+          <p class="text-light text-start">Рейтинг по КНА (админы) не сформирован.</p>
           {% endif %}
         </div>
       </div>
       <div class="col-md-4 rounded border text-center">
-        <p class="text-primary"><i class="fa-solid fa-calendar-days"></i> Смены</p>
+        <p class="text-primary normalize"><i class="fa-solid fa-calendar-days"></i> Смены</p>
         {% if missed_workshifts_dates %}
-        <div class="alert alert-warning text-center verysmall" role="alert">
+        <div class="alert alert-warning text-center" role="alert">
           <i class="fa-solid fa-triangle-exclamation fa-fade"></i> Пропущенные смены:<br>
           {% for day in missed_workshifts_dates %}
             {{ day|date:"j E" }}&nbsp;
@@ -234,20 +234,20 @@
         {% endif %}
         {% if unclosed_workshifts.unclosed_number %}
           {% if unclosed_workshifts.unverified_number %}
-          <a href="{% url 'workshifts_view' %}" class="btn btn-outline-warning m-1 btn-sm">Непроверенные смены <span class="badge bg-secondary">{{unclosed_workshifts.unverified_number}}</span></a><br>
+          <a href="{% url 'workshifts_view' %}" class="btn btn-outline-warning m-1">Непроверенные смены <span class="badge bg-secondary">{{unclosed_workshifts.unverified_number}}</span></a><br>
           {% endif %}
           {% if unclosed_workshifts.wait_fix_number %}
-          <a href="{% url 'workshifts_view' %}" class="btn btn-outline-info m-1 btn-sm">Ожидает исправления <span class="badge bg-secondary">{{unclosed_workshifts.wait_fix_number}}</span></a><br>
+          <a href="{% url 'workshifts_view' %}" class="btn btn-outline-info m-1">Ожидает исправления <span class="badge bg-secondary">{{unclosed_workshifts.wait_fix_number}}</span></a><br>
           {% endif %}
         {% else %}
           <span class="text-success"><b>Все смены проверены</b></span>
         {% endif %}
         <hr>
-        <a class="btn btn-outline-primary verysmall pt-0 pb-0 mb-1" href="{% url 'add_workshift' %}?next={{ request.path }}">
+        <a class="btn btn-outline-primary pt-0 pb-0 mb-1" href="{% url 'add_workshift' %}?next={{ request.path }}">
           <i class="fa-solid fa-calendar-plus"></i>&nbsp;Добавить смену
         </a>
       </div>
-      <div class="col-md-3 verysmall">
+      <div class="col-md-3">
         <div class="row row-cols-1 justify-content-center align-items-center">
           <div class="col rounded border mb-1">
             <p class="text-center"><i class="fa-solid fa-cake-candles"></i> Дни рождения</p>

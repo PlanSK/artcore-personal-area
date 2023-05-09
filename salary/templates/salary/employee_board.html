@@ -11,17 +11,17 @@
         <!-- Button -->
         <div class="col text-end">
           {% if employee_indicators.rating_data.position == employee_indicators.rating_data.position.ABSOLUTE_LEADER %}
-          <a class="btn btn-outline-success verysmall" data-bs-toggle="collapse" href="#expandRating" role="button" aria-expanded="false" aria-controls="expandRating">
+          <a class="btn btn-outline-success" data-bs-toggle="collapse" href="#expandRating" role="button" aria-expanded="false" aria-controls="expandRating">
             <i class="fa-solid fa-crown fa-xl fa-beat-fade"></i>
             <b>Вы - {{ employee_indicators.rating_data.position.value }}!</b>
           </a>
           {% elif employee_indicators.rating_data.position != employee_indicators.rating_data.position.NOT_LEADER %}
-          <a class="btn btn-outline-success verysmall" data-bs-toggle="collapse" href="#expandRating" role="button" aria-expanded="false" aria-controls="expandRating">
+          <a class="btn btn-outline-success" data-bs-toggle="collapse" href="#expandRating" role="button" aria-expanded="false" aria-controls="expandRating">
             <i class="fa-solid fa-trophy fa-xl fa-beat-fade"></i>
             <b>Вы - {{ employee_indicators.rating_data.position.value }}!</b>
           </a>
           {% else %}
-          <a class="btn btn-outline-warning verysmall" data-bs-toggle="collapse" href="#expandRating" role="button" aria-expanded="false" aria-controls="expandRating">
+          <a class="btn btn-outline-warning" data-bs-toggle="collapse" href="#expandRating" role="button" aria-expanded="false" aria-controls="expandRating">
             <i class="fa-solid fa-chart-column fa-xl"></i>
             <b>Текущий рейтинг</b>
           </a>
@@ -32,7 +32,7 @@
           <div class="row justify-content-end mt-2">
             {% if employee_indicators.rating_data.special_rating.first %}
             <div class="col-md-3 col-sm-auto text-center border rounded pb-2 m-1 border-secondary">
-              <span class="verysmall">Рейтинг по 
+              <span>Рейтинг по 
                 {% if employee_indicators.rating_data.special_rating.first.summary_bar_revenue %}
                 бару
                 {% else %}
@@ -40,7 +40,7 @@
                 {% endif %}
                 <br>
               </span><hr>
-              <ol class="list-group list-group-numbered verysmall text-start">
+              <ol class="list-group list-group-numbered text-start">
                 <!-- first item -->
                 {% if employee_indicators.rating_data.special_rating.first.id == user.id %}
                 <li class="list-group-item list-group-item-primary" style="font-weight: bold;">
@@ -96,8 +96,8 @@
             {% endif %}
             {% if employee_indicators.rating_data.common_rating.first %}
             <div class="col-md-3 col-sm-auto text-center border rounded pb-2 m-1 border-secondary">
-              <span class="verysmall">Рейтинг по средней выручке</span><hr>
-              <ol class="list-group list-group-numbered verysmall text-start">
+              <span>Рейтинг по средней выручке</span><hr>
+              <ol class="list-group list-group-numbered text-start">
                 <!-- first item -->
                 {% if employee_indicators.rating_data.common_rating.first.id == user.id %}
                 <li class="list-group-item list-group-item-primary" style="font-weight: bold;">
@@ -140,7 +140,7 @@
         </div>
         {% else %}
         <div class="col text-end">
-          <button type="button" class="btn btn-secondary btn-sm verysmall" disabled>
+          <button type="button" class="btn btn-secondary" disabled>
             <i class="fa-solid fa-chart-column fa-xl"></i>
             Текущий рейтинг
           </button><br>
@@ -152,12 +152,12 @@
       {% if perms.salary.add_workingshift %}
       <!-- close workshifts block -->
       <div class="row mt-2">
-        <div class="col text-center verysmall text-secondary">
+        <div class="col text-center text-secondary">
         {% if unclosed_shifts_dates %}
           Для закрытия смены воспользуйтесь кнопкой
           {% for day in unclosed_shifts_dates %}
           <br>
-          <a href="{% url 'add_workshift_for_date' date=day %}?next={{ request.path }}" class="btn btn-outline-secondary verysmall mt-1">
+          <a href="{% url 'add_workshift_for_date' date=day %}?next={{ request.path }}" class="btn btn-outline-secondary mt-1">
             <i class="fa-solid fa-calendar-plus fa-beat me-2"></i>
             Закрыть смену за {{ day|date:"j E" }}
           </a>
@@ -174,7 +174,7 @@
       <!-- notification about workshift block -->
       <div class="row justify-content-center">
         <div class="col-md-6 col-sm-auto">
-          <div class="alert alert-success mt-2 verysmall text-center" role="alert">
+          <div class="alert alert-success mt-2 text-center" role="alert">
             <i class="fa-solid fa-calendar-check"></i>&nbsp;Завтра Ваша рабочая смена.
           </div>
         </div>
@@ -186,7 +186,7 @@
       <div class="row justify-content-center">
         <div class="col-md-6 col-sm-auto">
           <div class="alert alert-danger d-flex align-items-center mt-2" role="alert">
-            <i class="fa-solid fa-triangle-exclamation fa-2xl fa-fade me-2"></i> <div class="verysmall text-justify">У вас имеются нарушения, по которым необходимо дать объяснения руководству. </div>
+            <i class="fa-solid fa-triangle-exclamation fa-2xl fa-fade me-2"></i> <div class="text-justify">У вас имеются нарушения, по которым необходимо дать объяснения руководству. </div>
           </div>
         </div>
       </div>
@@ -202,9 +202,9 @@
                   </div>
                   <div class="col m-1">
                     <div class="text-center">
-                      <p class="card-text fst-italic">Мои смены</p>
+                      <p class="card-text fst-italic normalize">Мои смены</p>
                       <hr class="m-1">
-                      <span class="fw-bold">{{ employee_indicators.number_of_total_workshifts|default:"-" }}</span>
+                      <span class="fw-bold normalize">{{ employee_indicators.number_of_total_workshifts|default:"-" }}</span>
                       <a href="{% url 'employee_workshifts' %}" class="stretched-link"></a>
                     </div>
                   </div>
@@ -221,9 +221,9 @@
                   </div>
                   <div class="col m-1">
                     <div class="text-center">
-                      <p class="card-text fst-italic">Мой заработок</p>
+                      <p class="card-text fst-italic normalize">Мой заработок</p>
                       <hr class="m-1">
-                      <span class="fw-bold">{{ employee_indicators.summary_earnings|default:"-" | intcomma }}</span>
+                      <span class="fw-bold normalize">{{ employee_indicators.summary_earnings|default:"-" | intcomma }}</span>
                     </div>
                   </div>
                 </div>
@@ -243,9 +243,9 @@
                   </div>
                   <div class="col m-1">
                     <div class="text-center">
-                      <p class="card-text fst-italic">Штрафы</p>
+                      <p class="card-text fst-italic normalize">Штрафы</p>
                       <hr class="m-1">
-                      <span class="fw-bold">{{ misconduct_data.penalty_sum|default:"-" | intcomma }}</span>
+                      <span class="fw-bold normalize">{{ misconduct_data.penalty_sum|default:"-" | intcomma }}</span>
                       <a href="{% url 'misconducts_user_view' username=request.user %}?next={{ request.path }}" class="stretched-link"></a>
                     </div>
                   </div>
@@ -261,9 +261,9 @@
                   </div>
                   <div class="col m-1">
                     <div class="text-center">
-                      <p class="card-text fst-italic">Недостачи</p>
+                      <p class="card-text fst-italic normalize">Недостачи</p>
                       <hr class="m-1">
-                      <span class="fw-bold">{{ employee_indicators.summary_shortage|default:"-" | intcomma }}</span>
+                      <span class="fw-bold normalize">{{ employee_indicators.summary_shortage|default:"-" | intcomma }}</span>
                     </div>
                   </div>
                 </div>
@@ -276,7 +276,7 @@
             <div class="col-sm-12 col-md-4 mb-1">
               <div class="card red-snippet text-light h-100">
                 <div class="card-body d-flex justify-content-between align-items-center">
-                  <span class="card-text fst-italic">
+                  <span class="card-text fst-italic normalize">
                     <i class="fa-solid fa-graduation-cap fa-xl me-2"></i>
                     Нарушения
                   </span>
@@ -287,7 +287,7 @@
                 </div>
                 {% if misconduct_data.wait_explanation %}
                 <div class="card-footer d-flex justify-content-between align-items-center">
-                  <span class="card-text text-light verysmall"><b><i>Ожидает объяснение:</i></b></span>
+                  <span class="card-text text-light"><b><i>Ожидает объяснение:</i></b></span>
                   <span class="badge bg-warning text-dark">{{ misconduct_data.wait_explanation }}</span>
                 </div>
                 {% endif %}
@@ -296,7 +296,7 @@
             <div class="col-sm-12 col-md-4 mb-1">
               <div class="card blue-snippet text-light h-100">
                 <div class="card-body d-flex justify-content-between align-items-center">
-                  <span class="card-text fst-italic">
+                  <span class="card-text fst-italic normalize">
                     <i class="fa-solid fa-book fa-xl me-2"></i>
                     Документы
                   </span>
@@ -307,7 +307,7 @@
             <div class="col-sm-12 col-md-4 mb-1">
               <div class="card green-snippet text-light h-100">
                 <div class="card-body d-flex justify-content-between align-items-center">
-                  <span class="card-text fst-italic">
+                  <span class="card-text fst-italic normalize">
                     <i class="fa-solid fa-calendar-days fa-2xl me-2"></i>
                     Графики
                   </span>

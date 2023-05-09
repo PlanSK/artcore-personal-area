@@ -4,22 +4,22 @@
 <div class="row border-top">
   <div class="col text-center table-responsive">
     <table class="table table-dark table-hover">
-      <thead class="text-warning text-center verysmall">
+      <thead class="text-warning text-center">
         <tr>
           <th colspan="3">Ежемесячные отчёты</th>
         </tr>
       </thead>
-      <tbody class="text-center verysmall">
+      <tbody class="text-center">
         {% for date_range in object_list %} 
         <tr>
           <td>
             {{ date_range|date:"F Y г." }}<br>
           </td>
           <td>
-            <a href="{% url 'monthly_report' year=date_range.year month=date_range.month %}" class="btn btn-secondary verysmall"><i class="fa-solid fa-coins"></i> Зарплатный отчёт</a>
+            <a href="{% url 'monthly_report' year=date_range.year month=date_range.month %}" class="btn btn-secondary"><i class="fa-solid fa-coins"></i> Зарплатный отчёт</a>
           </td>
           <td>
-            <a href="{% url 'award_rating' year=date_range.year month=date_range.month %}" class="btn btn-secondary verysmall"><i class="fa-solid fa-chart-simple"></i> Рейтинговый отчёт</a>
+            <a href="{% url 'award_rating' year=date_range.year month=date_range.month %}" class="btn btn-secondary"><i class="fa-solid fa-chart-simple"></i> Рейтинговый отчёт</a>
           </td>
         </tr>
         {% endfor %}

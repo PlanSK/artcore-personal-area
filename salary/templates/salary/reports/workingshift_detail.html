@@ -21,19 +21,19 @@
     </div>
     <div class="row mb-2 justify-content-between">
       <div class="col col-md-auto col-sm-auto">
-        <button class="btn btn-outline-secondary verysmall" onclick="history.back()">Назад</button>
+        <button class="btn btn-outline-secondary" onclick="history.back()">Назад</button>
         {% if request.user.is_staff %}
-        <a class="btn btn-outline-secondary verysmall" href="{% url 'workshifts_view' %}">К списку смен</a>
+        <a class="btn btn-outline-secondary" href="{% url 'workshifts_view' %}">К списку смен</a>
         {% endif %}
       </div>
-      <div class="col col-md-auto verysmall text-center text-muted">
+      <div class="col col-md-auto text-center text-body-secondary">
         Последнее изменение:<br>{{ workshift.editor }} ({{ workshift.change_date }})
       </div>
     </div>
     <div class="row row-cols-md-2 row-cols-sm-1 justify-content-center border rounded border-light">
       <div class="col-md-6 col-sm-auto table-responsive">
         <h5 class="text-center">Принимающая смена</h5>
-        <table class="table table-dark verysmall">
+        <table class="table table-dark">
           <thead class="text-warning">
             <th></th>
             <th>Администратор кассы</th>
@@ -55,7 +55,7 @@
       </div>
       <div class="col-md-6 col-sm-12 table-responsive border-start border-secondary">
         <h5 class="text-center">Сдающая смена</h5>
-        <table class="table table-dark verysmall">
+        <table class="table table-dark">
           <thead class="text-warning">
             <tr>
               <th></th>
@@ -81,7 +81,7 @@
     <div class="row row-cols-md-2 row-cols-sm-1 mt-1 justify-content-center rounded border border-light">
       <div class="col col-md-8 col-sm-12 table-responsive">
         <h5 class="text-center">Суммарные данные по смене</h5>
-        <table class="table table-dark verysmall">
+        <table class="table table-dark">
           <tbody>
             <tr><td class="text-warning">Сумма эквайринга (Эватор)</td><td>{{workshift.acquiring_evator_sum}}</td></tr>
             <tr><td class="text-warning">Сумма эквайринга (Терминал)</td><td>{{workshift.acquiring_terminal_sum}}</td></tr>
@@ -94,7 +94,7 @@
       </div>
       <div class="col col-md-4 col-sm-12 table-responsive border-start border-secondary">
         <h5 class="text-center">Детализация</h5>
-        <table class="table table-dark verysmall">
+        <table class="table table-dark">
           <tbody>
             <tr><td class="text-warning">Выручка по бару</td><td>{{workshift.bar_revenue | intcomma}}</td></tr>
             <tr><td class="text-warning">Общая сумма по КНА</td><td>{{workshift.game_zone_revenue | intcomma }}</td></tr>
@@ -109,7 +109,7 @@
       <div class="col col-md-2 col-sm-auto table-responsive">
         <h5 class="text-center">Прочие данные</h5>
         <table class="table table-dark">
-          <tbody class="verysmall">
+          <tbody>
             <tr>
               <td>Поддержание чистоты:</td>
               <td>
@@ -158,13 +158,13 @@
         <h5 class="text-center">Ошибки по кабинкам</h5>
         {% if workshift.cabin_error.all %}
         <table class="table table-dark">
-          <thead class="verysmall text-warning">
+          <thead class="text-warning">
               <th>Время</th>
               <th>Кабинка</th>
               <th>Причина</th>
               <th>Ошибочное время</th>
           </thead>
-          <tbody class="verysmall">
+          <tbody>
             {% for cabin_error in workshift.cabin_error.all %}
               <tr>
                 <td>{{cabin_error.time}}</td>
@@ -181,7 +181,7 @@
       <div class="col col-md-4 col-sm-auto border-start border-secondary">
         {% if workshift.costs.all %}
         <h5 class="text-center">Данные по расходам</h5>
-        <table class="table table-dark verysmall">
+        <table class="table table-dark">
           <thead class="text-warning">
             <th>Сумма</th>
             <th>Фамилия и имя сотрудника</th>
@@ -204,7 +204,7 @@
     <div class="row row-cols-md-2 row-cols-sm-1 mt-1 justify-content-center rounded border border-light">
       <div class="col col-md-12 col-sm-auto">
         <h5 class="text-center">Подробные данные по ошибкам КНА <a href="{% url 'costs_and_errors_form' pk=workshift.pk %}" class="link-info"><i class="fa-regular fa-pen-to-square"></i></a></h5>
-        <table class="table table-dark verysmall">
+        <table class="table table-dark">
           <thead class="text-warning">
             <th>Время по КНА</th>
             <th>№ карты или компьютера</th>
@@ -224,7 +224,7 @@
     <div class="row row-cols-md-2 row-cols-sm-1 mt-1 justify-content-center rounded border border-light">
       <div class="col col-md-6 col-sm-auto">
         <h5 class="text-center">Данные по грилю (включено в ошибки) <a href="{% url 'costs_and_errors_form' pk=workshift.pk %}" class="link-info"><i class="fa-regular fa-pen-to-square"></i></a></h5>
-        <table class="table table-dark verysmall">
+        <table class="table table-dark">
           <thead class="text-warning text-center">
             <th>Время по КНА</th>
             <th>№ карты или компьютера</th>
@@ -241,7 +241,7 @@
       </div>
       <div class="col col-md-6 col-sm-auto border-start border-secondary">
         <h5 class="text-center">Данные по лото (включено в ошибки) <a href="{% url 'costs_and_errors_form' pk=workshift.pk %}" class="link-info"><i class="fa-regular fa-pen-to-square"></i></a></h5>
-        <table class="table table-dark verysmall">
+        <table class="table table-dark">
           <thead class="text-warning text-center">
             <th>Время по КНА</th>
             <th>№ карты или компьютера</th>
@@ -258,7 +258,7 @@
       </div>
     </div>
     {% else %}
-    <p class="text-center"><a href="{% url 'costs_and_errors_form' pk=workshift.pk %}" class="link-info verysmall">Внести изменения по ошибкам или расходам</a></p>
+    <p class="text-center"><a href="{% url 'costs_and_errors_form' pk=workshift.pk %}" class="link-info">Внести изменения по ошибкам или расходам</a></p>
     {% endif %}
     <div class="row mt-2">
       {% if request.user == workshift.hall_admin or request.user.is_staff %}
@@ -271,32 +271,32 @@
     <div class="row text-center">
       {% if perms.salary.advanced_change_workshift and perms.salary.delete_workingshift %}
       <div class="col">
-        <a title="Печать" class="btn btn-light verysmall text-dark" href="{% url 'everyday_report_print' workshift.slug %}?next={{ request.path }}">
+        <a title="Печать" class="btn btn-light text-dark" href="{% url 'everyday_report_print' workshift.slug %}?next={{ request.path }}">
           <i class="fa-solid fa-print"></i>
           Печать отчёта
         </a>
       </div>
       <div class="col">
-        <a title="Внести изменения" class="btn btn-warning verysmall text-dark" href="{% url 'staff_edit_workshift' workshift.slug %}?next={{ request.path }}">
+        <a title="Внести изменения" class="btn btn-warning text-dark" href="{% url 'staff_edit_workshift' workshift.slug %}?next={{ request.path }}">
           <i class="fa-solid fa-square-pen"></i>
           Внести изменения
         </a>
       </div>
       <div class="col">
-        <a title="Удалить смену" class="btn btn-danger verysmall text-light" href="{% url 'delete_workshift' workshift.slug %}">
+        <a title="Удалить смену" class="btn btn-danger text-light" href="{% url 'delete_workshift' workshift.slug %}">
           <i class="fa-solid fa-square-xmark"></i>
           Удалить смену
         </a>
       </div>
       {% elif not workshift.status == 'VFD' and perms.salary.change_workingshift %}
       <div class="col">
-        <a title="Внести изменения" class="btn btn-warning verysmall text-dark" href="{% url 'edit_workshift' workshift.slug %}?next={{ request.path }}">
+        <a title="Внести изменения" class="btn btn-warning text-dark" href="{% url 'edit_workshift' workshift.slug %}?next={{ request.path }}">
           <i class="fa-solid fa-square-pen"></i>
           Внести изменения
         </a>
       </div>
       <div class="col">
-        <a title="Печать" class="btn btn-light verysmall text-dark" href="{% url 'everyday_report_print' workshift.slug %}?next={{ request.path }}">
+        <a title="Печать" class="btn btn-light text-dark" href="{% url 'everyday_report_print' workshift.slug %}?next={{ request.path }}">
           <i class="fa-solid fa-print"></i>
           Печать отчёта
         </a>

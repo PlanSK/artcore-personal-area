@@ -3,21 +3,21 @@
 
 {% block body %}
 <body class="bg-dark text-light h-100">
-    <div class="container h-100">
-        <div class="row h-100 align-items-center justify-content-md-center">
-            <div class="col-md-12">
-                <div class="text-center">
-                    <img class="mb-5" src="{% static 'salary/img/logo.png' %}" alt="" height="40">
-                    <h1 class="mb-1 text-success"><i class="fa-solid fa-envelope-circle-check fa-xl"></i></h1>
-                    <h2 class="mb-5">Учетная запись успешно создана</h2>
-                    <div class="mb-5">
-                        {{ first_name }}, процесс регистрации почти окончен.<br>
-                        Ожидайте разрешение на продолжение регистрации Вашей учетной записи.<br>
-                        После получения разрешения, на указанный Вами адрес, будет 
-                        направлено письмо с инструкциями по завершению процесса регистрации.
-                    </div>
-                </div>
-            </div>
+  <div class="container h-100">
+    <div class="row h-100 align-items-center justify-content-md-center">
+      <div class="col-md-12">
+        <div class="text-center">
+          <img class="mb-5" src="{% static 'salary/img/logo.png' %}" alt="" height="40">
+          <h1 class="mb-1 text-success"><i class="fa-solid fa-envelope-circle-check fa-xl"></i></h1>
+          <h2 class="mb-5">Учетная запись успешно создана</h2>
+          <div class="mb-5">
+            {{ first_name }}, процесс регистрации почти окончен.<br>
+            Ожидайте разрешение на продолжение регистрации Вашей учетной записи.<br>
+            После получения разрешения, на указанный Вами адрес, будет 
+            направлено письмо с инструкциями по завершению процесса регистрации.
+          </div>
         </div>
+      </div>
     </div>
+  </div>
 {% endblock %}

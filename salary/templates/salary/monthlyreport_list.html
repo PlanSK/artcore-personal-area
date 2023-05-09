@@ -8,7 +8,7 @@
       <div class="col table-responsive border rounded m-2">
         <p class="text-center">{{ title }} за {{ current_date|date:"F" }}</p>
         <table class="table table-dark table-hover">
-          <thead class="text-warning text-center verysmall">
+          <thead class="text-warning text-center">
             <tr>
               <th>Сотрудник</th>
               <th>Количество смен</th>
@@ -19,7 +19,7 @@
               <th></th>
             </tr>
           </thead>
-          <tbody class="text-center verysmall">
+          <tbody class="text-center">
             {% for employee in report_data.employees %}
             <tr>
               <td>{{ employee.full_name }}</td>
@@ -29,14 +29,14 @@
               <td>{{ employee.penalty|default:"-" | intcomma }}</td>
               <td>{{ employee.shortage|default:"-" | intcomma }}</td>
               <td>
-                <a href="{% url 'staff_employee_month_view' year=current_date.year month=current_date.month employee=employee.id %}?next={{ request.path }}" class="link-primary verysmall">
+                <a href="{% url 'staff_employee_month_view' year=current_date.year month=current_date.month employee=employee.id %}?next={{ request.path }}" class="link-primary">
                   Детально
                 </a>
               </td>
             </tr>
             {% endfor %}
           </tbody>
-          <tfoot class="text-center verysmall text-white">
+          <tfoot class="text-center text-white">
             <tr>
               <td></td>
               <td>{{ report_data.shift_counter|default:"-"  }}</td>
@@ -50,8 +50,8 @@
         </table>
       </div>
       <div class="col">
-        <p class="text-secondary fs-italic verysmall">Примечание - отображаются только проверенные смены.</p>
-        <p class="text-center"><a href="{% url 'reports_list' %}" class="btn btn-secondary verysmall">Вернуться к списку отчетов</a></p>
+        <p class="text-secondary fs-italic">Примечание - отображаются только проверенные смены.</p>
+        <p class="text-center"><a href="{% url 'reports_list' %}" class="btn btn-secondary">Вернуться к списку отчетов</a></p>
       </div>
     </div>
   </div>

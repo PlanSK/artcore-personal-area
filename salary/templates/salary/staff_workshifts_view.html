@@ -8,7 +8,7 @@
       {% if missed_workshifts_dates %}
       <div class="row justify-content-center">
         <div class="col-md-4 col-sm-auto">
-          <div class="alert alert-warning verysmall text-center" role="alert">
+          <div class="alert alert-warning text-center" role="alert">
             <i class="fa-solid fa-triangle-exclamation"></i>&nbsp;
             Обнаружены пропущенные смены:<br>
             {% for day in missed_workshifts_dates %}
@@ -18,8 +18,8 @@
         </div>
       </div>
       {% endif %}
-      <a href="{% url 'workshifts_months' %}" class="btn btn-outline-success verysmall pt-0 pb-0"><i class="fa-solid fa-calendar-days"></i>&nbsp;Смотреть архив</a>
-      <a class="btn btn-outline-primary verysmall pt-0 pb-0" href="{% url 'add_workshift' %}?next={{ request.path }}">
+      <a href="{% url 'workshifts_months' %}" class="btn btn-outline-success pt-0 pb-0"><i class="fa-solid fa-calendar-days"></i>&nbsp;Смотреть архив</a>
+      <a class="btn btn-outline-primary pt-0 pb-0" href="{% url 'add_workshift' %}?next={{ request.path }}">
         <i class="fa-solid fa-calendar-plus"></i>&nbsp;Добавить смену
       </a>
     </div>
@@ -42,32 +42,32 @@
           class="list-group-item list-group-item-action list-group-item-warning m-1 rounded"
         {% endif %}
         >
-          <div class="d-flex w-100 justify-content-between verysmall">
+          <div class="d-flex w-100 justify-content-between">
             <span class="mb-1">
               {% if workshift.status == 'VFD' %}
-              <a class="btn btn-success verysmall pt-0 pb-0" href="{{ workshift.get_absolute_url }}"><i class="fa-solid fa-calendar-check"></i>
+              <a class="btn btn-success pt-0 pb-0" href="{{ workshift.get_absolute_url }}"><i class="fa-solid fa-calendar-check"></i>
               {% elif workshift.status == 'WTC' %}
-              <a class="btn btn-warning verysmall pt-0 pb-0" href="{{ workshift.get_absolute_url }}"><i class="fa-solid fa-pen-to-square fa-fade"></i>
+              <a class="btn btn-warning pt-0 pb-0" href="{{ workshift.get_absolute_url }}"><i class="fa-solid fa-pen-to-square fa-fade"></i>
               {% else %}
-              <a class="btn btn-warning verysmall verysmall pt-0 pb-0" href="{{ workshift.get_absolute_url }}"><i class="fa-regular fa-clock fa-fade"></i> 
+              <a class="btn btn-warning pt-0 pb-0" href="{{ workshift.get_absolute_url }}"><i class="fa-regular fa-clock fa-fade"></i> 
               {% endif %}
                 {{ workshift.shift_date|date:"j E" }}
               </a>
             </span>
               <span class="text-wrap">{{ workshift.get_status_display }}</span>
             <div class="dropdown">
-              <button class="btn btn-outline-secondary btn-sm dropdown-toggle clear-after-toggle pb-0 pt-0 mb-1" type="button" id="dropdownMenuActions" data-bs-toggle="dropdown" aria-expanded="false">
+              <button class="btn btn-outline-secondary dropdown-toggle clear-after-toggle pb-0 pt-0 mb-1" type="button" id="dropdownMenuActions" data-bs-toggle="dropdown" aria-expanded="false">
                 <i class="fa-solid fa-ellipsis"></i>
               </button>
               <ul class="dropdown-menu dropdown-menu-secondary dropdown-menu-end" aria-labelledby="dropdownMenuActions">
                 <li>
-                  <a class="dropdown-item verysmall" href="{% url 'staff_edit_workshift' workshift.slug %}?next={{ request.path }}">
+                  <a class="dropdown-item" href="{% url 'staff_edit_workshift' workshift.slug %}?next={{ request.path }}">
                     <i class="fa-solid fa-square-pen"></i>&nbsp;Редактировать
                   </a>
                 </li>
                 <li><hr class="dropdown-divider"></li>
                 <li>
-                  <a class="dropdown-item verysmall text-danger" href="{% url 'delete_workshift' workshift.slug %}?next={{ request.path }}">
+                  <a class="dropdown-item text-danger" href="{% url 'delete_workshift' workshift.slug %}?next={{ request.path }}">
                     <i class="fa-solid fa-square-minus"></i>&nbsp;Удалить
                   </a>
                 </li>
@@ -76,7 +76,7 @@
           </div>
           <hr class="m-0">
           <div class="row m-1">
-            <div class="col verysmall ps-0">
+            <div class="col ps-0">
               <i class="fa-solid fa-user-gear"></i> {{ workshift.hall_admin.get_full_name }}<br>
               <i class="fa-solid fa-cash-register"></i> {{ workshift.cash_admin.get_full_name }}
             </div>
@@ -85,7 +85,7 @@
             </div>
           </div>
           <hr class="m-0 mb-1">
-          <div class="d-flex w-100 justify-content-between verysmall text-dark">
+          <div class="d-flex w-100 justify-content-between text-dark">
             <span class="badge rounded-pill bg-secondary"><i class="fa-solid fa-utensils"></i> {{ workshift.bar_revenue | intcomma }}</span>
             <span class="badge rounded-pill bg-secondary"><i class="fa-brands fa-playstation"></i> {{ workshift.game_zone_revenue | intcomma }}</span>
             {% if workshift.game_zone_error %}
@@ -125,13 +125,13 @@
   </div>
   <div class="row">
     <div class="col text-center">
-      <button class="btn btn-outline-secondary verysmall" onclick="history.back()">Назад</button>
+      <button class="btn btn-outline-secondary" onclick="history.back()">Назад</button>
     </div>
   </div>
   {% endif %}
   <div class="row">
     <div class="col text-center">
-      <a href="{% url 'index' %}" class="btn btn-secondary verysmall mt-2"><i class="fa-solid fa-house"></i>&nbsp;На главную</a>
+      <a href="{% url 'index' %}" class="btn btn-secondary mt-2"><i class="fa-solid fa-house"></i>&nbsp;На главную</a>
     </div>
   </div>
 </div>

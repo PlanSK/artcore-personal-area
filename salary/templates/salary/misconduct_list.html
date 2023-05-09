@@ -23,8 +23,8 @@
         {% endif %}
         m-2 rounded">
           <div class="d-flex w-100 justify-content-between">
-            <small class="mb-1">{{ misconduct.misconduct_date}}</small>
-            <span class="verysmall">
+            <span class="mb-1 normalize">{{ misconduct.misconduct_date}}</span>
+            <span class="">
               {% if misconduct.status == 'AD' %}
               <i class="fa-solid fa-file-circle-question fa-fade" style="color: coral;"></i> Ожидает объяснение
               {% elif misconduct.status == 'WT' %}
@@ -35,18 +35,18 @@
             </span>
             {% if perms.salary.change_misconduct and perms.salary.delete_misconduct %}
             <div class="dropdown">
-              <button class="btn btn-outline-secondary btn-sm dropdown-toggle clear-after-toggle pb-0 pt-0 mb-1" type="button" id="dropdownMenuActions" data-bs-toggle="dropdown" aria-expanded="false">
+              <button class="btn btn-outline-secondary dropdown-toggle clear-after-toggle pb-0 pt-0 mb-1" type="button" id="dropdownMenuActions" data-bs-toggle="dropdown" aria-expanded="false">
                 <i class="fa-solid fa-ellipsis"></i>
               </button>
               <ul class="dropdown-menu dropdown-menu-secondary dropdown-menu-end" aria-labelledby="dropdownMenuActions">
                 <li>
-                  <a class="dropdown-item verysmall" href="{% url 'edit_misconduct' pk=misconduct.pk %}?next={{ request.path }}">
+                  <a class="dropdown-item" href="{% url 'edit_misconduct' pk=misconduct.pk %}?next={{ request.path }}">
                     <i class="fa-solid fa-square-pen"></i>&nbsp;Редактировать
                   </a>
                 </li>
                 <li><hr class="dropdown-divider"></li>
                 <li>
-                  <a class="dropdown-item verysmall text-danger" href="{% url 'delete_misconduct' pk=misconduct.pk %}?next={{ request.path }}">
+                  <a class="dropdown-item text-danger" href="{% url 'delete_misconduct' pk=misconduct.pk %}?next={{ request.path }}">
                     <i class="fa-solid fa-square-minus"></i>&nbsp;Удалить
                   </a>
                 </li>
@@ -56,28 +56,28 @@
           </div>
           <hr class="m-0">
           <div class="text-justify">
-            <small>
+            <span class="normalize">
               <b>Нарушен п. {{ misconduct.regulations_article.article }} 
               <a href="https://drive.google.com/file/d/1d_wiCKQi9yC1eT4aKvm2mMLqdeq65XgJ/view?usp=sharing" class="link-dark">Регламента</a></b>
-            </small>
+            </span>
             <br>
-            <span class="verysmall text-justify">{{ misconduct.regulations_article.title }}</span>
+            <span class="text-justify">{{ misconduct.regulations_article.title }}</span>
           </div>
           <hr class="m-0">
           <div class="d-flex w-100 justify-content-between">
-            <small><b>
+            <span class="normalize"><b>
               {% if misconduct.penalty %}
               {{ misconduct.penalty | intcomma }} руб.
               {% else %}
               Предупреждение
               {% endif %}
-            </b></small>
-            <a class="btn btn-outline-primary verysmall mt-1 pt-0 pb-0" href="{{ misconduct.get_absolute_url }}">Подробно</a>
+            </b></span>
+            <a class="btn btn-outline-primary mt-1 pt-0 pb-0" href="{{ misconduct.get_absolute_url }}">Подробно</a>
           </div>
         </li>
         {% endfor %}
       </ul>
-      <p class="text-center verysmall">
+      <p class="text-center">
       Сумма штрафов по нарушениям: <b>{{ penalty_sum }} руб.</b>
       </p>
       {% else %}
@@ -88,11 +88,11 @@
   <div class="row">
     <div class="col text-center">
       {% if request.GET.next %}
-      <a class="btn btn-outline-secondary verysmall mt-1" href="{{ request.GET.next }}">Назад</a>
+      <a class="btn btn-outline-secondary mt-1" href="{{ request.GET.next }}">Назад</a>
       {% elif perms.salary.change_misconduct and perms.salary.delete_misconduct %}
-      <a class="btn btn-outline-secondary verysmall mt-1" href="{% url 'misconducts_view' %}">К списку нарушителей</a>
+      <a class="btn btn-outline-secondary mt-1" href="{% url 'misconducts_view' %}">К списку нарушителей</a>
       {% else %}
-      <a class="btn btn-outline-secondary verysmall mt-1" href="/">Назад</a>
+      <a class="btn btn-outline-secondary mt-1" href="/">Назад</a>
       {% endif %}
     </div>
   </div>

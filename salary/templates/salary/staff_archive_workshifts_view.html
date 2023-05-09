@@ -4,7 +4,7 @@
 {% block data %}
 <div class="col table-responsive border rounded m-3">
   <table class="table table-dark">
-    <thead class="text-warning text-center verysmall">
+    <thead class="text-warning text-center">
       <tr>
         <th scope="col">Статус</th>
         <th scope="col">Дата</th>
@@ -14,7 +14,7 @@
         <th scope="col"></th>
       </tr>
     </thead>
-    <tbody class="text-center verysmall">
+    <tbody class="text-center">
       {% for workshift in object_list %}
       {% if workshift.status == 'VFD' %}
       <tr class>
@@ -40,31 +40,31 @@
         <td>{{ workshift.summary_revenue | intcomma }}</td>
         <td>
           <div class="dropdown">
-            <button class="btn btn-outline-secondary btn-sm dropdown-toggle clear-after-toggle pb-0 pt-0" type="button" id="dropdownMenuActions" data-bs-toggle="dropdown" aria-expanded="false">
+            <button class="btn btn-outline-secondary dropdown-toggle clear-after-toggle pb-0 pt-0" type="button" id="dropdownMenuActions" data-bs-toggle="dropdown" aria-expanded="false">
               <i class="fa-solid fa-ellipsis"></i>
             </button>
             <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end" aria-labelledby="dropdownMenuActions">
               <li>
-                <a class="dropdown-item verysmall" href="{{ workshift.get_absolute_url }}">
+                <a class="dropdown-item" href="{{ workshift.get_absolute_url }}">
                   <i class="fa-solid fa-eye"></i>&nbsp;Детальный просмотр
                 </a>
               </li>
               <li>
-                <a class="dropdown-item verysmall" href="{% url 'staff_edit_workshift' workshift.slug %}?next={{ request.path }}">
+                <a class="dropdown-item" href="{% url 'staff_edit_workshift' workshift.slug %}?next={{ request.path }}">
                   <i class="fa-solid fa-square-pen"></i>&nbsp;Редактировать смену
                 </a>
               </li>
               <li><hr class="dropdown-divider"></li>
               <li>
-                <a class="dropdown-item verysmall text-danger" href="{% url 'delete_workshift' workshift.slug %}?next={{ request.path }}">
+                <a class="dropdown-item text-danger" href="{% url 'delete_workshift' workshift.slug %}?next={{ request.path }}">
                   <i class="fa-solid fa-square-minus"></i>&nbsp;Удалить смену
                 </a>
               </li>
               {% if workshift.shortage and not workshift.shortage_paid %}
               <li><hr class="dropdown-divider"></li>
-              <li><span class="dropdown-item-text text-warning verysmall text-center">Недостача: {{ workshift.shortage | intcomma }}</span></li>
+              <li><span class="dropdown-item-text text-warning text-center">Недостача: {{ workshift.shortage | intcomma }}</span></li>
               <li>
-                <a class="dropdown-item verysmall text-center" href="{% url 'shortage_payment' slug=workshift.slug %}?next={{ request.path }}">
+                <a class="dropdown-item text-center" href="{% url 'shortage_payment' slug=workshift.slug %}?next={{ request.path }}">
                   <i class="fa-solid fa-money-bill"></i>&nbsp;Погасить
                 </a>
               </li>
@@ -75,7 +75,7 @@
       </tr>
       {% endfor %}
     </tbody>
-    <tfoot class="text-center verysmall text-white">
+    <tfoot class="text-center text-white">
       <tr>
         <td></td>
         <td>{{ object_list.count }}</td>
@@ -90,7 +90,7 @@
 </div>
 <div class="row">
   <div class="col text-center">
-    <button class="btn btn-outline-secondary verysmall" onclick="history.back()">Назад</button>
+    <button class="btn btn-outline-secondary" onclick="history.back()">Назад</button>
   </div>
 </div>
 {% endblock %}

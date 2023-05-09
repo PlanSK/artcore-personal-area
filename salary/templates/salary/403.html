@@ -2,24 +2,25 @@
 {% load static %}
 
 {% block body %}
+
 <body class="bg-dark text-light h-100">
-    <div class="container h-100">
-        <div class="row h-100 align-items-center justify-content-md-center">
-            <div class="col-md-12">
-                <div class="text-center">
-                    <img class="mb-5" src="{% static 'salary/img/logo.png' %}" alt="" height="40">
-                    <h1 class="mb-5 text-danger"><i class="fa-solid fa-ban fa-3x"></i></h1>
-                    <h2>403 Access forbidden</h2>
-                    <div class="mb-5">
-                        You don't have permission to access on this server.
-                    </div>
-                    <div class="">
-                        <a href="{% url 'index' %}" class="btn btn-primary btn-lg verysmall">
-                            <i class="fa-solid fa-house"></i>&nbsp;Take Me Home
-                        </a>
-                    </div>
-                </div>
-            </div>
+  <div class="container h-100">
+    <div class="row h-100 align-items-center justify-content-md-center">
+      <div class="col-md-12">
+        <div class="text-center">
+          <img class="mb-5" src="{% static 'salary/img/logo.png' %}" alt="" height="40">
+          <h1 class="mb-5 text-danger"><i class="fa-solid fa-ban fa-3x"></i></h1>
+          <h2>403 Access forbidden</h2>
+          <div class="mb-5 normalize">
+            You don't have permission to access on this server.
+          </div>
+          <div class="">
+            <a href="{% url 'index' %}" class="btn btn-primary btn-lg">
+              <i class="fa-solid fa-house"></i>&nbsp;Take Me Home
+            </a>
+          </div>
         </div>
+      </div>
     </div>
-{% endblock %}
+  </div>
+  {% endblock %}

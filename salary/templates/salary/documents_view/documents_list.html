@@ -11,16 +11,16 @@
       <div class="row">
         {% if files_list %}
         <div class="col m-2 border rounded">
-          <p class="verysmall">Список документов:</p>
+          <p>Список документов:</p>
           <ul class="list-group m-1">
             {% for file in files_list %}
-            <a href="#" class="list-group-item list-group-item-dark pt-0 pb-0 verysmall" id="{{ file }}">{{ file }}</a>
+            <a href="#" class="list-group-item list-group-item-dark pt-0 pb-0" id="{{ file }}">{{ file }}</a>
             {% endfor %}
           </ul>
-          <a href="" class="btn btn-outline-primary verysmall mb-1" id="deleteButton" onclick="return confirm('Вы действительно хотите удалить этот файл?');"><i class="fa-solid fa-trash"></i>&nbsp;Удалить</a>
+          <a href="" class="btn btn-outline-primary mb-1" id="deleteButton" onclick="return confirm('Вы действительно хотите удалить этот файл?');"><i class="fa-solid fa-trash"></i>&nbsp;Удалить</a>
         </div>
         <div class="col m-2 border rounded">
-          <p class="verysmall">Preview</p>
+          <p>Preview</p>
           <div id="image-block"></div>
         </div>
         <script>
@@ -69,15 +69,15 @@
           <p>Документы отсутствуют</p>
         </div>
         {% endif %}
-        <div class="text-center mb-1 verysmall">
+        <div class="text-center mb-1">
         {% if employee.profile.profile_status != 'VD' %}
           <p>В настоящее время профиль сотрудника имеет стутус <b class="text-warning">"{{ employee.profile.get_profile_status_display }}"</b>.<br>Вы можете одобрить его регистрацию нажав кнопку ниже.<br>
-          <a href="{% url 'profile_approval' pk=employee.id %}?next={{ request.path }}" class="btn btn-outline-success verysmall mt-1" onclick="return confirm('Вы действительно хотите одобрить регистрицию сотрудника?');">Одобрить регистрацию</a></p>
+          <a href="{% url 'profile_approval' pk=employee.id %}?next={{ request.path }}" class="btn btn-outline-success mt-1" onclick="return confirm('Вы действительно хотите одобрить регистрицию сотрудника?');">Одобрить регистрацию</a></p>
         {% else %}
           <p>В настоящее время профиль сотрудника имеет стутус <b class="text-success">"{{ employee.profile.get_profile_status_display }}"</b>
         {% endif %}
         </div>
-        <div class="mb-2"><a href="{% url 'user_view' %}" class="btn btn-outline-primary verysmall"><i class="fa-solid fa-users"></i>&nbsp;Управление персоналом</a></div>
+        <div class="mb-2"><a href="{% url 'user_view' %}" class="btn btn-outline-primary"><i class="fa-solid fa-users"></i>&nbsp;Управление персоналом</a></div>
       </div>
     </div>
   </div>

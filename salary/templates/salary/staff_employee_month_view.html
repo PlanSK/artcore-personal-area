@@ -12,7 +12,7 @@
         {% else %}
         <p class="text-warning text-center">Смены за {{ object_list.0.shift_date|date:"F Y г."|lower }}</p><hr>
         <table class="table table-dark table-hover">
-          <thead class="text-warning text-center verysmall">
+          <thead class="text-warning text-center">
             <tr>
               <th>Статус</th>
               <th>Дата</th>
@@ -22,7 +22,7 @@
               <th></th>
             </tr>
           </thead>
-          <tbody class="text-center verysmall">
+          <tbody class="text-center">
             {% for workshift in object_list %}
             <tr>
               <td>
@@ -42,7 +42,7 @@
                 {% if workshift.shortage_paid and workshift.shortage %}
                   <s class="text-secondary">{{ workshift.shortage|default:"-" | intcomma }}</s>
                 {% elif workshift.shortage %}
-                  <a class="btn btn-danger pt-0 pb-0 verysmall" href="{% url 'shortage_payment' slug=workshift.slug %}?next={{ request.path }}" onclick="return confirm('Вы уверены, что хотите погасить недостачу?');">
+                  <a class="btn btn-danger pt-0 pb-0" href="{% url 'shortage_payment' slug=workshift.slug %}?next={{ request.path }}" onclick="return confirm('Вы уверены, что хотите погасить недостачу?');">
                     {{ workshift.shortage | intcomma }} <i class="fa-solid fa-sack-xmark"></i>
                   </a>
                 {% else %}
@@ -58,7 +58,7 @@
             </tr>
             {% endfor %}
           </tbody>
-          <tfoot class="text-center verysmall">
+          <tfoot class="text-center">
             <tr>
               <td>Суммарно за месяц:</td>
               <td>{{ object_list.count }}</td>
@@ -74,7 +74,7 @@
     </div>
     <div class="row">
       <div class="col text-center">
-        <button class="btn btn-outline-secondary verysmall" onclick="history.back()">Назад</button>
+        <button class="btn btn-outline-secondary" onclick="history.back()">Назад</button>
       </div>
     </div>
   </div>

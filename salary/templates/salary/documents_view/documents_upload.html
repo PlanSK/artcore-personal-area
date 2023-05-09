@@ -4,7 +4,7 @@
 {% block content %}
 <div class="container">
   <div class="row justify-content-center mt-2">
-    <div class="col-md-3 col-sm-auto text-center verysmall">
+    <div class="col-md-3 col-sm-auto text-center">
       Вам необходимо загрузить скан-копии следующих документов:
       <div class="list-group mt-1 mb-1">
         <a class="list-group-item list-group-item-action list-group-item-dark disabled">Паспорт</a>
@@ -27,21 +27,21 @@
     </div>
     <div class="col-md-9 col-sm-auto text-center border-start">
       {% if message %}
-      <div class="alert alert-success align-items-center m-2 text-center verysmall" role="alert">
+      <div class="alert alert-success align-items-center m-2 text-center" role="alert">
         {{ message }}
         Для возврата на главную страницу нажмите <a href="{% url 'index' %}" class="link-primary">сюда.</a>
       </div>
       {% endif %}
       <div class="col m-2 border rounded p-1">
         <form method="post" enctype="multipart/form-data" class="needs-validation mt-1" >
-          <p class="verysmall">Форма для загрузки файлов:<br><span class="footnote">(изображения формата *.jpg, *.png и др.)</span></p>
+          <p>Форма для загрузки файлов:<br><span class="footnote">(изображения формата *.jpg, *.png и др.)</span></p>
           <div class="form-error">{{ form.non_field_errors }}</div>
           <div class="input-group mb-3">
-            <label class="input-group-text verysmall" for="id_files">Выбрать&nbsp;<i class="fa-solid fa-folder-open"></i></label>
+            <label class="input-group-text" for="id_files">Выбрать&nbsp;<i class="fa-solid fa-folder-open"></i></label>
             <input type="file" name="files" class="form-control" id="id_files" accept="image/*" multiple hidden required>
-            <textarea class="form-control verysmall" id="file-list"></textarea>
+            <textarea class="form-control" id="file-list"></textarea>
           </div>
-          <button class="btn btn-outline-secondary verysmall" type="submit" onclick="checkInput()"><i class="fa-solid fa-cloud-arrow-up"></i>&nbsp;Загрузить</button>
+          <button class="btn btn-outline-secondary" type="submit" onclick="checkInput()"><i class="fa-solid fa-cloud-arrow-up"></i>&nbsp;Загрузить</button>
           {% csrf_token %}
         </form>
       </div>

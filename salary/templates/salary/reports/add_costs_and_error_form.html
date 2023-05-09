@@ -3,7 +3,7 @@
 
 {% block content %}
 <main>
-  <div class="container verysmall">
+  <div class="container">
     {% if not costs_list and not errors_list %}
     <div class="row justify-content-center">
       <div class="col col-md-8 col-sm-auto mt-1">
@@ -136,7 +136,7 @@
     <div class="row justify-content-center border-top mt-1">
       <div class="col col-md-6 text-center border rounded m-1 p-1">
         Достоверность и корректность, указанных в отчете сведений, подтверждаю. <br>
-        <a href="{% url 'redirect_to_workshift' pk=workshift_pk %}" class="btn btn-success btn-sm">Закончить подачу данных</a>
+        <a href="{% url 'redirect_to_workshift' pk=workshift_pk %}" class="btn btn-success">Закончить подачу данных</a>
       </div>
     </div>
   </div>

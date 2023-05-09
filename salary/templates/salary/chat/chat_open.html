@@ -13,7 +13,7 @@
           {% else %}
           <i class="fa-solid fa-circle-user fa-2x"></i>
           {% endif %}
-          <span class="m-1 verysmall">{{ recipient.get_full_name }}</span>
+          <span class="m-1">{{ recipient.get_full_name }}</span>
         </div>
         <div class="col-1 d-flex align-items-center">
           <a href="{% url 'messenger' %}" class="btn-close" aria-label="Close"></a>
@@ -36,11 +36,11 @@
             {% endif %}
           </div>
           {% if message.author == request.user %}
-            <div class="col-auto p-1 verysmall bg-my-chat-message rounded">
+            <div class="col-auto p-1 bg-my-chat-message rounded">
               <div class="card-body p-1">
-                <p class="card-text verysmall ms-1 mb-0">
+                <p class="card-text ms-1 mb-0">
                   {{ message.message_text }}</p>
-                <div class="text-end verysmall text-my-notify">
+                <div class="text-end text-my-notify">
                   {{ message.sending_time | date:"j M H:i" }}&nbsp;
                   {% if message.is_read  %}
                   <i class="fa-solid fa-check-double"></i>
@@ -51,10 +51,10 @@
               </div>
             </div>
           {% else %}
-            <div class="col-auto p-1 verysmall bg-chat-message rounded">
+            <div class="col-auto p-1 bg-chat-message rounded">
               <div class="card-body p-1">
-                <p class="card-text verysmall ms-1 mb-0">{{ message.message_text }}</p>
-                <div class="text-end verysmall text-secondary">{{ message.sending_time | date:"j M H:i" }}</div>
+                <p class="card-text ms-1 mb-0">{{ message.message_text }}</p>
+                <div class="text-end text-secondary">{{ message.sending_time | date:"j M H:i" }}</div>
               </div>
             </div>
           {% endif %}
@@ -80,7 +80,7 @@
   <div class="card-body text-center d-flex align-items-center">
     <div class="col m-5">
       <i class="fa-solid fa-comment-slash fa-2x"></i>
-      <p class="verysmall">No messages here yet...</p>
+      <p>No messages here yet...</p>
     </div>
   </div>
   {% endif %}

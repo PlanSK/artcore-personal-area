@@ -105,14 +105,14 @@
     </div>
     <div class="row mb-2">
       <div class="col">
-        <button class="btn btn-outline-secondary verysmall" onclick="history.back()">Назад</button>
+        <button class="btn btn-outline-secondary" onclick="history.back()">Назад</button>
       </div>
     </div>
     <div class="row mb-2 row-cols-md-2 row-cols-sm-1 m-1 justify-content-center">
       <div class="col-md-5 col-sm-12 m-2 table-responsive rounded border border-light">
         <p class="text-orange text-center fw-bold">Аналитика по выручке</p>
         <table class="table table-dark">
-          <thead class="text-warning text-center verysmall">
+          <thead class="text-warning text-center">
             <tr>
               <th>Показатель</th>
               <th>{{ previous_month_date|date:"F" }}</th>
@@ -120,7 +120,7 @@
               <th>Анализ</th>
             </tr>
           </thead>
-          <tbody class="verysmall text-center">
+          <tbody class="text-center">
             <tr>
               <td>Общая выручка</td>
               <td>{{ analytic.summary_revenue__sum.0 | intcomma }}</td>
@@ -152,10 +152,10 @@
           </tbody>
         </table>
         <table class="table table-dark">
-          <thead class="text-warning text-center verysmall">
+          <thead class="text-warning text-center">
             <th colspan="4">Пиковые показатели</th>
           </thead>
-          <tbody class="text-center verysmall">
+          <tbody class="text-center">
             <tr>
               <td>Макс. выручка</td>
               <td>{{ max_revenue_workshift.shift_date | date:"d.m.Y" }}<br>({{ max_revenue_workshift.shift_date | date:"l" }})</td>
@@ -180,7 +180,7 @@
       <div class="col-md col-sm-12 m-2 table-responsive rounded border border-light">
         <p class="text-orange text-center fw-bold">Основные показатели выручки</p>
         <table class="table table-dark">
-          <thead class="text-warning text-center verysmall">
+          <thead class="text-warning text-center">
             <tr>
               <th>Категория</th>
               <th>{{ previous_month_date|date:"F" }}</th>
@@ -188,7 +188,7 @@
               <th>Анализ</th>
             </tr>
           </thead>
-          <tbody class="text-center verysmall">
+          <tbody class="text-center">
             <tr>
               <td class="text-warning">Бар</td>
               <td>{{ analytic.bar_revenue__sum.0 | intcomma }}</td>
@@ -246,7 +246,7 @@
               </td>
             </tr>
           </tbody>
-          <tfoot class="text-center verysmall">
+          <tfoot class="text-center">
             <tr>
               <td class="text-danger">Недостачи</td>
               <td>{{ analytic.shortage__sum.0 | intcomma }}</td>
