@@ -175,8 +175,9 @@
             {% endfor %}
           </tbody>
         </table>
-        {% endif %}
+        {% else %}
         <p class="text-center text-secondary">Данные отсутствуют</p>
+        {% endif %}
       </div>
       <div class="col col-md-4 col-sm-auto border-start border-secondary">
         {% if workshift.costs.all %}
