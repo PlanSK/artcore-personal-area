@@ -10,7 +10,6 @@
     <link rel="stylesheet" id="css-url" href="">
     <script>
         document.getElementById("css-url").setAttribute('href', "{% static 'salary/css/style.css' %}?v=" + Math.floor((new Date().getTime()) / 1000));
-        document.getElementById("bootstrap-css-link").setAttribute('href', "{% static 'salary/css/bootstrap.css' %}?v=" + Math.floor((new Date().getTime()) / 1000));
     </script>
     <link rel="icon" type="image/x-icon" href="{% static 'salary/img/favicon.ico' %}">
     <title>{{ title }}</title>
