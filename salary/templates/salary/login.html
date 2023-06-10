@@ -4,25 +4,27 @@
 
 {% block body %}
 <body class="bg-dark h-100 text-light">
-    <main class="h-100">
-      <div class="container h-100">
-        <div class="row row-cols-1 align-items-center justify-content-md-center text-center p-5 h-100">
-          <div class="col-md-3">
-            <img class="mb-4" src="{% static 'salary/img/logo.png' %}" alt="" height="40">
-            <form method="post">
-              {% csrf_token %}
-              {{ form|crispy }}
-              <button class="w-100 btn btn-lg btn-primary mb-3" type="submit">Войти</button>
-              <a href="{% url 'registration' %}" class="link-secondary">Регистрация</a><br>
-              <a href="{% url 'password_reset' %}" class="link-secondary">Восстановление пароля</a>
-            </form>
-          </div>
-          <div class="col-md-12 fixed-bottom">
-            <p class="mt-5 mb-3 text-body-secondary">&copy; ARTCORE
-              <script>document.write(new Date().getFullYear())</script>
-            </p>
-          </div>
+  <main class="h-100">
+    <div class="container h-100">
+      <div class="row row-cols-1 align-items-center justify-content-md-center text-center p-5 h-100">
+        <div class="col-md-3">
+          <img class="mb-4" src="{% static 'salary/img/logo.png' %}" alt="" height="40">
+          <form method="post">
+            {% csrf_token %}
+            {{ form|crispy }}
+            <button class="w-100 btn btn-lg btn-primary mb-3" type="submit">Войти</button>
+            <a href="{% url 'registration' %}" class="link-secondary">Регистрация</a><br>
+            <a href="{% url 'password_reset' %}" class="link-secondary">Восстановление пароля</a>
+          </form>
+        </div>
+        <div class="col-md-12 fixed-bottom">
+          <p class="mt-5 mb-3 text-body-secondary">&copy; ARTCORE
+            <script>document.write(new Date().getFullYear())</script>
+          </p>
         </div>
       </div>
-    </main>   
+    </div>
+  </main>
+  {% include 'salary/scripts.html' %}
+</body>
 {% endblock %}
