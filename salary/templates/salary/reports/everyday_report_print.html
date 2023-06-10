@@ -1,258 +1,265 @@
-{% extends 'salary/logined_page.html' %}
-{% load humanize %}
+{% extends 'salary/base.html' %}
+{% load static %}
+{% load static %}
 
-{% block content %}
-<main>
-  <div class="container">
-    <div class="row mt-1">
-      <div class="col text-center text-secondary">
-        Ежедневный отчет по смене<br>
-        <b>{{ yesterday|date:"d.m.Y" }} - {{ workshift.shift_date|date:"d.m.Y" }}</b>
-      </div>
-    </div>
-    <div class="row mb-1">
-      <div class="col text-center">
-        <table class="table table-dark table-report text-secondary table-bordered">
-          <thead>
-            <th>Смена закрыта:</th>
-            <th>Смену сдали:</th>
-          </thead>
-          <tbody>
+{% block body %}
+<body class="bg-dark text-white font-italic">
+  <main>
+    <div class="container">
+      <div class="row mt-1">
+        <div class="col text-center text-secondary">
+          <table class="table text-secondary text-center">
             <tr>
-              <td>
-               {{workshift.shift_date}}<br><br>
-                Технический отчет:
-                {% if workshift.technical_report %}
-                сдан
-                {% else %}
-                не сдан
-                {% endif %}
+              <td style="width: 20%;">
+                <img src="{% static 'salary/img/logo.png' %}" height="30" class="d-inline-block align-top" alt="" loading="lazy">
               </td>
               <td>
-                <table class="table table-dark text-secondary">
-                  <thead>
-                    <th>Администратор кассы</th>
-                    <th>Администратор зала</th>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>{{workshift.cash_admin.get_full_name}}</td>
-                      <td>{{workshift.hall_admin.get_full_name}}</td>
-                    </tr>
-                  </tbody>
-                </table>
+                Ежедневный отчет по смене<br>
+                <b>{{ yesterday|date:"d.m.Y" }} - {{ workshift.shift_date|date:"d.m.Y" }}</b>
               </td>
             </tr>
-          </tbody>
-        </table>
+          </table>
+        </div>
       </div>
-    </div>
-    <div class="row mb-1">
-      <div class="col text-center text-secondary">
-        <b>Время прибытия смены</b>
-        <table class="table table-dark text-center table-report text-secondary table-bordered">
-          <thead>
-            <th>Администратор кассы</th>
-            <th>Администратор зала</th>
-          </thead>
-          <tbody>
-            <tr>
-              <td>{{workshift.next_cashier.get_full_name|default:"-"}}</td>
-              <td>{{workshift.next_hall_admin.get_full_name|default:"-"}}</td>
-            </tr>
-            <tr>
-              <td>{{workshift.cashier_arrival_time|default:"-"}}</td>
-              <td>{{workshift.hall_admin_arrival_time|default:"-"}}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-    <div class="row mb-1">
-      <div class="col text-center text-secondary">
-        <b>Расходы и суммарные данные</b>
-        <table class="table table-dark table-report text-secondary table-bordered">
-          <thead>
-            <th>Расходы (Наименование, сумма)</th>
-            <th>Суммарные данные</th>
-          </thead>
-          <tbody>
-            <tr>
-              <td>
-                <table class="table table-dark text-secondary">
-                  <thead>
-                    <th>Сумма</th>
-                    <th>Наименование</th>
-                    <th>Подпись</th>
-                  </thead>
-                  <tbody>
-                    {% for cost in workshift.costs.all %}
-                    <tr>
-                      <td>{{cost.cost_sum}}</td>
-                      <td>{{cost.cost_reason}}</td>
-                      <td class="text-start"><br>_________/{{cost.cost_person.last_name}}/</td>
-                    </tr>
-                    {% endfor %}
-                  </tbody>
-                </table>
-              </td>
-              <td>
-                <table class="table table-dark text-secondary table-report text-start">
-                  <thead>
-                    <th>Наименование</th>
-                    <th>Сумма</th>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>Сумма эквайринга (терминал)</td>
-                      <td>{{workshift.acquiring_terminal_sum}}</td>
-                    </tr>
-                    <tr>
-                      <td>Сумма по эквайринга (Эватор)</td>
-                      <td>{{workshift.acquiring_evator_sum}}</td>
-                    </tr>
-                    <tr>
-                      <td>Сумма расходов</td>
-                      <td>{{workshift.cost_sum}}</td>
-                    </tr>
-                    <tr>
-                      <td>Сумма ошибок</td>
-                      <td>{{workshift.game_zone_error}}</td>
-                    </tr>
-                    <tr>
-                      <td>Сумма наличных</td>
-                      <td>{{workshift.cash_sum}}</td>
-                    </tr>
-                    <tr>
-                      <td>Сумма на сдачу</td>
-                      <td>{{workshift.short_change_sum}}</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-    <div class="row mb-1">
-      <div class="col text-center">
-        <table class="table text-secondary table-dark table-report table-bordered">
-          <thead>
-            <th>Ошибки по кабинкам (время, №, причина, ошибочное время)</th>
-            <th>Пожелания/примечания</th>
-          </thead>
-          <tr>
-            <td>
-              <table class="table table-dark">
-                <tbody class="text-secondary">
-                  {% for cabin_error in workshift.cabin_error.all %}
-                  <tr>
-                    <td>{{cabin_error.time}}</td>
-                    <td>{{cabin_error.get_cabin_number_display}}</td>
-                    <td>{{cabin_error.description}}</td>
-                    <td>{{cabin_error.error_interval}}</td>
-                  </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
-            </td>
-            <td>
-              <br><br>
-            </td>
-          </tr>
-        </table>
-      </div>
-    </div>
-    <div class="row mb-1">
-      <div class="col text-center text-secondary">
-        <b>Пояснения к ошибкам KNA</b>
-        <table class="table table-dark text-secondary table-report table-bordered">
-          <thead>
-            <th>Время по КНА</th>
-            <th>Номер компьютера или карты</th>
-            <th>Описание ошибки (подробное описание, была ли устранена)</th>
-            <th>Сумма в рублях</th>
-          </thead>
-          <tbody>
-            {% for error in workshift.errors.all %}
-              {% if error.error_type == 'KNA' %}
+      <div class="row mb-1">
+        <div class="col text-center">
+          <table class="table table-dark table-report text-secondary table-bordered">
+            <thead>
+              <th>Смена закрыта:</th>
+              <th>Данные смены:</th>
+            </thead>
+            <tbody>
               <tr>
-                <td>{{ error.error_time }}</td>
-                <td>{{ error.card }}</td>
-                <td>{{ error.description }}</td>
-                <td>{{ error.error_sum }}</td>
+                <td style="width: 50%;">
+                {{workshift.shift_date}}<br>
+                  Технический отчет:
+                  {% if workshift.technical_report %}
+                  сдан
+                  {% else %}
+                  не сдан
+                  {% endif %}
+                </td>
+                <td>
+                  <table class="table table-dark text-secondary">
+                    <thead>
+                      <th>Администратор кассы</th>
+                      <th>Администратор зала</th>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>{{workshift.cash_admin.get_full_name}}</td>
+                        <td>{{workshift.hall_admin.get_full_name}}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
               </tr>
-              {% endif %}
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    </div>
-    <div class="row row-cols-2 mb-1 text-secondary text-center">
-      <div class="col-md-6">
-        Данные по  грилю
-        <table class="table table-dark text-secondary table-report table-bordered">
-          <thead>
-            <th>Время</th>
-            <th>Номер карты</th>
-            <th>Сумма</th>
-            <th>Комментарий</th>
-          </thead>
-          <tbody>
-            {% for error in workshift.errors.all %}
-              {% if error.error_type == 'GRILL' %}
               <tr>
-                <td>{{ error.error_time }}</td>
-                <td>{{ error.card }}</td>
-                <td>{{ error.error_sum }}</td>
-                <td>{{ error.description|default:"-" }}</td>
+                <td>
+                  <b>Суммарные данные</b>
+                  <table class="table table-dark text-secondary table-report text-start">
+                    <thead>
+                      <th>Наименование</th>
+                      <th>Сумма</th>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>Сумма эквайринга (терминал)</td>
+                        <td>{{workshift.acquiring_terminal_sum}}</td>
+                      </tr>
+                      <tr>
+                        <td>Сумма эквайринга (Эватор)</td>
+                        <td>{{workshift.acquiring_evator_sum}}</td>
+                      </tr>
+                      <tr>
+                        <td>Сумма расходов</td>
+                        <td>{{workshift.cost_sum}}</td>
+                      </tr>
+                      <tr>
+                        <td>Сумма ошибок</td>
+                        <td>{{workshift.game_zone_error}}</td>
+                      </tr>
+                      <tr>
+                        <td>Сумма наличных</td>
+                        <td>{{workshift.cash_sum}}</td>
+                      </tr>
+                      <tr>
+                        <td>Сумма на сдачу</td>
+                        <td>{{workshift.short_change_sum}}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+                <td>
+                  <b>Время прибытия смены</b>
+                  <table class="table table-dark text-secondary">
+                    <thead>
+                      <th>Администратор кассы</th>
+                      <th>Администратор зала</th>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>{{workshift.next_cashier.get_full_name|default:"-"}}</td>
+                        <td>{{workshift.next_hall_admin.get_full_name|default:"-"}}</td>
+                      </tr>
+                      <tr>
+                        <td>{{workshift.cashier_arrival_time|default:"-"}}</td>
+                        <td>{{workshift.hall_admin_arrival_time|default:"-"}}</td>
+                      </tr>
+                      <tr>
+                        <td colspan="2" class="mb-2">
+                          <br>
+                          <b>Пожелания/примечания</b>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
               </tr>
-              {% endif %}
-            {% endfor %}
-            <tr><td colspan="2"><b>Итого:</b></td><td>{{ grill_sum|default:"0" }}</td><td>-</td></tr>
-          </tbody>
-        </table>
+            </tbody>
+          </table>
+        </div>
       </div>
-      <div class="col-md-6">
-        Данные по лото
-        <table class="table table-dark text-secondary table-report table-bordered">
-          <thead>
-            <th>Время</th>
-            <th>Номер карты</th>
-            <th>Сумма</th>
-            <th>Комментарий</th>
-          </thead>
-          <tbody>
-            {% for error in workshift.errors.all %}
-              {% if error.error_type == 'LOTTO' %}
+      <div class="row mb-1">
+        <div class="col text-center text-secondary">
+          <b>Данные по расходам</b>
+          <table class="table table-dark table-report text-secondary table-bordered">
+            <thead>
+              <th style="width: 5%;">Сумма</th>
+              <th>Наименование</th>
+              <th>Подпись</th>
+            </thead>
+            <tbody>
+              {% for cost in workshift.costs.all %}
               <tr>
-                <td>{{ error.error_time }}</td>
-                <td>{{ error.card }}</td>
-                <td>{{ error.error_sum }}</td>
-                <td>{{ error.description|default:"-" }}</td>
+                <td>{{cost.cost_sum}}</td>
+                <td>{{cost.cost_reason}}</td>
+                <td class="text-start" style="width: 20%;"><br>_________/{{cost.cost_person.last_name}}/</td>
               </tr>
-              {% endif %}
-            {% endfor %}
-            <tr><td colspan="2"><b>Итого:</b></td><td>{{ lotto_sum|default:"0" }}</td><td>-</td></tr>
-          </tbody>
-        </table>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="row mb-1">
+        <div class="col text-center text-secondary">
+          {% if workshift.cabin_error.all %}
+          <b>Ошибки по кабинкам</b>
+          <table class="table text-secondary table-dark table-report table-bordered">
+            <thead>
+              <th>Время</th>
+              <th>№</th>
+              <th>Причина</th>
+              <th>Ошибочное время</th>
+            </thead>
+            <tbody class="text-secondary">
+              {% for cabin_error in workshift.cabin_error.all %}
+              <tr>
+                <td>{{cabin_error.time}}</td>
+                <td>{{cabin_error.get_cabin_number_display}}</td>
+                <td>{{cabin_error.description}}</td>
+                <td>{{cabin_error.error_interval}}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          {% else %}
+          <b>Ошибки по кабинкам отсутствуют</b><hr>
+          {% endif %}
+        </div>
+      </div>
+      <div class="row mb-1">
+        <div class="col text-center text-secondary">
+          {% if kna_errors_queryset %}
+          <b>Пояснения к ошибкам KNA</b>
+          <table class="table table-dark text-secondary table-report table-bordered">
+            <thead>
+              <th>Время по КНА</th>
+              <th>Номер компьютера или карты</th>
+              <th>Описание ошибки (подробное описание, была ли устранена)</th>
+              <th>Сумма в рублях</th>
+            </thead>
+            <tbody>
+              {% for error in kna_errors_queryset %}
+                <tr>
+                  <td>{{ error.error_time }}</td>
+                  <td>{{ error.card }}</td>
+                  <td>{{ error.description }}</td>
+                  <td>{{ error.error_sum }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          {% else %}
+          <b>Пояснения к ошибкам KNA отсутствуют</b><hr>
+          {% endif %}
+        </div>
+      </div>
+      <div class="row mb-1 text-secondary text-center">
+        {% if grill_queryset %}
+        <div class="col">
+          <b>Данные по  грилю</b>
+          <table class="table table-dark text-secondary table-report table-bordered">
+            <thead>
+              <th>Время</th>
+              <th>Номер карты</th>
+              <th>Сумма</th>
+              <th>Комментарий</th>
+            </thead>
+            <tbody>
+              {% for error in grill_queryset %}
+                <tr>
+                  <td>{{ error.error_time }}</td>
+                  <td>{{ error.card }}</td>
+                  <td>{{ error.error_sum }}</td>
+                  <td>{{ error.description|default:"-" }}</td>
+                </tr>
+              {% endfor %}
+              <tr><td colspan="2"><b>Итого:</b></td><td>{{ grill_sum|default:"0" }}</td><td>-</td></tr>
+            </tbody>
+          </table>
+        </div>
+        {% endif %}
+        {% if lotto_queryset %}
+        <div class="col">
+          <b>Данные по лото</b>
+          <table class="table table-dark text-secondary table-report table-bordered">
+            <thead>
+              <th>Время</th>
+              <th>Номер карты</th>
+              <th>Сумма</th>
+              <th>Комментарий</th>
+            </thead>
+            <tbody>
+              {% for error in lotto_queryset %}
+                <tr>
+                  <td>{{ error.error_time }}</td>
+                  <td>{{ error.card }}</td>
+                  <td>{{ error.error_sum }}</td>
+                  <td>{{ error.description|default:"-" }}</td>
+                </tr>
+              {% endfor %}
+              <tr><td colspan="2"><b>Итого:</b></td><td>{{ lotto_sum|default:"0" }}</td><td>-</td></tr>
+            </tbody>
+          </table>
+        </div>
+        {% endif %}
+      </div>
+      <div class="row mb-1">
+        <div class="col text-center text-secondary">
+          <table class="table table-dark table-report text-secondary text-start">
+            <tbody>
+              <tr><td colspan="2">Достоверность и корректность, указанных в отчете сведений, подтверждаю.</td></tr>
+              <tr><td>Смену сдал: {{ workshift.cash_admin.get_full_name }}</td><td>Подпись: ____________</td></tr>
+              <tr><td>Смену принял: {{ workshift.next_cashier.get_full_name }}</td><td>Подпись: ____________</td></tr>
+              <tr><td colspan="2"><br></td></tr>
+              <tr><td><b>Смену закрыл и проверил:</b> </td><td>Подпись: ____________</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
-    <div class="row mb-1">
-      <div class="col text-center text-secondary">
-        <b>Данные о приеме/сдаче</b>
-        <table class="table table-dark table-report text-secondary text-start">
-          <tbody>
-            <tr><td colspan="2">Достоверность и корректность, указанных в отчете сведений, подтверждаю.</td></tr>
-            <tr><td>Смену сдал: {{ workshift.cash_admin.get_full_name }}</td><td>Подпись: ____________</td></tr>
-            <tr><td>Смену принял: {{ workshift.next_cashier.get_full_name }}</td><td>Подпись: ____________</td></tr>
-            <tr><td colspan="2"><br></td></tr>
-            <tr><td>Смену закрыл и проверил: </td><td>Подпись: ____________</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-</main>
+  </main>
+  {% include 'salary/scripts.html' %}
+</body>
 {% endblock %}
