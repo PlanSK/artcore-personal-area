@@ -127,14 +127,14 @@
             <thead>
               <th style="width: 5%;">Сумма</th>
               <th>Наименование</th>
-              <th>Подпись</th>
+              <th style="width: 30%;">Подпись</th>
             </thead>
             <tbody>
               {% for cost in workshift.costs.all %}
               <tr>
                 <td>{{cost.cost_sum}}</td>
                 <td>{{cost.cost_reason}}</td>
-                <td class="text-start" style="width: 20%;"><br>_________/{{cost.cost_person.last_name}}/</td>
+                <td><br>___________ ({{cost.cost_person.last_name}})</td>
               </tr>
               {% endfor %}
             </tbody>

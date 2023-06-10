@@ -289,7 +289,7 @@
     <div class="row text-center mt-1">
       {% if perms.salary.change_workingshift or perms.salary.advanced_change_workshift%}
       <div class="col">
-        <a title="Печать" class="btn btn-light text-dark" href="{% url 'everyday_report_print' workshift.slug %}?next={{ request.path }}">
+        <a title="Печать" class="btn btn-light text-dark" href="{% url 'everyday_report_print' workshift.slug %}?next={{ request.path }}" target="_blank">
           <i class="fa-solid fa-print"></i>
           Печать отчёта
         </a>
