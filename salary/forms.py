@@ -200,19 +200,75 @@ class AddWorkshiftDataForm(EditWorkshiftDataForm):
         return cleaned_data
 
 
-class StaffEditWorkshiftForm(EditWorkshiftDataForm):
-    class Meta(EditWorkshiftDataForm.Meta):
-        fields = EditWorkshiftDataForm.Meta.fields
-        if settings.PUBLICATION_ENABLED:
-            fields.append('publication_is_verified')
-        fields.extend([
+class StaffEditWorkshiftForm(forms.ModelForm):
+    base_queryset = User.objects.all()
+    employee_queryset = base_queryset.filter(profile__position__in=[1, 2, 4])
+    
+    hall_admin = EmplModelChoiceField(
+        queryset=employee_queryset,
+        label='Администратор зала',
+    )
+    cash_admin = EmplModelChoiceField(
+        queryset=employee_queryset,
+        label='Администратор кассы',
+    )
+    next_hall_admin = EmplModelChoiceField(
+        queryset=employee_queryset,
+        label='Прибывшая смена (Администратор)',
+    )
+    next_cashier = EmplModelChoiceField(
+        queryset=employee_queryset,
+        label='Прибывшая смена (Кассир)',
+    )
+
+    class Meta:
+        model = WorkingShift
+        fields = [
+            'hall_admin',
+            'cash_admin',
+            'bar_revenue',
+            'game_zone_revenue',
+            'additional_services_revenue',
+            'hookah_revenue',
+            'next_hall_admin',
+            'next_cashier',
+            'hall_admin_arrival_time',
+            'cashier_arrival_time',
+            'acquiring_evator_sum',
+            'acquiring_terminal_sum',
+            'cash_sum',
+            'short_change_sum',
+            'technical_report',
             'shortage',
             'shortage_paid',
             'comment_for_cash_admin',
             'comment_for_hall_admin',
             'hall_cleaning',
             'status',
-        ])
+        ]
+        if settings.PUBLICATION_ENABLED:
+            fields.append('publication_link')
+        widgets = {
+            'shift_date': forms.DateInput(attrs={'type': 'date'}),
+            'hall_admin_arrival_time': forms.TimeInput(
+                attrs={'type': 'time',}),
+            'cashier_arrival_time': forms.TimeInput(
+                attrs={'type': 'time',}),
+        }
+
+    # class Meta(EditWorkshiftDataForm.Meta):
+    #     fields = EditWorkshiftDataForm.Meta.fields
+    #     if settings.PUBLICATION_ENABLED:
+    #         fields.append('publication_is_verified')
+    #     fields.extend([
+    #         'shortage',
+    #         'shortage_paid',
+    #         'comment_for_cash_admin',
+    #         'comment_for_hall_admin',
+    #         'hall_cleaning',
+    #         'status',
+    #     ])
+
 
 class AddMisconductForm(forms.ModelForm):
     intruder = EmplModelChoiceField(
