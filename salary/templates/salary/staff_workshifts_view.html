@@ -18,7 +18,25 @@
         </div>
       </div>
       {% endif %}
-      <a href="{% url 'workshifts_months' %}" class="btn btn-outline-success pt-0 pb-0"><i class="fa-solid fa-calendar-days"></i>&nbsp;Смотреть архив</a>
+    </div>
+  </div>
+  <div class="row row-cols-1 row-cols-md-2">
+    <div class="col">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="{% url 'workshifts_all_years' %}?next={{ request.path }}">Все года</a></li>
+          <li class="breadcrumb-item"><a href="{% url 'workshifts_for_year' year=workshift_dates.year %}?next={{ request.path }}">{{ workshift_dates | date:"Y" }}</a></li>
+          <li class="breadcrumb-item active" aria-current="page">
+            {% if is_unverified %}
+            <a href="{% url 'workshift_archive_view' month=workshift_dates.month year=workshift_dates.year %}">{{ workshift_dates | date:"F" }} (смотреть все)</a>
+            {% else %}
+            {{ workshift_dates | date:"F" }}
+            {% endif %}
+          </li>
+        </ol>
+      </nav>
+    </div>
+    <div class="col text-end">
       <a class="btn btn-outline-primary pt-0 pb-0" href="{% url 'add_workshift' %}?next={{ request.path }}">
         <i class="fa-solid fa-calendar-plus"></i>&nbsp;Добавить смену
       </a>
