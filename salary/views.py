@@ -231,27 +231,6 @@ class AnalyticalView(ReportsView):
     template_name = 'salary/analytical_reports_list.html'
 
 
-class StaffWorkshiftsView(WorkingshiftPermissonsMixin, MonthYearExtractMixin,
-                          TitleMixin, ListView):
-    template_name = 'salary/staff_workshifts_view.html'
-    model = WorkingShift
-    title = 'Смены'
-
-    def get_queryset(self):
-        workshifts = WorkingShift.objects.select_related('hall_admin',
-                                                         'cash_admin')
-        return workshifts
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context.update({
-            'workshift_list': self.object_list.exclude(
-                status=WorkingShift.WorkshiftStatus.VERIFIED),
-            'missed_workshifts_dates': get_missed_dates_tuple(),
-        })
-        return context
-
-
 class StaffIndexView(WorkingshiftPermissonsMixin, TitleMixin, TemplateView,
                      CatchingExceptionsMixin):
     template_name = 'salary/staff/staff_index.html'
@@ -273,6 +252,29 @@ class StaffIndexView(WorkingshiftPermissonsMixin, TitleMixin, TemplateView,
             'unclosed_workshifts': get_unclosed_workshift_number(),
             'total_rating_data': get_filtered_rating_data(today_date.month,
                                                           today_date.year)
+        })
+        return context
+
+
+class StaffWorkshiftsView(WorkingshiftPermissonsMixin, MonthYearExtractMixin,
+                          TitleMixin, ListView):
+    template_name = 'salary/staff_workshifts_view.html'
+    model = WorkingShift
+    title = 'Смены'
+
+    def get_queryset(self):
+        workshifts = WorkingShift.objects.select_related('hall_admin',
+                                                         'cash_admin')
+        return workshifts
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'workshift_list': self.object_list.exclude(
+                status=WorkingShift.WorkshiftStatus.VERIFIED),
+            'is_unverified': True,
+            'missed_workshifts_dates': get_missed_dates_tuple(),
+            'workshift_dates': timezone.now().date(),
         })
         return context
 
@@ -304,25 +306,43 @@ class StaffArchiveWorkshiftsView(WorkingshiftPermissonsMixin,
             'workshift_dates': datetime.date(
                 self.year, self.month, 1
             ),
+            'is_unverified': False,
             'missed_workshifts_dates': get_missed_dates_tuple(),
         })
 
         return context
 
 
-class StaffWorkshiftsMonthlyList(WorkingshiftPermissonsMixin, TitleMixin, 
-                                    ListView):
-    template_name = 'salary/staff_monthly_workshifts_list.html'
+class StaffWorkshiftsForYear(WorkingshiftPermissonsMixin, TitleMixin,
+                             MonthYearExtractMixin, ListView):
+    template_name = 'salary/staff_months_workshifts_list.html'
     model = WorkingShift
     title = 'Смены'
 
     def get_queryset(self):
-        workshifts_months = WorkingShift.objects.dates('shift_date', 'month')
+        workshifts_months = WorkingShift.objects.filter(
+            shift_date__year=self.year).dates('shift_date', 'month')
         return workshifts_months
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({'year': self.year})
+        return context
+
+
+class StaffWorkshiftsYearList(WorkingshiftPermissonsMixin, TitleMixin,
+                              ListView):
+    template_name = 'salary/staff_years_workshifts_list.html'
+    model = WorkingShift
+    title = 'Смены'
+
+    def get_queryset(self):
+        workshifts_years = WorkingShift.objects.dates('shift_date', 'year')
+        return workshifts_years
 
 
 class DeleteWorkshift(WorkingshiftPermissonsMixin, TitleMixin, SuccessUrlMixin,
-                        DeleteView):
+                      DeleteView):
     model = WorkingShift
     title = 'Удаление смены'
 
