@@ -106,7 +106,8 @@ def get_workshift_data(workshift: WorkingShift) -> WorkshiftData:
     
     cashier_dict = {
         'id': workshift.cash_admin.id,
-        'name': workshift.cash_admin.get_full_name(),
+        'name': ' '.join([workshift.cash_admin.last_name,
+                          workshift.cash_admin.first_name[:1:]]) + '.',
         'basic_part': cashier_earnings_data.basic_part.summary,
         'bonus_part': cashier_earnings_data.bonus_part.summary,
         'shortage': cashier_earnings_data.shortage,
@@ -117,7 +118,8 @@ def get_workshift_data(workshift: WorkingShift) -> WorkshiftData:
     }
     hall_admin_dict = {
         'id': workshift.hall_admin.id,
-        'name': workshift.hall_admin.get_full_name(),
+        'name': ' '.join([workshift.hall_admin.last_name,
+                          workshift.hall_admin.first_name[:1:]]) + '.',
         'basic_part': hall_admin_earnings_data.basic_part.summary,
         'bonus_part': hall_admin_earnings_data.bonus_part.summary,
         'penalty': hall_admin_earnings_data.penalty,
