@@ -79,13 +79,20 @@ def get_employees_schedule_dict(year: int, month: int) -> dict:
     worksheet_name = get_worksheet_name(year, month)
     employees_schedule_dict = cache.get(worksheet_name)
     if employees_schedule_dict is None:
+        employees_schedule_dict = dict()
         worksheet_data = get_gsheets_worksheet_data(worksheet_name)
         full_names_tuple = _get_full_names_tuple(worksheet_data)
-        employees_schedule_dict = {
-            row[0].strip(): _get_list_of_dates_from_int(row, month, year)
-            for row in worksheet_data
-            if row[0].strip() in full_names_tuple
-        }
+        for row in worksheet_data:
+            clear_row_value = row[0].strip()
+            if clear_row_value in full_names_tuple:
+                try:
+                    employees_schedule_dict[clear_row_value].extend(
+                        _get_list_of_dates_from_int(row, month, year)
+                    )
+                except KeyError:
+                    employees_schedule_dict[
+                        clear_row_value
+                    ] = _get_list_of_dates_from_int(row, month, year)
         cache.set(worksheet_name, employees_schedule_dict,
                   settings.DEFAULT_CACHE_LIFETIME)
         logger.info(f'The worksheet {worksheet_name} is cached.')
