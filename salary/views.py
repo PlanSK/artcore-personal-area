@@ -611,6 +611,9 @@ class MisconductDetailView(ProfileStatusRedirectMixin, PermissionRequiredMixin,
                                                  'regulations_article')
 
 
+# TODO
+# Need refactioring! Moving logic to services.
+# Templates get data from json on separated page.
 class MonthlyAnalyticalReport(WorkingshiftPermissonsMixin, 
                               MonthYearExtractMixin, TitleMixin, ListView):
     model = WorkingShift
