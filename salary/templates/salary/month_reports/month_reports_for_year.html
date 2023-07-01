@@ -1,0 +1,31 @@
+{% extends 'salary/dashboard.html' %}
+
+{% block data %}
+<div class="row border-top justify-content-center">
+  <div class="col text-center">
+    <h5>Архив отётов за {{year}} г.</h5>
+  </div>
+</div>
+<div class="row row-cols-1 row-cols-md-3">
+  {% for date_range in object_list %} 
+  <div class="col p-1 text-center">
+    <div class="card text-light text-bg-dark border-secondary h-100">
+      <div class="card-body">
+        <h5 class="card-title">Отчёты за {{ date_range|date:"F" }}</h5>
+        <a href="{% url 'monthly_report' year=date_range.year month=date_range.month %}?next={{ request.path }}" class="btn btn-primary">
+          <i class="fa-solid fa-coins"></i> Зарплатный
+        </a>
+        <a href="{% url 'award_rating' year=date_range.year month=date_range.month %}?next={{ request.path }}" class="btn btn-success">
+          <i class="fa-solid fa-chart-simple"></i> Рейтинговый
+        </a>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+<div class="row">
+  <div class="col text-center">
+    <button class="btn btn-outline-secondary" onclick="history.back()">Назад</button>
+  </div>
+</div>
+{% endblock %}

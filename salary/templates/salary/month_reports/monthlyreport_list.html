@@ -1,0 +1,72 @@
+{% extends 'salary/logined_page.html' %}
+{% load humanize %}
+
+{% block content %}
+<main>
+  <div class="container">
+    <div class="row">
+      <div class="col">
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'all_years_reports' %}?next={{ request.path }}">Все года</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'month_reports_for_year' year=current_date.year %}?next={{ request.path }}">{{ current_date | date:"Y" }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ current_date | date:"F" }}</li>
+          </ol>
+        </nav>
+      </div>
+    </div>
+    <div class="row row-cols-1">
+      <div class="col table-responsive border rounded m-2">
+        <p class="text-center">{{ title }} за {{ current_date|date:"F" }}</p>
+        <table class="table table-dark table-hover">
+          <thead class="text-warning text-center">
+            <tr>
+              <th>Сотрудник</th>
+              <th>Количество смен</th>
+              <th>Оклад</th>
+              <th>Бонусная часть</th>
+              <th>Штрафы</th>
+              <th>Недостачи</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody class="text-center">
+            {% for employee in report_data.employees %}
+            <tr>
+              <td>{{ employee.full_name }}</td>
+              <td>{{ employee.shift_counter|default:"-"  }}</td>
+              <td>{{ employee.basic_revenues|default:"-" | intcomma }}</td>
+              <td>{{ employee.bonus_revenues|default:"-" | intcomma }}</td>
+              <td>{{ employee.penalty|default:"-" | intcomma }}</td>
+              <td>{{ employee.shortage|default:"-" | intcomma }}</td>
+              <td>
+                <a href="{% url 'staff_employee_month_view' year=current_date.year month=current_date.month employee=employee.id %}?next={{ request.path }}" class="link-primary">
+                  Детально
+                </a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+          <tfoot class="text-center text-white">
+            <tr>
+              <td></td>
+              <td>{{ report_data.shift_counter|default:"-"  }}</td>
+              <td>{{ report_data.summary_basic_revenue|default:"-" | intcomma }}</td>
+              <td>{{ report_data.summary_bonus_revenue|default:"-" | intcomma }}</td>
+              <td>{{ report_data.summary_all_penalties|default:"-" | intcomma }}</td>
+              <td>{{ report_data.summary_all_shortages|default:"-" | intcomma }}</td>
+              <td></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      <div class="col">
+        <p class="text-secondary fs-italic">Примечание - отображаются только проверенные смены.</p>
+        {% if request.GET.next %}
+        <p class="text-center"><a href="{{request.GET.next}}" class="btn btn-secondary">Вернуться к списку отчетов</a></p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</main>
+{% endblock %}

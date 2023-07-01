@@ -1,0 +1,26 @@
+{% extends 'salary/dashboard.html' %}
+
+{% block data %}
+<div class="row border-top justify-content-center">
+  <div class="col text-center">
+    <h5>Архив отчётов по годам</h5>
+  </div>
+</div>
+<div class="row row-cols-1 row-cols-md-3">
+  {% for date_range in object_list %} 
+  <div class="col text-center rounded p-1">
+    <div class="card blue-snippet text-light h-100">
+      <div class="card-body">
+        <h2>{{ date_range|date:"Y" }}</h2>
+        <a href="{% url 'month_reports_for_year' year=date_range.year %}?next={{ request.path }}" class="stretched-link"></a>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+<div class="row">
+  <div class="col text-center">
+    <button class="btn btn-outline-secondary" onclick="history.back()">Назад</button>
+  </div>
+</div>
+{% endblock %}
