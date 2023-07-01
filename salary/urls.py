@@ -47,10 +47,11 @@ urlpatterns = [
     path('workshifts_view/<int:year>/<int:month>/<int:employee>/', StaffEmployeeMonthView.as_view(), name='staff_employee_month_view'),
     path('workshifts_view/<int:year>/<int:month>/', EmployeeWorkshiftsView.as_view(), name='employee_archive_view'),
     path('shortage_payment/<slug:slug>/', ShortagePayment.as_view(), name='shortage_payment'),
-    path('award_rating/<int:year>/<int:month>/', AwardRatingView.as_view(), name='award_rating'),
     # Reports section
     path('monthly_report/<int:year>/<int:month>/', MonthlyReportListView.as_view(), name='monthly_report'),
-    path('reports_list/', ReportsView.as_view(), name='reports_list'),
+    path('all_years_reports/', AllYearsReportsView.as_view(), name='all_years_reports'),
+    path('month_reports_for_year/<int:year>/', MonthReportsForYearView.as_view(), name='month_reports_for_year'),
+    path('award_rating/<int:year>/<int:month>/', AwardRatingView.as_view(), name='award_rating'),
     path('monthly_list/', EmployeeMonthlyListView.as_view(), name='employee_monthly_list'),
     path('monthly_analytics/<int:year>/<int:month>/', MonthlyAnalyticalReport.as_view(), name='monthly_analytics'),
     path('analytics_reports/', AnalyticalView.as_view(), name='analytics_reports'),

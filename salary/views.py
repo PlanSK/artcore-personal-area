@@ -215,8 +215,8 @@ class AdminUserView(EmployeePermissionsMixin, TitleMixin, ListView):
         return context
 
 
-class ReportsView(WorkingshiftPermissonsMixin, TitleMixin, ListView):
-    template_name = 'salary/reports_list.html'
+class AnalyticalView(WorkingshiftPermissonsMixin, TitleMixin, ListView):
+    template_name = 'salary/analytical_reports_list.html'
     model = WorkingShift
     title = 'Отчеты'
 
@@ -225,10 +225,6 @@ class ReportsView(WorkingshiftPermissonsMixin, TitleMixin, ListView):
             status=WorkingShift.WorkshiftStatus.VERIFIED
         ).dates('shift_date','month')
         return query
-
-
-class AnalyticalView(ReportsView):
-    template_name = 'salary/analytical_reports_list.html'
 
 
 class StaffIndexView(WorkingshiftPermissonsMixin, TitleMixin, TemplateView,
@@ -341,6 +337,16 @@ class StaffWorkshiftsYearList(WorkingshiftPermissonsMixin, TitleMixin,
         return workshifts_years
 
 
+class AllYearsReportsView(StaffWorkshiftsYearList):
+    template_name = 'salary/month_reports/all_years_reports_list.html'
+    title = 'Ежемесячные отчёты'
+
+
+class MonthReportsForYearView(StaffWorkshiftsForYear):
+    template_name = 'salary/month_reports/month_reports_for_year.html'
+    title = 'Ежемесячные отчёты'
+
+
 class DeleteWorkshift(WorkingshiftPermissonsMixin, TitleMixin, SuccessUrlMixin,
                       DeleteView):
     model = WorkingShift
@@ -349,8 +355,8 @@ class DeleteWorkshift(WorkingshiftPermissonsMixin, TitleMixin, SuccessUrlMixin,
 
 class MonthlyReportListView(WorkingshiftPermissonsMixin, MonthYearExtractMixin,
                             TitleMixin, TemplateView):
-    template_name = 'salary/monthlyreport_list.html'
-    title = 'Сводный отчёт'
+    template_name = 'salary/month_reports/monthlyreport_list.html'
+    title = 'Зарплатный отчёт'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -1176,7 +1182,7 @@ class StaffCalendarListView(TitleMixin, ListView):
 
 
 class AwardRatingView(MonthlyReportListView):
-    template_name: str = 'salary/award_rating.html'
+    template_name: str = 'salary/month_reports/award_rating.html'
     title = 'Рейтинговый отчёт'
 
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
