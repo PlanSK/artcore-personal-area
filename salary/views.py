@@ -215,18 +215,6 @@ class AdminUserView(EmployeePermissionsMixin, TitleMixin, ListView):
         return context
 
 
-class AnalyticalView(WorkingshiftPermissonsMixin, TitleMixin, ListView):
-    template_name = 'salary/analytical_reports_list.html'
-    model = WorkingShift
-    title = 'Отчеты'
-
-    def get_queryset(self):
-        query = WorkingShift.objects.filter(
-            status=WorkingShift.WorkshiftStatus.VERIFIED
-        ).dates('shift_date','month')
-        return query
-
-
 class StaffIndexView(WorkingshiftPermissonsMixin, TitleMixin, TemplateView,
                      CatchingExceptionsMixin):
     template_name = 'salary/staff/staff_index.html'
@@ -309,7 +297,7 @@ class StaffArchiveWorkshiftsView(WorkingshiftPermissonsMixin,
         return context
 
 
-class StaffWorkshiftsForYear(WorkingshiftPermissonsMixin, TitleMixin,
+class StaffWorkshiftsForYearView(WorkingshiftPermissonsMixin, TitleMixin,
                              MonthYearExtractMixin, ListView):
     template_name = 'salary/staff_months_workshifts_list.html'
     model = WorkingShift
@@ -326,7 +314,7 @@ class StaffWorkshiftsForYear(WorkingshiftPermissonsMixin, TitleMixin,
         return context
 
 
-class StaffWorkshiftsYearList(WorkingshiftPermissonsMixin, TitleMixin,
+class StaffWorkshiftsYearView(WorkingshiftPermissonsMixin, TitleMixin,
                               ListView):
     template_name = 'salary/staff_years_workshifts_list.html'
     model = WorkingShift
@@ -337,14 +325,24 @@ class StaffWorkshiftsYearList(WorkingshiftPermissonsMixin, TitleMixin,
         return workshifts_years
 
 
-class AllYearsReportsView(StaffWorkshiftsYearList):
+class AllYearsReportsView(StaffWorkshiftsYearView):
     template_name = 'salary/month_reports/all_years_reports_list.html'
     title = 'Ежемесячные отчёты'
 
 
-class MonthReportsForYearView(StaffWorkshiftsForYear):
+class AllYearsAnalyticView(StaffWorkshiftsYearView):
+    template_name = 'salary/month_reports/all_years_analytic_list.html'
+    title = 'Аналитика'
+
+
+class MonthReportsForYearView(StaffWorkshiftsForYearView):
     template_name = 'salary/month_reports/month_reports_for_year.html'
     title = 'Ежемесячные отчёты'
+
+
+class AnalyticForYearView(StaffWorkshiftsForYearView):
+    template_name = 'salary/month_reports/analytic_for_year.html'
+    title = 'Аналитика'
 
 
 class DeleteWorkshift(WorkingshiftPermissonsMixin, TitleMixin, SuccessUrlMixin,
@@ -617,7 +615,7 @@ class MonthlyAnalyticalReport(WorkingshiftPermissonsMixin,
                               MonthYearExtractMixin, TitleMixin, ListView):
     model = WorkingShift
     title = 'Аналитический отчёт'
-    template_name = 'salary/monthly_analytical_report.html'
+    template_name = 'salary/month_reports/monthly_analytical_report.html'
 
     def get_queryset(self) -> QuerySet:
         queryset = WorkingShift.objects.all().select_related(
