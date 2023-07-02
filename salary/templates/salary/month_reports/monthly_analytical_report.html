@@ -4,99 +4,6 @@
 
 {% block content %}
 <main>
-  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-  <script type="text/javascript">
-    // Loading variables from django
-    var linechart_data = JSON.parse("{{ linechart_data }}");
-    var piechart_data = {{ piechart_data|safe }};
-    var current_month_title = '{{ current_month_date|date:"F Y г." }}'
-    var previous_month_title = '{{ previous_month_date|date:"F Y г." }}'
-
-    google.charts.load('current', {'packages':['corechart']});
-    // Init Callback's
-    google.charts.setOnLoadCallback(revenuesLineChart);
-    google.charts.setOnLoadCallback(currentMonthPieChart);
-    // Draw functions
-    function revenuesLineChart() {
-      var data = new google.visualization.DataTable();
-      data.addColumn('number', 'Day of Month');
-      data.addColumn('number', previous_month_title);
-      data.addColumn('number', current_month_title);
-      data.addRows(linechart_data);
-
-      var options = {
-        title: 'Динамика ежедневной выручки',
-        titleTextStyle: {
-          color: '#fff'
-        },
-        backgroundColor: '#3e4444',
-        hAxis: {
-          textStyle: {
-            color: '#fff',
-            bold: true
-          },
-          minValue: 1
-        },
-        vAxis: {
-          title: 'Выручка',
-          textStyle: {
-            color: '#fff',
-            bold: true
-          },
-          titleTextStyle: {
-            color: '#feb236'
-          }
-        },
-        curveType: 'function',
-        legend: { 
-          position: 'bottom',
-          textStyle: {
-            color: '#fff'
-          }
-        },
-        colors: ['#684ff7', '#04ff00'],
-      };
-
-      var chart = new google.visualization.LineChart(document.getElementById('revenues_linechart_div'));
-      chart.draw(data, options);
-    }
-
-    var width = window.innerWidth;
-    var chart_width
-    if(width > 1280) {
-      chart_width = 720
-    }
-    else if(width < 720) {
-      chart_width = width
-    }
-
-    function currentMonthPieChart() {
-      var data = new google.visualization.DataTable();
-      data.addColumn('string', 'Category');
-      data.addColumn('number', 'Values');
-      data.addRows(piechart_data);
-
-      var options = {
-        title:'Распределение выручки по категориям',
-        width: chart_width,
-        height:300,
-        titleTextStyle: {
-          color: '#fff'
-        },
-        backgroundColor: '#3e4444',
-        is3D: 'true',
-        legend: { 
-          textStyle: {
-            position: 'bottom',
-            color: '#fff'
-          }
-        },
-      };
-
-      var chart = new google.visualization.PieChart(document.getElementById('currentmonth_piechart_div'));
-      chart.draw(data, options);
-    }
-  </script>
   <div class="container">
     <div class="row mt-1">
       <div class="col">
@@ -263,34 +170,6 @@
             </tr>
           </tfoot>
         </table>
-      </div>
-    </div>
-    <div class="row row-cols-md-2 row-cols-sm-1 justify-content-center m-2">
-      <div class="col-md-12 col-sm-12 rounded border border-light text-center">
-        <div id="carouselChartControls" class="carousel slide carousel-fade" data-bs-ride="carousel">
-          <div class="carousel-inner">
-            <div class="carousel-item active">
-              <div id="revenues_linechart_div" class="chart_div"></div>
-            </div>
-            <div class="carousel-item">
-              <div id="currentmonth_piechart_div" class="chart_div"></div>
-            </div>
-          </div>
-          <script>
-            var styled_linechart = document.getElementById('revenues_linechart_div');
-            var styled_piechart = document.getElementById('currentmonth_piechart_div');
-            styled_linechart.setAttribute('style', 'width: ' + chart_width + 'px;');
-            styled_piechart.setAttribute('style', 'width: ' + chart_width + 'px;');
-          </script>
-          <button class="carousel-control-prev" type="button" data-bs-target="#carouselChartControls" data-bs-slide="prev">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Previous</span>
-          </button>
-          <button class="carousel-control-next" type="button" data-bs-target="#carouselChartControls" data-bs-slide="next">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Next</span>
-          </button>
-        </div>
       </div>
     </div>
   </div>

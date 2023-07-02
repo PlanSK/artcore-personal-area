@@ -42,6 +42,7 @@ from salary.services.monthly_reports import (
 )
 from salary.services.misconduct import get_misconduct_employee_data
 from salary.services.profile_services import get_birthday_person_list
+from salary.services.analytic import get_analytic_data
 
 
 logger = logging.getLogger(__name__)
@@ -682,58 +683,19 @@ class MonthlyAnalyticalReport(WorkingshiftPermissonsMixin,
 
         return values_dict
 
-    def get_linechart_data(self) -> list:
-        """Return list of lists with revenue data for Google LineChart
-
-        Returns:
-            list: list of lists [day_of_month, previous_month_revenue, current_month_revenue]
-        """
-        current_month_list =  self.current_month_queryset.values_list(
-            'shift_date__day',
-            'summary_revenue')
-        previous_month_list = self.previous_month_queryset.values_list(
-            'shift_date__day',
-            'summary_revenue')
-        linechart_data_list = list()
-        for first_element in previous_month_list:
-            for second_element in current_month_list:
-                if first_element[0] == second_element[0]:
-                    data_row = list(first_element)
-                    data_row.append(second_element[1])
-                    linechart_data_list.append(data_row)
-
-        return linechart_data_list
-
-    def get_piechart_data(self, analytic_data: dict) -> list:
-        categories = {
-            'bar_revenue': 'Бар',
-            'game_zone_subtotal': 'Game zone',
-            'additional_services_revenue': 'Доп. услуги',
-            'hookah_revenue': 'Кальян',
-        }
-
-        piechart_data = list()
-
-        for category in categories.keys():
-            piechart_data.append(
-                [categories.get(category), analytic_data.get(f'{category}__sum')[1]]
-            )
-
-        return piechart_data
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        _analitic_data = get_analytic_data(self.month, self.year)
         analytic_data = self.get_fields_dict()
         context.update({
             'analytic': analytic_data,
-            'piechart_data': self.get_piechart_data(analytic_data),
             'min_revenue_workshift': self.current_month_queryset.order_by(
                 'summary_revenue').first(),
             'max_revenue_workshift': self.current_month_queryset.order_by(
                 'summary_revenue').last(),
             'current_month_date': self.current_date,
             'previous_month_date': self.previous_month_date,
-            'linechart_data': self.get_linechart_data(),
         })
 
         return context
