@@ -61,13 +61,13 @@ def _get_workshift_data(month: int, year: int, day: int = 0) -> QuerySet:
 def _get_analytic_field(current_month_value: float,
                        previous_month_value: float,
                        field_name: str) -> AnalyticField:
-    ratio = previous_month_value * 100 / current_month_value - 100
+    ratio = (previous_month_value - current_month_value) / previous_month_value
     status = StatusField.DECLINE if ratio > 0 else StatusField.RISE
     return AnalyticField(
         name=WorkingShift._meta.get_field(field_name).verbose_name,
         previous_month_value=previous_month_value,
         current_month_value=current_month_value,
-        ratio=round(abs(ratio), 2),
+        ratio=round(abs(ratio * 100), 2),
         status=status
     )
 
