@@ -616,86 +616,15 @@ class MisconductDetailView(ProfileStatusRedirectMixin, PermissionRequiredMixin,
 # Need refactioring! Moving logic to services.
 # Templates get data from json on separated page.
 class MonthlyAnalyticalReport(WorkingshiftPermissonsMixin, 
-                              MonthYearExtractMixin, TitleMixin, ListView):
-    model = WorkingShift
+                              MonthYearExtractMixin, TitleMixin, TemplateView):
     title = 'Аналитический отчёт'
     template_name = 'salary/month_reports/monthly_analytical_report.html'
 
-    def get_queryset(self) -> QuerySet:
-        queryset = WorkingShift.objects.all().select_related(
-            'hall_admin',
-            'cash_admin',
-        ).order_by('shift_date')
-        return queryset
-
-    def get_fields_dict(self) -> dict:
-        fields = (
-            'summary_revenue', 'bar_revenue', 'game_zone_subtotal',
-            'game_zone_error', 'additional_services_revenue', 'hookah_revenue',
-            'shortage', 'summary_revenue__avg',
-        )
-        self.current_month_queryset = self.object_list.filter(
-            shift_date__month=self.month,
-            shift_date__year=self.year,
-        )
-
-        if not self.current_month_queryset:
-            raise Http404
-
-        self.current_date = datetime.date(self.year, self.month, 1)
-
-        self.previous_month_date = self.current_date - relativedelta(months=1)
-        self.previous_month_queryset = self.object_list.filter(
-            shift_date__month=self.previous_month_date.month,
-            shift_date__year=self.previous_month_date.year,
-        )
-
-        values_dict = dict()
-        operations_list = [
-            Sum(field) if '__avg' not in field
-            else Avg(field.split('__')[0])
-            for field in fields
-        ]
-
-        current_month_values = self.current_month_queryset.aggregate(*operations_list)
-        previous_month_values = self.previous_month_queryset.aggregate(*operations_list)
-
-        for field in current_month_values.keys():
-            current_month_value = round(current_month_values.get(field, 0), 2)
-            previous_month_value = round(
-                previous_month_values.get(field, 0), 2
-            ) if previous_month_values.get(field, 0) else 0
-
-            if current_month_value == 0.0:
-                ratio = 100.0
-            elif current_month_value > previous_month_value:
-                ratio = round((current_month_value - previous_month_value) /
-                            current_month_value * 100, 2)
-            elif current_month_value < previous_month_value:
-                ratio = round((previous_month_value - current_month_value) /
-                            previous_month_value * 100, 2)
-
-            values_dict[field] = (
-                        previous_month_value,
-                        current_month_value,
-                        ratio,
-                    )
-
-        return values_dict
-
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        _analitic_data = get_analytic_data(self.month, self.year)
-        analytic_data = self.get_fields_dict()
+        analytic_data = get_analytic_data(self.month, self.year)
         context.update({
-            'analytic': analytic_data,
-            'min_revenue_workshift': self.current_month_queryset.order_by(
-                'summary_revenue').first(),
-            'max_revenue_workshift': self.current_month_queryset.order_by(
-                'summary_revenue').last(),
-            'current_month_date': self.current_date,
-            'previous_month_date': self.previous_month_date,
+            'analytic_data': analytic_data,
         })
 
         return context

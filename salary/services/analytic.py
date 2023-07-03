@@ -4,6 +4,7 @@ import logging
 from dataclasses import dataclass
 from enum import Enum
 
+from calendar import monthrange
 from dateutil.relativedelta import relativedelta
 from django.db.models import Sum, Avg, QuerySet
 
@@ -16,6 +17,7 @@ logger = logging.getLogger(__name__)
 class StatusField(Enum):
     DECLINE = 0
     RISE = 1
+    EQUAL = 2
 
 
 @dataclass
@@ -61,12 +63,23 @@ def _get_workshift_data(month: int, year: int, day: int = 0) -> QuerySet:
 def _get_analytic_field(current_month_value: float,
                        previous_month_value: float,
                        field_name: str) -> AnalyticField:
-    ratio = (previous_month_value - current_month_value) / previous_month_value
-    status = StatusField.DECLINE if ratio > 0 else StatusField.RISE
+    if previous_month_value == 0:
+        ratio = -1
+    else:
+        ratio = (
+            previous_month_value - current_month_value) / previous_month_value
+
+    if previous_month_value == current_month_value:
+        status = StatusField.EQUAL
+    elif previous_month_value > current_month_value:
+        status = StatusField.DECLINE
+    else:
+        status = StatusField.RISE
+
     return AnalyticField(
         name=WorkingShift._meta.get_field(field_name).verbose_name,
-        previous_month_value=previous_month_value,
-        current_month_value=current_month_value,
+        previous_month_value=round(previous_month_value, 2),
+        current_month_value=round(current_month_value, 2),
         ratio=round(abs(ratio * 100), 2),
         status=status
     )
@@ -81,6 +94,10 @@ def get_analytic_data(month: int, year: int) -> AnalyticData:
     previous_month_date = current_month_date - relativedelta(months=1)
     current_month_queryset = _get_workshift_data(month, year)
     limited_day_number = current_month_queryset.last().shift_date.day
+    previous_date_limit_day_number = monthrange(
+        previous_month_date.year, previous_month_date.month)[1]
+    if previous_date_limit_day_number < limited_day_number:
+        limited_day_number = previous_date_limit_day_number
     previous_month_queryset = _get_workshift_data(previous_month_date.month,
                                                   previous_month_date.year,
                                                   limited_day_number)
@@ -143,62 +160,6 @@ def get_analytic_data(month: int, year: int) -> AnalyticData:
         min_revenue_workshift_data=min_revenue_workshift_data
     )
 
-
-# class MonthlyAnaliticData:
-#     def get_fields_dict(self) -> dict:
-#         fields = (
-#             'summary_revenue', 'bar_revenue', 'game_zone_subtotal',
-#             'game_zone_error', 'additional_services_revenue', 'hookah_revenue',
-#             'shortage', 'summary_revenue__avg',
-#         )
-#         self.current_month_queryset = self.object_list.filter(
-#             shift_date__month=self.month,
-#             shift_date__year=self.year,
-#         )
-
-#         # if not self.current_month_queryset:
-#         #     raise Http404
-
-#         self.current_date = datetime.date(self.year, self.month, 1)
-
-#         self.previous_month_date = self.current_date - relativedelta(months=1)
-#         self.previous_month_queryset = self.object_list.filter(
-#             shift_date__month=self.previous_month_date.month,
-#             shift_date__year=self.previous_month_date.year,
-#         )
-
-#         values_dict = dict()
-#         operations_list = [
-#             Sum(field) if '__avg' not in field
-#             else Avg(field.split('__')[0])
-#             for field in fields
-#         ]
-
-#         current_month_values = self.current_month_queryset.aggregate(*operations_list)
-#         previous_month_values = self.previous_month_queryset.aggregate(*operations_list)
-
-#         for field in current_month_values.keys():
-#             current_month_value = round(current_month_values.get(field, 0), 2)
-#             previous_month_value = round(
-#                 previous_month_values.get(field, 0), 2
-#             ) if previous_month_values.get(field, 0) else 0
-
-#             if current_month_value == 0.0:
-#                 ratio = 100.0
-#             elif current_month_value > previous_month_value:
-#                 ratio = round((current_month_value - previous_month_value) /
-#                             current_month_value * 100, 2)
-#             elif current_month_value < previous_month_value:
-#                 ratio = round((previous_month_value - current_month_value) /
-#                             previous_month_value * 100, 2)
-
-#             values_dict[field] = (
-#                         previous_month_value,
-#                         current_month_value,
-#                         ratio,
-#                     )
-
-#         return values_dict
 
 #     def get_linechart_data(self) -> list:
 #         """Return list of lists with revenue data for Google LineChart

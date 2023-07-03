@@ -7,7 +7,10 @@
   <div class="container">
     <div class="row mt-1">
       <div class="col">
-        <p class="text-center">Аналитический отчет за {{ current_month_date|date:"F Y г." }}</p>
+        <p class="text-center">Аналитические данные за {{ analytic_data.previous_period_date|date:"F" }} и {{ analytic_data.current_period_date|date:"F Y г." }}
+          <br>
+          (с 1 по {{analytic_data.current_period_date|date:"d"}} числа месяца)
+        </p>
       </div>
     </div>
     <div class="row mb-2">
@@ -22,37 +25,37 @@
           <thead class="text-warning text-center">
             <tr>
               <th>Показатель</th>
-              <th>{{ previous_month_date|date:"F" }}</th>
-              <th>{{ current_month_date|date:"F" }}</th>
+              <th>{{ analytic_data.previous_period_date|date:"F" }}</th>
+              <th>{{ analytic_data.current_period_date|date:"F" }}</th>
               <th>Анализ</th>
             </tr>
           </thead>
           <tbody class="text-center">
             <tr>
               <td>Общая выручка</td>
-              <td>{{ analytic.summary_revenue__sum.0 | intcomma }}</td>
-              <td>{{ analytic.summary_revenue__sum.1 | intcomma }}</td>
+              <td>{{ analytic_data.summary_revenue_data.previous_month_value | intcomma }}</td>
+              <td>{{ analytic_data.summary_revenue_data.current_month_value | intcomma }}</td>
               <td>
-                {% if analytic.summary_revenue__sum.0 < analytic.summary_revenue__sum.1 %}
-                <span class="text-acid"><i class="fa-solid fa-arrow-trend-up"></i> рост на {{ analytic.summary_revenue__sum.2 }}%</span>
-                {% elif analytic.summary_revenue__sum.0 > analytic.summary_revenue__sum.1 %}
-                <span class="text-danger"><i class="fa-solid fa-arrow-trend-down"></i> снижение на {{ analytic.summary_revenue__sum.2 }}%</span>
-                {% else %}
+                {% if analytic_data.summary_revenue_data.status.value == 1 %}
+                <span class="text-acid"><i class="fa-solid fa-arrow-trend-up"></i> рост на {{ analytic_data.summary_revenue_data.ratio }}%</span>
+                {% elif analytic_data.summary_revenue_data.status.value == 2 %}
                 -
+                {% else %}
+                <span class="text-danger"><i class="fa-solid fa-arrow-trend-down"></i> снижение на {{ analytic_data.summary_revenue_data.ratio }}%</span>
                 {% endif %}
               </td>
             </tr>
             <tr>
               <td>Средняя выручка</td>
-              <td>{{ analytic.summary_revenue__avg.0 | intcomma }}</td>
-              <td>{{ analytic.summary_revenue__avg.1 | intcomma }}</td>
+              <td>{{ analytic_data.avg_revenue_data.previous_month_value | intcomma }}</td>
+              <td>{{ analytic_data.avg_revenue_data.current_month_value | intcomma }}</td>
               <td>
-                {% if analytic.summary_revenue__avg.0 < analytic.summary_revenue__avg.1 %}
-                <span class="text-acid"><i class="fa-solid fa-arrow-trend-up"></i> рост на {{ analytic.summary_revenue__avg.2 }}%</span>
-                {% elif analytic.summary_revenue__avg.0 > analytic.summary_revenue__avg.1 %}
-                <span class="text-danger"><i class="fa-solid fa-arrow-trend-down"></i> снижение на {{ analytic.summary_revenue__avg.2 }}%</span>
-                {% else %}
+                {% if analytic_data.avg_revenue_data.status.value == 1 %}
+                <span class="text-acid"><i class="fa-solid fa-arrow-trend-up"></i> рост на {{ analytic_data.avg_revenue_data.ratio }}%</span>
+                {% elif analytic_data.summary_revenue_data.status.value == 2 %}
                 -
+                {% else %}
+                <span class="text-danger"><i class="fa-solid fa-arrow-trend-down"></i> снижение на {{ analytic_data.avg_revenue_data.ratio }}%</span>
                 {% endif %}
               </td>
             </tr>
@@ -65,20 +68,20 @@
           <tbody class="text-center">
             <tr>
               <td>Макс. выручка</td>
-              <td>{{ max_revenue_workshift.shift_date | date:"d.m.Y" }}<br>({{ max_revenue_workshift.shift_date | date:"l" }})</td>
-              <td>{{ max_revenue_workshift.summary_revenue | intcomma }}</td>
+              <td>{{ analytic_data.max_revenue_workshift_data.shift_date | date:"d.m.Y" }}<br>({{ analytic_data.max_revenue_workshift_data.shift_date | date:"l" }})</td>
+              <td>{{ analytic_data.max_revenue_workshift_data.summary_revenue | intcomma }}</td>
               <td>
-                {{ max_revenue_workshift.hall_admin.get_full_name }}<br>
-                {{ max_revenue_workshift.cash_admin.get_full_name }}
+                {{ analytic_data.max_revenue_workshift_data.hall_admin_name }}<br>
+                {{ analytic_data.max_revenue_workshift_data.cash_admin_name }}
               </td>
             </tr>
             <tr>
               <td>Мин. выручка</td>
-              <td>{{ min_revenue_workshift.shift_date | date:"d.m.Y" }}<br>({{ min_revenue_workshift.shift_date | date:"l" }})</td>
-              <td>{{ min_revenue_workshift.summary_revenue | intcomma }}</td>
+              <td>{{ analytic_data.min_revenue_workshift_data.shift_date | date:"d.m.Y" }}<br>({{ analytic_data.min_revenue_workshift_data.shift_date | date:"l" }})</td>
+              <td>{{ analytic_data.min_revenue_workshift_data.summary_revenue | intcomma }}</td>
               <td>
-                {{ min_revenue_workshift.hall_admin.get_full_name }}<br>
-                {{ min_revenue_workshift.cash_admin.get_full_name }}
+                {{ analytic_data.min_revenue_workshift_data.hall_admin_name }}<br>
+                {{ analytic_data.min_revenue_workshift_data.cash_admin_name }}
               </td>
             </tr>
           </tbody>
@@ -90,85 +93,29 @@
           <thead class="text-warning text-center">
             <tr>
               <th>Категория</th>
-              <th>{{ previous_month_date|date:"F" }}</th>
-              <th>{{ current_month_date|date:"F" }}</th>
+              <th>{{ analytic_data.previous_period_date|date:"F" }}</th>
+              <th>{{ analytic_data.current_period_date|date:"F" }}</th>
               <th>Анализ</th>
             </tr>
           </thead>
           <tbody class="text-center">
+            {% for analytic_field in analytic_data.summary_fields_list %}
             <tr>
-              <td class="text-warning">Бар</td>
-              <td>{{ analytic.bar_revenue__sum.0 | intcomma }}</td>
-              <td>{{ analytic.bar_revenue__sum.1 | intcomma }}</td>
+              <td class="text-warning">{{ analytic_field.name }}</td>
+              <td>{{ analytic_field.previous_month_value | intcomma }}</td>
+              <td>{{ analytic_field.current_month_value | intcomma }}</td>
               <td>
-                {% if analytic.bar_revenue__sum.0 < analytic.bar_revenue__sum.1 %}
-                <span class="text-acid"><i class="fa-solid fa-arrow-trend-up"></i> рост на {{ analytic.bar_revenue__sum.2 }}%</span>
-                {% elif analytic.bar_revenue__sum.0 > analytic.bar_revenue__sum.1 %}
-                <span class="text-danger"><i class="fa-solid fa-arrow-trend-down"></i> снижение на {{ analytic.bar_revenue__sum.2 }}%</span>
-                {% else %}
+                {% if analytic_field.status.value == 1 %}
+                <span class="text-acid"><i class="fa-solid fa-arrow-trend-up"></i> рост на {{ analytic_field.ratio }}%</span>
+                {% elif analytic_field.status.value == 2 %}
                 -
+                {% else %}
+                <span class="text-danger"><i class="fa-solid fa-arrow-trend-down"></i> снижение на {{ analytic_field.ratio }}%</span>
                 {% endif %}
               </td>
             </tr>
-            <tr>
-              <td class="text-warning">Game Zone (КНА)</td>
-              <td>{{ analytic.game_zone_subtotal__sum.0 | intcomma }}</td>
-              <td>{{ analytic.game_zone_subtotal__sum.1 | intcomma }}</td>
-              <td>
-                {% if analytic.game_zone_subtotal__sum.0 < analytic.game_zone_subtotal__sum.1 %}
-                <span class="text-acid"><i class="fa-solid fa-arrow-trend-up"></i> рост на {{ analytic.game_zone_subtotal__sum.2 }}%</span>
-                {% elif analytic.game_zone_subtotal__sum.0 > analytic.game_zone_subtotal__sum.1 %}
-                <span class="text-danger"><i class="fa-solid fa-arrow-trend-down"></i> снижение на {{ analytic.game_zone_subtotal__sum.2 }}%</span>
-                {% else %}
-                -
-                {% endif %}
-              </td>
-            </tr>
-            <tr>
-              <td class="text-warning">Доп. услуги</td>
-              <td>{{ analytic.additional_services_revenue__sum.0 | intcomma }}</td>
-              <td>{{ analytic.additional_services_revenue__sum.1 | intcomma }}</td>
-              <td>
-                {% if analytic.additional_services_revenue__sum.0 < analytic.additional_services_revenue__sum.1 %}
-                <span class="text-acid"><i class="fa-solid fa-arrow-trend-up"></i> рост на {{ analytic.additional_services_revenue__sum.2 }}%</span>
-                {% elif analytic.additional_services_revenue__sum.0 > analytic.additional_services_revenue__sum.1 %}
-                <span class="text-danger"><i class="fa-solid fa-arrow-trend-down"></i> снижение на {{ analytic.additional_services_revenue__sum.2 }}%</span>
-                {% else %}
-                -
-                {% endif %}
-              </td>
-            </tr>
-            <tr>
-              <td class="text-warning">Кальян</td>
-              <td>{{ analytic.hookah_revenue__sum.0 | intcomma }}</td>
-              <td>{{ analytic.hookah_revenue__sum.1 | intcomma }}</td>
-              <td>
-                {% if analytic.hookah_revenue__sum.0 < analytic.hookah_revenue__sum.1 %}
-                <span class="text-acid"><i class="fa-solid fa-arrow-trend-up"></i> рост на {{ analytic.hookah_revenue__sum.2 }}%</span>
-                {% elif analytic.hookah_revenue__sum.0 > analytic.hookah_revenue__sum.1 %}
-                <span class="text-danger"><i class="fa-solid fa-arrow-trend-down"></i> снижение на {{ analytic.hookah_revenue__sum.2 }}%</span>
-                {% else %}
-                -
-                {% endif %}
-              </td>
-            </tr>
+            {% endfor %}
           </tbody>
-          <tfoot class="text-center">
-            <tr>
-              <td class="text-danger">Недостачи</td>
-              <td>{{ analytic.shortage__sum.0 | intcomma }}</td>
-              <td>{{ analytic.shortage__sum.1 | intcomma }}</td>
-              <td>
-                {% if analytic.shortage__sum.0 < analytic.shortage__sum.1 %}
-                <span class="text-danger"><i class="fa-solid fa-arrow-trend-up"></i> рост на {{ analytic.shortage__sum.2 }}%</span>
-                {% elif analytic.shortage__sum.0 > analytic.shortage__sum.1 %}
-                <span class="text-acid"><i class="fa-solid fa-arrow-trend-down"></i> снижение на {{ analytic.shortage__sum.2 }}%</span>
-                {% else %}
-                -
-                {% endif %}
-              </td>
-            </tr>
-          </tfoot>
         </table>
       </div>
     </div>
