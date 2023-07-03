@@ -1,0 +1,124 @@
+{% extends 'salary/logined_page.html' %}
+{% load humanize %}
+{% load salary_tags %}
+
+{% block content %}
+<main>
+  <div class="container">
+    <div class="row mt-1">
+      <div class="col">
+        <p class="text-center">Аналитические данные за {{ analytic_data.previous_period_date|date:"F" }} и {{ analytic_data.current_period_date|date:"F Y г." }}
+          <br>
+          (с 1 по {{analytic_data.current_period_date|date:"d"}} числа месяца)
+        </p>
+      </div>
+    </div>
+    <div class="row mb-2">
+      <div class="col">
+        <button class="btn btn-outline-secondary" onclick="history.back()">Назад</button>
+      </div>
+    </div>
+    <div class="row mb-2 row-cols-md-2 row-cols-sm-1 m-1 justify-content-center">
+      <div class="col-md-5 col-sm-12 m-2 table-responsive rounded border border-light">
+        <p class="text-orange text-center fw-bold">Аналитика по выручке</p>
+        <table class="table table-dark">
+          <thead class="text-warning text-center">
+            <tr>
+              <th>Показатель</th>
+              <th>{{ analytic_data.previous_period_date|date:"F" }}</th>
+              <th>{{ analytic_data.current_period_date|date:"F" }}</th>
+              <th>Анализ</th>
+            </tr>
+          </thead>
+          <tbody class="text-center">
+            <tr>
+              <td>Общая выручка</td>
+              <td>{{ analytic_data.summary_revenue_data.previous_month_value | intcomma }}</td>
+              <td>{{ analytic_data.summary_revenue_data.current_month_value | intcomma }}</td>
+              <td>
+                {% if analytic_data.summary_revenue_data.status.value == 1 %}
+                <span class="text-acid"><i class="fa-solid fa-arrow-trend-up"></i> рост на {{ analytic_data.summary_revenue_data.ratio }}%</span>
+                {% elif analytic_data.summary_revenue_data.status.value == 2 %}
+                -
+                {% else %}
+                <span class="text-danger"><i class="fa-solid fa-arrow-trend-down"></i> снижение на {{ analytic_data.summary_revenue_data.ratio }}%</span>
+                {% endif %}
+              </td>
+            </tr>
+            <tr>
+              <td>Средняя выручка</td>
+              <td>{{ analytic_data.avg_revenue_data.previous_month_value | intcomma }}</td>
+              <td>{{ analytic_data.avg_revenue_data.current_month_value | intcomma }}</td>
+              <td>
+                {% if analytic_data.avg_revenue_data.status.value == 1 %}
+                <span class="text-acid"><i class="fa-solid fa-arrow-trend-up"></i> рост на {{ analytic_data.avg_revenue_data.ratio }}%</span>
+                {% elif analytic_data.summary_revenue_data.status.value == 2 %}
+                -
+                {% else %}
+                <span class="text-danger"><i class="fa-solid fa-arrow-trend-down"></i> снижение на {{ analytic_data.avg_revenue_data.ratio }}%</span>
+                {% endif %}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <table class="table table-dark">
+          <thead class="text-warning text-center">
+            <th colspan="4">Пиковые показатели</th>
+          </thead>
+          <tbody class="text-center">
+            <tr>
+              <td>Макс. выручка</td>
+              <td>{{ analytic_data.max_revenue_workshift_data.shift_date | date:"d.m.Y" }}<br>({{ analytic_data.max_revenue_workshift_data.shift_date | date:"l" }})</td>
+              <td>{{ analytic_data.max_revenue_workshift_data.summary_revenue | intcomma }}</td>
+              <td>
+                {{ analytic_data.max_revenue_workshift_data.hall_admin_name }}<br>
+                {{ analytic_data.max_revenue_workshift_data.cash_admin_name }}
+              </td>
+            </tr>
+            <tr>
+              <td>Мин. выручка</td>
+              <td>{{ analytic_data.min_revenue_workshift_data.shift_date | date:"d.m.Y" }}<br>({{ analytic_data.min_revenue_workshift_data.shift_date | date:"l" }})</td>
+              <td>{{ analytic_data.min_revenue_workshift_data.summary_revenue | intcomma }}</td>
+              <td>
+                {{ analytic_data.min_revenue_workshift_data.hall_admin_name }}<br>
+                {{ analytic_data.min_revenue_workshift_data.cash_admin_name }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="col-md col-sm-12 m-2 table-responsive rounded border border-light">
+        <p class="text-orange text-center fw-bold">Основные показатели выручки</p>
+        <table class="table table-dark">
+          <thead class="text-warning text-center">
+            <tr>
+              <th>Категория</th>
+              <th>{{ analytic_data.previous_period_date|date:"F" }}</th>
+              <th>{{ analytic_data.current_period_date|date:"F" }}</th>
+              <th>Анализ</th>
+            </tr>
+          </thead>
+          <tbody class="text-center">
+            {% for analytic_field in analytic_data.summary_fields_list %}
+            <tr>
+              <td class="text-warning">{{ analytic_field.name }}</td>
+              <td>{{ analytic_field.previous_month_value | intcomma }}</td>
+              <td>{{ analytic_field.current_month_value | intcomma }}</td>
+              <td>
+                {% if analytic_field.status.value == 1 %}
+                <span class="text-acid"><i class="fa-solid fa-arrow-trend-up"></i> рост на {{ analytic_field.ratio }}%</span>
+                {% elif analytic_field.status.value == 2 %}
+                -
+                {% else %}
+                <span class="text-danger"><i class="fa-solid fa-arrow-trend-down"></i> снижение на {{ analytic_field.ratio }}%</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</main>
+{% endblock %}

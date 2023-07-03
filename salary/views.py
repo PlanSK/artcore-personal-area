@@ -42,6 +42,7 @@ from salary.services.monthly_reports import (
 )
 from salary.services.misconduct import get_misconduct_employee_data
 from salary.services.profile_services import get_birthday_person_list
+from salary.services.analytic import get_analytic_data
 
 
 logger = logging.getLogger(__name__)
@@ -215,22 +216,6 @@ class AdminUserView(EmployeePermissionsMixin, TitleMixin, ListView):
         return context
 
 
-class ReportsView(WorkingshiftPermissonsMixin, TitleMixin, ListView):
-    template_name = 'salary/reports_list.html'
-    model = WorkingShift
-    title = 'Отчеты'
-
-    def get_queryset(self):
-        query = WorkingShift.objects.filter(
-            status=WorkingShift.WorkshiftStatus.VERIFIED
-        ).dates('shift_date','month')
-        return query
-
-
-class AnalyticalView(ReportsView):
-    template_name = 'salary/analytical_reports_list.html'
-
-
 class StaffIndexView(WorkingshiftPermissonsMixin, TitleMixin, TemplateView,
                      CatchingExceptionsMixin):
     template_name = 'salary/staff/staff_index.html'
@@ -313,7 +298,7 @@ class StaffArchiveWorkshiftsView(WorkingshiftPermissonsMixin,
         return context
 
 
-class StaffWorkshiftsForYear(WorkingshiftPermissonsMixin, TitleMixin,
+class StaffWorkshiftsForYearView(WorkingshiftPermissonsMixin, TitleMixin,
                              MonthYearExtractMixin, ListView):
     template_name = 'salary/staff_months_workshifts_list.html'
     model = WorkingShift
@@ -330,7 +315,7 @@ class StaffWorkshiftsForYear(WorkingshiftPermissonsMixin, TitleMixin,
         return context
 
 
-class StaffWorkshiftsYearList(WorkingshiftPermissonsMixin, TitleMixin,
+class StaffWorkshiftsYearView(WorkingshiftPermissonsMixin, TitleMixin,
                               ListView):
     template_name = 'salary/staff_years_workshifts_list.html'
     model = WorkingShift
@@ -341,6 +326,26 @@ class StaffWorkshiftsYearList(WorkingshiftPermissonsMixin, TitleMixin,
         return workshifts_years
 
 
+class AllYearsReportsView(StaffWorkshiftsYearView):
+    template_name = 'salary/month_reports/all_years_reports_list.html'
+    title = 'Ежемесячные отчёты'
+
+
+class AllYearsAnalyticView(StaffWorkshiftsYearView):
+    template_name = 'salary/month_reports/all_years_analytic_list.html'
+    title = 'Аналитика'
+
+
+class MonthReportsForYearView(StaffWorkshiftsForYearView):
+    template_name = 'salary/month_reports/month_reports_for_year.html'
+    title = 'Ежемесячные отчёты'
+
+
+class AnalyticForYearView(StaffWorkshiftsForYearView):
+    template_name = 'salary/month_reports/analytic_for_year.html'
+    title = 'Аналитика'
+
+
 class DeleteWorkshift(WorkingshiftPermissonsMixin, TitleMixin, SuccessUrlMixin,
                       DeleteView):
     model = WorkingShift
@@ -349,8 +354,8 @@ class DeleteWorkshift(WorkingshiftPermissonsMixin, TitleMixin, SuccessUrlMixin,
 
 class MonthlyReportListView(WorkingshiftPermissonsMixin, MonthYearExtractMixin,
                             TitleMixin, TemplateView):
-    template_name = 'salary/monthlyreport_list.html'
-    title = 'Сводный отчёт'
+    template_name = 'salary/month_reports/monthlyreport_list.html'
+    title = 'Зарплатный отчёт'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -607,126 +612,19 @@ class MisconductDetailView(ProfileStatusRedirectMixin, PermissionRequiredMixin,
                                                  'regulations_article')
 
 
+# TODO
+# Need refactioring! Moving logic to services.
+# Templates get data from json on separated page.
 class MonthlyAnalyticalReport(WorkingshiftPermissonsMixin, 
-                              MonthYearExtractMixin, TitleMixin, ListView):
-    model = WorkingShift
+                              MonthYearExtractMixin, TitleMixin, TemplateView):
     title = 'Аналитический отчёт'
-    template_name = 'salary/monthly_analytical_report.html'
-
-    def get_queryset(self) -> QuerySet:
-        queryset = WorkingShift.objects.all().select_related(
-            'hall_admin',
-            'cash_admin',
-        ).order_by('shift_date')
-        return queryset
-
-    def get_fields_dict(self) -> dict:
-        fields = (
-            'summary_revenue', 'bar_revenue', 'game_zone_subtotal',
-            'game_zone_error', 'additional_services_revenue', 'hookah_revenue',
-            'shortage', 'summary_revenue__avg',
-        )
-        self.current_month_queryset = self.object_list.filter(
-            shift_date__month=self.month,
-            shift_date__year=self.year,
-        )
-
-        if not self.current_month_queryset:
-            raise Http404
-
-        self.current_date = datetime.date(self.year, self.month, 1)
-
-        self.previous_month_date = self.current_date - relativedelta(months=1)
-        self.previous_month_queryset = self.object_list.filter(
-            shift_date__month=self.previous_month_date.month,
-            shift_date__year=self.previous_month_date.year,
-        )
-
-        values_dict = dict()
-        operations_list = [
-            Sum(field) if '__avg' not in field
-            else Avg(field.split('__')[0])
-            for field in fields
-        ]
-
-        current_month_values = self.current_month_queryset.aggregate(*operations_list)
-        previous_month_values = self.previous_month_queryset.aggregate(*operations_list)
-
-        for field in current_month_values.keys():
-            current_month_value = round(current_month_values.get(field, 0), 2)
-            previous_month_value = round(
-                previous_month_values.get(field, 0), 2
-            ) if previous_month_values.get(field, 0) else 0
-
-            if current_month_value == 0.0:
-                ratio = 100.0
-            elif current_month_value > previous_month_value:
-                ratio = round((current_month_value - previous_month_value) /
-                            current_month_value * 100, 2)
-            elif current_month_value < previous_month_value:
-                ratio = round((previous_month_value - current_month_value) /
-                            previous_month_value * 100, 2)
-
-            values_dict[field] = (
-                        previous_month_value,
-                        current_month_value,
-                        ratio,
-                    )
-
-        return values_dict
-
-    def get_linechart_data(self) -> list:
-        """Return list of lists with revenue data for Google LineChart
-
-        Returns:
-            list: list of lists [day_of_month, previous_month_revenue, current_month_revenue]
-        """
-        current_month_list =  self.current_month_queryset.values_list(
-            'shift_date__day',
-            'summary_revenue')
-        previous_month_list = self.previous_month_queryset.values_list(
-            'shift_date__day',
-            'summary_revenue')
-        linechart_data_list = list()
-        for first_element in previous_month_list:
-            for second_element in current_month_list:
-                if first_element[0] == second_element[0]:
-                    data_row = list(first_element)
-                    data_row.append(second_element[1])
-                    linechart_data_list.append(data_row)
-
-        return linechart_data_list
-
-    def get_piechart_data(self, analytic_data: dict) -> list:
-        categories = {
-            'bar_revenue': 'Бар',
-            'game_zone_subtotal': 'Game zone',
-            'additional_services_revenue': 'Доп. услуги',
-            'hookah_revenue': 'Кальян',
-        }
-
-        piechart_data = list()
-
-        for category in categories.keys():
-            piechart_data.append(
-                [categories.get(category), analytic_data.get(f'{category}__sum')[1]]
-            )
-
-        return piechart_data
+    template_name = 'salary/month_reports/monthly_analytical_report.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        analytic_data = self.get_fields_dict()
+        analytic_data = get_analytic_data(self.month, self.year)
         context.update({
-            'analytic': analytic_data,
-            'piechart_data': self.get_piechart_data(analytic_data),
-            'min_revenue_workshift': self.current_month_queryset.order_by(
-                'summary_revenue').first(),
-            'max_revenue_workshift': self.current_month_queryset.order_by(
-                'summary_revenue').last(),
-            'current_month_date': self.current_date,
-            'previous_month_date': self.previous_month_date,
-            'linechart_data': self.get_linechart_data(),
+            'analytic_data': analytic_data,
         })
 
         return context
@@ -1176,7 +1074,7 @@ class StaffCalendarListView(TitleMixin, ListView):
 
 
 class AwardRatingView(MonthlyReportListView):
-    template_name: str = 'salary/award_rating.html'
+    template_name: str = 'salary/month_reports/award_rating.html'
     title = 'Рейтинговый отчёт'
 
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
