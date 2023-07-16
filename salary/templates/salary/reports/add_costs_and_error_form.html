@@ -136,7 +136,12 @@
     <div class="row justify-content-center border-top mt-1">
       <div class="col col-md-6 text-center border rounded m-1 p-1">
         Достоверность и корректность, указанных в отчете сведений, подтверждаю. <br>
+        {% if request.GET.next %}
+        <a href="{% url 'redirect_to_workshift' pk=workshift_pk %}?next={{request.GET.next}}" class="btn btn-outline-success">Закончить подачу данных</a>
+        <a href="{{request.GET.next}}" class="btn btn-outline-secondary">Вернуться назад</a>
+        {% else %}
         <a href="{% url 'redirect_to_workshift' pk=workshift_pk %}" class="btn btn-success">Закончить подачу данных</a>
+        {% endif %}
       </div>
     </div>
   </div>

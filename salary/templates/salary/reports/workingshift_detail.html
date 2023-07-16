@@ -21,9 +21,10 @@
     </div>
     <div class="row mb-2 justify-content-between">
       <div class="col col-md-auto col-sm-auto">
-        <button class="btn btn-outline-secondary" onclick="history.back()">Назад</button>
         {% if request.user.is_staff %}
         <a class="btn btn-outline-secondary" href="{% url 'workshifts_view' %}">К списку смен</a>
+        {% else %}
+        <button class="btn btn-outline-secondary" onclick="history.back()">Назад</button>
         {% endif %}
       </div>
       <div class="col col-md-auto text-center text-body-secondary">
@@ -204,7 +205,7 @@
     {% if workshift.errors.all %}
     <div class="row mt-1 justify-content-center rounded border border-light">
       <div class="col-md-12 col-sm-auto">
-        <h5 class="text-center">Подробные данные по ошибкам КНА <a href="{% url 'costs_and_errors_form' pk=workshift.pk %}" class="link-info"><i class="fa-regular fa-pen-to-square"></i></a></h5>
+        <h5 class="text-center">Подробные данные по ошибкам КНА <a href="{% url 'costs_and_errors_form' pk=workshift.pk %}?next={{request.path}}" class="link-info"><i class="fa-regular fa-pen-to-square"></i></a></h5>
         <table class="table table-dark">
           <thead class="text-warning">
             <th>Время по КНА</th>
@@ -229,7 +230,7 @@
     </div>
     <div class="row row-cols-md-2 row-cols-sm-1 mt-1 justify-content-center rounded border border-light">
       <div class="col-md-6 col-sm-auto">
-        <h5 class="text-center">Данные по грилю (включено в ошибки) <a href="{% url 'costs_and_errors_form' pk=workshift.pk %}" class="link-info"><i class="fa-regular fa-pen-to-square"></i></a></h5>
+        <h5 class="text-center">Данные по грилю (включено в ошибки) <a href="{% url 'costs_and_errors_form' pk=workshift.pk %}?next={{request.path}}" class="link-info"><i class="fa-regular fa-pen-to-square"></i></a></h5>
         <table class="table table-dark">
           <thead class="text-warning text-center">
             <th>Время по КНА</th>
@@ -252,7 +253,7 @@
         </table>
       </div>
       <div class="col-md-6 col-sm-auto border-start border-secondary">
-        <h5 class="text-center">Данные по лото (включено в ошибки) <a href="{% url 'costs_and_errors_form' pk=workshift.pk %}" class="link-info"><i class="fa-regular fa-pen-to-square"></i></a></h5>
+        <h5 class="text-center">Данные по лото (включено в ошибки) <a href="{% url 'costs_and_errors_form' pk=workshift.pk %}?next={{request.path}}" class="link-info"><i class="fa-regular fa-pen-to-square"></i></a></h5>
         <table class="table table-dark">
           <thead class="text-warning text-center">
             <th>Время по КНА</th>

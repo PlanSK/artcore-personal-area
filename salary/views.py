@@ -1121,7 +1121,7 @@ class EverydayReportPrintView(PermissionRequiredMixin, TitleMixin, DetailView):
 
 
 class AddCostErrorFormView(PermissionRequiredMixin, TitleMixin,
-                             TemplateView):
+                           TemplateView):
     template_name: str = 'salary/reports/add_costs_and_error_form.html'
     error_kna_form = ErrorKNAForm
     cost_form = CostForm
@@ -1198,8 +1198,13 @@ class CabinErrorUpdateView(CostUpdateView):
 @login_required
 def save_workshift_and_redirect(request, pk):
     workshift = get_object_or_404(WorkingShift, pk=pk)
-    workshift.status = WorkingShift.WorkshiftStatus.UNVERIFIED
+    if workshift.status == WorkingShift.WorkshiftStatus.NOT_CONFIRMED:
+        workshift.status = WorkingShift.WorkshiftStatus.UNVERIFIED
     workshift.save()
+    next_path = request.GET.get('next')
+    if next_path:
+        return redirect(next_path)
+
     return redirect(workshift)
 
 
