@@ -14,6 +14,11 @@
                 {% csrf_token %}
                 <div class="form-error">{{ form.non_field_errors }}</div>
                 {{ form|crispy }}
+                <p class="text-center">
+                  <a href="{% url 'costs_and_errors_form' pk=workingshift.pk %}?next={{request.path}}" class="btn btn-outline-info">
+                    <i class="fa-regular fa-pen-to-square"></i> Изменить данные по ошибкам и расходам
+                  </a>
+                </p>
                 <div class="m-6 d-flex justify-content-center">
                   <button type="submit" class="btn btn-primary mb-4 me-2">Внести изменения</button>
                   <div><a class="btn btn-outline-secondary" onclick="history.back()">Назад</a></div>

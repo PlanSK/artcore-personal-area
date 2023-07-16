@@ -83,6 +83,11 @@
                     <i class="fa-solid fa-square-pen"></i>&nbsp;Редактировать
                   </a>
                 </li>
+                <li>
+                  <a class="dropdown-item" href="{% url 'costs_and_errors_form' workshift.pk %}?next={{ request.path }}">
+                    <i class="fa-solid fa-square-pen"></i>&nbsp;Редактировать ошибки
+                  </a>
+                </li>
                 <li><hr class="dropdown-divider"></li>
                 <li>
                   <a class="dropdown-item text-danger" href="{% url 'delete_workshift' workshift.slug %}?next={{ request.path }}">
