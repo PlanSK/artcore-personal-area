@@ -26,8 +26,14 @@
         <hr class="m-1">
         <h5><i><b class="text-primary">{{ today_date|date:"j E Y г., l" }}</b><br></h5>
         <span>Сегодня на смене:</span></i><br>
-        <span class="badge bg-primary"><i class="fa-solid fa-cash-register"></i> {{ employees_at_work.cashier | default:"нет данных" }}</span>
-        <span class="badge bg-success"><i class="fa-solid fa-user-gear"></i> {{ employees_at_work.hall_admin | default:"нет данных" }}</span>
+        <div class="row">
+          <div class="col">
+            <span class="badge bg-primary"><i class="fa-solid fa-cash-register"></i> {{ employees_at_work.cashier | default:"нет данных" }}</span>
+          </div>
+          <div class="col">
+            <span class="badge bg-success"><i class="fa-solid fa-user-gear"></i> {{ employees_at_work.hall_admin | default:"нет данных" }}</span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
