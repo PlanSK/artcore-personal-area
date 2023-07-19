@@ -44,8 +44,3 @@ def get_unread_messages(user: User) -> int:
 @register.simple_tag()
 def check_image_file_exists(profile: Profile) -> bool:
     return profile_photo_is_exists(profile)
-
-
-@register.simple_tag()
-def current_day_date() -> datetime.date:
-    return timezone.now().date()
