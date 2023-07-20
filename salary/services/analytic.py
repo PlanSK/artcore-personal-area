@@ -7,6 +7,7 @@ from enum import Enum
 from calendar import monthrange
 from dateutil.relativedelta import relativedelta
 from django.db.models import Sum, Avg, QuerySet
+from django.http import Http404
 
 from salary.models import WorkingShift
 
@@ -92,7 +93,7 @@ def _get_analytic_field(current_month_value: float,
     )
 
 
-def _get_peak_workshift_data(workshift: WorkingShift) -> PeakWorkshift:
+def _get_peak_workshift_model(workshift: WorkingShift) -> PeakWorkshift:
     """Return PeakWorkshift from WorkingShift model data"""
     return PeakWorkshift(
         summary_revenue=workshift.summary_revenue,
@@ -108,10 +109,10 @@ def get_peak_workshifts_data(current_month_queryset: QuerySet,
     summary_revenue_sorted_queryset = current_month_queryset.order_by(
         criteria_field)
 
-    max_revenue_workshift_data = _get_peak_workshift_data(
+    max_revenue_workshift_data = _get_peak_workshift_model(
         summary_revenue_sorted_queryset.last()
     )
-    min_revenue_workshift_data = _get_peak_workshift_data(
+    min_revenue_workshift_data = _get_peak_workshift_model(
         summary_revenue_sorted_queryset.first()
     )
     return (max_revenue_workshift_data, min_revenue_workshift_data)
@@ -145,20 +146,29 @@ def get_querysets_for_specific_period(
     (previous and current months limited by day number)
     """
     current_month_queryset = _get_workshift_data(month, year)
-    previous_period_date = get_last_day_date_of_previous_month(
-        current_month_queryset.last().shift_date)
+    try:
+        last_day_of_current_month = current_month_queryset.last().shift_date
+    except AttributeError:
+        logger.error("QuerySet with last() has no attribute 'shift_date'")
+        raise Http404
 
+    previous_period_date = get_last_day_date_of_previous_month(
+        last_day_of_current_month)
     previous_month_queryset = _get_workshift_data(
         previous_period_date.month,
         previous_period_date.year,
         previous_period_date.day
     )
-    current_month__limited_queryset = current_month_queryset
-    if previous_period_date.day < current_month_queryset.last().shift_date.day:
-        current_month__limited_queryset = current_month_queryset.filter(
+    current_month_limited_queryset = current_month_queryset
+    if previous_period_date.day < last_day_of_current_month.day:
+        current_month_limited_queryset = current_month_queryset.filter(
             shift_date__day__lte=previous_period_date.day)
 
-    return (current_month__limited_queryset, previous_month_queryset)
+    if not current_month_limited_queryset or not previous_month_queryset:
+        logger.warning('QuerySets for analytic has empty result. Raise 404.')
+        raise Http404
+
+    return (current_month_limited_queryset, previous_month_queryset)
 
 
 def get_analytic_data(month: int, year: int) -> AnalyticData:
