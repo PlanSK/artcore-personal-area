@@ -3,6 +3,8 @@
 {% load salary_tags %}
 
 {% block content %}
+{% now "Y" as year %}
+{% now "m" as month %}
   <main>
     <div class="container">
       <div class="row m-3">
@@ -79,7 +81,7 @@
                     <span class="me-2"><i class="fa-solid fa-chart-line fa-2xl"></i></span>
                     Аналитика
                   </p>
-                  <a href="{% url 'all_year_analytics' %}" class="stretched-link"></a>
+                  <a href="{% url 'monthly_analytics' year=year month=month %}" class="stretched-link"></a>
                 </div>
               </div>
             </div>
@@ -101,7 +103,7 @@
                     <span class="me-2"><i class="fa-solid fa-chart-column fa-xl"></i></span>
                     Отчеты
                   </p>
-                  <a href="{% url 'all_years_reports' %}" class="stretched-link"></a>
+                  <a href="{% url 'month_reports_for_year' year=year %}" class="stretched-link"></a>
                 </div>
               </div>
             </div>

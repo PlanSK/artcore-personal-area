@@ -13,9 +13,15 @@
         </p>
       </div>
     </div>
-    <div class="row mb-2">
+    <div class="row">
       <div class="col">
-        <button class="btn btn-outline-secondary" onclick="history.back()">Назад</button>
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'all_year_analytics' %}?next={{ request.path }}">Все года</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'analytic_for_year' year=analytic_data.current_period_date.year %}?next={{ request.path }}">{{ analytic_data.current_period_date | date:"Y" }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ analytic_data.current_period_date | date:"F" }}</li>
+          </ol>
+        </nav>
       </div>
     </div>
     <div class="row mb-2 row-cols-md-2 row-cols-sm-1 m-1 justify-content-center">
@@ -106,17 +112,32 @@
               <td>{{ analytic_field.current_month_value | intcomma }}</td>
               <td>
                 {% if analytic_field.status.value == 1 %}
-                <span class="text-acid"><i class="fa-solid fa-arrow-trend-up"></i> рост на {{ analytic_field.ratio }}%</span>
+                  {% if analytic_field.is_negative %}
+                    <span class="text-danger">
+                  {% else %}
+                    <span class="text-acid">
+                  {% endif %}
+                <i class="fa-solid fa-arrow-trend-up"></i> рост на {{ analytic_field.ratio }}%</span>
                 {% elif analytic_field.status.value == 2 %}
                 -
                 {% else %}
-                <span class="text-danger"><i class="fa-solid fa-arrow-trend-down"></i> снижение на {{ analytic_field.ratio }}%</span>
+                  {% if analytic_field.is_negative %}
+                    <span class="text-acid">
+                  {% else %}
+                    <span class="text-danger">
+                  {% endif %}
+                <i class="fa-solid fa-arrow-trend-down"></i> снижение на {{ analytic_field.ratio }}%</span>
                 {% endif %}
               </td>
             </tr>
             {% endfor %}
           </tbody>
         </table>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col text-center">
+        <button class="btn btn-outline-secondary" onclick="history.back()">Назад</button>
       </div>
     </div>
   </div>
