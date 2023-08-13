@@ -196,7 +196,7 @@ class WorkingShift(models.Model):
         verbose_name='Время прибытия кассира', blank=True, null=True
     )
     acquiring_evator_sum = models.FloatField(
-        verbose_name='Сумма эквайринга (Эватор)', default=0.0
+        verbose_name='Сумма эквайринга (Эвотор)', default=0.0
     )
     acquiring_terminal_sum = models.FloatField(
         verbose_name='Сумма эквайринга (Терминал)', default=0.0

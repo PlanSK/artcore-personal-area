@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='workingshift',
             name='acquiring_evator_sum',
-            field=models.FloatField(default=0.0, verbose_name='Сумма эквайринга (Эватор)'),
+            field=models.FloatField(default=0.0, verbose_name='Сумма эквайринга (Эвотор)'),
         ),
         migrations.AddField(
             model_name='workingshift',
