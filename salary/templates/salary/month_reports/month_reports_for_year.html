@@ -9,7 +9,7 @@
 <div class="row row-cols-1 row-cols-md-3">
   {% for date_range in object_list %} 
   <div class="col p-1 text-center">
-    <div class="card text-light text-bg-dark border-secondary h-100">
+    <div class="card border-secondary h-100">
       <div class="card-body">
         <h5 class="card-title">Отчёты за {{ date_range|date:"F" }}</h5>
         <a href="{% url 'monthly_report' year=date_range.year month=date_range.month %}?next={{ request.path }}" class="btn btn-primary">
