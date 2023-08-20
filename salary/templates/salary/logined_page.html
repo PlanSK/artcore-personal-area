@@ -47,6 +47,9 @@
                     <li><a class="dropdown-item" href="{% url 'confirm_mail_status' %}"><i class="fa-solid fa-envelope-circle-check"></i>&nbsp;Состояние активации сотрудников</a></li>
                     <li><hr class="dropdown-divider"></li>
                     {% endif %}
+                    <li>
+                      <a href class="dropdown-item" onclick="switchTheme()"><i class="fa-regular fa-sun"></i> / <i class="fa-regular fa-moon"></i> Сменить тему</a>
+                    </li>
                     <li><a href="https://stat.artcore24.ru/" class="dropdown-item"><i class="fa-solid fa-network-wired"></i> Состояние игровых зон</a></li>
                     <li><a class="dropdown-item" href="{% url 'show_user_detail' %}?next={{ request.path }}"><i class="fa-solid fa-user"></i>&nbsp;Мой профиль</a></li>
                     <li><hr class="dropdown-divider"></li>
