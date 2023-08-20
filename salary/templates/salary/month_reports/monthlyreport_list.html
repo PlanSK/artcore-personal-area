@@ -19,7 +19,7 @@
       <div class="col table-responsive border rounded m-2">
         <p class="text-center">{{ title }} за {{ current_date|date:"F" }}</p>
         <table class="table table-hover">
-          <thead class="text-warning text-center">
+          <thead class="text-center">
             <tr>
               <th>Сотрудник</th>
               <th>Количество смен</th>
@@ -30,7 +30,7 @@
               <th></th>
             </tr>
           </thead>
-          <tbody class="text-center">
+          <tbody class="text-center table-group-divider">
             {% for employee in report_data.employees %}
             <tr>
               <td>{{ employee.full_name }}</td>
@@ -47,8 +47,8 @@
             </tr>
             {% endfor %}
           </tbody>
-          <tfoot class="text-center text-white">
-            <tr>
+          <tfoot class="text-center">
+            <tr class="table-active">
               <td></td>
               <td>{{ report_data.shift_counter|default:"-"  }}</td>
               <td>{{ report_data.summary_basic_revenue|default:"-" | intcomma }}</td>
