@@ -11,7 +11,7 @@
         <div class="col">
           <div class="row row-cols-md-3 row-cols-sm-1 justify-content-center">
             <div class="col-sm-12 col-md-3 mb-1">
-              <div class="card blue-snippet text-light h-100">
+              <div class="card blue-snippet h-100">
                 <div class="card-body">
                   <p class="card-text fst-italic normalize">
                     <span class="me-2"><i class="fa-solid fa-calendar-check fa-xl"></i></span>
@@ -22,13 +22,13 @@
                 {% unverified_shift as unverified_shifts %}
                 {% if unverified_shifts.unclosed_number %}
                 <div class="card-footer d-flex justify-content-between align-items-center">
-                  <span class="card-text text-light"><b><i>Ожидает действие:</i></b></span><span class="badge bg-warning text-dark">{{ unverified_shifts.unclosed_number }}</span>
+                  <span class="card-text"><b><i>Ожидает действие:</i></b></span><span class="badge bg-warning text-dark">{{ unverified_shifts.unclosed_number }}</span>
                 </div>
                 {% endif %}
               </div>
             </div>
             <div class="col-sm-12 col-md-3 mb-1">
-              <div class="card green-snippet text-light h-100">
+              <div class="card green-snippet h-100">
                 <div class="card-body">
                   <p class="card-text fst-italic normalize">
                     <span class="me-2"><i class="fa-solid fa-users fa-xl"></i></span>
@@ -39,13 +39,13 @@
                 {% inactive_user as inactive_users %}
                 {% if inactive_users %}
                 <div class="card-footer d-flex justify-content-between align-items-center">
-                  <span class="card-text text-light"><b><i>Ожидает действие:</i></b></span><span class="badge bg-warning text-dark">{{ inactive_users }}</span>
+                  <span class="card-text"><b><i>Ожидает действие:</i></b></span><span class="badge bg-warning text-dark">{{ inactive_users }}</span>
                 </div>
                 {% endif %}
               </div>
             </div>
             <div class="col-sm-12 col-md-3 mb-1">
-              <div class="card red-snippet text-light h-100">
+              <div class="card red-snippet h-100">
                 <div class="card-body">
                   <p class="card-text fst-italic normalize">
                     <span class="me-2"><i class="fa-solid fa-graduation-cap fa-xl"></i></i></span>
@@ -59,13 +59,13 @@
                 {% if wait_explanation_misconducts or wait_decision_misconducts %}
                 <div class="card-footer d-flex justify-content-between align-items-center">
                   {% if wait_explanation_misconducts and wait_decision_misconducts %}
-                  <span class="card-text text-light"><b><i>Ожидает объяснение/решение:</i></b></span>
+                  <span class="card-text"><b><i>Ожидает объяснение/решение:</i></b></span>
                   <span class="badge bg-warning text-dark">{{ wait_explanation_misconducts }} / {{ wait_decision_misconducts }}</span>
                   {% elif wait_explanation_misconducts %}
-                  <span class="card-text text-light"><b><i>Ожидает объяснение:</i></b></span>
+                  <span class="card-text"><b><i>Ожидает объяснение:</i></b></span>
                   <span class="badge bg-warning text-dark">{{ wait_explanation_misconducts }}</span>
                   {% elif wait_decision_misconducts %}
-                  <span class="card-text text-light"><b><i>Ожидает решение:</i></b></span>
+                  <span class="card-text"><b><i>Ожидает решение:</i></b></span>
                   <span class="badge bg-warning text-dark">{{ wait_decision_misconducts }}</span>
                   {% endif %}
                 </div>
@@ -75,7 +75,7 @@
           </div>
           <div class="row row-cols-md-3 row-cols-sm-1 justify-content-center">
             <div class="col-sm-12 col-md-3 mb-1">
-              <div class="card blue-snippet text-light h-100">
+              <div class="card blue-snippet h-100">
                 <div class="card-body">
                   <p class="card-text fst-italic normalize">
                     <span class="me-2"><i class="fa-solid fa-chart-line fa-2xl"></i></span>
@@ -86,7 +86,7 @@
               </div>
             </div>
             <div class="col-sm-12 col-md-3 mb-1">
-              <div class="card green-snippet text-light h-100">
+              <div class="card green-snippet h-100">
                 <div class="card-body">
                   <p class="card-text fst-italic normalize">
                     <span class="me-2"><i class="fa-solid fa-calendar-days fa-2xl"></i></span>
@@ -97,7 +97,7 @@
               </div>
             </div>
             <div class="col-sm-12 col-md-3 mb-1">
-              <div class="card orange-snippet text-light h-100">
+              <div class="card orange-snippet h-100">
                 <div class="card-body">
                   <p class="card-text fst-italic normalize">
                     <span class="me-2"><i class="fa-solid fa-chart-column fa-xl"></i></span>

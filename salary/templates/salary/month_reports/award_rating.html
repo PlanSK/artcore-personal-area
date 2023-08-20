@@ -38,7 +38,7 @@
             <td class="text-body-secondary">{{employee.average_bar_revenue}}</td>
           {% else %}
             {% if award_data.bar_leader and employee.id == award_data.bar_leader.leader.id %}
-            <td class="bg-warning text-dark"><i class="fa-solid fa-award"></i>
+            <td class="bg-warning"><i class="fa-solid fa-award"></i>
             {% else %}
             <td>
             {% endif %}
@@ -46,7 +46,7 @@
             <td>{{employee.average_bar_revenue}}</td>
           {% endif %}
           {% if award_data.cashiers_leader and employee.id == award_data.cashiers_leader.leader.id %}
-          <td class="bg-warning text-dark"><i class="fa-solid fa-award"></i>
+          <td class="bg-warning"><i class="fa-solid fa-award"></i>
           {% else %}
           <td>
           {% endif %}
@@ -73,7 +73,7 @@
             <td class="text-body-secondary">{{employee.average_hookah_revenue}}</td>
           {% else %}
             {% if award_data.hookah_leader and employee.id == award_data.hookah_leader.leader.id %}
-            <td class="bg-warning text-dark"><i class="fa-solid fa-award"></i>
+            <td class="bg-warning"><i class="fa-solid fa-award"></i>
             {% else %}
             <td>
             {% endif %}
@@ -81,7 +81,7 @@
             <td>{{employee.average_hookah_revenue}}</td>
           {% endif %}
           {% if award_data.hall_admins_leader and employee.id == award_data.hall_admins_leader.leader.id %}
-          <td class="bg-warning text-dark"><i class="fa-solid fa-award"></i>
+          <td class="bg-warning"><i class="fa-solid fa-award"></i>
           {% else %}
           <td>
           {% endif %}

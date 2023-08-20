@@ -54,7 +54,7 @@
             <th>Ответственное лицо</th>
             <th></th>
           </thead>
-          <tbody class="text-light">
+          <tbody>
           {% for cost in costs_list %}
           <tr>
             <td>{{cost.cost_sum}}</td>
@@ -84,7 +84,7 @@
             <th>Описание</th>
             <th></th>
           </thead>
-          <tbody class="text-light">
+          <tbody>
           {% for error in errors_list %}
           <tr>
             <td>{{error.get_error_type_display}}</td>
@@ -115,7 +115,7 @@
             <th>Ошибочное время</th>
             <th></th>
           </thead>
-          <tbody class="text-light">
+          <tbody>
           {% for cabin_error in cabin_errors_list %}
           <tr>
             <td>{{cabin_error.time}}</td>
