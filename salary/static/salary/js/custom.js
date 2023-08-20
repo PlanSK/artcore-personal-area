@@ -5,7 +5,12 @@ function getCookie(name) {
     return matches ? decodeURIComponent(matches[1]) : undefined;
 }
 
-const setCookie = (cName, cValue) => document.cookie = encodeURIComponent(cName)+"="+encodeURIComponent(cValue);
+function setCookie (cName, cValue) {
+    let currentDate = new Date();
+    currentDate.setTime(+ currentDate + (365 * 86400000));
+    document.cookie = encodeURIComponent(cName) + "=" + encodeURIComponent(cValue) + "; expires=" + currentDate.toGMTString() + "; path=/";
+}
+
 const BOOTSTRAP_ATTR_NAME = "data-bs-theme";
 const THEME_RELAY_NAME = "bsThemeRelay";
 
