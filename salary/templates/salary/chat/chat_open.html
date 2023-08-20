@@ -2,7 +2,7 @@
 {% load salary_tags %}
 
 {% block messages %}
-<div class="card bg-dark ">
+<div class="card">
   <div class="card-header bg-secondary juestify-content-between">
     <div class="col">
       <div class="row justify-content-between">
@@ -25,7 +25,7 @@
   <div class="card-body" id="chat-window" style="height: 300px; overflow-y: auto;">
     {% for message in messages_list %}
     <div class="row">
-      <div class="col-md-6 col-sm-auto">
+      <div class="col-md-8 col-sm-auto">
         <div class="row m-1">
           <div class="col-auto d-flex align-items-center">
             {% check_image_file_exists profile=message.author.profile as image_file_exists %}
@@ -36,7 +36,7 @@
             {% endif %}
           </div>
           {% if message.author == request.user %}
-            <div class="col-auto p-1 bg-my-chat-message rounded">
+            <div class="col-md-8 col-auto p-1 bg-primary rounded">
               <div class="card-body p-1">
                 <p class="card-text ms-1 mb-0">
                   {{ message.message_text }}</p>
@@ -51,7 +51,7 @@
               </div>
             </div>
           {% else %}
-            <div class="col-auto p-1 bg-chat-message rounded">
+            <div class="col-md-8 col-auto p-1 bg-secondary rounded m-2">
               <div class="card-body p-1">
                 <p class="card-text ms-1 mb-0">{{ message.message_text }}</p>
                 <div class="text-end text-secondary">{{ message.sending_time | date:"j M H:i" }}</div>
@@ -89,7 +89,7 @@
       <form class="needs-validation" method="post" enctype="multipart/form-data">
         {% csrf_token %}
         <div class="input-group input-group-sm mt-2 mb-1">
-          <input type="text" class="form-control text-light bg-transparent border border-secondary" placeholder="Write a mesage..." aria-label="Your message" name="message" aria-describedby="button-addon2" required>
+          <input type="text" class="form-control bg-transparent border border-secondary" placeholder="Write a mesage..." aria-label="Your message" name="message" aria-describedby="button-addon2" required>
           <input type="hidden" name="recipient_id" value="{{ recipient.id }}">
           <button class="btn btn-outline-secondary rounded" type="submit" id="button-addon2"><i class="fa-solid fa-paper-plane"></i></button>
         </div>

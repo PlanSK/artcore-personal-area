@@ -16,7 +16,7 @@
 <div class="row justify-content-center">
   <div class="col-md-12 col-sm-suto table-responsive">
     <p class="text-center mt-2">{{ title }} за {{ current_date|date:"F" }}</p>
-    <table class="table table-dark">
+    <table class="table">
       <thead class="text-warning text-center">
         <tr>
           <th>Сотрудник</th>
@@ -27,7 +27,7 @@
         </tr>
       </thead>
       <tbody class="text-center">
-        <tr><td colspan="5" class="bg-dark bg-gradient">Кассиры</td></tr>
+        <tr><td colspan="5">Кассиры</td></tr>
       {% for employee in award_data.cashiers_list %}
         {% if employee.shift_counter >= minimal_workshifts_number %}
         <tr>
@@ -38,7 +38,7 @@
             <td class="text-body-secondary">{{employee.average_bar_revenue}}</td>
           {% else %}
             {% if award_data.bar_leader and employee.id == award_data.bar_leader.leader.id %}
-            <td class="bg-warning text-dark"><i class="fa-solid fa-award"></i>
+            <td class="bg-warning"><i class="fa-solid fa-award"></i>
             {% else %}
             <td>
             {% endif %}
@@ -46,7 +46,7 @@
             <td>{{employee.average_bar_revenue}}</td>
           {% endif %}
           {% if award_data.cashiers_leader and employee.id == award_data.cashiers_leader.leader.id %}
-          <td class="bg-warning text-dark"><i class="fa-solid fa-award"></i>
+          <td class="bg-warning"><i class="fa-solid fa-award"></i>
           {% else %}
           <td>
           {% endif %}
@@ -62,7 +62,7 @@
         </tr>
         {% endif %}
       {% endfor %}
-        <tr><td colspan="5" class="bg-dark bg-gradient">Админы</td></tr>
+        <tr><td colspan="5">Админы</td></tr>
       {% for employee in award_data.hall_admin_list %}
         {% if employee.shift_counter >= minimal_workshifts_number %}
         <tr>
@@ -73,7 +73,7 @@
             <td class="text-body-secondary">{{employee.average_hookah_revenue}}</td>
           {% else %}
             {% if award_data.hookah_leader and employee.id == award_data.hookah_leader.leader.id %}
-            <td class="bg-warning text-dark"><i class="fa-solid fa-award"></i>
+            <td class="bg-warning"><i class="fa-solid fa-award"></i>
             {% else %}
             <td>
             {% endif %}
@@ -81,7 +81,7 @@
             <td>{{employee.average_hookah_revenue}}</td>
           {% endif %}
           {% if award_data.hall_admins_leader and employee.id == award_data.hall_admins_leader.leader.id %}
-          <td class="bg-warning text-dark"><i class="fa-solid fa-award"></i>
+          <td class="bg-warning"><i class="fa-solid fa-award"></i>
           {% else %}
           <td>
           {% endif %}

@@ -3,7 +3,7 @@
 {% load crispy_forms_tags %}
 
 {% block body %}
-<body class="bg-dark h-100 text-light">
+<body class="h-100">
   <main class="h-100">
     <div class="container h-100">
       <div class="row row-cols-1 align-items-center justify-content-md-center text-center p-5 h-100">
@@ -23,8 +23,23 @@
           </p>
         </div>
       </div>
+      <div class="toast-container position-fixed bottom-0 start-0 p-3">
+        <div class="toast" role="alert" aria-live="assertive" aria-atomic="true" id="cookieToast" data-bs-autohide="false">
+          <div class="toast-body">
+            Этот сайт использует cookie для хранения данных. Продолжая использовать сайт, Вы даете согласие на работу с этими файлами.
+            <div class="mt-2 pt-2 border-top text-center">
+              <button type="button" class="btn btn-outline-primary btn-sm" data-bs-dismiss="toast">Продолжить</button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </main>
   {% include 'salary/scripts.html' %}
+  <script>
+    const toastLiveExample = document.getElementById('cookieToast');
+    const toastBootstrap = bootstrap.Toast.getOrCreateInstance(toastLiveExample);
+    toastBootstrap.show();
+  </script>
 </body>
 {% endblock %}

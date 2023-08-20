@@ -3,10 +3,10 @@
 {% load salary_tags %}
 
 {% block body %}
-<body class="bg-dark text-white font-italic">
+<body>
   <header>
     <div class="container">
-      <nav class="navbar navbar-expand navbar-dark bg-dark border-bottom p-0">
+      <nav class="navbar navbar-expand border-bottom p-0">
         <div class="container-fluid">
           <a class="navbar-brand" href="{% url 'index' %}">
             <img src="{% static 'salary/img/logo.png' %}" height="30" class="d-inline-block align-top" alt="" loading="lazy">
@@ -41,12 +41,15 @@
                     {% endif %}
                     <span class="text-secondary m-2 mobile-hide"><b>{{request.user.first_name}}</b></span>
                     </a>
-                  <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end" aria-labelledby="navbarDarkDropdownMenuLink">
+                  <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDarkDropdownMenuLink">
                     {% if request.user.is_staff %}
                     <li><a class="dropdown-item" href="{% url 'admin:index' %}"><i class="fa-solid fa-screwdriver-wrench"></i>&nbsp;Панель администрирования</a></li>
                     <li><a class="dropdown-item" href="{% url 'confirm_mail_status' %}"><i class="fa-solid fa-envelope-circle-check"></i>&nbsp;Состояние активации сотрудников</a></li>
                     <li><hr class="dropdown-divider"></li>
                     {% endif %}
+                    <li>
+                      <a href class="dropdown-item" onclick="switchTheme()"><i class="fa-regular fa-sun"></i> / <i class="fa-regular fa-moon"></i> Сменить тему</a>
+                    </li>
                     <li><a href="https://stat.artcore24.ru/" class="dropdown-item"><i class="fa-solid fa-network-wired"></i> Состояние игровых зон</a></li>
                     <li><a class="dropdown-item" href="{% url 'show_user_detail' %}?next={{ request.path }}"><i class="fa-solid fa-user"></i>&nbsp;Мой профиль</a></li>
                     <li><hr class="dropdown-divider"></li>

@@ -11,25 +11,18 @@
   <div class="row justify-content-center">
     <div class="col-md-6 col-sm-auto border-bottom border-top ps-0">
     {% if object_list %}
-      <ul class="list-group">
-        {% for misconduct in object_list %} 
-        <li class="list-group-item list-group-item-action 
-        {% if misconduct.status == 'AD' %}
-          list-group-item-danger
-        {% elif misconduct.status == 'WT' %}
-          list-group-item-warning
-        {% elif misconduct.status == 'CL' %}
-          list-group-item-success
-        {% endif %}
-        m-2 rounded">
-          <div class="d-flex w-100 justify-content-between">
+      {% for misconduct in object_list %} 
+      <div class="card mt-1 mb-2">
+        <div class="card-header d-flex justify-content-between p-1">
             <span class="mb-1 normalize">{{ misconduct.misconduct_date}}</span>
-            <span class="">
               {% if misconduct.status == 'AD' %}
+              <span class="text-danger">
               <i class="fa-solid fa-file-circle-question fa-fade" style="color: coral;"></i> Ожидает объяснение
               {% elif misconduct.status == 'WT' %}
+              <span class="text-warning">
               <i class="fa-regular fa-clock fa-fade"></i> На рассмотрении
               {% elif misconduct.status == 'CL' %}
+              <span class="text-success">
               <i class="fa-solid fa-clipboard-check" style="color: green;"></i> Решение принято
               {% endif %}
             </span>
@@ -53,8 +46,8 @@
               </ul>
             </div>
             {% endif %}
-          </div>
-          <hr class="m-0">
+        </div>
+        <div class="card-body p-1">
           <div class="text-justify">
             <span class="normalize">
               <b>Нарушен п. {{ misconduct.regulations_article.article }} 
@@ -63,7 +56,8 @@
             <br>
             <span class="text-justify">{{ misconduct.regulations_article.title }}</span>
           </div>
-          <hr class="m-0">
+        </div>
+        <div class="card-footer p-1">
           <div class="d-flex w-100 justify-content-between">
             <span class="normalize"><b>
               {% if misconduct.penalty %}
@@ -74,9 +68,9 @@
             </b></span>
             <a class="btn btn-outline-primary mt-1 pt-0 pb-0" href="{{ misconduct.get_absolute_url }}">Подробно</a>
           </div>
-        </li>
-        {% endfor %}
-      </ul>
+        </div>
+      </div>
+      {% endfor %}
       <p class="text-center">
       Сумма штрафов по нарушениям: <b>{{ penalty_sum }} руб.</b>
       </p>

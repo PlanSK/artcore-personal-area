@@ -5,67 +5,79 @@
 <main>
   <div class="container">
     <div class="row justify-content-center">
-      <div class="col-md-4 col-sm-auto m-3">
+      <div class="col-md-5 col-sm-auto m-3">
         {% if not workshifts_list %}
-        <p class="text-warning text-center">Смен пока нет.</p><hr>
+        <p class="text-warning text-center">Смен пока нет.</p>
+        <hr>
         {% else %}
-        <p class="text-warning text-center">Смены за {{ workshifts_list.0.shift_date|date:"F Y г."|lower }}</p><hr>
-        <ul class="list-group">
-          {% for workshift in workshifts_list %}
-          {% if workshift.status == 'VFD' %}
-          <li class="list-group-item list-group-item-action list-group-item-success m-1 rounded">
-          {% elif workshift.status == 'WTC' %}
-          <li class="list-group-item list-group-item-action list-group-item-warning m-1 rounded">
-          {% else %}
-          <li class="list-group-item list-group-item-action list-group-item-info m-1 rounded">
-          {% endif %}
-            <div class="d-flex w-100 justify-content-between">
-              <span class="mb-1">
-                {% if workshift.status == 'VFD' %}
-                <a class="btn btn-success pt-0 pb-0" href="{{ workshift.get_absolute_url }}"><i class="fa-solid fa-calendar-check"></i>
-                {% elif workshift.status == 'WTC' %}
-                <a class="btn btn-warning pt-0 pb-0" href="{{ workshift.get_absolute_url }}"><i class="fa-solid fa-pen-to-square fa-fade"></i>
-                {% else %}
-                <a class="btn btn-warning pt-0 pb-0" href="{{ workshift.get_absolute_url }}"><i class="fa-regular fa-clock fa-fade"></i> 
-                {% endif %}
-                  {{ workshift.shift_date|date:"j E" }}
-                </a>
-              </span>
-              <span><i class="fa-solid fa-coins"></i>
-                <i><b>
-                {% if request.user == workshift.hall_admin %}
+        <p class="text-center">Смены за {{ workshifts_list.0.shift_date|date:"F Y г."|lower }}</p>
+        <hr>
+        {% for workshift in workshifts_list %}
+        <div class="card mb-2">
+          <div class="card-header d-flex justify-content-between">
+            <span class="mb-1">
+              {% if workshift.status == 'VFD' %}
+              <a class="btn btn-success pt-0 pb-0" href="{{ workshift.get_absolute_url }}"><i class="fa-solid fa-calendar-check"></i>
+              {% elif workshift.status == 'WTC' %}
+              <a class="btn btn-warning pt-0 pb-0" href="{{ workshift.get_absolute_url }}"><i class="fa-solid fa-pen-to-square fa-fade"></i>
+              {% else %}
+              <a class="btn btn-warning pt-0 pb-0" href="{{ workshift.get_absolute_url }}"><i class="fa-regular fa-clock fa-fade"></i>
+              {% endif %}
+                {{ workshift.shift_date|date:"j E" }}
+              </a>
+            </span>
+            <span><i class="fa-solid fa-coins"></i>
+              <i><b>
+                  {% if request.user == workshift.hall_admin %}
                   {{ workshift.hall_admin_earnings.final_earnings | intcomma }}
-                {% elif request.user == workshift.cash_admin %}
+                  {% elif request.user == workshift.cash_admin %}
                   {{ workshift.cashier_earnings.final_earnings | intcomma }}
-                {% endif %}
-                </b></i>
-              </span>
-            </div>
-            <hr class="m-1">
+                  {% endif %}
+              </b></i>
+            </span>
+          </div>
+          <div class="card-body">
             <div class="row row-cols-4 text-center">
               {% if request.user == workshift.hall_admin %}
-              <div class="col"><span class="badge bg-secondary"><i class="fa-solid fa-bong"></i> {{ workshift.hookah_revenue | intcomma }}</span></div>
+              <div class="col">
+                <span class="badge bg-secondary">
+                  <i class="fa-solid fa-bong"></i> {{ workshift.hookah_revenue | intcomma }}
+                </span>
+              </div>
               {% elif request.user == workshift.cash_admin %}
-              <div class="col"><span class="badge bg-secondary"><i class="fa-solid fa-utensils"></i> {{ workshift.bar_revenue | intcomma }}</span></div>
-                {% if workshift.shortage and workshift.shortage_paid %}
-                <div class="col"><span class="badge bg-secondary"><i class="fa-solid fa-sack-xmark"></i> <s>{{ workshift.shortage | intcomma }}</s></span></div>
-                {% elif workshift.shortage %}
-                <div class="col"><span class="badge bg-secondary bg-danger"><b><i class="fa-solid fa-sack-xmark"></i> <i>{{ workshift.shortage | intcomma }}</i></b> </span></div>
-                {% endif %}
+              <div class="col">
+                <span class="badge bg-secondary">
+                  <i class="fa-solid fa-utensils"></i> {{ workshift.bar_revenue | intcomma }}
+                </span>
+              </div>
+              {% if workshift.shortage and workshift.shortage_paid %}
+              <div class="col">
+                <span class="badge bg-secondary">
+                  <i class="fa-solid fa-sack-xmark"></i> <s>{{ workshift.shortage | intcomma }}</s>
+                </span>
+              </div>
+              {% elif workshift.shortage %}
+              <div class="col">
+                <span class="badge bg-secondary bg-danger">
+                  <b><i class="fa-solid fa-sack-xmark"></i><i>{{ workshift.shortage | intcomma }}</i></b>
+                </span>
+              </div>
+              {% endif %}
               {% endif %}
               <div class="col"><span class="badge bg-secondary"><i class="fa-brands fa-playstation"></i> {{ workshift.game_zone_subtotal | intcomma }}</span></div>
               <div class="col"><span class="badge bg-secondary"><i class="fa-solid fa-cash-register"></i> {{ workshift.summary_revenue | intcomma }}</span></div>
             </div>
-            <hr class="m-1">
+          </div>
+          <div class="card-footer">
             {% if request.user == workshift.cash_admin %}
-              {% if workshift.status == 'WTC' %}
-              <div class="text-center">
-                <span class="fa-fade text-danger"><b>{{ workshift.get_status_display }}</b></span>
-              </div>
-              {% endif %}
+            {% if workshift.status == 'WTC' %}
+            <div class="text-center">
+              <span class="fa-fade text-danger"><b>{{ workshift.get_status_display }}</b></span>
+            </div>
+            {% endif %}
             {% endif %}
             {% if workshift.status == 'UVD' %}
-            <div class="text-center">
+            <div class="text-center text-warning">
               <span><b>{{ workshift.get_status_display }}</b></span>
             </div>
             {% endif %}
@@ -73,12 +85,15 @@
             <div class="accordion" id="accordion{{ workshift.shift_date.day }}">
               <div class="accordion-item">
                 <h2 class="accordion-header" id="headingTwo">
-                  <button class="accordion-button collapsed bg-secondary pt-0 pb-0" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ workshift.shift_date.day }}" aria-expanded="false" aria-controls="collapse{{ workshift.shift_date.day }}">
+                  <button class="accordion-button collapsed pt-0 pb-0" type="button"
+                    data-bs-toggle="collapse" data-bs-target="#collapse{{ workshift.shift_date.day }}"
+                    aria-expanded="false" aria-controls="collapse{{ workshift.shift_date.day }}">
                     Имеется комментарий к смене.
                   </button>
                 </h2>
-                <div id="collapse{{ workshift.shift_date.day }}" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordion{{ workshift.shift_date.day }}">
-                  <div class="accordion-body bg-secondary">
+                <div id="collapse{{ workshift.shift_date.day }}" class="accordion-collapse collapse"
+                  aria-labelledby="headingTwo" data-bs-parent="#accordion{{ workshift.shift_date.day }}">
+                  <div class="accordion-body">
                     {{ workshift.comment_for_cash_admin|linebreaks }}
                   </div>
                 </div>
@@ -88,11 +103,14 @@
             <div class="accordion" id="accordion{{ workshift.shift_date.day }}">
               <div class="accordion-item">
                 <h2 class="accordion-header" id="headingTwo">
-                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ workshift.shift_date.day }}" aria-expanded="false" aria-controls="collapse{{ workshift.shift_date.day }}">
+                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#collapse{{ workshift.shift_date.day }}" aria-expanded="false"
+                    aria-controls="collapse{{ workshift.shift_date.day }}">
                     Имеется комментарий к смене.
                   </button>
                 </h2>
-                <div id="collapse{{ workshift.shift_date.day }}" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordion{{ workshift.shift_date.day }}">
+                <div id="collapse{{ workshift.shift_date.day }}" class="accordion-collapse collapse"
+                  aria-labelledby="headingTwo" data-bs-parent="#accordion{{ workshift.shift_date.day }}">
                   <div class="accordion-body">
                     {{ workshift.comment_for_hall_admin|linebreaks }}
                   </div>
@@ -100,13 +118,13 @@
               </div>
             </div>
             {% endif %}
-          </li>
-          {% endfor %}
-        </ul>
+          </div>
+        </div>
+        {% endfor %}
         <hr>
         <ul class="list-group">
           {% if employee_indicators.rating_data and employee_indicators.rating_data.position != employee_indicators.rating_data.position.NOT_LEADER %}
-          <li class="list-group-item list-group-item-action list-group-item-success m-1 rounded">
+          <li class="list-group-item list-group-item-success m-1 rounded">
             <div class="d-flex w-100 justify-content-between">
               <span class="mb-1">
                 <b>Бонус ({{ employee_indicators.rating_data.position.value }})</b>
@@ -117,7 +135,7 @@
             </div>
           </li>
           {% endif %}
-          <li class="list-group-item list-group-item-action list-group-item-success m-1 rounded">
+          <li class="list-group-item list-group-item-success m-1 rounded">
             <div class="d-flex w-100 justify-content-between">
               <span class="mb-1">
                 <b>Суммарно за месяц:</b>
@@ -132,8 +150,10 @@
       </div>
     </div>
     <div class="row">
-      <div class="col text-center"><a href="{% url 'index' %}" class="btn btn-secondary"><i class="fa-solid fa-house"></i>&nbsp;На главную</a></div>
-      <div class="col text-center"><a href="{% url 'employee_monthly_list' %}" class="btn btn-primary"><i class="fa-solid fa-calendar-days"></i>&nbsp;Архив</a></div>
+      <div class="col text-center"><a href="{% url 'index' %}" class="btn btn-secondary"><i
+            class="fa-solid fa-house"></i>&nbsp;На главную</a></div>
+      <div class="col text-center"><a href="{% url 'employee_monthly_list' %}" class="btn btn-primary"><i
+            class="fa-solid fa-calendar-days"></i>&nbsp;Архив</a></div>
     </div>
   </div>
 </main>

@@ -9,7 +9,7 @@
 <div class="row row-cols-1 row-cols-md-3">
   {% for date_range in object_list %} 
   <div class="col text-center rounded p-1">
-    <div class="card blue-snippet text-light h-100">
+    <div class="card blue-snippet h-100">
       <div class="card-body">
         <h2>{{ date_range|date:"Y" }}</h2>
         <a href="{% url 'analytic_for_year' year=date_range.year %}?next={{ request.path }}" class="stretched-link"></a>

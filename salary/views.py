@@ -464,8 +464,12 @@ class MisconductUserView(ProfileStatusRedirectMixin, PermissionRequiredMixin,
         return super().dispatch(request, *args, **kwargs)
 
     def get_queryset(self):
-        return Misconduct.objects.filter(intruder__username=self.intruder).select_related('intruder', 'regulations_article')
+        return Misconduct.objects.filter(
+            intruder__username=self.intruder).select_related(
+                'intruder', 'regulations_article'
+            )
 
+# TODO: Move to services.
     def get_penalty_sum(self) -> float:
         """Возвращает сумму штрафов по нарушениям
 
@@ -612,9 +616,6 @@ class MisconductDetailView(ProfileStatusRedirectMixin, PermissionRequiredMixin,
                                                  'regulations_article')
 
 
-# TODO
-# Need refactioring! Moving logic to services.
-# Templates get data from json on separated page.
 class MonthlyAnalyticalReport(WorkingshiftPermissonsMixin, 
                               MonthYearExtractMixin, TitleMixin, TemplateView):
     title = 'Аналитический отчёт'

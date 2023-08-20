@@ -159,6 +159,8 @@ class Misconduct(models.Model):
         if (self.explanation_exist and
                 self.status == self.MisconductStatus.ADDED):
             self.status = self.MisconductStatus.WAIT
+        elif (not self.explanation_exist):
+            self.status = self.MisconductStatus.ADDED
         super().save(*args, **kwargs)
 
     def get_absolute_url(self):

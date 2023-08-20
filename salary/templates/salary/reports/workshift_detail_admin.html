@@ -1,7 +1,7 @@
   {% load humanize %}
   <!-- Admin -->
-  <div class="col-md-6 col-sm-auto rounded border border-light">
-    <table class="table table-dark">
+  <div class="col-md-6 col-sm-auto rounded border">
+    <table class="table">
       <thead class="text-warning text-center">
         <tr>
           <th>Комментарий для админинстратора зала</th>
@@ -20,7 +20,7 @@
       </tbody>
     </table>
     <h5 class="text-center">Калькуляция для администратора зала</h5>
-    <table class="table table-dark">
+    <table class="table">
       {% if workshift.hall_admin.profile.position.name != 'trainee' %}
       <tbody>
         <tr><td colspan="2" class="text-info text-center">Базовая часть</td></tr>

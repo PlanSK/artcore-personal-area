@@ -47,14 +47,14 @@
     <div class="row justify-content-center border-top mt-1">
       <div class="col col-md-12 text-center">
         <h5>Расходы</h5>
-        <table class="table table-dark table-report text-secondary table-bordered">
+        <table class="table table-report text-secondary table-bordered">
           <thead>
             <th>Сумма</th>
             <th>Причина</th>
             <th>Ответственное лицо</th>
             <th></th>
           </thead>
-          <tbody class="text-light">
+          <tbody>
           {% for cost in costs_list %}
           <tr>
             <td>{{cost.cost_sum}}</td>
@@ -75,7 +75,7 @@
     <div class="row justify-content-center border-top mt-1">
       <div class="col col-md-12 text-center">
         <h5>Ошибки</h5>
-        <table class="table table-dark table-report text-secondary table-bordered">
+        <table class="table table-report text-secondary table-bordered">
           <thead>
             <th>Тип ошибки</th>
             <th>Время</th>
@@ -84,7 +84,7 @@
             <th>Описание</th>
             <th></th>
           </thead>
-          <tbody class="text-light">
+          <tbody>
           {% for error in errors_list %}
           <tr>
             <td>{{error.get_error_type_display}}</td>
@@ -107,7 +107,7 @@
     <div class="row justify-content-center border-top mt-1">
       <div class="col col-md-12 text-center">
         <h5>Ошибки по кабинкам</h5>
-        <table class="table table-dark table-report text-secondary table-bordered">
+        <table class="table table-report text-secondary table-bordered">
           <thead>
             <th>Время ошибки</th>
             <th>Кабинка</th>
@@ -115,7 +115,7 @@
             <th>Ошибочное время</th>
             <th></th>
           </thead>
-          <tbody class="text-light">
+          <tbody>
           {% for cabin_error in cabin_errors_list %}
           <tr>
             <td>{{cabin_error.time}}</td>

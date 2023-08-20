@@ -49,88 +49,95 @@
       <h5 class="text-center">Смены за {{ workshift_dates | date:"F Y г." }}</h5>
       {% endif %}
       {% if workshift_list %}
-      <ul class="list-group">
         {% for workshift in workshift_list %}
-        <li  id="{{ workshift.slug }}"
         {% if workshift.status == 'VFD' %}
-          class="list-group-item list-group-item-action list-group-item-success m-1 rounded"
+        <div class="card mb-1 border-success">
         {% elif workshift.status == 'WTC' %}
-          class="list-group-item list-group-item-action list-group-item-info m-1 rounded"
+        <div class="card mb-1 border-info">
         {% else %}
-          class="list-group-item list-group-item-action list-group-item-warning m-1 rounded"
+        <div class="card mb-1 border-warning">
         {% endif %}
-        >
-          <div class="d-flex w-100 justify-content-between">
-            <span class="mb-1">
-              {% if workshift.status == 'VFD' %}
-              <a class="btn btn-success pt-0 pb-0" href="{{ workshift.get_absolute_url }}"><i class="fa-solid fa-calendar-check"></i>
-              {% elif workshift.status == 'WTC' %}
-              <a class="btn btn-warning pt-0 pb-0" href="{{ workshift.get_absolute_url }}"><i class="fa-solid fa-pen-to-square fa-fade"></i>
-              {% else %}
-              <a class="btn btn-warning pt-0 pb-0" href="{{ workshift.get_absolute_url }}"><i class="fa-regular fa-clock fa-fade"></i> 
+          <div class="card-header">
+            <div class="d-flex w-100 justify-content-between">
+              <span class="mb-1">
+                {% if workshift.status == 'VFD' %}
+                <a class="btn btn-success pt-0 pb-0" href="{{ workshift.get_absolute_url }}"><i class="fa-solid fa-calendar-check"></i>
+                {% elif workshift.status == 'WTC' %}
+                <a class="btn btn-warning pt-0 pb-0" href="{{ workshift.get_absolute_url }}"><i class="fa-solid fa-pen-to-square fa-fade"></i>
+                {% else %}
+                <a class="btn btn-warning pt-0 pb-0" href="{{ workshift.get_absolute_url }}"><i class="fa-regular fa-clock fa-fade"></i> 
+                {% endif %}
+                  {{ workshift.shift_date|date:"j E" }}
+                </a>
+              </span>
+                {% if workshift.status == 'VFD' %}
+                <span class="text-success">
+                {% elif workshift.status == 'WTC' %}
+                <span class="text-info">
+                {% else %}
+                <span class="text-warning">
+                {% endif %}
+                {{ workshift.get_status_display }}</span>
+              <div class="dropdown">
+                <button class="btn btn-outline-secondary dropdown-toggle clear-after-toggle pb-0 pt-0 mb-1" type="button" id="dropdownMenuActions" data-bs-toggle="dropdown" aria-expanded="false">
+                  <i class="fa-solid fa-ellipsis"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-secondary dropdown-menu-end" aria-labelledby="dropdownMenuActions">
+                  <li>
+                    <a class="dropdown-item" href="{% url 'staff_edit_workshift' workshift.slug %}?next={{ request.path }}">
+                      <i class="fa-solid fa-square-pen"></i>&nbsp;Редактировать
+                    </a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item" href="{% url 'costs_and_errors_form' workshift.pk %}?next={{ request.path }}">
+                      <i class="fa-solid fa-square-pen"></i>&nbsp;Редактировать ошибки
+                    </a>
+                  </li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li>
+                    <a class="dropdown-item text-danger" href="{% url 'delete_workshift' workshift.slug %}?next={{ request.path }}">
+                      <i class="fa-solid fa-square-minus"></i>&nbsp;Удалить
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="card-body p-1">
+            <div class="row m-1">
+              <div class="col ps-0">
+                <i class="fa-solid fa-user-gear"></i> {{ workshift.hall_admin.get_full_name }}<br>
+                <i class="fa-solid fa-cash-register"></i> {{ workshift.cash_admin.get_full_name }}
+              </div>
+              <div class="col text-end align-bottom">
+                <h5><i class="fa-solid fa-coins"></i> <i><b>{{ workshift.summary_revenue | intcomma }}</b></i></h5>
+              </div>
+            </div>
+          </div>
+          <div class="card-footer">
+            <div class="d-flex w-100 justify-content-between">
+              <span class="badge rounded-pill bg-secondary"><i class="fa-solid fa-utensils"></i> {{ workshift.bar_revenue | intcomma }}</span>
+              <span class="badge rounded-pill bg-secondary"><i class="fa-brands fa-playstation"></i> {{ workshift.game_zone_revenue | intcomma }}</span>
+              {% if workshift.game_zone_error %}
+              <span class="badge rounded-pill bg-secondary"><i class="fa-solid fa-circle-xmark"></i> {{ workshift.game_zone_error | intcomma }}</span>
               {% endif %}
-                {{ workshift.shift_date|date:"j E" }}
+              {% if workshift.additional_services_revenue %}
+              <span class="badge rounded-pill bg-secondary"><i class="fa-solid fa-hand-holding-dollar"></i> {{ workshift.additional_services_revenue | intcomma }}</span>
+              {% endif %}
+              {% if workshift.hookah_revenue %}
+              <span class="badge rounded-pill bg-secondary"><i class="fa-solid fa-bong"></i> {{ workshift.hookah_revenue | intcomma }}</span>
+              {% endif %}
+              {% if workshift.shortage and workshift.shortage_paid %}
+              <span class="badge rounded-pill bg-secondary"><i class="fa-solid fa-sack-xmark"></i> <s>{{ workshift.shortage | intcomma }}</s></span>
+              {% elif workshift.shortage %}
+              <a class="badge rounded-pill bg-danger link-light not-underlined" href="{% url 'shortage_payment' slug=workshift.slug %}?next={{ request.path }}#{{ workshift.slug }}" onclick="return confirm('Вы уверены, что хотите погасить недостачу?');">
+                <i class="fa-solid fa-sack-xmark"></i> <i><b>{{ workshift.shortage | intcomma }}</b></i>
               </a>
-            </span>
-              <span class="text-wrap">{{ workshift.get_status_display }}</span>
-            <div class="dropdown">
-              <button class="btn btn-outline-secondary dropdown-toggle clear-after-toggle pb-0 pt-0 mb-1" type="button" id="dropdownMenuActions" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="fa-solid fa-ellipsis"></i>
-              </button>
-              <ul class="dropdown-menu dropdown-menu-secondary dropdown-menu-end" aria-labelledby="dropdownMenuActions">
-                <li>
-                  <a class="dropdown-item" href="{% url 'staff_edit_workshift' workshift.slug %}?next={{ request.path }}">
-                    <i class="fa-solid fa-square-pen"></i>&nbsp;Редактировать
-                  </a>
-                </li>
-                <li>
-                  <a class="dropdown-item" href="{% url 'costs_and_errors_form' workshift.pk %}?next={{ request.path }}">
-                    <i class="fa-solid fa-square-pen"></i>&nbsp;Редактировать ошибки
-                  </a>
-                </li>
-                <li><hr class="dropdown-divider"></li>
-                <li>
-                  <a class="dropdown-item text-danger" href="{% url 'delete_workshift' workshift.slug %}?next={{ request.path }}">
-                    <i class="fa-solid fa-square-minus"></i>&nbsp;Удалить
-                  </a>
-                </li>
-              </ul>
+              {% endif %}
             </div>
           </div>
-          <hr class="m-0">
-          <div class="row m-1">
-            <div class="col ps-0">
-              <i class="fa-solid fa-user-gear"></i> {{ workshift.hall_admin.get_full_name }}<br>
-              <i class="fa-solid fa-cash-register"></i> {{ workshift.cash_admin.get_full_name }}
-            </div>
-            <div class="col text-end align-bottom">
-              <span><i class="fa-solid fa-coins"></i> <i><b>{{ workshift.summary_revenue | intcomma }}</b></i></span>
-            </div>
-          </div>
-          <hr class="m-0 mb-1">
-          <div class="d-flex w-100 justify-content-between text-dark">
-            <span class="badge rounded-pill bg-secondary"><i class="fa-solid fa-utensils"></i> {{ workshift.bar_revenue | intcomma }}</span>
-            <span class="badge rounded-pill bg-secondary"><i class="fa-brands fa-playstation"></i> {{ workshift.game_zone_revenue | intcomma }}</span>
-            {% if workshift.game_zone_error %}
-            <span class="badge rounded-pill bg-secondary"><i class="fa-solid fa-circle-xmark"></i> {{ workshift.game_zone_error | intcomma }}</span>
-            {% endif %}
-            {% if workshift.additional_services_revenue %}
-            <span class="badge rounded-pill bg-secondary"><i class="fa-solid fa-hand-holding-dollar"></i> {{ workshift.additional_services_revenue | intcomma }}</span>
-            {% endif %}
-            {% if workshift.hookah_revenue %}
-            <span class="badge rounded-pill bg-secondary"><i class="fa-solid fa-bong"></i> {{ workshift.hookah_revenue | intcomma }}</span>
-            {% endif %}
-            {% if workshift.shortage and workshift.shortage_paid %}
-            <span class="badge rounded-pill bg-secondary"><i class="fa-solid fa-sack-xmark"></i> <s>{{ workshift.shortage | intcomma }}</s></span>
-            {% elif workshift.shortage %}
-            <a class="badge rounded-pill bg-danger link-light not-underlined" href="{% url 'shortage_payment' slug=workshift.slug %}?next={{ request.path }}#{{ workshift.slug }}" onclick="return confirm('Вы уверены, что хотите погасить недостачу?');">
-              <i class="fa-solid fa-sack-xmark"></i> <i><b>{{ workshift.shortage | intcomma }}</b></i>
-            </a>
-            {% endif %}
-          </div>
-        </li>
+        </div>
         {% endfor %}
-      </ul>
       {% endif %}
     </div>
     {% else %}

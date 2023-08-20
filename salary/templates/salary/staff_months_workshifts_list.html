@@ -9,7 +9,7 @@
 <div class="row row-cols-1 row-cols-md-3">
   {% for date_range in object_list %} 
   <div class="col p-1 text-center">
-    <div class="card blue-snippet text-light h-100">
+    <div class="card blue-snippet h-100">
       <div class="card-body">
         <h3>{{ date_range|date:"F" }}</h3>
         <a href="{% url 'workshift_archive_view' year=date_range.year month=date_range.month %}?next={{ request.path }}" class="stretched-link"></a>

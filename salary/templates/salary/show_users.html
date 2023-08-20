@@ -6,7 +6,7 @@
   {% include 'salary/js/mail_request.js.html' %}
   {% for current_user in object_list %}
     <div class="col d-flex justify-content-center">
-      <div class="card border-light text-light h-100 bg-dark" style="width: 18rem;">
+      <div class="card h-100" style="width: 18rem;">
         <div class="card-header text-center bg-black-50">
           <div class="d-flex justify-content-center mb-1">
           {% check_image_file_exists profile=current_user.profile as image_file_exists %}
