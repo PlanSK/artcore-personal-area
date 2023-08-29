@@ -1,7 +1,9 @@
 import datetime
 
+from dataclasses import dataclass
 from typing import NamedTuple
 
+from django.db import models
 from django.contrib.auth.models import User
 from django.conf import settings
 
@@ -57,6 +59,12 @@ class Earnings(NamedTuple):
     estimated_earnings: float
     before_shortage: float
     final_earnings: float
+
+
+@dataclass
+class Penalties:
+    cash_admin_penalty: float = 0.0
+    hall_admin_penalty: float = 0.0
 
 
 def get_experience_bonus(employment_date: datetime.date,
@@ -232,3 +240,47 @@ def get_current_earnings(employee: User,
         estimated_earnings=estimated_earnings, before_shortage=before_shortage,
         final_earnings=final_earnings
     )
+
+
+def get_total_revenue(*args) -> float:
+    """Returns sum of revenue values"""
+    return sum(args) if sum(args) else 0.0
+
+
+def get_game_zone_subtotal(game_zone_revenue: float,
+                           game_zone_error: float) -> float:
+    """Returns calculation subtotal for game_zone sum"""
+    if game_zone_revenue >= game_zone_error:
+        return round(game_zone_revenue - game_zone_error, 2)
+    return 0.0
+
+
+def get_workshift_penalties(misconduct_queryset: models.QuerySet,
+                            cash_admin_id: int,
+                            hall_admin_id: int) -> Penalties:
+    """Returns penalties for employees from Misconsucts"""
+    current_penalties = Penalties()
+    for misconduct in misconduct_queryset:
+        if misconduct.intruder.id == cash_admin_id:
+            current_penalties.cash_admin_penalty += misconduct.penalty
+        elif misconduct.intruder.id == hall_admin_id:
+            current_penalties.hall_admin_penalty += misconduct.penalty
+    return current_penalties
+
+
+def get_costs_sum(costs_queryset: models.QuerySet) -> float:
+    """Returns sum of costs for workshift"""
+    costs_sum = costs_queryset.aggregate(
+        models.Sum('cost_sum')).get('cost_sum__sum')
+    if isinstance(costs_sum, float):
+        return costs_sum
+    return 0.0
+
+
+def get_errors_sum(errors_queryset: models.QuerySet) -> float:
+    """Returns sum of costs for workshift"""
+    errors_sum = errors_queryset.aggregate(
+        models.Sum('error_sum')).get('error_sum__sum')
+    if isinstance(errors_sum, float):
+        return errors_sum
+    return 0.0

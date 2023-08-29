@@ -10,7 +10,11 @@ from salary.services.filesystem import (
     user_directory_path,
     OverwriteStorage,
 )
-from salary.services.earnings import WorkshiftData, get_current_earnings
+from salary.services.earnings import (
+    WorkshiftData, get_current_earnings, get_total_revenue,
+    get_game_zone_subtotal, get_workshift_penalties, get_costs_sum,
+    get_errors_sum
+)
 
 
 def get_last_name(self):
@@ -317,63 +321,32 @@ class WorkingShift(models.Model):
         employee = self.cash_admin
         return get_current_earnings(employee, workshift_data, is_cashier=True)
 
-
     def get_absolute_url(self):
         return reverse_lazy('detail_workshift', kwargs={'slug': self.slug})
 
-
-    def _get_costs_sum(self) -> float:
-        """Returns sum of costs for workshift"""
-        costs_queryset = Cost.objects.filter(workshift__id=self.pk)
-        costs_sum = costs_queryset.aggregate(
-            models.Sum('cost_sum')).get('cost_sum__sum')
-        if isinstance(costs_sum, float):
-            return costs_sum
-        return 0.0
-
-
-    def _get_errors_sum(self) -> float:
-        """Returns sum of costs for workshift"""
-        errors_queryset = ErrorKNA.objects.filter(workshift__id=self.pk)
-        errors_sum = errors_queryset.aggregate(
-            models.Sum('error_sum')).get('error_sum__sum')
-        if isinstance(errors_sum, float):
-            return errors_sum
-        return 0.0
-
-
     def save(self, *args, **kwargs):
-        self.game_zone_subtotal = 0.0
-        self.summary_revenue = 0.0
-        sum_of_errors = self._get_errors_sum()
-        if sum_of_errors:
-            self.game_zone_error = sum_of_errors
-        self.cost_sum = self._get_costs_sum()
-        if self.game_zone_revenue >= self.game_zone_error:
-            self.game_zone_subtotal = round(
-                self.game_zone_revenue - self.game_zone_error, 2
-            ) 
-
-        total_revenue = sum((
-            self.bar_revenue,
-            self.game_zone_subtotal,
-            self.additional_services_revenue,
-            self.hookah_revenue,
-        ))
-        if total_revenue > 0.0:
-            self.summary_revenue = round(total_revenue, 2)
-
-        misconduct_queryset = Misconduct.objects.filter(
-            workshift_date=self.shift_date,
-            status=Misconduct.MisconductStatus.CLOSED,
+        self.slug = self.shift_date
+        self.game_zone_error = get_errors_sum(
+            ErrorKNA.objects.filter(workshift__id=self.pk))
+        self.cost_sum = get_costs_sum(
+            Cost.objects.filter(workshift__id=self.pk))
+        self.game_zone_subtotal = get_game_zone_subtotal(
+            self.game_zone_revenue, self.game_zone_error)
+        self.summary_revenue = get_total_revenue(
+            self.bar_revenue, self.game_zone_subtotal,
+            self.additional_services_revenue, self.hookah_revenue
         )
-        self.cash_admin_penalty = 0.0
-        self.hall_admin_penalty = 0.0
-        for misconduct in misconduct_queryset:
-            if misconduct.intruder == self.cash_admin:
-                self.cash_admin_penalty += misconduct.penalty
-            elif misconduct.intruder == self.hall_admin:
-                self.hall_admin_penalty += misconduct.penalty
+
+        current_penalties = get_workshift_penalties(
+            misconduct_queryset=Misconduct.objects.filter(
+                workshift_date=self.shift_date,
+                status=Misconduct.MisconductStatus.CLOSED,
+            ),
+            cash_admin_id=self.cash_admin.pk,
+            hall_admin_id=self.hall_admin.pk
+        )
+        self.cash_admin_penalty = current_penalties.cash_admin_penalty
+        self.hall_admin_penalty = current_penalties.hall_admin_penalty
 
         super().save(*args, **kwargs)
 
