@@ -807,7 +807,6 @@ class AddWorkshiftData(PermissionRequiredMixin, TitleMixin, CreateView):
     def form_valid(self, form):
         object = form.save(commit=False)
         object.editor = self.request.user.get_full_name()
-        object.slug = object.shift_date
         return super().form_valid(form)
     
     def get_success_url(self):
