@@ -29,6 +29,7 @@ urlpatterns = [
     path('user_session_set/<int:user_id>/', user_session_set, name='session_set'),
     path('employment_documents_view/<str:user>/', EmploymentDocumentsView.as_view(), name='employment_documents_view'),
     path('employment_documents_upload/', EmploymentDocumentsUploadView.as_view(), name='employment_documents_upload'),
+    path('documents_upload/<str:user>/', StaffDocumentsUploadView.as_view(), name='staff_documents_upload'),
     path('pending_verification/', UnverifiedEmployeeView.as_view(), name='pending_verification'),
     path('document_delete/<int:pk>/<str:filename>/', DocumentDeleteView.as_view(), name='document_delete'),
     path('profile_approval/<int:pk>/', ProfileStatusApprovalView.as_view(), name='profile_approval'),

@@ -60,7 +60,7 @@
               <span class="text-warning">Не пройдена</span> 
               {% endif %}
             {% endif %}<br>
-            <a href="{% url 'employment_documents_upload' %}" class="link-secondary">Загрузить документы...</a>
+            <a href="{% url 'employment_documents_upload' %}?next={{request.path}}" class="link-secondary">Загрузить документы...</a>
           </p>
         </div>
         <div class="card-footer text-center">
