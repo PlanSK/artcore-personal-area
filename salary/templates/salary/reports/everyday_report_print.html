@@ -3,6 +3,14 @@
 {% load static %}
 
 {% block body %}
+<style>
+  @media print {
+    @page {
+      padding: 0px;
+      margin: 0;
+    }
+  }
+</style>
 <body  data-bs-theme="light">
   <main>
     <div class="container">
