@@ -29,12 +29,13 @@
       {% if message %}
       <div class="alert alert-success align-items-center m-2 text-center" role="alert">
         {{ message }}
-        Для возврата на главную страницу нажмите <a href="{% url 'index' %}" class="link-primary">сюда.</a>
+        Для возврата на предыдущую страницу нажмите <a href="{{success_url}}" class="link-primary">сюда.</a>
       </div>
       {% endif %}
       <div class="col m-2 border rounded p-1">
         <form method="post" enctype="multipart/form-data" class="needs-validation mt-1" >
-          <p>Форма для загрузки файлов:<br><span class="footnote">(изображения формата *.jpg, *.png и др.)</span></p>
+          <p>Форма для загрузки файлов:<br><span class="footnote">(изображения формата *.jpg, *.png и др.)</span>
+            <a href="{{success_url}}" class="link-primary">сюда.</a></p>
           <div class="form-error">{{ form.non_field_errors }}</div>
           <div class="input-group mb-3">
             <label class="input-group-text" for="id_files">Выбрать&nbsp;<i class="fa-solid fa-folder-open"></i></label>
