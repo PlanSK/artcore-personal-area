@@ -13,7 +13,7 @@
           </div>
           <div class="text-justify">
             Для продолжения процесса регистрации Вам необходимо представить отсканированные образы заполненных документов о трудоустройстве руководству.<br> Для перехода к загрузке документов нажмите 
-            <a href="{% url 'employment_documents_upload' %}" class="link-primary">сюда.</a>
+            <a href="{% url 'employment_documents_upload' %}?next={{request.path}}" class="link-primary">сюда.</a>
           </div>
         </div>
       </div>

@@ -881,22 +881,46 @@ class EmploymentDocumentsView(EmployeePermissionsMixin, TitleMixin,
         return context
 
 
-class EmploymentDocumentsUploadView(LoginRequiredMixin, TitleMixin, TemplateView):
+class EmploymentDocumentsUploadView(LoginRequiredMixin, SuccessUrlMixin,
+                                    TitleMixin, TemplateView):
     title = 'Загрузка документов'
     template_name = 'salary/documents_view/documents_upload.html'
 
-    def post(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
-        employment_files = request.FILES.getlist('files')
+    def dispatch(self, request: HttpRequest,
+                 *args: Any, **kwargs: Any) -> HttpResponse:
+        if kwargs.get('user'):
+            self.target_user = get_object_or_404(User,
+                                             username=self.kwargs.get('user'))
+        else:
+            self.target_user = request.user
+        return super().dispatch(request, *args, **kwargs)
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['success_url'] = self.get_success_url()
+        return context
+
+    def post(self, request: HttpRequest,
+             *args: Any, **kwargs: Any) -> HttpResponse:
+        employment_files = request.FILES.getlist('files')
         if employment_files:
             for file in employment_files:
-                document_file_handler(request.user, file)
-
+                document_file_handler(self.target_user, file)
+        success_message = """
+        Файлы успешно загружены. Ожидайте проверку руководством.
+        """
         return render(
             request, 
             self.template_name, 
-            context={'message': 'Файлы успешно загружены. Ожидайте проверку руководством.'},
+            context={
+                'message': success_message,
+                'success_url': self.get_success_url()
+            },
         )
+
+
+class StaffDocumentsUploadView(StaffOnlyMixin, EmploymentDocumentsUploadView):
+    pass
 
 
 class UnverifiedEmployeeView(LoginRequiredMixin, TitleMixin, TemplateView):
