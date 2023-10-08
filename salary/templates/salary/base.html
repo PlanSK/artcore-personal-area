@@ -9,6 +9,7 @@
   <link href="{% static 'salary/css/bootstrap.css' %}?v=5.3.1" id="bootstrap-css-link" rel="stylesheet">
   <script defer src="{% static 'salary/js/all.js' %}"></script>
   <link rel="stylesheet" id="css-url" href="">
+  <link rel="stylesheet" href="{% static 'salary/css/print.css' %}" media="print">
   <script>
     document.getElementById("css-url").setAttribute('href', "{% static 'salary/css/style.css' %}?v=" + Math.floor((new Date().getTime()) / 1000));
   </script>
