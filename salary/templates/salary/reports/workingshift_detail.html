@@ -104,6 +104,10 @@
             <tr><td class="text-warning">Суммарная выручка</td><td>{{workshift.summary_revenue | intcomma}}</td></tr>
           </tbody>
         </table>
+        {% if workshift.wishes %}
+        <h5 class="text-center">Предложения</h5><hr class="mt-0">
+        <p class="text-center text-info"><i>{{workshift.wishes}}</i></p>
+        {% endif %}
       </div>
     </div>
     <div class="row row-cols-md-3 row-cols-sm-1 mt-1 justify-content-center rounded border">

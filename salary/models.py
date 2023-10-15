@@ -269,6 +269,7 @@ class WorkingShift(models.Model):
     technical_report = models.BooleanField(
         verbose_name='Технический отчёт', default=False
     )
+    wishes = models.TextField(verbose_name='Предложения', blank=True)
 
     class Meta:
         verbose_name = 'Смена'
