@@ -160,6 +160,7 @@ class EditWorkshiftDataForm(forms.ModelForm):
             'cash_sum',
             'short_change_sum',
             'technical_report',
+            'wishes',
         ]
         if settings.PUBLICATION_ENABLED:
             fields.append('publication_link')
@@ -239,6 +240,7 @@ class StaffEditWorkshiftForm(forms.ModelForm):
             'cash_sum',
             'short_change_sum',
             'technical_report',
+            'wishes',
             'shortage',
             'shortage_paid',
             'comment_for_cash_admin',
@@ -255,19 +257,6 @@ class StaffEditWorkshiftForm(forms.ModelForm):
             'cashier_arrival_time': forms.TimeInput(
                 attrs={'type': 'time',}),
         }
-
-    # class Meta(EditWorkshiftDataForm.Meta):
-    #     fields = EditWorkshiftDataForm.Meta.fields
-    #     if settings.PUBLICATION_ENABLED:
-    #         fields.append('publication_is_verified')
-    #     fields.extend([
-    #         'shortage',
-    #         'shortage_paid',
-    #         'comment_for_cash_admin',
-    #         'comment_for_hall_admin',
-    #         'hall_cleaning',
-    #         'status',
-    #     ])
 
 
 class AddMisconductForm(forms.ModelForm):

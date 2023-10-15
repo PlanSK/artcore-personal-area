@@ -467,20 +467,20 @@ def get_filtered_rating_data(month: int, year: int) -> FilteredRating:
     )
 
 
-def _get_employee_rating_data(
-    employee_id: int, month: int = datetime.date.today().month,
-        year: int = datetime.date.today().year) -> Rating:
+def _get_employee_rating_data(employee_id: int,
+                              is_cashier: bool,
+                              month: int = datetime.date.today().month,
+                              year: int = datetime.date.today().year
+    ) -> Rating:
     """
     Define and returns Rating data from awards data.
     """
     all_filtered_categories = get_filtered_rating_data(month=month, year=year)
-    is_cashier = False
 
-    if tuple(filter(lambda x: x.id == employee_id,
+    if is_cashier and tuple(filter(lambda x: x.id == employee_id,
                 all_filtered_categories.full_cashier_list)):
         special_rating=all_filtered_categories.bar_rating
         common_rating=all_filtered_categories.cashier_common_rating
-        is_cashier = True
     elif tuple(filter(lambda x: x.id == employee_id,
                 all_filtered_categories.full_hall_admin_list)):
         special_rating=all_filtered_categories.hookah_rating
@@ -502,16 +502,18 @@ def _get_employee_rating_data(
     )
 
 
-def get_rating_data(
-    employee_id: int, month: int = datetime.date.today().month,
-        year: int = datetime.date.today().year) -> Rating | None:
+def get_rating_data(employee_id: int,
+                    is_cashier: bool,
+                    month: int = datetime.date.today().month,
+                    year: int = datetime.date.today().year) -> Rating | None:
     """
     Returns Rating data for the employee by id or None if employee rating
     status not defined.
     """
     rating_data = None
     try:
-        rating_data = _get_employee_rating_data(employee_id, month, year)
+        rating_data = _get_employee_rating_data(employee_id, is_cashier,
+                                                month, year)
     except RatingDataNotDefined:
         logger.warning(
             f'Employee id {employee_id} rating position is not found.')

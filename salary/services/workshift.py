@@ -4,6 +4,7 @@ import logging
 from typing import NamedTuple
 
 from django.contrib.auth.models import User
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import QuerySet, Q, Sum
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -188,6 +189,19 @@ def _get_summary_earnings(employee_id: int, month: int, year: int,
     return round(summary_earnings, 2)
 
 
+def _is_employee_cashier(employee_id: int) -> bool:
+    """Returns True if employee with employee_id has position 'cash_admin'"""
+    try:
+        employee_object = User.objects.select_related(
+            'profile', 'profile__position').get(pk=employee_id)
+        position_name = employee_object.profile.position.name
+    except ObjectDoesNotExist:
+        logger.error(f'User with id {employee_id} does not exist.')
+        return False
+
+    return True if position_name == 'cash_admin' else False
+
+
 def get_employee_workshift_indicators(
     employee_id: int, month: int = 0,
         year: int = 0) -> EmployeeMonthIndicators:
@@ -202,7 +216,9 @@ def get_employee_workshift_indicators(
         employee_id, month, year).filter(
             cash_admin__id=employee_id, shortage_paid=False).aggregate(
                 Sum('shortage')).get('shortage__sum', 0.0)
-    rating_data=get_rating_data(employee_id, month, year)
+    is_cashier = _is_employee_cashier(employee_id)
+
+    rating_data=get_rating_data(employee_id, is_cashier, month, year)
     summary_earnings = _get_summary_earnings(employee_id, month, year,
                                              rating_data)
     number_of_verified_workshifts=get_employee_month_workshifts(
