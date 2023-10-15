@@ -159,14 +159,6 @@ class Misconduct(models.Model):
     def __str__(self) -> str:
         return f'{self.misconduct_date} {self.intruder.get_full_name()}'
 
-    def save(self, *args, **kwargs):
-        if (self.explanation_exist and
-                self.status == self.MisconductStatus.ADDED):
-            self.status = self.MisconductStatus.WAIT
-        elif (not self.explanation_exist):
-            self.status = self.MisconductStatus.ADDED
-        super().save(*args, **kwargs)
-
     def get_absolute_url(self):
         return reverse_lazy('misconduct_detail', kwargs={'slug': self.slug})
 
