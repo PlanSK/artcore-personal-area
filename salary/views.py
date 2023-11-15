@@ -45,6 +45,16 @@ from salary.services.profile_services import get_birthday_person_list
 from salary.services.analytic import get_analytic_data
 
 
+WORKINGSHIFT_PERMISSONS_TUPLE: tuple[str, ...] = (
+    'salary.view_workingshift',
+    'salary.add_workingshift',
+    'salary.change_workingshift',
+    'salary.delete_workingshift',
+    'salary.view_workshift_report',
+    'salary.advanced_change_workshift',
+)
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -69,21 +79,22 @@ class RegistrationUser(TitleMixin, SuccessUrlMixin, TemplateView):
 
         user_form = self.user_form(request.POST)
         profile_form = self.profile_form(request.POST, request.FILES)
+        template_for_render = self.template_name
         if user_form.is_valid() and profile_form.is_valid():
             user = registration_user(
                 request=request,
                 user_form=user_form,
                 profile_form=profile_form
             )
-
             context = { 'first_name': user.first_name }
-            return render(request, self.success_template_name, context=context)
+            template_for_render = self.success_template_name
         else:
             context = self.get_context_data(
                 profile_form=profile_form,
                 user_form=user_form
             )
-            return render(request, self.template_name, context=context)
+
+        return render(request, template_for_render, context=context)
 
 
 def request_confirmation_link(request):
@@ -93,13 +104,14 @@ def request_confirmation_link(request):
     return HttpResponse('Success sent.')
 
 
-class ConfirmUserView(TitleMixin, SuccessUrlMixin, TemplateView):
+class ConfirmUserView(TitleMixin, SuccessUrlMixin, UpdateContextMixin,
+                      TemplateView):
     template_name = 'salary/auth/email_confirmed.html'
     title = 'Учетная запись активирована'
 
     def dispatch(self, request, *args: Any, **kwargs: Any):
-        user_uidb64 = kwargs.get('uidb64')
-        request_token = kwargs.get('token')
+        user_uidb64: str = kwargs.get('uidb64') # type: ignore
+        request_token: str = kwargs.get('token') # type: ignore
 
         confirmation_user_email(
             request=request,
@@ -111,10 +123,8 @@ class ConfirmUserView(TitleMixin, SuccessUrlMixin, TemplateView):
         )
         return super().dispatch(request, *args, **kwargs)
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['first_name'] = self.requested_user.first_name
-        return context
+    def get_additional_context_data(self) -> dict:
+        return {'first_name': self.requested_user.first_name}
 
 
 class ConfirmMailStatus(EmployeePermissionsMixin, TitleMixin, ListView):
@@ -165,7 +175,7 @@ class DismissalEmployee(EmployeePermissionsMixin, TitleMixin,
             context = self.get_context_data(
                 profile_form=profile_form_class,
             )
-            return render(request, self.template_name, context=context)
+        return render(request, self.template_name, context=context)
 
 
 class LoginUser(TitleMixin, SuccessUrlMixin, LoginView):
@@ -192,7 +202,8 @@ def logout_user(request):
     return redirect('login')
 
 
-class AdminUserView(EmployeePermissionsMixin, TitleMixin, ListView):
+class AdminUserView(EmployeePermissionsMixin, TitleMixin, UpdateContextMixin,
+                    ListView):
     template_name = 'salary/show_users.html'
     model = User
     title = 'Управление персоналом'
@@ -207,27 +218,25 @@ class AdminUserView(EmployeePermissionsMixin, TitleMixin, ListView):
 
         return queryset
 
-    def get_context_data(self, **kwargs):
-        context: dict = super().get_context_data(**kwargs)
-        context.update({
+    def get_additional_context_data(self) -> dict:
+        return {
             'attestation_enabled': settings.ATTESTATION_ENABLED,
             'only_actived': True if not self.kwargs.get('all') else False
-        })
-        return context
+        }
 
 
-class StaffIndexView(WorkingshiftPermissonsMixin, TitleMixin, TemplateView,
-                     CatchingExceptionsMixin):
+class StaffIndexView(PermissionRequiredMixin, TitleMixin, UpdateContextMixin,
+                     TemplateView, CatchingExceptionsMixin):
     template_name = 'salary/staff/staff_index.html'
     title = 'Главная'
-    
-    def get_context_data(self, **kwargs):
-        context : dict = super().get_context_data(**kwargs)
+    permission_required = WORKINGSHIFT_PERMISSONS_TUPLE
+
+    def get_additional_context_data(self) -> dict:
         employees_at_work = get_employees_at_work()
         today_date = timezone.localdate(timezone.now())
         birthday_person_list = get_birthday_person_list(day=today_date.day,
                                                         month=today_date.month)
-        context.update({
+        additional_context_data = {
             'employees_at_work': employees_at_work,
             'today_date': today_date,
             'missed_workshifts_dates': get_missed_dates_tuple(),
@@ -237,39 +246,41 @@ class StaffIndexView(WorkingshiftPermissonsMixin, TitleMixin, TemplateView,
             'unclosed_workshifts': get_unclosed_workshift_number(),
             'total_rating_data': get_filtered_rating_data(today_date.month,
                                                           today_date.year)
-        })
-        return context
+        }
+        return additional_context_data
 
 
-class StaffWorkshiftsView(WorkingshiftPermissonsMixin, MonthYearExtractMixin,
-                          TitleMixin, ListView):
+class StaffWorkshiftsView(PermissionRequiredMixin, MonthYearExtractMixin,
+                          TitleMixin, UpdateContextMixin, ListView):
     template_name = 'salary/staff_workshifts_view.html'
     model = WorkingShift
     title = 'Смены'
+    permission_required = WORKINGSHIFT_PERMISSONS_TUPLE
 
     def get_queryset(self):
         workshifts = WorkingShift.objects.select_related('hall_admin',
                                                          'cash_admin')
         return workshifts
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context.update({
+    def get_additional_context_data(self) -> dict:
+        additional_context_data = {
             'workshift_list': self.object_list.exclude(
                 status=WorkingShift.WorkshiftStatus.VERIFIED),
             'is_unverified': True,
             'missed_workshifts_dates': get_missed_dates_tuple(),
             'workshift_dates': timezone.now().date(),
-        })
-        return context
+        }
+        return additional_context_data
 
 
-class StaffArchiveWorkshiftsView(WorkingshiftPermissonsMixin,
-                                 MonthYearExtractMixin, TitleMixin, ListView):
+class StaffArchiveWorkshiftsView(PermissionRequiredMixin,
+                                 MonthYearExtractMixin, TitleMixin,
+                                 UpdateContextMixin, ListView):
     template_name = 'salary/staff_workshifts_view.html'
     model = WorkingShift
     title = 'Смены'
     context_object_name = 'workshift_list'
+    permission_required = WORKINGSHIFT_PERMISSONS_TUPLE
 
     def get_queryset(self):
         if self.kwargs.get('year') and self.kwargs.get('month'):
@@ -281,45 +292,41 @@ class StaffArchiveWorkshiftsView(WorkingshiftPermissonsMixin,
             HttpResponseNotFound('No all data found.')
         return queryset
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context.update({
+    def get_additional_context_data(self) -> dict:
+        additional_context_data = {
             'summary_revenue': sum([
                 workshift.summary_revenue
                 for workshift in self.object_list
             ]),
-            'workshift_dates': datetime.date(
-                self.year, self.month, 1
-            ),
+            'workshift_dates': datetime.date(self.year, self.month, 1), # type:ignore
             'is_unverified': False,
             'missed_workshifts_dates': get_missed_dates_tuple(),
-        })
+        }
+        return additional_context_data
 
-        return context
 
-
-class StaffWorkshiftsForYearView(WorkingshiftPermissonsMixin, TitleMixin,
-                             MonthYearExtractMixin, ListView):
+class StaffWorkshiftsForYearView(PermissionRequiredMixin, TitleMixin,
+                                 MonthYearExtractMixin, UpdateContextMixin,
+                                 ListView):
     template_name = 'salary/staff_months_workshifts_list.html'
     model = WorkingShift
     title = 'Смены'
+    permission_required = WORKINGSHIFT_PERMISSONS_TUPLE
 
     def get_queryset(self):
         workshifts_months = WorkingShift.objects.filter(
             shift_date__year=self.year).dates('shift_date', 'month')
         return workshifts_months
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context.update({'year': self.year})
-        return context
+    def get_additional_context_data(self) -> dict:
+        return {'year': self.year}
 
 
-class StaffWorkshiftsYearView(WorkingshiftPermissonsMixin, TitleMixin,
-                              ListView):
+class StaffWorkshiftsYearView(PermissionRequiredMixin, TitleMixin, ListView):
     template_name = 'salary/staff_years_workshifts_list.html'
     model = WorkingShift
     title = 'Смены'
+    permission_required = WORKINGSHIFT_PERMISSONS_TUPLE
 
     def get_queryset(self):
         workshifts_years = WorkingShift.objects.dates('shift_date', 'year')
@@ -346,26 +353,32 @@ class AnalyticForYearView(StaffWorkshiftsForYearView):
     title = 'Аналитика'
 
 
-class DeleteWorkshift(WorkingshiftPermissonsMixin, TitleMixin, SuccessUrlMixin,
+class DeleteWorkshift(PermissionRequiredMixin, TitleMixin, SuccessUrlMixin,
                       DeleteView):
     model = WorkingShift
     title = 'Удаление смены'
+    permission_required = WORKINGSHIFT_PERMISSONS_TUPLE
 
 
-class MonthlyReportListView(WorkingshiftPermissonsMixin, MonthYearExtractMixin,
-                            TitleMixin, TemplateView):
+class MonthlyReportListView(PermissionRequiredMixin, MonthYearExtractMixin,
+                            TitleMixin, UpdateContextMixin, TemplateView):
     template_name = 'salary/month_reports/monthlyreport_list.html'
     title = 'Зарплатный отчёт'
+    permission_required = WORKINGSHIFT_PERMISSONS_TUPLE
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context.update({
-            'report_data': get_monthly_report(month=self.month,
-                                                  year=self.year),
-            'current_date': datetime.date(self.year, self.month, 1),
-        })
-
-        return context
+    def get_additional_context_data(self):
+        current_month: int = self.month # type: ignore
+        current_year: int = self.year # type: ignore
+        monthly_report_data = get_monthly_report(
+            month=current_month,
+            year=current_year
+        )
+        current_date = datetime.date(current_year, current_month, 1)
+        additional_context_data = {
+            'report_data': monthly_report_data,
+            'current_date': current_date,
+        }
+        return additional_context_data
 
 
 class AddMisconductView(MisconductPermissionsMixin, TitleMixin, SuccessUrlMixin,
@@ -409,13 +422,14 @@ class MisconductListView(MisconductPermissionsMixin, TitleMixin, ListView):
     title = 'Список нарушителей'
     template_name = 'salary/intruders_list.html'
 
+# TODO: Move this to services, and replase get_gueryset to another method
     def get_queryset(self) -> List[Intruder]:
         queryset = Misconduct.objects.select_related('intruder__profile')
 
         if not self.request.GET.get('show'):
             queryset = queryset.exclude(intruder__profile__profile_status='DSM')
 
-        intruders_dict = dict()
+        intruders_dict: dict[User, list] = dict()
         for misconduct in queryset:
             if intruders_dict.get(misconduct.intruder):
                 intruders_dict[misconduct.intruder].append(misconduct.status)
@@ -454,7 +468,7 @@ class MisconductListView(MisconductPermissionsMixin, TitleMixin, ListView):
 
 
 class MisconductUserView(ProfileStatusRedirectMixin, PermissionRequiredMixin,
-                            TitleMixin, ListView):
+                         UpdateContextMixin, TitleMixin, ListView):
     model = Misconduct
     title = 'Нарушения'
     permission_required = 'salary.view_misconduct'
@@ -483,15 +497,12 @@ class MisconductUserView(ProfileStatusRedirectMixin, PermissionRequiredMixin,
         
         return 0.0
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        context.update({
+    def get_additional_context_data(self) -> dict:
+        additional_context_data = {
             'intruder': get_object_or_404(User, username=self.intruder),
             'penalty_sum': self.get_penalty_sum(),
-        })
-
-        return context
+        }
+        return additional_context_data
 
 
 class MisconductUpdateView(MisconductPermissionsMixin, TitleMixin, 
@@ -514,6 +525,7 @@ class EditUser(ProfileStatusRedirectMixin, TitleMixin, SuccessUrlMixin,
     userform = EditUserForm
     profileform = EditProfileForm
 
+# TODO: Need to refactoring this
     def dispatch(self, request, *args: Any, **kwargs: Any):
         if self.kwargs.get('pk'):
             self.edited_user = get_object_or_404(
@@ -561,7 +573,8 @@ class StaffEditUser(EmployeePermissionsMixin, EditUser):
     title = 'Редактирование профиля'
 
 
-class ShowUserProfile(LoginRequiredMixin, TitleMixin, DetailView):
+class ShowUserProfile(LoginRequiredMixin, TitleMixin, UpdateContextMixin,
+                      DetailView):
     model = User
     title = 'Просмотр профиля'
     queryset = User.objects.select_related('profile')
@@ -572,19 +585,15 @@ class ShowUserProfile(LoginRequiredMixin, TitleMixin, DetailView):
             queryset if queryset else self.get_queryset(),
             pk=self.request.user.pk
         )
-    
-    def get_context_data(self, **kwargs):
-        context : dict = super().get_context_data(**kwargs)
-        context.update(
-            {
-                'attestation_enabled': settings.ATTESTATION_ENABLED
-            }
-        )
-        return context
+
+    def get_additional_context_data(self) -> dict:
+        return {
+            'attestation_enabled': settings.ATTESTATION_ENABLED
+        }
 
 
 class WorkshiftDetailView(ProfileStatusRedirectMixin, PermissionRequiredMixin,
-                            TitleMixin, DetailView):
+                          UpdateContextMixin, TitleMixin, DetailView):
     model = WorkingShift
     template_name = 'salary/reports/workingshift_detail.html'
     title = 'Детальный просмотр смены'
@@ -595,16 +604,16 @@ class WorkshiftDetailView(ProfileStatusRedirectMixin, PermissionRequiredMixin,
     )
     context_object_name = 'workshift'
 
-    def get_context_data(self, **kwargs):
-        context: dict = super().get_context_data(**kwargs)
-        yesterday = context['object'].shift_date - datetime.timedelta(days=1)
-        context.update({
+    def get_additional_context_data(self) -> dict:
+        workshift_object = self.get_object()
+        yesterday = workshift_object.shift_date - datetime.timedelta(days=1)
+        additional_context_data = {
             'yesterday': yesterday,
             'attestation_enabled': settings.ATTESTATION_ENABLED,
             'publication_enabled': settings.PUBLICATION_ENABLED
-        })
+        }
+        return additional_context_data
 
-        return context
 
 class MisconductDetailView(ProfileStatusRedirectMixin, PermissionRequiredMixin,
                             TitleMixin, DetailView):
@@ -616,23 +625,21 @@ class MisconductDetailView(ProfileStatusRedirectMixin, PermissionRequiredMixin,
                                                  'regulations_article')
 
 
-class MonthlyAnalyticalReport(WorkingshiftPermissonsMixin, 
-                              MonthYearExtractMixin, TitleMixin, TemplateView):
+class MonthlyAnalyticalReport(PermissionRequiredMixin,
+                              MonthYearExtractMixin, TitleMixin,
+                              UpdateContextMixin, TemplateView):
     title = 'Аналитический отчёт'
     template_name = 'salary/month_reports/monthly_analytical_report.html'
+    permission_required = WORKINGSHIFT_PERMISSONS_TUPLE
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        analytic_data = get_analytic_data(self.month, self.year)
-        context.update({
-            'analytic_data': analytic_data,
-        })
-
-        return context
+    def get_additional_context_data(self) -> dict:
+        analytic_data = get_analytic_data(self.month, self.year) # type: ignore
+        return {'analytic_data': analytic_data}
 
 
 class IndexEmployeeView(LoginRequiredMixin, ProfileStatusRedirectMixin,
-                        TitleMixin, TemplateView, CatchingExceptionsMixin):
+                        TitleMixin, UpdateContextMixin, TemplateView,
+                        CatchingExceptionsMixin):
     """
     Class based view Index page for any employee.
     Redirect user with staff status to staff index page.
@@ -650,12 +657,8 @@ class IndexEmployeeView(LoginRequiredMixin, ProfileStatusRedirectMixin,
 
         return super().dispatch(request, *args, **kwargs)
 
-    def get_context_data(self, **kwargs):
-        logger.debug(
-            f'Get user {self.request.user.username} context data.'
-        )
-        context = super().get_context_data(**kwargs)
-
+    def get_additional_context_data(self) -> dict:
+        logger.debug(f'Get user {self.request.user.username} context data.')
         notification_about_shift = notification_of_upcoming_shifts(
             user_id=self.request.user.pk)
         misconduct_data = get_misconduct_employee_data(self.request.user.id)
@@ -663,42 +666,39 @@ class IndexEmployeeView(LoginRequiredMixin, ProfileStatusRedirectMixin,
             self.request.user.id)
         unclosed_shifts_dates = get_employee_unclosed_workshifts_dates(
             self.request.user.id)
-
         logger.debug(
             f'Shifts to close number: {len(unclosed_shifts_dates)}. '
             f'Notofication: {notification_about_shift}.'
         )
-        context.update({
+        additional_context_data = {
             'employee_indicators': employee_month_indicators,
             'misconduct_data': misconduct_data,
             'today_date': timezone.localdate(timezone.now()),
             'unclosed_shifts_dates': unclosed_shifts_dates,
             'notification_about_shift': notification_about_shift,
             'minimal_workshifts_number': settings.MINIMAL_WORKSHIFTS_NUMBER
-        })
+        }
         logger.debug('Context data is updated. Return context.')
-        return context
+        return additional_context_data
 
 
 class EmployeeWorkshiftsView(PermissionRequiredMixin, MonthYearExtractMixin,
-                             TitleMixin, TemplateView):
+                             TitleMixin, UpdateContextMixin, TemplateView):
     template_name = 'salary/employee_workshifts_view.html'
     title = 'Смены'
     permission_required = 'salary.view_workingshift'
 
-    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+    def get_additional_context_data(self) -> dict:
+        current_month: int = self.month # type: ignore
+        current_year: int = self.year # type: ignore
         workshifts_list = get_employee_month_workshifts(
-            self.request.user.id, self.month, self.year)
+            self.request.user.id, current_month, current_year)
         employee_month_indicators = get_employee_workshift_indicators(
-            self.request.user.id, self.month, self.year)
-        context = super().get_context_data(**kwargs)
-        context.update(
-            {
-                'employee_indicators': employee_month_indicators,
-                'workshifts_list': workshifts_list
-            }
-        )
-        return context
+            self.request.user.id, current_month, current_year)
+        return {
+            'employee_indicators': employee_month_indicators,
+            'workshifts_list': workshifts_list
+        }
 
 
 class EmployeeMonthlyListView(ProfileStatusRedirectMixin, 
@@ -718,10 +718,12 @@ class EmployeeMonthlyListView(ProfileStatusRedirectMixin,
         return queryset
 
 
-class StaffEmployeeMonthView(WorkingshiftPermissonsMixin,
-                             MonthYearExtractMixin, TitleMixin, ListView):
+class StaffEmployeeMonthView(PermissionRequiredMixin,
+                             MonthYearExtractMixin, TitleMixin,
+                             UpdateContextMixin, ListView):
     template_name = 'salary/staff_employee_month_view.html'
     title = 'Просмотр смен'
+    permission_required = WORKINGSHIFT_PERMISSONS_TUPLE
 
     def dispatch(self, request, *args: Any, **kwargs: Any):
         self.employee = get_object_or_404(User, pk=self.kwargs.get('employee'))
@@ -740,6 +742,7 @@ class StaffEmployeeMonthView(WorkingshiftPermissonsMixin,
 
         return queryset
 
+# TODO: Need to refactoring this
     def get_summary_earnings(self):
         summary_earnings = sum([
             workshift.hall_admin_earnings.final_earnings
@@ -760,9 +763,8 @@ class StaffEmployeeMonthView(WorkingshiftPermissonsMixin,
 
         return round(summary_penalties, 2)
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context.update({
+    def get_additional_context_data(self) -> dict:
+        additional_context_data = {
             'employee': self.employee,
             'summary_earnings': self.get_summary_earnings(),
             'summary_penalties': self.get_summary_penalties(),
@@ -770,8 +772,8 @@ class StaffEmployeeMonthView(WorkingshiftPermissonsMixin,
                 cash_admin=self.employee,
                 shortage_paid=False,
             ).aggregate(Sum('shortage')).get('shortage__sum')
-        })
-        return context
+        }
+        return additional_context_data
 
 
 class DocumentsList(LoginRequiredMixin, TitleMixin, TemplateView):
@@ -787,8 +789,9 @@ class AddWorkshiftData(PermissionRequiredMixin, TitleMixin, CreateView):
 
     def dispatch(self, request: HttpRequest, *args: Any,
                  **kwargs: Any) -> HttpResponse:
-        if kwargs.get('date'):
-            year, month, day = (map(int, kwargs.get('date').split('-')))
+        closing_date_str: str = kwargs.get('date') # type: ignore
+        if closing_date_str:
+            year, month, day = (map(int, closing_date_str.split('-')))
             self.closed_date = datetime.date(year, month, day)
         else:
             self.closed_date = timezone.localdate(timezone.now())
@@ -816,19 +819,22 @@ class AddWorkshiftData(PermissionRequiredMixin, TitleMixin, CreateView):
 
 class EditWorkshiftData(ProfileStatusRedirectMixin, PermissionRequiredMixin,
                         SuccessUrlMixin, EditModelEditorFieldsMixin,
-                        UpdateView):
+                        UpdateContextMixin, UpdateView):
     model = WorkingShift
     form_class = EditWorkshiftDataForm
-    permission_required = 'salary.change_workingshift'
+    permission_required: tuple[str, ...] = 'salary.change_workingshift',
     template_name = 'salary/edit_workshift.html'
 
-    def get_context_data(self, **kwargs) -> dict:
-        context = super().get_context_data(**kwargs)
-        context['start_date'] = context['object'].shift_date - relativedelta(days=1)
-        return context
+    def get_additional_context_data(self) -> dict:
+        workshift_object = self.get_object()
+        return {
+            'start_date': workshift_object.shift_date - relativedelta(days=1)
+        }
 
 
-class ShortagePayment(WorkingshiftPermissonsMixin, RedirectView):
+class ShortagePayment(PermissionRequiredMixin, RedirectView):
+    permission_required = WORKINGSHIFT_PERMISSONS_TUPLE
+
     def get_redirect_url(self, *args, **kwargs):
         self.url = self.request.GET.get('next', reverse_lazy('index'))
         workshift = get_object_or_404(WorkingShift, slug=kwargs.get('slug'))
@@ -837,8 +843,9 @@ class ShortagePayment(WorkingshiftPermissonsMixin, RedirectView):
         return super().get_redirect_url(*args, **kwargs)
 
 
-class StaffEditWorkshift(EditWorkshiftData, WorkingshiftPermissonsMixin):
+class StaffEditWorkshift(EditWorkshiftData):
     form_class = StaffEditWorkshiftForm
+    permission_required = WORKINGSHIFT_PERMISSONS_TUPLE
 
 
 class ResetPasswordView(TitleMixin, PasswordResetView):
@@ -860,7 +867,7 @@ class ResetPasswordConfirmView(TitleMixin, PasswordResetConfirmView):
 
 
 class EmploymentDocumentsView(EmployeePermissionsMixin, TitleMixin,
-                              TemplateView):
+                              UpdateContextMixin, TemplateView):
     title = 'Документы по трудоустройству'
     template_name = 'salary/documents_view/documents_list.html'
 
@@ -871,34 +878,32 @@ class EmploymentDocumentsView(EmployeePermissionsMixin, TitleMixin,
 
         return super().dispatch(request, *args, **kwargs)
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context.update({
+    def get_additional_context_data(self) -> dict:
+        return {
             'files_list': get_employee_documents_urls(self.employee),
             'employee': self.employee,
-        })
-
-        return context
+        }
 
 
 class EmploymentDocumentsUploadView(LoginRequiredMixin, SuccessUrlMixin,
-                                    TitleMixin, TemplateView):
+                                    UpdateContextMixin, TitleMixin,
+                                    TemplateView):
     title = 'Загрузка документов'
     template_name = 'salary/documents_view/documents_upload.html'
 
     def dispatch(self, request: HttpRequest,
                  *args: Any, **kwargs: Any) -> HttpResponse:
         if kwargs.get('user'):
-            self.target_user = get_object_or_404(User,
-                                             username=self.kwargs.get('user'))
+            self.target_user = get_object_or_404(
+                User,
+                username=self.kwargs.get('user')
+            )
         else:
             self.target_user = request.user
         return super().dispatch(request, *args, **kwargs)
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['success_url'] = self.get_success_url()
-        return context
+    def get_additional_context_data(self) -> dict:
+        return {'success_url': self.get_success_url()}
 
     def post(self, request: HttpRequest,
              *args: Any, **kwargs: Any) -> HttpResponse:
@@ -923,7 +928,8 @@ class StaffDocumentsUploadView(StaffOnlyMixin, EmploymentDocumentsUploadView):
     pass
 
 
-class UnverifiedEmployeeView(LoginRequiredMixin, TitleMixin, TemplateView):
+class UnverifiedEmployeeView(LoginRequiredMixin, TitleMixin,
+                             UpdateContextMixin, TemplateView):
     title = 'Главная'
     template_name = 'salary/unverified_employee.html'
 
@@ -934,13 +940,11 @@ class UnverifiedEmployeeView(LoginRequiredMixin, TitleMixin, TemplateView):
                 return redirect('index')
         return super().dispatch(request, *args, **kwargs)
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+    def get_additional_context_data(self) -> dict:
         unclosed_shifts_dates = get_employee_unclosed_workshifts_dates(
             user_id=self.request.user.id
         )
-        context.update({ 'unclosed_shifts_dates': unclosed_shifts_dates })
-        return context
+        return { 'unclosed_shifts_dates': unclosed_shifts_dates }
 
 
 class DocumentDeleteView(EmployeePermissionsMixin, RedirectView):
@@ -977,17 +981,17 @@ class ProfileStatusApprovalView(EmployeePermissionsMixin, RedirectView):
         return super().get_redirect_url(*args, **kwargs)
 
 
-class MessengerMainView(LoginRequiredMixin, TitleMixin ,TemplateView):
+class MessengerMainView(LoginRequiredMixin, TitleMixin, UpdateContextMixin,
+                        TemplateView):
     template_name = 'salary/chat/main_window.html'
     title = 'Чат'
 
-    def get_context_data(self, **kwargs):
-        context_data = super().get_context_data(**kwargs)
-        context_data.update({
+    def get_additional_context_data(self) -> dict:
+        additional_context_data = {
             'active_users': get_acvite_users_list(self.request.user.id),
             'chats_list': get_chats_list(self.request.user.id),
-        })
-        return context_data
+        }
+        return additional_context_data
 
     def post(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
         return redirect(add_message_and_return_chat(request))
@@ -996,15 +1000,13 @@ class MessengerMainView(LoginRequiredMixin, TitleMixin ,TemplateView):
 class MessengerChatView(MessengerMainView):
     template_name = 'salary/chat/chat_open.html'
 
-    def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+    def dispatch(self, request: HttpRequest,
+                 *args: Any, **kwargs: Any) -> HttpResponse:
         selected_chat_slug = self.kwargs.get('slug')
         self.chat_object = get_object_or_404(Chat, slug=selected_chat_slug)
-
         return super().dispatch(request, *args, **kwargs)
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
+    def get_additional_context_data(self) -> dict:
         messages_list = []
         messages_list = get_messages_list(self.chat_object.slug)
 
@@ -1013,18 +1015,18 @@ class MessengerChatView(MessengerMainView):
             self.chat_object.slug
         )
         recipient = get_chat_info(
-            self.chat_object,
+            self.chat_object, # type: ignore
             self.request.user.id
         ).member
 
         mark_messages_as_read(messages_list, self.request.user)
-        context.update({
+        additional_context_data = {
             'chats_list': chats_list,
             'messages_list': messages_list,
             'recipient': recipient,
-        })
+        }
 
-        return context
+        return additional_context_data
 
 
 class MessengerNewChatView(MessengerMainView):
@@ -1038,17 +1040,12 @@ class MessengerNewChatView(MessengerMainView):
 
         return super().dispatch(request, *args, **kwargs)
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context.update(
-            { 'recipient': self.recipient }
-        )
-
-        return context
+    def get_additional_context_data(self) -> dict:
+        return {'recipient': self.recipient}
 
 
 class CalendarView(LoginRequiredMixin, MonthYearExtractMixin,
-                   TitleMixin, TemplateView):
+                   TitleMixin, UpdateContextMixin, TemplateView):
     template_name: str = 'salary/calendar/calendar.html'
     title: str = 'График смен'
     
@@ -1063,65 +1060,58 @@ class CalendarView(LoginRequiredMixin, MonthYearExtractMixin,
 
         return super().dispatch(request, *args, **kwargs)
 
-    def get_context_data(self, **kwargs: Any) -> dict:
-        context: dict = super().get_context_data(**kwargs)
+    def get_additional_context_data(self) -> dict:
+        current_month: int = self.month # type: ignore
+        current_year: int = self.year # type: ignore
         user_calendar = get_user_calendar(
-            self.requested_user.id, self.year, self.month)
-
-        context.update({
+            self.requested_user.id, current_year, current_month)
+        additional_context_data = {
             'month_calendar': user_calendar,
-            'requested_date': datetime.date(self.year, self.month, 1),
+            'requested_date': datetime.date(current_year, current_month, 1),
             'requested_user': self.requested_user,
-        })
-        return context
+        }
+        return additional_context_data
 
 
 class StaffCalendarView(StaffOnlyMixin, CalendarView):
     pass
 
 
-class StaffCalendarListView(TitleMixin, ListView):
+class StaffCalendarListView(TitleMixin, UpdateContextMixin, ListView):
     model = User
     queryset = User.objects.filter(is_active=True).exclude(
         is_staff=True).exclude(profile__position=4).select_related(
                 'profile', 'profile__position').order_by('-profile__position')
-
     template_name: str = 'salary/calendar/calendar_users_list.html'
     title = 'Графики пользователей'
 
-    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
-        context = super().get_context_data(**kwargs)
-        context.update({
-            'date': datetime.date.today()
-        })
-        return context
+    def get_additional_context_data(self) -> dict:
+        return {'date': datetime.date.today()}
 
 
 class AwardRatingView(MonthlyReportListView):
     template_name: str = 'salary/month_reports/award_rating.html'
     title = 'Рейтинговый отчёт'
 
-    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
-        context = super().get_context_data(**kwargs)
-        context.update({
+    def get_additional_context_data(self):
+        return {
             'award_data': get_awards_data(month=self.month, year=self.year),
             'current_date': datetime.date(self.year, self.month, 1),
             'minimal_workshifts_number': settings.MINIMAL_WORKSHIFTS_NUMBER,
             'avg_bar_criteria': settings.AVERAGE_BAR_REVENUE_CRITERIA,
             'avg_hookah_criteria': settings.AVERAGE_HOOKAH_REVENUE_CRITERIA
-        })
-        return context
+        }
 
 
-class EverydayReportPrintView(PermissionRequiredMixin, TitleMixin, DetailView):
+class EverydayReportPrintView(PermissionRequiredMixin, TitleMixin,
+                              UpdateContextMixin, DetailView):
     template_name: str = 'salary/reports/everyday_report_print.html'
     permission_required = 'salary.change_workingshift'
     title = 'Ежедневный отчет'
     model = WorkingShift
     context_object_name = 'workshift'
 
-    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
-        context = super().get_context_data(**kwargs)
+    def get_additional_context_data(self) -> dict:
         errors_queryset = self.object.errors.all()
         grill_queryset = errors_queryset.filter(
             error_type=ErrorKNA.ErrorType.GRILL)
@@ -1133,19 +1123,19 @@ class EverydayReportPrintView(PermissionRequiredMixin, TitleMixin, DetailView):
                 Sum('error_sum'))
         kna_errors_queryset = errors_queryset.filter(
             error_type=ErrorKNA.ErrorType.KNA)
-        context.update({
+        additional_context_data = {
             'lotto_queryset': lotto_queryset,
             'grill_queryset': grill_queryset,
             'kna_errors_queryset': kna_errors_queryset,
             'grill_sum': grill_sum.get('error_sum__sum'),
             'lotto_sum': lotto_sum.get('error_sum__sum'),
             'yesterday': self.object.shift_date - datetime.timedelta(days=1),
-        })
-        return context
+        }
+        return additional_context_data
 
 
 class AddCostErrorFormView(PermissionRequiredMixin, TitleMixin,
-                           TemplateView):
+                           UpdateContextMixin, TemplateView):
     template_name: str = 'salary/reports/add_costs_and_error_form.html'
     error_kna_form = ErrorKNAForm
     cost_form = CostForm
@@ -1153,8 +1143,7 @@ class AddCostErrorFormView(PermissionRequiredMixin, TitleMixin,
     permission_required = 'salary.change_workingshift'
     title = 'Добавление ошибок и расходов'
 
-    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
-        context = super().get_context_data(**kwargs)
+    def get_additional_context_data(self) -> dict:
         try:
             workshift = WorkingShift.objects.get(pk=self.kwargs['pk'])
         except WorkingShift.DoesNotExist:
@@ -1163,7 +1152,7 @@ class AddCostErrorFormView(PermissionRequiredMixin, TitleMixin,
         errors = ErrorKNA.objects.filter(
             workshift=workshift).order_by('error_type')
         cabin_errors_list = CabinError.objects.filter(workshift=workshift)
-        context.update({
+        additional_context_data = {
             'error_kna_form': self.error_kna_form(
                 initial={'workshift': workshift}),
             'workshift_pk': workshift.pk,
@@ -1174,8 +1163,8 @@ class AddCostErrorFormView(PermissionRequiredMixin, TitleMixin,
             'costs_list': costs,
             'errors_list': errors,
             'cabin_errors_list': cabin_errors_list,
-        })
-        return context
+        }
+        return additional_context_data
 
 
 class CreateErrorRedirectView(CreateObjectRedirectView):

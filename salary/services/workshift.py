@@ -82,7 +82,7 @@ def notification_of_upcoming_shifts(
     return False
 
 
-def get_missed_dates_tuple() -> tuple[datetime.date]:
+def get_missed_dates_tuple() -> tuple[datetime.date, ...]:
     """Returns tuple with missed dates of unclosed workshifts."""
     current_date = timezone.localdate(timezone.now())
     year, month = current_date.year, current_date.month
@@ -107,7 +107,7 @@ def get_missed_dates_tuple() -> tuple[datetime.date]:
 
 
 def get_employee_unclosed_workshifts_dates(
-        user_id: int) -> tuple[datetime.date]:
+        user_id: int) -> tuple[datetime.date, ...]:
     """Returns tuple with missed dates of employee unclosed workshifts."""
     requested_user = get_object_or_404(User, id=user_id)
     if not requested_user.has_perm('salary.add_workingshift'):
