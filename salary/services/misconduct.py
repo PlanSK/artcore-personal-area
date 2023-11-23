@@ -20,7 +20,7 @@ class Intruder(NamedTuple):
 
 
 class MisconductData(NamedTuple):
-    count: int
+    penalty_counter: int
     wait_explanation: int
     penalty_sum: float
 
@@ -44,7 +44,7 @@ def get_misconduct_employee_data(
             Sum('penalty')).get('penalty__sum', 0.0)
 
     return MisconductData(
-        count=misconducts_from_db.count(),
+        penalty_counter=misconducts_from_db.count(),
         wait_explanation=wait_explanation,
         penalty_sum=penalty_sum
     )

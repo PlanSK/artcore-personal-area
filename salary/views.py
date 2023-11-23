@@ -32,7 +32,8 @@ from salary.services.workshift import (
 )
 from salary.services.registration import (
     registration_user, sending_confirmation_link, confirmation_user_email,
-    get_user_instance_from_uidb64, authentification_user, add_user_to_groups
+    get_user_instance_from_uidb64, authentification_user, change_user_data,
+    get_user_model_from_pk
 )
 from salary.services.filesystem import (
     get_employee_documents_urls, document_file_handler,
@@ -486,44 +487,38 @@ class EditUser(ProfileStatusRedirectMixin, TitleMixin, SuccessUrlMixin,
     userform = EditUserForm
     profileform = EditProfileForm
 
-# TODO: Need to refactoring this
     def dispatch(self, request, *args: Any, **kwargs: Any):
-        if self.kwargs.get('pk'):
-            self.edited_user = get_object_or_404(
-                User.objects.select_related('profile'),
-                pk=self.kwargs.get('pk', 0)
-            )
-        else:
-            self.edited_user = self.request.user
+        self.edited_user = get_user_model_from_pk(request, **kwargs)
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, *args: Any, **kwargs: Any):
-        user_form_class = self.userform(instance=self.edited_user)
-        profile_form_class = self.profileform(instance=self.edited_user.profile)
+        user_form_instance = self.userform(instance=self.edited_user)
+        profile_form_instance = self.profileform(
+            instance=self.edited_user.profile
+        )
         context = self.get_context_data(
-            profile_form=profile_form_class,
-            user_form=user_form_class
+            profile_form=profile_form_instance,
+            user_form=user_form_instance
         )
         return render(request, self.template_name, context=context)
 
-    def post(self, request, **kwargs):
-        user_form_class = self.userform(request.POST, instance=self.edited_user)
-        profile_form_class = self.profileform(request.POST, request.FILES, instance=self.edited_user.profile)
-        if user_form_class.is_valid() and profile_form_class.is_valid():
-            if 'email' in user_form_class.changed_data:
-                self.edited_user.profile.email_status = Profile.EmailStatus.ADDED
-            user = user_form_class.save(commit=False)
-            profile = profile_form_class.save(commit=False)
-            user.save()
-            profile.save()
-            add_user_to_groups(user)
+    def post(self, request, **kwargs: Any):
+        user_form_instance = self.userform(request.POST,
+                                        instance=self.edited_user)
+        profile_form_instance = self.profileform(
+            request.POST, request.FILES, instance=self.edited_user.profile
+        )
+        if user_form_instance.is_valid() and profile_form_instance.is_valid():
+            change_user_data(
+                self.edited_user, user_form_instance, profile_form_instance
+            )
             return redirect(self.get_success_url())
         else:
-            user_form_class = self.userform
-            profile_form_class = self.profileform
+            user_form_instance = self.userform # type: ignore
+            profile_form_instance = self.profileform # type: ignore
             context = self.get_context_data(
-                profile_form=profile_form_class,
-                user_form=user_form_class
+                profile_form=profile_form_instance,
+                user_form=user_form_instance
             )
             return render(request, self.template_name, context=context)
 
