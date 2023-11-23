@@ -40,7 +40,9 @@ from salary.services.filesystem import (
 from salary.services.monthly_reports import (
     get_monthly_report, get_awards_data, get_filtered_rating_data
 )
-from salary.services.misconduct import get_misconduct_employee_data
+from salary.services.misconduct import (
+    get_misconduct_employee_data, get_sorted_intruders_list, get_penalty_sum
+)
 from salary.services.profile_services import get_birthday_person_list
 from salary.services.analytic import get_analytic_data
 
@@ -417,54 +419,28 @@ def load_regulation_data(request: HttpRequest) -> JsonResponse:
     return JsonResponse(response)
 
 
-class MisconductListView(MisconductPermissionsMixin, TitleMixin, ListView):
+class MisconductListView(MisconductPermissionsMixin, TitleMixin,
+                         UpdateContextMixin, ListView):
     model = Misconduct
     title = 'Список нарушителей'
     template_name = 'salary/intruders_list.html'
+    is_show_dissmissed = False
 
-# TODO: Move this to services, and replase get_gueryset to another method
     def get_queryset(self) -> List[Intruder]:
         queryset = Misconduct.objects.select_related('intruder__profile')
+        if not self.request.GET.get('show_dissmissed'):
+            self.is_show_dissmissed = True
+            dismissed_status = Profile.ProfileStatus.DISMISSED
+            return queryset.exclude(
+                intruder__profile__profile_status=dismissed_status)
+        return queryset
 
-        if not self.request.GET.get('show'):
-            queryset = queryset.exclude(intruder__profile__profile_status='DSM')
-
-        intruders_dict: dict[User, list] = dict()
-        for misconduct in queryset:
-            if intruders_dict.get(misconduct.intruder):
-                intruders_dict[misconduct.intruder].append(misconduct.status)
-            else:
-                intruders_dict[misconduct.intruder] = [misconduct.status,]
-        
-        intruders_list = [
-            Intruder(
-                employee=intruder,
-                total_count=len(intruders_dict[intruder]),
-                explanation_count=len(
-                    list(filter(
-                        lambda x: x == 'AD',
-                        intruders_dict[intruder]
-                    ))
-                ),
-                decision_count=len(
-                    list(filter(
-                        lambda x: x == 'WT',
-                        intruders_dict[intruder]
-                    ))
-                )
-            ) for intruder in intruders_dict.keys()
-        ]
-        sorted_intruders_list = sorted(
-            intruders_list, key=lambda i: i.total_count, reverse=True
-        )
-
-        return sorted_intruders_list
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        if not self.request.GET.get('show'):
-            context['only_actived'] = True
-        return context
+    def get_additional_context_data(self):
+        additional_context_data = {
+            'intruders_list': get_sorted_intruders_list(self.object_list),
+            'is_show_dissmissed': self.is_show_dissmissed,
+        }
+        return additional_context_data
 
 
 class MisconductUserView(ProfileStatusRedirectMixin, PermissionRequiredMixin,
@@ -483,24 +459,10 @@ class MisconductUserView(ProfileStatusRedirectMixin, PermissionRequiredMixin,
                 'intruder', 'regulations_article'
             )
 
-# TODO: Move to services.
-    def get_penalty_sum(self) -> float:
-        """Возвращает сумму штрафов по нарушениям
-
-        Returns:
-            float: сумма штрафов (число типа float)
-        """
-        if self.object_list.filter(status=Misconduct.MisconductStatus.CLOSED):
-            return self.object_list.filter(
-                status=Misconduct.MisconductStatus.CLOSED,
-            ).aggregate(Sum('penalty')).get('penalty__sum')
-        
-        return 0.0
-
     def get_additional_context_data(self) -> dict:
         additional_context_data = {
             'intruder': get_object_or_404(User, username=self.intruder),
-            'penalty_sum': self.get_penalty_sum(),
+            'penalty_sum': get_penalty_sum(self.object_list),
         }
         return additional_context_data
 
