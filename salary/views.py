@@ -27,7 +27,8 @@ from salary.services.internal_model_func import get_misconduct_slug
 from salary.services.workshift import (
     notification_of_upcoming_shifts, get_missed_dates_tuple,
     get_employee_workshift_indicators, get_employee_month_workshifts,
-    get_employee_unclosed_workshifts_dates, get_unclosed_workshift_number
+    get_employee_unclosed_workshifts_dates, get_unclosed_workshift_number,
+    get_summary_workshift_data
 )
 from salary.services.registration import (
     registration_user, sending_confirmation_link, confirmation_user_email,
@@ -692,48 +693,17 @@ class StaffEmployeeMonthView(PermissionRequiredMixin,
         return super().dispatch(request, *args, **kwargs)
 
     def get_queryset(self) -> QuerySet:
-        queryset = WorkingShift.objects.select_related(
-            'hall_admin__profile__position',
-            'cash_admin__profile__position'
-        ).filter(
-            shift_date__month=self.month,
-            shift_date__year=self.year,
-        ).filter(
-            Q(cash_admin=self.employee) | Q(hall_admin=self.employee)
-        ).order_by('shift_date')
-
-        return queryset
-
-# TODO: Need to refactoring this
-    def get_summary_earnings(self):
-        summary_earnings = sum([
-            workshift.hall_admin_earnings.final_earnings
-            if workshift.hall_admin == self.employee
-            else workshift.cashier_earnings.final_earnings
-            for workshift in self.object_list
-        ])
-
-        return round(summary_earnings, 2)
-
-    def get_summary_penalties(self):
-        summary_penalties = sum([
-            workshift.hall_admin_penalty
-            if workshift.hall_admin == self.employee
-            else workshift.cash_admin_penalty
-            for workshift in self.object_list
-        ])
-
-        return round(summary_penalties, 2)
+        return get_employee_month_workshifts(
+            self.employee.pk, self.month, self.year)
 
     def get_additional_context_data(self) -> dict:
+        workshift_summary_data = get_summary_workshift_data(self.object_list,
+                                                            self.employee.pk)
         additional_context_data = {
             'employee': self.employee,
-            'summary_earnings': self.get_summary_earnings(),
-            'summary_penalties': self.get_summary_penalties(),
-            'summary_shortages': self.object_list.filter(
-                cash_admin=self.employee,
-                shortage_paid=False,
-            ).aggregate(Sum('shortage')).get('shortage__sum')
+            'summary_earnings': workshift_summary_data.summary_earnings,
+            'summary_penalties': workshift_summary_data.summary_penalties,
+            'summary_shortages': workshift_summary_data.summary_shortages
         }
         return additional_context_data
 

@@ -31,6 +31,12 @@ class UnclosedWorkshifts(NamedTuple):
     unclosed_number: int
 
 
+class SummaryWorkshiftData(NamedTuple):
+    summary_earnings: float
+    summary_penalties: float
+    summary_shortages: float
+
+
 def _is_date_day_exists_in_plan(user_id: int,
                            check_date: datetime.date) -> bool:
     """Returns True if day from check_date exists
@@ -247,3 +253,25 @@ def get_unclosed_workshift_number() -> UnclosedWorkshifts:
     return UnclosedWorkshifts(unverified_number=unverified_workshifts_number,
                               wait_fix_number=wait_fix_workshifts_number,
                               unclosed_number=unclosed_workshifts_number)
+
+
+def get_summary_workshift_data(workshift_queryset: QuerySet,
+                               employee_id: int) -> SummaryWorkshiftData:
+    """Returns summary values of earnings and penalties"""
+    summary_earnings = 0.0
+    summary_penalties = 0.0
+    summary_shortages = 0.0
+    for workshift in workshift_queryset:
+        if workshift.hall_admin.pk == employee_id:
+            summary_earnings += workshift.hall_admin_earnings.final_earnings
+            summary_penalties += workshift.hall_admin_penalty
+        elif workshift.cash_admin.pk == employee_id:
+            summary_earnings += workshift.cashier_earnings.final_earnings
+            summary_penalties += workshift.cash_admin_penalty
+            if not workshift.shortage_paid:
+                summary_shortages += workshift.shortage
+    return SummaryWorkshiftData(
+        summary_earnings=round(summary_earnings, 2),
+        summary_penalties=round(summary_penalties, 2),
+        summary_shortages=round(summary_shortages, 2)
+    )

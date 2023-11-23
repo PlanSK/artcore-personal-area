@@ -42,7 +42,10 @@
                 {% if workshift.shortage_paid and workshift.shortage %}
                   <s class="text-secondary">{{ workshift.shortage|default:"-" | intcomma }}</s>
                 {% elif workshift.shortage %}
-                  <a class="btn btn-danger pt-0 pb-0" href="{% url 'shortage_payment' slug=workshift.slug %}?next={{ request.path }}" onclick="return confirm('Вы уверены, что хотите погасить недостачу?');">
+                  <a class="btn btn-danger pt-0 pb-0"
+                     href="{% url 'shortage_payment' slug=workshift.slug %}?next={{ request.path }}"
+                     onclick="return confirm('Вы уверены, что хотите погасить недостачу?');"
+                  >
                     {{ workshift.shortage | intcomma }} <i class="fa-solid fa-sack-xmark"></i>
                   </a>
                 {% else %}

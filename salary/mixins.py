@@ -85,9 +85,11 @@ class ProfileStatusRedirectMixin(AccessMixin):
 class MonthYearExtractMixin(View):
     def dispatch(self, request: HttpRequest, *args: Any,
                  **kwargs: Any) -> HttpResponse:
-        month, year = datetime.date.today().month, datetime.date.today().year
-        self.month = kwargs.get('month') if kwargs.get('month') else month
-        self.year = kwargs.get('year') if kwargs.get('year') else year
+        try:
+            self.month = int(kwargs['month'])
+            self.year = int(kwargs['year'])
+        except KeyError:
+            self.month, self.year = timezone.now().month, timezone.now().year
         return super().dispatch(request, *args, **kwargs)
 
 
