@@ -290,7 +290,7 @@ class AddMisconductForm(forms.ModelForm):
 
 class EditMisconductForm(forms.ModelForm):
     intruder = EmplModelChoiceField(
-        queryset=User.objects.filter(is_active=True, is_staff=False),
+        queryset=User.objects.filter(is_staff=False),
         label='Сотрудник',
         disabled = True,
     )

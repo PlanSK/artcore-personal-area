@@ -1,4 +1,5 @@
 import datetime
+from typing import Any
 
 from django.contrib.auth.models import Group, User
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
@@ -86,6 +87,17 @@ def registration_user(request: HttpRequest,
     return user
 
 
+def change_user_data(edited_user: User, user_form_instance: ModelForm,
+                     profile_form_instance: ModelForm) -> None:
+    if 'email' in user_form_instance.changed_data:
+        edited_user.profile.email_status = Profile.EmailStatus.ADDED
+    user = user_form_instance.save(commit=False)
+    profile = profile_form_instance.save(commit=False)
+    user.save()
+    profile.save()
+    add_user_to_groups(user)
+
+
 def add_user_to_groups(user: User) -> None:
     """
     Adds a user to groups based on their position
@@ -153,3 +165,19 @@ def coming_of_age_date_string() -> str:
     today = datetime.date.today()
     minimal_coming_date = today - datetime.timedelta(days=coming_date_days)
     return minimal_coming_date.strftime('%Y-%m-%d')
+
+
+def get_user_model_from_pk(self, request, **kwargs) -> User:
+    """
+    Returns User model. If pk is defined returns User model with pk,
+    else User model from request.
+    """
+    try:
+        requested_id: int = int(kwargs['pk'])
+    except KeyError:
+        return request.user
+    else:
+        return get_object_or_404(
+            User.objects.select_related('profile'),
+            pk=requested_id
+        )

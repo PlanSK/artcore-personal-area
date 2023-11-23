@@ -281,8 +281,8 @@
                     Нарушения
                   </span>
                   <a href="{% url 'misconducts_user_view' username=request.user %}?next={{ request.path }}" class="stretched-link"></a>
-                  {% if misconduct_data.penalty_count %}
-                  <span class="badge bg-secondary text-dark">{{ misconduct_data.penalty_count }}</span>
+                  {% if misconduct_data.penalty_counter %}
+                  <span class="badge bg-secondary text-dark">{{ misconduct_data.penalty_counter }}</span>
                   {% endif %}
                 </div>
                 {% if misconduct_data.wait_explanation %}

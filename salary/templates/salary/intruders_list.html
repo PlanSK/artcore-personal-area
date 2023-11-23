@@ -11,7 +11,7 @@
   </div>
   <div class="col-md-6 col-sm-auto m-3 mb-0">
     <div class="list-group">
-      {% for intruder in object_list %}
+      {% for intruder in intruders_list %}
       {% if intruder.explanation_count and intruder.decision_count %}
       <a href="{% url 'misconducts_user_view' username=intruder.employee.username %}?next={{ request.path }}" class="list-group-item list-group-item-action list-group-item-warning" data-bs-toggle="tooltip" data-bs-placement="right" title="Необходимо объяснение и решение">
         <div class="d-flex justify-content-between align-items-center">
@@ -45,9 +45,9 @@
     </div>
   </div>
 </div>
-{% if only_actived %}
+{% if is_show_dissmissed %}
 <div class="row text-center">
-  <div class="col"><a href="{% url 'misconducts_view' %}?show=all" class="link_secondary">Показать всех</a></div>
+  <div class="col"><a href="{% url 'misconducts_view' %}?show_dissmissed=true" class="link_secondary">Показать всех</a></div>
 </div>
 {% endif %}
 <div class="row">

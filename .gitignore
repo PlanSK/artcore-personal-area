@@ -167,3 +167,4 @@ media/
 mediafiles/
 .db
 .secrets/
+mypy.ini

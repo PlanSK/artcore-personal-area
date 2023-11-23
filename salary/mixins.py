@@ -29,17 +29,6 @@ class EmployeePermissionsMixin(PermissionRequiredMixin):
     )
 
 
-class WorkingshiftPermissonsMixin(PermissionRequiredMixin):
-    permission_required = (
-        'salary.view_workingshift',
-        'salary.add_workingshift',
-        'salary.change_workingshift',
-        'salary.delete_workingshift',
-        'salary.view_workshift_report',
-        'salary.advanced_change_workshift',
-    )
-
-
 class MisconductPermissionsMixin(PermissionRequiredMixin):
     permission_required = (
         'salary.view_misconduct',
@@ -55,13 +44,13 @@ class StaffOnlyMixin(UserPassesTestMixin):
 
 
 class TitleMixin(object):
-    title = None
+    title = ''
 
     def get_title(self):
         return self.title
 
     def get_context_data(self, **kwargs):
-        context= super(TitleMixin, self).get_context_data(**kwargs)
+        context = super(TitleMixin, self).get_context_data(**kwargs)
         context['title'] = self.get_title()
         return context
 
@@ -93,12 +82,14 @@ class ProfileStatusRedirectMixin(AccessMixin):
         return super().dispatch(request, *args, **kwargs)
 
 
-class MonthYearExtractMixin:
+class MonthYearExtractMixin(View):
     def dispatch(self, request: HttpRequest, *args: Any,
                  **kwargs: Any) -> HttpResponse:
-        month, year = datetime.date.today().month, datetime.date.today().year
-        self.month = kwargs.get('month') if kwargs.get('month') else month
-        self.year = kwargs.get('year') if kwargs.get('year') else year
+        try:
+            self.month = int(kwargs['month'])
+            self.year = int(kwargs['year'])
+        except KeyError:
+            self.month, self.year = timezone.now().month, timezone.now().year
         return super().dispatch(request, *args, **kwargs)
 
 
@@ -125,3 +116,18 @@ class CreateObjectRedirectView(PermissionRequiredMixin, RedirectView):
         if object_form.is_valid():
             object_form.save()
         return redirect(next)
+
+
+class UpdateContextMixin:
+    """
+    This mixin defined the class method get_additional_context_data()
+    from which the context data will be updated
+    """
+    def get_additional_context_data(self) -> dict:
+        """Returns dictionary with additional context data"""
+        return dict()
+
+    def get_context_data(self, **kwargs):
+        context: dict = super(UpdateContextMixin, self).get_context_data(**kwargs)
+        context.update(self.get_additional_context_data())
+        return context

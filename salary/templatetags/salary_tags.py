@@ -28,12 +28,20 @@ def inactive_user() -> int:
 
 @register.simple_tag()
 def wait_explanation_misconducts() -> int:
-    return Misconduct.objects.filter(status='AD').count()
+    """Returns number of misconducts awaiting explanation"""
+    return Misconduct.objects.filter(
+        status=Misconduct.MisconductStatus.ADDED).exclude(
+            intruder__profile__profile_status=Profile.ProfileStatus.DISMISSED
+        ).count()
 
 
 @register.simple_tag()
 def wait_decision_misconducts() -> int:
-    return Misconduct.objects.filter(status='WT').count()
+    """Returns number of misconducts awaiting resolution"""
+    return Misconduct.objects.filter(
+        status=Misconduct.MisconductStatus.WAIT).exclude(
+            intruder__profile__profile_status=Profile.ProfileStatus.DISMISSED
+        ).count()
 
 
 @register.simple_tag()
