@@ -370,13 +370,11 @@ class MonthlyReportListView(PermissionRequiredMixin, MonthYearExtractMixin,
     permission_required = WORKINGSHIFT_PERMISSONS_TUPLE
 
     def get_additional_context_data(self):
-        current_month: int = self.month # type: ignore
-        current_year: int = self.year # type: ignore
         monthly_report_data = get_monthly_report(
-            month=current_month,
-            year=current_year
+            month=self.month,
+            year=self.year
         )
-        current_date = datetime.date(current_year, current_month, 1)
+        current_date = datetime.date(self.year, self.month, 1)
         additional_context_data = {
             'report_data': monthly_report_data,
             'current_date': current_date,
@@ -596,7 +594,7 @@ class MonthlyAnalyticalReport(PermissionRequiredMixin,
     permission_required = WORKINGSHIFT_PERMISSONS_TUPLE
 
     def get_additional_context_data(self) -> dict:
-        analytic_data = get_analytic_data(self.month, self.year) # type: ignore
+        analytic_data = get_analytic_data(self.month, self.year)
         return {'analytic_data': analytic_data}
 
 
@@ -652,12 +650,10 @@ class EmployeeWorkshiftsView(PermissionRequiredMixin, MonthYearExtractMixin,
     permission_required = 'salary.view_workingshift'
 
     def get_additional_context_data(self) -> dict:
-        current_month: int = self.month # type: ignore
-        current_year: int = self.year # type: ignore
         workshifts_list = get_employee_month_workshifts(
-            self.request.user.id, current_month, current_year)
+            self.request.user.id, self.month, self.year)
         employee_month_indicators = get_employee_workshift_indicators(
-            self.request.user.id, current_month, current_year)
+            self.request.user.id, self.month, self.year)
         return {
             'employee_indicators': employee_month_indicators,
             'workshifts_list': workshifts_list
@@ -993,13 +989,11 @@ class CalendarView(LoginRequiredMixin, MonthYearExtractMixin,
         return super().dispatch(request, *args, **kwargs)
 
     def get_additional_context_data(self) -> dict:
-        current_month: int = self.month # type: ignore
-        current_year: int = self.year # type: ignore
         user_calendar = get_user_calendar(
-            self.requested_user.id, current_year, current_month)
+            self.requested_user.id, self.year, self.month)
         additional_context_data = {
             'month_calendar': user_calendar,
-            'requested_date': datetime.date(current_year, current_month, 1),
+            'requested_date': datetime.date(self.year, self.month, 1),
             'requested_user': self.requested_user,
         }
         return additional_context_data
